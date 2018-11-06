@@ -1,7 +1,16 @@
-    #editor { 
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-    }
+nav{
+	/*Die Navbar hat eine feste Größe in px, da ich keine andere Möglichkeit gesehen habe, den editor auf den Rest des Bildschirms zu skalieren*/
+	position:absolute;
+	height:55px;
+	top:0px;
+	left:0px;
+	right:0px;
+}
+#editor{
+	position:absolute;
+	top:55px;
+	left:0px;
+	right:0px;
+	bottom:0px
+}
+
