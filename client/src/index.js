@@ -12,6 +12,8 @@ import 'brace/mode/java';
 // Import a Theme (okadia, github, xcode etc)
 import 'brace/theme/monokai';
 
+import lint from './linting.js'
+
 class App extends React.Component {
     render() {
 	return (
