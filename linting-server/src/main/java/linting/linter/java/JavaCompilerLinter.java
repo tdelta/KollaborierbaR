@@ -7,6 +7,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import linting.linter.Diagnostic;
@@ -29,7 +30,7 @@ public class JavaCompilerLinter {
         null, // no special output device, use System.err (will not be used, because of diagnostics listener)
         null, // use default file manager
         diagnosticsCollector, // collect diagnostics instead of usual compiler output
-        null, // no compiler options
+        Arrays.asList("-Xlint"), // enable all warnings
         null, // no class names for additional annotation processing
         toCheck // compile these files (can be located in memory, @see linting.linter.java.JavaMemoryFileObject)
     );
