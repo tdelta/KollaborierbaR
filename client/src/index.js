@@ -20,7 +20,8 @@ import {
   DropdownMenu,
   DropdownItem } from 'reactstrap';
 
-import lint from './linting.js'
+import lint from './linting.js';
+import toAnnotation from './diagnostics.js';
 
 import 'brace/mode/java';
 
@@ -59,7 +60,9 @@ class Top extends React.Component {
     <NavItem>
       <Button color="info" onClick={()=>{
         lint("Test", this.props.text)
-          .then((diagnostics) => {alert(JSON.stringify(diagnostics));});
+          .then((diagnostics) => {
+            this.props.setDiagnostics(diagnostics);
+          });
       }}>lint</Button>{' '}
     </NavItem>
 		<UncontrolledDropdown nav inNavbar>
@@ -91,8 +94,13 @@ class Editor extends React.Component {
 			editor: null
 		};
 	}
+	setDiagnostics(diagnostics){
+    this.state.editor.getSession().setAnnotations(
+      diagnostics.map(toAnnotation)
+    );
+	}
 	componentDidMount(){
-		var editor = brace.edit("editor");
+		var editor = brace.edit('editor');
 		editor.setOptions({
 			autoScrollEditorIntoView: true,
 			copyWithEmptySelection: true,
@@ -109,11 +117,14 @@ class Editor extends React.Component {
 		});
 	}	
 	componentDidUpdate(){
-		// Wird aufgerufen, wenn React eine neue text property an die Komponente weitergibt
-    // Nur aktualisieren, wenn unterschiedlich, um loop zu vermeiden
+		// Wird aufgerufen, wenn React eine property, z.B. text oder diagnostics verändert
+
+    // Text nur aktualisieren, wenn unterschiedlich, um loop zu vermeiden
     if (this.state.editor.getValue() !== this.props.text) {
       this.state.editor.setValue(this.props.text,-1);
     }
+
+    this.setDiagnostics(this.props.diagnostics);
 	}
 	render() {
 	return (
@@ -127,20 +138,27 @@ class App extends React.Component {
 	constructor(props){
 		super(props);
 		this.setText = this.setText.bind(this);
+		this.setDiagnostics = this.setDiagnostics.bind(this);
 		this.state = {
-			text : 'public class Test {\n\tpublic static void main(String[] args){\n\t\tSystem.out.println("Hello World");\n\t}\n}'
+			text : 'public class Test {\r\n\tpublic static void main(String[] args){\r\n\t\tSystem.out.println(\"Hello World\");\r\n\t\t\r\n\t\tswitch (2) {\r\n\t\t    case 1:\r\n\t\t        System.out.println(\"1\");\r\n\t\t    case 2: //there be warnings, try linting!\r\n\t\t        System.out.println(\"2\"); \r\n\t\t}\r\n\t}\r\n}',
+      diagnostics: []
 		};
 	}
 	setText(text){
 		this.setState({
-			text:text
+			text: text
+		});
+	}
+	setDiagnostics(diagnostics){
+		this.setState({
+      'diagnostics': diagnostics
 		});
 	}
 	render() {
 	return(
 	<div>
-		<Top setText={this.setText} text={this.state.text}/>
-		<Editor setText={this.setText} text={this.state.text}/>
+		<Top setDiagnostics={this.setDiagnostics} setText={this.setText} text={this.state.text}/>
+		<Editor diagnostics={this.state.diagnostics} setText={this.setText} text={this.state.text}/>
 	</div>
 	);
 	}
