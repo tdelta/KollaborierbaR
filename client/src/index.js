@@ -22,6 +22,8 @@ import {
 
 import lint from './linting.js'
 
+import 'brace/mode/java';
+
 class Top extends React.Component {
 	constructor(props) {
 		super(props);
@@ -97,6 +99,7 @@ class Editor extends React.Component {
 			fontSize: 20,
 			firstLineNumber: 1,
 		});
+    editor.getSession().setMode('ace/mode/java');
 		editor.setValue(this.props.text,-1);
     editor.on("change", (e) => {
       this.props.setText(editor.getValue());
