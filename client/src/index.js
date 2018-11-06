@@ -14,6 +14,7 @@ import {
   Nav,
   NavItem,
   NavLink,
+  Button,
   UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
@@ -53,6 +54,12 @@ class Top extends React.Component {
 
 		<Collapse isOpen={this.state.isOpen} navbar>
 		<Nav className="ml-auto" navbar>
+    <NavItem>
+      <Button color="info" onClick={()=>{
+        lint("Test", this.props.text)
+          .then((diagnostics) => {alert(JSON.stringify(diagnostics));});
+      }}>lint</Button>{' '}
+    </NavItem>
 		<UncontrolledDropdown nav inNavbar>
 			<DropdownToggle nav caret>
 			File
@@ -91,13 +98,19 @@ class Editor extends React.Component {
 			firstLineNumber: 1,
 		});
 		editor.setValue(this.props.text,-1);
+    editor.on("change", (e) => {
+      this.props.setText(editor.getValue());
+    });
 		this.setState({
 			editor:editor
 		});
 	}	
 	componentDidUpdate(){
 		// Wird aufgerufen, wenn React eine neue text property an die Komponente weitergibt
-		this.state.editor.setValue(this.props.text,-1);
+    // Nur aktualisieren, wenn unterschiedlich, um loop zu vermeiden
+    if (this.state.editor.getValue() !== this.props.text) {
+      this.state.editor.setValue(this.props.text,-1);
+    }
 	}
 	render() {
 	return (
@@ -112,7 +125,7 @@ class App extends React.Component {
 		super(props);
 		this.setText = this.setText.bind(this);
 		this.state = {
-			text : 'public static void main(String[] args){\n\tSystem.out.println("Hello World");\n}'
+			text : 'public class Test {\n\tpublic static void main(String[] args){\n\t\tSystem.out.println("Hello World");\n\t}\n}'
 		};
 	}
 	setText(text){
@@ -123,8 +136,8 @@ class App extends React.Component {
 	render() {
 	return(
 	<div>
-		<Top setText={this.setText}/>
-		<Editor text={this.state.text}/>
+		<Top setText={this.setText} text={this.state.text}/>
+		<Editor setText={this.setText} text={this.state.text}/>
 	</div>
 	);
 	}
