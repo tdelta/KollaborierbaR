@@ -56,17 +56,8 @@ class Top extends React.Component {
         <div>
         <Navbar color="dark" dark expand="md">
         <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
-
         <Collapse isOpen={this.state.isOpen} navbar>
         <Nav className="ml-auto" navbar>
-    <NavItem>
-      <Button color="info" onClick={()=>{
-        lint("Test", this.props.text)
-          .then((diagnostics) => {
-            this.props.setDiagnostics(diagnostics);
-          });
-      }}>lint</Button>{' '}
-    </NavItem>
         <UncontrolledDropdown nav inNavbar>
             <DropdownToggle nav caret>
             File
@@ -90,13 +81,21 @@ class Top extends React.Component {
 }
 
 class Editor extends React.Component {
-    setDiagnostics(diagnostics){
-        this.editor.getSession().setAnnotations(
-            diagnostics.map(toAnnotation)
-        );
+    callLinter(){
+        lint("Test", this.editor.getValue())
+          .then((diagnostics) => {
+            this.props.setDiagnostics(diagnostics);
+      });
     }
+
+    setAnnotations(){
+        this.editor.getSession().setAnnotations(
+            this.props.diagnostics.map(toAnnotation));
+    }
+
     componentDidMount(){
         this.editor = brace.edit('editor');
+        this.timeTest = null;
         this.editor.setOptions({
             autoScrollEditorIntoView: true,
             copyWithEmptySelection: true,
@@ -105,14 +104,17 @@ class Editor extends React.Component {
         });
         this.editor.getSession().setMode('ace/mode/java');
         this.editor.setTheme('ace/theme/monokai');
-        this.editor.setValue(this.props.text,-1);
         this.editor.on("change", (e) => {
             this.props.setText(this.editor.getValue());
+        });
+        this.editor.on("change", (e) => {
+            clearTimeout(this.timeTest)
+            this.timeTest = setTimeout(() => {this.callLinter()}, 1000)
         });
     }    
     componentDidUpdate(){
         // Wird aufgerufen, wenn React eine property, z.B. text oder diagnostics verändert
-        this.setDiagnostics(this.props.diagnostics);
+        this.setAnnotations();
         if(this.props.text!=this.editor.getValue()){
             this.editor.setValue(this.props.text,-1);
         }
@@ -131,7 +133,7 @@ class App extends React.Component {
         this.setText = this.setText.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.state = {
-            text : 'public class Test {\r\n\tpublic static void main(String[] args){\r\n\t\tSystem.out.println(\"Hello World\");\r\n\t\t\r\n\t\tswitch (2) {\r\n\t\t    case 1:\r\n\t\t        System.out.println(\"1\");\r\n\t\t    case 2: //there be warnings, try linting!\r\n\t\t        System.out.println(\"2\"); \r\n\t\t}\r\n\t}\r\n}',
+            text : '',
             diagnostics: []
         };
     }
@@ -142,14 +144,19 @@ class App extends React.Component {
     }
     setDiagnostics(diagnostics){
         this.setState({
-      'diagnostics': diagnostics
+          'diagnostics': diagnostics
+        });
+    }
+    componentDidMount() {
+        this.setState({
+            text: 'public class Test {\r\n\tpublic static void main(String[] args){\r\n\t\tSystem.out.println(\"Hello World\");\r\n\t\t\r\n\t\tswitch (2) {\r\n\t\t    case 1:\r\n\t\t        System.out.println(\"1\");\r\n\t\t    case 2: //there be warnings, try linting!\r\n\t\t        System.out.println(\"2\"); \r\n\t\t}\r\n\t}\r\n}'
         });
     }
     render() {
     return(
     <div>
-        <Top setDiagnostics={this.setDiagnostics} setText={this.setText} text={this.state.text}/>
-        <Editor diagnostics={this.state.diagnostics} setText={this.setText} text={this.state.text}/>
+        <Top setText={this.setText} text={this.state.text}/>
+        <Editor setDiagnostics={this.setDiagnostics} diagnostics={this.state.diagnostics} setText={this.setText} text={this.state.text}/>
     </div>
     );
     }
