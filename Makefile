@@ -28,6 +28,10 @@ test:
 	$(MAKE) -C $(CLIENT_DIR) test
 	$(MAKE) -C $(SERVER_DIR) test
 
+# run a complete ci pipeline, like the Jenkinsfile would
+# (this needs to be updated, when the Jenkinsfile is updated)
+pipeline: setup check all test
+
 clean:
 	$(MAKE) -C $(CLIENT_DIR) clean
 	$(MAKE) -C $(SERVER_DIR) clean
