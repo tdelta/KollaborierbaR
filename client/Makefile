@@ -1,4 +1,4 @@
-.PHONY: clean run setup
+.PHONY: setup run test clean
 
 all:
 	npm run-script build
@@ -6,8 +6,11 @@ all:
 setup:
 	npm install
 
-clean:
-	npm run-script clean
-
 run:
 	npm start
+
+test:
+	CI=true npm test
+
+clean:
+	npm run-script clean
