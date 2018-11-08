@@ -1,14 +1,14 @@
 # Allgemeine Hinweise
 
-Eine einheitliche Bedienung (bauen, ausführen, testen, ...) wird zu Zeit durch Makefiles realisiert:
+Eine einheitliche Bedienung (bauen, ausführen, testen, ...) wird zur Zeit durch Makefiles realisiert:
 
 * Nach dem Klonen definitiv mindestens einmal `make setup` im Hauptordner durchführen
 * Die folgenden Befehle funktioniern sowohl in den Unterprojekten, als auch im Wurzelverzeichnis.
   Ihre Ausführung im Wurzelverzeichnis wird dann an alle Unterordner delegiert:
   * **bauen**: `make`
   * **ausführen**: `make run`
-  * **Statische Analyse**: `make check`
-  * **Unit tests**: `make test`
+  * **statische Analyse**: `make check`
+  * **unit tests**: `make test`
 * Ein automatisierter Build mit statischer Analyse und Tests lässt sich im Wurzelverzeichnis durch `make pipeline`
   auslösen.
 
