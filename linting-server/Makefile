@@ -1,7 +1,9 @@
-.PHONY: clean run
+.PHONY: setup clean run
 
 all:
 	./gradlew build
+
+setup:
 
 clean:
 	./gradlew clean
