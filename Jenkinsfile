@@ -11,5 +11,10 @@ pipeline {
               sh 'make'
             }
         }
+        stage('Tests') {
+            steps {
+              sh 'make test'
+            }
+        }
     }
 }
