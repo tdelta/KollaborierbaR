@@ -2,9 +2,13 @@ CLIENT_DIR = client
 SERVER_DIR = linting-server
 
 # indicate, that submodules are not files
-.PHONY: client linter clean
+.PHONY: setup client linter clean
 
 all: linter client
+
+setup:
+	$(MAKE) -C $(CLIENT_DIR) setup
+	$(MAKE) -C $(SERVER_DIR) setup
 
 # build instructions for submodules
 client:
