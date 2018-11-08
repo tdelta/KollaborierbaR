@@ -6,6 +6,11 @@ pipeline {
               sh 'make setup'
             }
         }
+        stage('Static Analysis') {
+            steps {
+              sh 'make check'
+            }
+        }
         stage('Build') {
             steps {
               sh 'make'

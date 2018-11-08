@@ -13,6 +13,9 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
+// static analysis tools
+apply plugin: 'pmd'
+
 bootJar {
     baseName = 'gs-rest-service'
     version =  '0.1.0'
@@ -33,3 +36,11 @@ dependencies {
 task wrapper(type: Wrapper) {
    gradleVersion = '4.10.2'
 }
+
+// PMD static analysis settings
+pmd {
+    ruleSets = ["java-basic", "java-braces", "java-design"]
+    sourceSets = [sourceSets.main]
+    consoleOutput = true
+}
+
