@@ -11,6 +11,8 @@ setup:
 check:
 	# run PMD tool
 	./gradlew pmdMain
+	# run Spotless coding style checker
+	./gradlew spotlessCheck
 
 # run project
 run:
