@@ -31,6 +31,7 @@ class Top extends React.Component {
     constructor(props) {
         super(props);
         this.fileSelector = React.createRef();
+        this.downloadSelector = React.createRef();
         this.onFileChosen = this.onFileChosen.bind(this);
         this.onFileLoaded = this.onFileLoaded.bind(this);
         this.toggle = this.toggle.bind(this);
@@ -51,6 +52,7 @@ class Top extends React.Component {
     onFileLoaded(e){
         this.props.setText(this.fileReader.result);
     }
+
     render() {
     return(
         <div>
@@ -63,7 +65,7 @@ class Top extends React.Component {
             File
             </DropdownToggle>
             <DropdownMenu right>
-            <DropdownItem>
+            <DropdownItem onClick={(e)=> this.downloadSelector.current.click()}>
             Save
             </DropdownItem>
             <DropdownItem onClick={(e)=>this.fileSelector.current.click()}>
@@ -75,6 +77,11 @@ class Top extends React.Component {
         </Collapse>
         </Navbar>
         <input type="file" id="file" ref={this.fileSelector} style={{display: "none"}} onChange={this.onFileChosen}/>
+        
+        <a href={'data:text/plain;charset=utf-8,'+ encodeURIComponent(this.props.text)} download='test.txt'>
+            <input type="button" ref={this.downloadSelector} style={{display: "none"}}/>
+        </a>
+
         </div>
         );
     }
