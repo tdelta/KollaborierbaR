@@ -4,6 +4,7 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.16.0"
     }
 }
 
@@ -12,6 +13,9 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+
+// coding style formatter and analysis
+apply plugin: "com.diffplug.gradle.spotless"
 
 // static analysis tools
 apply plugin: 'pmd'
@@ -33,8 +37,19 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
-task wrapper(type: Wrapper) {
+wrapper {
    gradleVersion = '4.10.2'
+}
+
+// Spotless coding style checker and formatter
+spotless {
+  enforceCheck false // do not enforce formatting rules on regular build/check.
+  // ...instead call spotlessCheck / spotlessApply directly
+
+  java {
+    googleJavaFormat('1.6') // use version 1.6 of google-java-format
+    paddedCell() //workaround for minor bug in spotless
+  }
 }
 
 // PMD static analysis settings
