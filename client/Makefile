@@ -1,4 +1,4 @@
-.PHONY: setup check run test clean
+.PHONY: setup check pedantic run test clean
 
 all:
 	npm run-script build
@@ -9,6 +9,10 @@ setup:
 
 # run static analysis tools
 check:
+	#TODO
+
+# run static analysis tools in aggressive mode
+pedantic:
 	#TODO
 
 # run project
