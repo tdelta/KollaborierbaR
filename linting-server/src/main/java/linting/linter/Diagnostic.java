@@ -42,7 +42,7 @@ public class Diagnostic {
 		this.startCol = pos[1];
 		pos = getRowCol(source, end);
 		this.endRow = pos[0];
-		this.endCol = pos[1] +1;
+		this.endCol = pos[1] + 1;
 	}
 
 	private long[] getRowCol(JavaFileObject source, long position) {
@@ -77,7 +77,7 @@ public class Diagnostic {
 		//row = (count == position) ? -1 : r.getLineNumber();
 		//column = (count == position) ? -1 : column -1;
 		row = r.getLineNumber() - 1;
-		column = column - 1;
+		column = column;
 		long[] results = { row, column };
 
 		return results;
