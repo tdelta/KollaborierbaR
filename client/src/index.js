@@ -96,12 +96,32 @@ class Editor extends React.Component {
     }
 
     setAnnotations(){
-        this.editor.getSession().setAnnotations(
-            this.props.diagnostics.map(toAnnotation));
+        let aceDiagnostics = this.props.diagnostics.map(toAnnotation);
+        this.editor.getSession().setAnnotations(aceDiagnostics);
+
+        for (var i = 0; i < this.markers.length; i++) {
+            this.editor.session.removeMarker(this.markers[i]);
+        }
+        this.markers = [];
+
+        for (var i = 0; i < aceDiagnostics.length; i++) {
+            let startRow = aceDiagnostics[i]["startRow"];
+            let startCol = aceDiagnostics[i]["startCol"];
+            let endRow = aceDiagnostics[i]["endRow"];
+            let endCol = aceDiagnostics[i]["endCol"];
+            var Range = brace.acequire('ace/range').Range;
+            if (aceDiagnostics[i]["type"] == "error")
+                this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), "errorMarker", "text"));
+            else
+                this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), "warningMarker", "text"));
+        }
+
+
     }
 
     componentDidMount(){
         this.editor = brace.edit('editor');
+        this.markers = [];
         this.timeTest = null;
         this.editor.setOptions({
             autoScrollEditorIntoView: true,
