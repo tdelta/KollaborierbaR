@@ -29,7 +29,7 @@ public class Diagnostic {
 	}
 
 	public Diagnostic(final String message, final long column, final long line, final long start, final long end,
-		final long position, final JavaFileObject source, final Kind kind) {
+			final long position, final JavaFileObject source, final Kind kind) {
 		this.message = message;
 		this.column = column;
 		this.line = line;
@@ -42,42 +42,41 @@ public class Diagnostic {
 		this.startCol = pos[1];
 		pos = getRowCol(source, end);
 		this.endRow = pos[0];
-		this.endCol = pos[1] + 1;
+		this.endCol = pos[1];
 	}
 
 	private long[] getRowCol(JavaFileObject source, long position) {
 		long row, column = -1;
 		long count = 0;
 		long truePos = position;
-		LineNumberReader r = null;
-		String line = null;
+		LineNumberReader r;
+		String line;
 
 		try {
-			
-			r = new LineNumberReader(source.openReader(true));
-			
+			r = new LineNumberReader(source.openReader(true)); //true == ignore coding errors
+
 			while (count < truePos) {
 				column = 0;
 				line = r.readLine();
-				
+
 				while (count < truePos && column < line.length()) {
 					count++;
 					column++;
 				}
-				truePos-=1;
+				truePos -= 1; // iteratively substract newlines
+				
 				if (column == line.length())
 					count++;
-
-				System.out.println(r.getLineNumber() + " | " + count + " | " + position + " | " + " | " + column + "  | " + line.length());
 			}
 		} catch (Exception e) {
-			//e.printStackTrace();
+			row = -1;
+			column = -1;
+			long[] results = { row, column };
+			return results;
+
 		}
 
-		//row = (count == position) ? -1 : r.getLineNumber();
-		//column = (count == position) ? -1 : column -1;
 		row = r.getLineNumber() - 1;
-		column = column;
 		long[] results = { row, column };
 
 		return results;
@@ -113,19 +112,19 @@ public class Diagnostic {
 	public Kind getKind() {
 		return kind;
 	}
-	
+
 	public long getStartRow() {
 		return startRow;
 	}
-	
+
 	public long getStartCol() {
 		return startCol;
 	}
-	
+
 	public long getEndRow() {
 		return endRow;
 	}
-	
+
 	public long getEndCol() {
 		return endCol;
 	}
