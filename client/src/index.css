@@ -19,7 +19,7 @@ nav{
   z-index:20;
   color: red;
   text-decoration: none;
-  border-bottom: 2px solid red;
+  background: url(error-underline.png) bottom repeat-x;
 }
 
 .warningMarker {
@@ -27,5 +27,5 @@ nav{
   z-index:20;
   color: red;
   text-decoration: none;
-  border-bottom: 2px solid yellow;
+  background: url(warning-underline.png) bottom repeat-x;
 }
