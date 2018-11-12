@@ -1,6 +1,6 @@
-import brace from 'brace'
+import brace from 'brace';
 
-import 'brace/mode/java'
+import 'brace/mode/java';
 
 /**
  * Draft for a custom java mode. (not in use yet)
@@ -19,39 +19,37 @@ import 'brace/mode/java'
  */
 
 brace.define('ace/mode/javaex', function(require, exports, module) {
-  var oop = require("ace/lib/oop");
+    var oop = require('ace/lib/oop');
 
-  // based on standard java mode
-  var JavaMode = require("ace/mode/java").Mode;
+    // based on standard java mode
+    var JavaMode = require('ace/mode/java').Mode;
 
-  // based on standard java highlight rules (see below)
-  var JavaExHighlightRules = require("ace/mode/javaex_highlight_rules").JavaExHighlightRules;
+    // based on standard java highlight rules (see below)
+    var JavaExHighlightRules = require('ace/mode/javaex_highlight_rules').JavaExHighlightRules;
 
-  var Mode = function() {
-      this.HighlightRules = JavaExHighlightRules;
-  };
-  oop.inherits(Mode, JavaMode);
+    var Mode = function() {
+        this.HighlightRules = JavaExHighlightRules;
+    };
+    oop.inherits(Mode, JavaMode);
 
-  (function() {
-      // Extra mode logic
-  }).call(Mode.prototype);
+    (function() {
+        // Extra mode logic
+    }).call(Mode.prototype);
 
-  exports.Mode = Mode;
+    exports.Mode = Mode;
 });
 
 brace.define('ace/mode/javaex_highlight_rules', function(require, exports, module) {
-  var oop = require("ace/lib/oop");
+    var oop = require('ace/lib/oop');
 
-  // based on existing ace java highlight rules
-  var JavaHighlightRules = require("ace/mode/java_highlight_rules").JavaHighlightRules;
+    // based on existing ace java highlight rules
+    var JavaHighlightRules = require('ace/mode/java_highlight_rules').JavaHighlightRules;
 
-  var JavaExHighlightRules = function() {
+    var JavaExHighlightRules = function() {
+        this.$rules = new JavaHighlightRules().getRules();
+    };
 
-      this.$rules = new JavaHighlightRules().getRules();
-      
-  }
+    oop.inherits(JavaExHighlightRules, JavaHighlightRules);
 
-  oop.inherits(JavaExHighlightRules, JavaHighlightRules);
-
-  exports.JavaExHighlightRules = JavaExHighlightRules;
+    exports.JavaExHighlightRules = JavaExHighlightRules;
 });
