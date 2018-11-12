@@ -9,11 +9,12 @@ setup:
 
 # run static analysis tools
 check:
-	#TODO
+	npm run-script lint
 
 # run static analysis tools in aggressive mode
 pedantic:
-	#TODO
+	#No special options here yet
+	npm run-script lint
 
 # run project
 run:
