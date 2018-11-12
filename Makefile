@@ -2,7 +2,7 @@ CLIENT_DIR = client
 SERVER_DIR = linting-server
 
 # indicate, that submodules are not files
-.PHONY: setup check client linter test clean
+.PHONY: setup check pedantic client linter test clean
 
 all: server client
 
@@ -15,6 +15,11 @@ setup:
 check:
 	$(MAKE) -C $(CLIENT_DIR) check
 	$(MAKE) -C $(SERVER_DIR) check
+
+# run static analysis tools in aggressive mode
+pedantic:
+	$(MAKE) -C $(CLIENT_DIR) pedantic
+	$(MAKE) -C $(SERVER_DIR) pedantic
 
 # build
 client:
