@@ -78,6 +78,7 @@ public class JavaCompilerLinter {
         d.getStartPosition(),
         d.getEndPosition(),
         d.getPosition(),
+        d.getSource(),
         kind);
   }
 }

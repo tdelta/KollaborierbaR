@@ -28,6 +28,10 @@ function toAnnotation(diagnostic) {
     end,
     start,
     position,
+    startRow,
+    startCol,
+    endRow,
+    endCol,
     kind
   } = diagnostic;
 
@@ -50,7 +54,11 @@ function toAnnotation(diagnostic) {
     'row': line - 1,
     'column': column, //also -1 ? TODO: Check this
     'text': message,
-    'type': type
+    'type': type,
+    'startRow': startRow,
+    'startCol': startCol,
+    'endRow' : endRow,
+    'endCol': endCol
   };
 }
 
