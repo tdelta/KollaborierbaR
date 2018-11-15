@@ -8,6 +8,7 @@ Eine einheitliche Bedienung (bauen, ausführen, testen, ...) wird zur Zeit durch
   * **bauen**: `make`
   * **ausführen**: `make run`
   * **statische Analyse**: `make check`
+  * **statische Analyse im agressiven Modus**: `make pedantic`
   * **unit tests**: `make test`
 * Ein automatisierter Build mit statischer Analyse und Tests lässt sich im Wurzelverzeichnis durch `make pipeline`
   auslösen.
