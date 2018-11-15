@@ -7,6 +7,7 @@ module.exports = {
     },
     "extends": [
       "eslint:recommended",
+      "plugin:react/recommended",
     ],
     "parserOptions": {
         "ecmaFeatures": {
@@ -15,9 +16,11 @@ module.exports = {
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
-    "plugins": [
-        "react"
-    ],
+    "settings": {
+        "react":{
+            "version": "15.0",
+        },
+    },
     "rules": {
         "indent": [
             "error",
@@ -41,8 +44,5 @@ module.exports = {
         ],
         // unused function arguments shall be no error
         "no-unused-vars": ["error", { "args": "none" }],
-        // prevent false positives in react code (due to JSX extensions)
-        "react/jsx-uses-react": "error",   
-        "react/jsx-uses-vars": "error" 
     }
 };

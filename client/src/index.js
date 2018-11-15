@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 import './index.css';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -92,6 +93,11 @@ class Top extends React.Component {
     }
 }
 
+Top.propTypes = {
+    setText: PropTypes.func.isRequired,
+    text: PropTypes.String,
+};
+
 class Editor extends React.Component {
     callLinter(){
         lint('Test', this.editor.getValue())
@@ -142,6 +148,13 @@ class Editor extends React.Component {
         );
     }
 }
+
+Editor.propTypes = {
+    setText: PropTypes.func.isRequired,
+    setDiagnostics: PropTypes.func.isRequired,
+    diagnostics: PropTypes.array,
+    text: PropTypes.String,
+};
 
 class App extends React.Component {
     constructor(props){
