@@ -19,7 +19,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -r build/*",
-    "lint": "eslint src/*.js src/**/*.js"
+    "lint": "eslint -c .eslintrc.js src/*.js src/**/*.js",
+    "lint-pedantic": "eslint -c .eslint-pedantic.js src/*.js src/**/*.js"
   },
   "eslintConfig": {
     "extends": "react-app"
