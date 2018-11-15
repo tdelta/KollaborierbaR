@@ -69,7 +69,6 @@ public class JavaCompilerLinter {
 
       default: // to simplify things, everything else is interpreted as NOTE
         kind = Diagnostic.Kind.NOTE;
-	break;
     }
 
     return new Diagnostic(
