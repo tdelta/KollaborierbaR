@@ -23,9 +23,21 @@ nav{
   height: 100%;
 }
 
-.sidebar {
-  background-color: #757575;
+.sidebarRestoreHandle {
+  float: left;
+  height: 100%;
+  background-color: #212121;
+  color: white;
+  text-align: center;
+  width: 10px;
+}
 
+.sidebarRestoreButton {
+  margin-top: 0.8em;
+  cursor: pointer;
+}
+
+.sidebar {
   width: 300px;
 
   float: left;
@@ -46,4 +58,45 @@ nav{
 
   width: 4px;
   height:100%;
+}
+
+.sidebarToggleButton {
+    /*circle shaped background*/
+    /*(the button shall not be transparent, but rectangle backgrounds would
+       have been ugly)*/
+    border-radius: 50%;
+    background-color: white;
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1;
+
+    position: relative;
+    display: inline-block;
+    top: 0.5em;
+    left: calc(100% - 1.8em);
+
+    cursor: pointer;
+}
+
+.sidebarContent {
+    margin-left: 0.5em;
+    margin-top: -1em;
+
+    white-space: nowrap;
+    user-select: none;
+    overflow: hidden;
+}
+
+.projectTreeList {
+    list-style-type: none;
+    padding-left: 1em;
+}
+
+.projectTreeIcon {
+    margin-right: 0.5em;
+}
+
+#projectTree {
 }
