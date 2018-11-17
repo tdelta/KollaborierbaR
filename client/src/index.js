@@ -4,9 +4,7 @@ import PropTypes from 'prop-types';
 import './index.css';
 
 import 'bootstrap/dist/css/bootstrap.css';
-
-import brace from 'brace';
-
+import brace from 'brace'; 
 import {
     Collapse,
     Navbar,
@@ -19,6 +17,8 @@ import {
 
 import lint from './linting.js';
 import toAnnotation from './diagnostics.js';
+
+import Sidebar from './sidebar.jsx';
 
 import 'brace/mode/java';
 import 'brace/theme/monokai';
@@ -143,7 +143,11 @@ class Editor extends React.Component {
     }
     render() {
         return (
-            <div id="editor">
+            <div id="mainContainer">
+                <Sidebar>
+                    <div id="editor">
+                    </div>
+                </Sidebar>
             </div>
         );
     }
