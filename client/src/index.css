@@ -6,11 +6,44 @@ nav{
 	left:0px;
 	right:0px;
 }
-#editor{
-	position:absolute;
-	top:55px;
-	left:0px;
-	right:0px;
-	bottom:0px
+
+#mainContainer {
+  position: absolute;
+  top: 55px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
 }
 
+#editor{
+  position: relative;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  height: 100%;
+}
+
+.sidebar {
+  background-color: #757575;
+
+  width: 300px;
+
+  float: left;
+  height: 100%;
+}
+
+.sidebarMainContainer {
+  margin-left: 200px;
+  height: 100%;
+}
+
+.sidebar-split-bar {
+  background-color: #212121;
+
+  cursor: col-resize;
+
+  float: right;
+
+  width: 4px;
+  height:100%;
+}
