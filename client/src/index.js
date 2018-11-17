@@ -20,7 +20,7 @@ import {
 import lint from './linting.js';
 import toAnnotation from './diagnostics.js';
 
-import 'brace/mode/java';
+import './highlighting/jml.js';
 import 'brace/theme/monokai';
 
 class Top extends React.Component {
@@ -120,7 +120,7 @@ class Editor extends React.Component {
             fontSize: 20,
             firstLineNumber: 1,
         });
-        this.editor.getSession().setMode('ace/mode/java');
+        this.editor.getSession().setMode('ace/mode/jml');
         this.editor.setTheme('ace/theme/monokai');
 
         // editor event handlers
@@ -178,7 +178,7 @@ class App extends React.Component {
     }
     componentDidMount() {
         this.setState({
-            text: 'public class Test {\r\n\tpublic static void main(String[] args){\r\n\t\tSystem.out.println("Hello World");\r\n\t\t\r\n\t\tswitch (2) {\r\n\t\t    case 1:\r\n\t\t        System.out.println("1");\r\n\t\t    case 2: //there be warnings, try linting!\r\n\t\t        System.out.println("2"); \r\n\t\t}\r\n\t}\r\n}'
+            text: '//@ public normal_behaviour\npublic class Test {\r\n\tpublic static void main(String[] args){\r\n\t\tSystem.out.println("Hello World");\r\n\t\t\r\n\t\tswitch (2) {\r\n\t\t    case 1:\r\n\t\t        System.out.println("1");\r\n\t\t    case 2: //there be warnings, try linting!\r\n\t\t        System.out.println("2"); \r\n\t\t}\r\n\t}\r\n}'
         });
     }
     render() {
