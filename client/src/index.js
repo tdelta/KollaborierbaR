@@ -142,9 +142,45 @@ class Editor extends React.Component {
         }
     }
     render() {
+        const testProject = {
+            'name': 'MyProject',
+            'contents': [
+                {
+                    'name': 'src',
+                    'type': 'folder',
+                    'contents': [
+                        {
+                            'name': 'java',
+                            'type': 'folder',
+                            'contents': [
+                                {
+                                    'name': 'main',
+                                    'type': 'folder',
+                                    'contents': [
+                                        {
+                                            'name': 'Main.java',
+                                            'type': 'file'
+                                        },
+                                        {
+                                            'name': 'Test.java',
+                                            'type': 'file'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                    ]
+                },
+                {
+                    'name': 'README.md',
+                    'type': 'file'
+                }
+            ]
+        };
+
         return (
             <div id="mainContainer">
-                <Sidebar>
+                <Sidebar project={testProject}>
                     <div id="editor">
                     </div>
                 </Sidebar>
