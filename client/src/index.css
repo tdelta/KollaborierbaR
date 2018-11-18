@@ -38,6 +38,8 @@ nav{
 }
 
 .sidebar {
+  background-color: #455a64;
+  color: #cfd8dc;
   width: 300px;
 
   float: left;
@@ -65,12 +67,14 @@ nav{
     /*(the button shall not be transparent, but rectangle backgrounds would
        have been ugly)*/
     border-radius: 50%;
-    background-color: white;
     width: 1em;
     height: 1em;
     text-align: center;
     vertical-align: middle;
     line-height: 1;
+
+    background-color: #455a64;
+    color: #cfd8dc;
 
     position: relative;
     display: inline-block;
@@ -96,6 +100,7 @@ nav{
 
 .projectTreeIcon {
     margin-right: 0.5em;
+    color: #caa576;
 }
 
 #projectTree {
