@@ -30,11 +30,11 @@ nav{
   color: white;
   text-align: center;
   width: 10px;
+  cursor: pointer;
 }
 
 .sidebarRestoreButton {
   margin-top: 0.8em;
-  cursor: pointer;
 }
 
 .sidebar {

@@ -85,11 +85,11 @@ class Sidebar extends React.Component {
                 <div
                     className="sidebarRestoreHandle"
                     style={restoreHandleStyleMod}
+                    onClick={this.toggle.bind(this)}
                 >
                     <FontAwesome
                         className="sidebarRestoreButton"
                         name="angle-right"
-                        onClick={this.toggle.bind(this)}
                     />
                 </div>
                 <div className="sidebar" ref={this.sideBar} style={sidebarStyleMod}>
