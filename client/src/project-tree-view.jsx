@@ -3,6 +3,8 @@ import React from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
+import FileIcon from './FileIcon.jsx';
+
 class TreeNode extends React.Component {
     constructor(props) {
         super(props);
@@ -10,30 +12,6 @@ class TreeNode extends React.Component {
         this.state = {
             'visible': true
         }
-    }
-
-    renderIcon(data) {
-        var icon = 'question';
-
-        switch (data.type) {
-            case 'file':
-                icon = 'file';
-                break;
-            case 'folder':
-                if (this.state.visible) {
-                    icon = 'folder-open';
-                }
-
-                else {
-                    icon = 'folder';
-                }
-
-                break;
-        }
-
-        return (
-            <FontAwesome name={icon} className="projectTreeIcon" />
-        );
     }
 
     toggle() {
@@ -67,7 +45,11 @@ class TreeNode extends React.Component {
             return (
                 <>
                     <div onClick={() => {this.toggle();}}>
-                        {this.renderIcon(this.props.data)}
+                        <FileIcon
+                            className="projectTreeIcon"
+                            data={this.props.data}
+                            isOpen={this.state.visible}
+                        />
                         {this.props.data.name}
                     </div>
                     <ul
@@ -92,8 +74,14 @@ class TreeNode extends React.Component {
 
         else {
             return (
-                <div onDoubleClick={this.handleItemDoubleClick.bind(this)}>
-                    {this.renderIcon(this.props.data)}
+                <div
+                    onDoubleClick={this.handleItemDoubleClick.bind(this)}
+                >
+                    <FileIcon
+                        className="projectTreeIcon"
+                        data={this.props.data}
+                        isOpen={this.state.visible}
+                    />
                     {this.props.data.name}
                 </div>
             );
