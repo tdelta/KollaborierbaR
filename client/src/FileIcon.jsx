@@ -111,15 +111,11 @@ FileIcon.propTypes = {
     /** Additional classes set by parent */
     'className': PropTypes.string,
 
-    /**
-     * Information about the file, this icon shall represent.
-     *
-     * data : {
-     *     'name' : Any string,
-     *     'type' : 'file' or 'folder'
-     * }
-     */
-    'data': PropTypes.object,
+    /** Information about the file, this icon shall represent. */
+    'data': PropTypes.shape({
+        'name': PropTypes.string.isRequired,
+        'type': PropTypes.oneOf(['file', 'folder']).isRequired
+    }).isRequired,
 
     /**
      * Whether the symbol shall indicate, that the file/folder has been opened.
