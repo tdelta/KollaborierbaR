@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import './index.css';
+import './sidebar.css';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import brace from 'brace'; 
@@ -180,7 +181,10 @@ class Editor extends React.Component {
 
         return (
             <div id="mainContainer">
-                <Sidebar project={testProject}>
+                <Sidebar
+                    project={testProject}
+                    onOpenFile={(path) => alert(path.join('/'))}
+                >
                     <div id="editor">
                     </div>
                 </Sidebar>

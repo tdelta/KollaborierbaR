@@ -85,9 +85,7 @@ export default class ProjectTreeView extends React.Component {
 ProjectTreeView.propTypes = {
     'onOpenFile': PropTypes.func,
     'project': PropTypes.shape({
-        'contents': PropTypes.arrayOf(
-            PropTypes.instanceOf(FileNode)
-        ),
+        'contents': PropTypes.arrayOf(PropTypes.object),
         'name': PropTypes.string.isRequired
     }).isRequired
 };
