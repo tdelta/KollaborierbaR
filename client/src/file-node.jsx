@@ -2,7 +2,7 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 
-import FileIcon from './FileIcon.jsx';
+import FileIcon from './file-icon.jsx';
 
 /**
  * Displays a node and its children (recursively) in a filesystem-like tree.
@@ -157,7 +157,7 @@ FileNode.propTypes = {
     'data': PropTypes.shape({
         'name': PropTypes.string.isRequired,
         'type': PropTypes.oneOf(['file', 'folder']).isRequired,
-        'contents': PropTypes.arrayOf(PropTypes.instanceOf(FileNode))
+        'contents': PropTypes.arrayOf(PropTypes.object)
     }).isRequired,
     'path': PropTypes.arrayOf(PropTypes.string)
 };
