@@ -53,7 +53,7 @@ class FileIcon extends React.Component {
         const match = re.exec(name);
 
         // if the expression matched, return the capture group
-        if (match && match.length > 1) {
+        if (match && match.length > 1 && match[1]) {
             return match[1];
         }
 
@@ -65,7 +65,7 @@ class FileIcon extends React.Component {
     render() {
         // if no specific icon can be determined, use a question mark as
         // default symbol
-        var icon = 'question';
+        var icon = 'fa question';
 
         // check, whether the file in question is actually a file or a folder
         switch (this.props.data.type) {
@@ -91,6 +91,10 @@ class FileIcon extends React.Component {
                     icon = 'far fa-folder';
                 }
 
+                break;
+
+            default:
+                icon = 'fa question';
                 break;
         }
 

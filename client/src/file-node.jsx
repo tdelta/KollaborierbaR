@@ -88,9 +88,9 @@ export default class FileNode extends React.Component {
 
         // Does the node have children?
         if (this.props.data.hasOwnProperty('contents')) {
-            {/*if so, are they visible / collapsed?
+            /*if so, are they visible / collapsed?
                (we'll use the css display property to hide them, if necessary)
-            */}
+            */
             const visibility = {
                 'display': this.state.collapsed ?
                     'none'
