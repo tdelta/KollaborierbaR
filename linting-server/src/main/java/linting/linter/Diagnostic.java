@@ -45,29 +45,27 @@ public class Diagnostic {
 		this.endCol = pos[1];
 	}
 
+	/**
+	 * @param source the java source code
+	 * @param position an absolute position in characters from the start of the source code
+	 * @return the position converted into a {row, column} long array
+	 */
 	private long[] getRowCol(JavaFileObject source, long position) {
 		long row, column = -1;
-		long count = 0;
-		long truePos = position;
+		long positionCounter = position;
 		LineNumberReader r;
 		String line;
 
 		try {
 			r = new LineNumberReader(source.openReader(true)); //true == ignore coding errors
-
-			while (count < truePos) {
-				column = 0;
-				line = r.readLine();
-
-				while (count < truePos && column < line.length()) {
-					count++;
-					column++;
-				}
-				truePos -= 1; // iteratively substract newlines
-				
-				if (column == line.length())
-					count++;
+			line = r.readLine();
+			// this loop counts all characters in the lines up to position
+			while (positionCounter > line.length()) {
+			    // The position is not in the current line; substract characters in the line to count and 2 characters for newline
+			    positionCounter -= line.length() + 2;
+			    line = r.readLine();
 			}
+		        column = positionCounter;
 		} catch (Exception e) {
 			row = -1;
 			column = -1;
