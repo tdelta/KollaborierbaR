@@ -26,15 +26,15 @@ public class ProjectController {
      * @return a LinkedList containing the Projects from the Projects folder(currently hardcoded)
      */
     @RequestMapping("/listProjects")
-    public List<FolderItem> listProjects() {
-        List<FolderItem> projects = new LinkedList<FolderItem>();
+    public List<String> listProjects() {
+        List<String> projects = new LinkedList<String>();
 
-        File file = new File("/home/marc/TestProjects/");
+        File file = new File("/home/heckstrahler/Downloads");
         File[] files = file.listFiles();
 
         for(File f: files){
 
-            projects.add(new FolderItem(null, f.getName()));
+            projects.add(f.getName());
         }
         return projects;
     }
@@ -51,7 +51,7 @@ public class ProjectController {
 
 
         // Get the File/Folder form the file system
-        File file = new File("/home/marc/TestProjects");
+        File file = new File("/home/heckstrahler/Downloads");
         File[] files = file.listFiles();
 
 
