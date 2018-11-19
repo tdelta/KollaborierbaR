@@ -38,9 +38,17 @@ class ModalSelect extends React.Component {
         super(props);
         this.project = [];
         this.loadProject = this.loadProject.bind(this);
+        this.mark = this.mark.bind(this);
         this.state = {
-            projects: []
+            projects: [],
+            selected: -1
         };
+    }
+
+    mark(i) {
+        this.setState({
+            'selected': i
+        });
     }
 
     // if selected to fast it is possible that no project is loaded, change!
@@ -62,7 +70,14 @@ class ModalSelect extends React.Component {
                     {
                         this.state.projects.map((name, i) => 
                             // key not necessary but added for good practice. see: https://reactjs.org/docs/lists-and-keys.html
-                            <ListGroupItem key={i} onClick={() => this.loadStructure(name)} action>{name}</ListGroupItem>
+                            <ListGroupItem
+                                key={i}
+                                onClick={() => {this.loadStructure(name); this.mark(i);}}
+                                action
+                                active={this.state.selected === i}
+                            >
+                                {name}
+                            </ListGroupItem>
                         )
                     }
                 </ListGroup>
