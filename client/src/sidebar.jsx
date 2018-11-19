@@ -60,11 +60,21 @@ export default class Sidebar extends React.Component {
         this.minWidth = 100;
         this.maxWidth = 400;
 
+        // determine, whether the initial project property is set and
+        // contains anything. If not, the sidebar will be collapsed initially.
+        const isProjectValid =
+               this.props.project // the project property is set to something
+            && Object.keys(this.props.project).length !== 0;
+            // ^ the project object must not be empty
+
         this.state = {
             // current width of the sidebar
             'sidebarWidth': 200,
             // whether the sidebar is currently hidden, or not
-            'collapsed': false
+            'collapsed': isProjectValid ? 
+                // only display the sidebar initially, if a project is set
+                false
+                : true
         };
     }
 

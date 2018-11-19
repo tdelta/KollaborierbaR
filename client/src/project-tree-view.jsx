@@ -43,14 +43,39 @@ import FileNode from './file-node.jsx';
  */
 export default class ProjectTreeView extends React.Component {
     render() {
+        // determine, whether the project property is set and
+        // contains at least a name. If not, the view will show an appropriate message.
+        const isProjectValid =
+               this.props.project // the project property is set to something
+            && this.props.project.name;
+            // ^ the project object must at least contain a name
+
+        var projectTitle;
+        if (isProjectValid) {
+            projectTitle = ( // if there is a valid project, render its name
+                <>
+                    <FontAwesome
+                        name='cube'
+                        className="projectTreeIcon"
+                    /> {this.props.project.name}
+                </>
+            );
+        } else {
+            projectTitle = ( // if not, render a message
+                <>
+                    <FontAwesome
+                        name='expand'
+                        className="projectTreeIcon"
+                    /> No open project
+                </>
+            );
+        }
+
         // Always display the project's name.
         // (...and a little icon on the left)
         const header = (
             <>
-                <FontAwesome
-                    name='cube'
-                    className="projectTreeIcon"
-                /> {this.props.project.name}
+                {projectTitle}
 
                 <hr />
             </>
