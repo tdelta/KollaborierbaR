@@ -30,17 +30,16 @@ class Top extends React.Component {
         this.downloadSelector = React.createRef();
         this.onFileChosen = this.onFileChosen.bind(this);
         this.onFileLoaded = this.onFileLoaded.bind(this);
-        this.handleOpenModal = this.handleOpenModal.bind(this);
+        this.toggleModal = this.toggleModal.bind(this);
         this.state = {
             showModal: false
         };
     }
 
-     handleOpenModal () {
-       this.setState({ showModal: true });
+     toggleModal() {
+       this.setState({ showModal: !this.state.showModal });
      }
      
-
     onFileChosen(event){
         this.fileReader = new FileReader();
         this.fileReader.onloadend = this.onFileLoaded;
@@ -50,6 +49,7 @@ class Top extends React.Component {
     onFileLoaded() {
         this.props.setText(this.fileReader.result);
     }
+
 
     render() {
         return(
@@ -62,7 +62,7 @@ class Top extends React.Component {
                                     Project
                                     </DropdownToggle>
                                     <DropdownMenu right>
-                                        <DropdownItem onClick={this.handleOpenModal}>
+                                        <DropdownItem onClick={this.toggleModal}>
                                         Load Project
                                         </DropdownItem>
                                         <DropdownItem onClick={() => this.fileSelector.current.click()}>
@@ -70,7 +70,7 @@ class Top extends React.Component {
                                         </DropdownItem>
                                     </DropdownMenu>
                             </UncontrolledDropdown>
-            <ModalSelect isOpen={this.state.showModal} />
+            <ModalSelect isOpen={this.state.showModal} toggle={this.toggleModal} />
                             <UncontrolledDropdown>
                                     <DropdownToggle nav caret>
                                     File
