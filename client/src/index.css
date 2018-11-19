@@ -15,10 +15,18 @@ nav{
   bottom: 0px;
 }
 
-#editor{
-  position: relative;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  height: 100%;
+.errorMarker {
+  position:absolute;
+  z-index:20;
+  color: red;
+  text-decoration: none;
+  background: url(error-underline.png) bottom repeat-x;
+}
+
+.warningMarker {
+  position:absolute;
+  z-index:20;
+  color: red;
+  text-decoration: none;
+  background: url(warning-underline.png) bottom repeat-x;
 }
