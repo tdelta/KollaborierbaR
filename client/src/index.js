@@ -21,7 +21,7 @@ import ModalSelect from './modal.js';
 
 import Sidebar from './sidebar.jsx';
 
-import 'brace/mode/java';
+import './highlighting/jml.js';
 import 'brace/theme/monokai';
 
 class Top extends React.Component {
@@ -163,7 +163,7 @@ class Editor extends React.Component {
             fontSize: 20,
             firstLineNumber: 1,
         });
-        this.editor.getSession().setMode('ace/mode/java');
+        this.editor.getSession().setMode('ace/mode/jml');
         this.editor.setTheme('ace/theme/monokai');
 
         // editor event handlers
