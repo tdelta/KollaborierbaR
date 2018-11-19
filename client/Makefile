@@ -13,8 +13,7 @@ check:
 
 # run static analysis tools in aggressive mode
 pedantic:
-	#No special options here yet
-	npm run-script lint
+	npm run-script lint-pedantic
 
 # run project
 run:

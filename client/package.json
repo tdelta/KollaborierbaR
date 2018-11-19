@@ -19,7 +19,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -r build/*",
-    "lint": "eslint src/*.js src/**/*.js"
+    "lint": "eslint -c .eslintrc.js src/*.js src/**/*.js",
+    "lint-pedantic": "eslint -c .eslint-pedantic.js src/*.js src/**/*.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -31,7 +32,10 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.5.0",
     "eslint": "^5.6.0",
-    "eslint-plugin-react": "^7.11.1"
+    "eslint-plugin-react": "^7.11.1",
+    "react-fontawesome": "^1.6.1",
+    "react-test-renderer": "^16.6.3"
   }
 }
