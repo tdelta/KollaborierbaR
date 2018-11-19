@@ -21,6 +21,8 @@ import java.util.List;
 public class ProjectController {
 
     /**
+     * That method handels requests to /listProjects and creates a list of project names. 
+     *
      * @return a LinkedList containing the Projects from the Projects folder(currently hardcoded)
      */
     @RequestMapping("/listProjects")
@@ -38,12 +40,15 @@ public class ProjectController {
     }
 
     /**
+     * That method handels requests to /showProject and creates a folderItem object which models the folder structure
+     * of the given folder name. The object will later be marshalled through Java Spring, resulting in a JSON object. 
+     *
+     * @param name is given in the http request.
      * @return the content of a chooses Projekt (currently hardcoded) in the form of a folder
      */
     @RequestMapping("/showProject")
-    public FolderItem showProject(){
+    public FolderItem showProject(@RequestParam("name") String name){
 
-        String name = "p4";
 
         // Get the File/Folder form the file system
         File file = new File("/home/marc/TestProjects");
@@ -56,6 +61,8 @@ public class ProjectController {
     }
 
     /**
+     * Helper function for recursivly creating a folderItem object from a given file structure.
+     *
      * @param file A file from the file system
      * @return A Folder and its content 
      */
@@ -75,6 +82,8 @@ public class ProjectController {
 
 
     /**
+     * Selectes a folder/project from a given file structure and returns it.
+     *
      * @param files List of the content of a folder
      * @param name	Name of the to be selected Folder
      * @return The folder matching the giving name or null if it does not exist
