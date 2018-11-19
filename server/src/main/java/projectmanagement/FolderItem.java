@@ -24,7 +24,7 @@ public class FolderItem extends Item{
     public FolderItem(List<Item> contents, String name){
 
         super(name);
-        this.Typ = "folder";
+        this.type = "folder";
         this.contents = contents;
     }
 

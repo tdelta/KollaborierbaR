@@ -51,7 +51,6 @@ class Top extends React.Component {
         this.props.setText(this.fileReader.result);
     }
 
-
     render() {
         return(
             <div>
@@ -71,7 +70,7 @@ class Top extends React.Component {
                                         </DropdownItem>
                                     </DropdownMenu>
                             </UncontrolledDropdown>
-            <ModalSelect isOpen={this.state.showModal} toggle={this.toggleModal} />
+            <ModalSelect isOpen={this.state.showModal} toggle={this.toggleModal} setStructure={this.props.showProject} />
                             <UncontrolledDropdown>
                                     <DropdownToggle nav caret>
                                     File
@@ -195,7 +194,7 @@ class Editor extends React.Component {
         return (
             <div id="mainContainer">
                 <Sidebar
-                    project={testProject}
+                    project={this.props.project}
                     onOpenFile={(path) => alert(path.join('/'))}
                 >
                     <div id="editor">
@@ -218,10 +217,18 @@ class App extends React.Component {
         super(props);
         this.setText = this.setText.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
+        this.showProject = this.showProject.bind(this);
         this.state = {
+            project: {},
             text : '',
             diagnostics: []
         };
+    }
+    showProject(project) {
+        console.log(project);
+        this.setState({
+            'project': project
+        });
     }
     setText(text){
         this.setState({
@@ -241,8 +248,8 @@ class App extends React.Component {
     render() {
         return(
             <div>
-                <Top setText={this.setText} text={this.state.text}/>
-                <Editor setDiagnostics={this.setDiagnostics} diagnostics={this.state.diagnostics} setText={this.setText} text={this.state.text}/>
+                <Top showProject={this.showProject} setText={this.setText} text={this.state.text}/>
+                <Editor project={this.state.project} setDiagnostics={this.setDiagnostics} diagnostics={this.state.diagnostics} setText={this.setText} text={this.state.text}/>
             </div>
         );
     }

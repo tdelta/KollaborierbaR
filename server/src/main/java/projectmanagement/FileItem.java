@@ -17,6 +17,6 @@ public class FileItem extends Item{
     public FileItem(String name){
     
         super(name);
-        Typ = "file";
+        type = "file";
     }
 }

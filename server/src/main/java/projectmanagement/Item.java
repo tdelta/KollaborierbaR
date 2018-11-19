@@ -11,7 +11,7 @@ package projectmanagement;
 public class Item{
 
     private String name;
-    protected String Typ;
+    protected String type;
 
     
     /**
@@ -39,13 +39,13 @@ public class Item{
 
     /**
      * 
-     * Basic getter of the Typ
+     * Basic getter of the type
      * 
      * @return the type of the item (folder/file) 
      */
-    public String getTyp(){
+    public String gettype(){
 
-        return this.Typ;
+        return this.type;
 
     }
 

@@ -2,6 +2,7 @@ package server;
 
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +18,7 @@ import java.util.List;
  *  This is a rest controller for handling the project file structure
  */
 @RestController
+@CrossOrigin
 @RequestMapping("/projects")
 public class ProjectController {
     private static final String projectPath = "projects";
