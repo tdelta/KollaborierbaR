@@ -1,4 +1,4 @@
-package projectmanagment;
+package projectmanagement;
 
 public class Item{
 
