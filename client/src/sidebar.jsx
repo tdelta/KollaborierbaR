@@ -58,7 +58,7 @@ export default class Sidebar extends React.Component {
         // Minimum and maximum width of this sidebar.
         // These settings determine, how much the user can control its size.
         this.minWidth = 100;
-        this.maxWidth = 400;
+        this.maxWidth = 600;
 
         // determine, whether the initial project property is set and
         // contains anything. If not, the sidebar will be collapsed initially.

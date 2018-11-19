@@ -1,5 +1,5 @@
 CLIENT_DIR = client
-SERVER_DIR = linting-server
+SERVER_DIR = server
 
 # indicate, that submodules are not files
 .PHONY: setup check pedantic client linter test clean
