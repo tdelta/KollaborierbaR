@@ -1,10 +1,10 @@
-import ace from 'brace';
+import brace from 'brace';
 import 'brace/mode/java';
 import './jml_highlighting.js';
 
 // Defines how code in the editor can be folded. (This is used to generate the little arrows in the gutter)
-// ace.define is used in order to import this somewhere else
-ace.define('ace/mode/folding/jml',['require','exports','module','ace/lib/oop','ace/range','ace/mode/folding/fold_mode'], 
+// brace.define is used in order to import this somewhere else
+brace.define('ace/mode/folding/jml',['require','exports','module','ace/lib/oop','ace/range','ace/mode/folding/fold_mode'], 
     function(acequire, exports, module) {
         'use strict';
 
@@ -61,7 +61,7 @@ ace.define('ace/mode/folding/jml',['require','exports','module','ace/lib/oop','a
 
 // The JML Mode defined here combines folding, highlighting and indentation rules. This is what you have to import in order to use the JML Highlighting.
 // ace.define is used in order to import this somewhere else
-ace.define('ace/mode/jml',['require','exports','module','ace/lib/oop','ace/mode/javascript','ace/mode/java_highlight_rules'], function(acequire, exports, module) {
+brace.define('ace/mode/jml',['require','exports','module','ace/lib/oop','ace/mode/javascript','ace/mode/java_highlight_rules'], function(acequire, exports, module) {
     'use strict';
 
     // acequire imports ace modules
@@ -85,7 +85,7 @@ ace.define('ace/mode/jml',['require','exports','module','ace/lib/oop','ace/mode/
             return null;
         };
 
-	// Creates the beginning of a new line when the user presses enter
+        // Creates the beginning of a new line when the user presses enter
         this.getNextLineIndent = function(state, line, tab){
             if(state == 'jml-block-comment'){
                 // Count the characters in front of the first '@' in the current line
