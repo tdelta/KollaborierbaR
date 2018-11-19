@@ -74,7 +74,7 @@ export default class Sidebar extends React.Component {
             'collapsed': isProjectValid ? 
                 // only display the sidebar initially, if a project is set
                 false
-                : true
+                : true,
         };
     }
 
@@ -140,6 +140,16 @@ export default class Sidebar extends React.Component {
             'mouseup',
             mouseupHandler
         );
+    }
+
+    componentDidUpdate(prevProps) {
+        // has the project been changed?
+        if (prevProps.project !== this.props.project) {
+            // if so, the sidebar should definitely be visible
+            this.setState({
+                'collapsed': false
+            });
+        }
     }
 
     render() {
