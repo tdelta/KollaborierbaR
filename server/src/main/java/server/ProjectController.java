@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @author Marc Arnold, David Heck
- *
+ *  This is a rest controller for handling the project file structure
  */
 @RestController
 @RequestMapping("/projects")
