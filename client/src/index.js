@@ -113,7 +113,7 @@ Top.propTypes = {
 
 class Editor extends React.Component {
     callLinter(){
-        lint('Test', this.editor.getValue())
+        lint('LimitedIntegerSet', this.editor.getValue())
             .then((diagnostics) => {
                 this.props.setDiagnostics(diagnostics);
             });
@@ -272,7 +272,8 @@ class App extends React.Component {
     }
     componentDidMount() {
         this.setState({
-            text: 'public class Test {\r\n\tpublic static void main(String[] args){\r\n\t\tSystem.out.println("Hello World");\r\n\t\t\r\n\t\tswitch (2) {\r\n\t\t    case 1:\r\n\t\t        System.out.println("1");\r\n\t\t    case 2: //there be warnings, try linting!\r\n\t\t        System.out.println("2"); \r\n\t\t}\r\n\t}\r\n}'
+            // source code from a FMISE exercise, to test JML highlighting
+            text: 'public class LimitedIntegerSet {\r\n\r\n\t//@ public invariant (\\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);\r\n\tprivate /*@ spec_public @*/ int[] arr;\r\n\t\r\n\t//@ public invariant size >= 0 && size <= arr.length;\r\n\tprivate /*@ spec_public @*/ int size;\r\n\r\n\r\n\tpublic LimitedIntegerSet(int limit) {\r\n\t\tthis.arr = new int[limit];\r\n\t}\r\n\r\n\r\n\t/*@ public normal_behavior\r\n      @ ensures \\result == (\\exists int i;\r\n      @                             0 <= i && i < size;\r\n      @                             arr[i] == elem);\r\n      @*/\r\n\tpublic /*@ pure @*/ boolean contains(int elem) {/*...*/ throw new RuntimeException(\"Not yet implemented\");}\r\n\r\n\r\n\r\n\t/*@ public normal_behavior\r\n\t  @ requires contains(elem);\r\n      @ assignable size, arr[*];  // allows arbitrary reordering of the array elements\r\n      @ ensures !contains(elem); \r\n      @ ensures (\\forall int e;\r\n      @                  e != elem;\r\n      @                  contains(e) <==> \\old(contains(e)));\r\n      @ ensures size == \\old(size) - 1;\r\n      @\r\n      @ also\r\n      @ \r\n      @ public normal_behavior\r\n      @ requires !contains(elem);\r\n      @ assignable \\nothing;\r\n      @*/\r\n\tpublic void remove(int elem) {/*...*/}\r\n\r\n\r\n\t// we specify that the array is sorted afterwards and that the set has not changed; the latter works in this case and is easier \r\n\t// than if we would have to try to formalize permutation\r\n\t/*@ public normal_behavior\r\n\t  @ assignable a[0..size - 1];\r\n      @ ensures\r\n      @   (\\forall int i, j; i>=0 && i<j && j<size; arr[i]<arr[j]);\r\n      @ ensures (\\forall int e;  \r\n      @                  contains(e) <==> \\old(contains(e)));\r\n      @*/\r\n\tpublic void sort() { /* ... */ }\r\n\r\n\t\r\n\t/*@ public normal_behavior\r\n\t  @ requires size > 0;\r\n      @ assignable \\nothing;\r\n      @ ensures ( \\forall int i;\r\n      @                  i>=0 && i<size;\r\n      @                  \\result >= a[i] );\r\n      @ ensures ( \\exists int i;\r\n      @                  i>=0 && i<size;\r\n      @                  \\result == a[i] );\r\n      @\r\n      @ also\r\n      @ \r\n      @ public exceptional_behavior\r\n      @ requires size == 0;\r\n      @ assignable \\nothing;\r\n      @ signals  (RuntimeException) true;\r\n      @*/\r\n\tpublic int max() {\r\n\t\t// ...\r\n\t\tthrow new RuntimeException(\"Not yet implemented.\");\r\n\t}\r\n\t\r\n\r\n\r\n}\r\n'
         });
     }
     render() {
