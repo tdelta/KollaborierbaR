@@ -23,7 +23,7 @@ public class ProjectController {
     /**
      * That method handels requests to /listProjects and creates a list of project names. 
      *
-     * @return a LinkedList containing the Projects from the Projects folder(currently hardcoded)
+     * @return a LinkedList containing Stings of the Names form of the Folders in the Projects folder(currently hardcoded)
      */
     @RequestMapping("/listProjects")
     public List<String> listProjects() {
