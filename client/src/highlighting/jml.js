@@ -47,7 +47,7 @@ brace.define( // we tell ace, that we want to define our own ace extension modul
                     var token = iterator.getCurrentToken();
                     var type = token.type;
 
-                    if(type == 'jml_comment') {
+                    if(type === 'jml_comment') {
                         var range = new Range();
                         range.start.row = iterator.getCurrentTokenRow();
                         range.start.column = iterator.getCurrentTokenColumn() + 3;
@@ -87,8 +87,6 @@ brace.define( // see above, for how this define call works.
     'ace/mode/jml',
     ['require','exports','module','ace/lib/oop','ace/mode/javascript','ace/mode/java_highlight_rules'],
     function(acequire, exports, module) {
-        'use strict';
-
         // acequire imports ace modules
         var oop = acequire('../lib/oop');
         var JavaScriptMode = acequire('./javascript').Mode;
@@ -112,7 +110,7 @@ brace.define( // see above, for how this define call works.
 
             // Creates the beginning of a new line when the user presses enter
             this.getNextLineIndent = function(state, line, tab){
-                if(state == 'jml-block-comment'){
+                if(state === 'jml-block-comment'){
                     // Count the characters in front of the first '@' in the current line
                     var indent = line.match(/[^@]+/).toString().length;
                     // Create a string of indent whitespaces and an @

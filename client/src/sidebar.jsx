@@ -235,7 +235,7 @@ export default class Sidebar extends React.Component {
 Sidebar.propTypes = {
     'children': PropTypes.element.isRequired,
     'project': PropTypes.shape({
-        'name': PropTypes.string.isRequired,
+        'name': PropTypes.string,
         'contents': PropTypes.arrayOf(PropTypes.object)
     }),
     'onOpenFile': PropTypes.func

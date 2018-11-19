@@ -21,8 +21,6 @@ brace.define( // create a new ace module
         'ace/mode/text_highlight_rules' // we will include the existing basic highlight rules
     ],
     function(acequire, exports) {
-        'use strict';
-
         // we want OOP functionality (inheriting from existing ace modes, etc.)
         const oop = acequire('../lib/oop');
         // the lang module will provide use with `arrayToMap`, see below

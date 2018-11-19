@@ -25,10 +25,13 @@ function toAnnotation(diagnostic) {
         message,
         column,
         line,
-        /* currently unused
-        end,
+        /*end,
         start,
         position,*/
+        startRow,
+        startCol,
+        endRow,
+        endCol,
         kind
     } = diagnostic;
 
@@ -49,53 +52,24 @@ function toAnnotation(diagnostic) {
 
     /*annotations format:
 
-    {
-      row: 3, //line -1 !
-      column: 17,
-      text: "not a statement",
-      type: "error"     // alternatives: 'info' or 'warning', see https://github.com/ajaxorg/ace/blob/9b5b63d1dc7c1b81b58d30c87d14b5905d030ca5/lib/ace/edit_session.js
-    }
-  */
+      {
+        row: 3, //line -1 !
+        column: 17,
+        text: "not a statement",
+        type: "error"     // alternatives: 'info' or 'warning', see https://github.com/ajaxorg/ace/blob/9b5b63d1dc7c1b81b58d30c87d14b5905d030ca5/lib/ace/edit_session.js
+      }
+    */
 
-  var {
-    message,
-    column,
-    line,
-    end,
-    start,
-    position,
-    startRow,
-    startCol,
-    endRow,
-    endCol,
-    kind
-  } = diagnostic;
-
-  var type;
-
-  switch (kind) {
-    case 'ERROR':
-      type = 'error';
-      break;
-
-    case 'WARNING':
-      type = 'warning';
-      break;
-
-    default:
-      type = 'info';
-  }
-
-  return {
-    'row': line - 1,
-    'column': column, //also -1 ? TODO: Check this
-    'text': message,
-    'type': type,
-    'startRow': startRow,
-    'startCol': startCol,
-    'endRow' : endRow,
-    'endCol': endCol
-  };
+    return {
+        'row': line - 1,
+        'column': column, //also -1 ? TODO: Check this
+        'text': message,
+        'type': type,
+        'startRow': startRow,
+        'startCol': startCol,
+        'endRow' : endRow,
+        'endCol': endCol
+    };
 }
 
 export default toAnnotation;

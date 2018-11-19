@@ -55,11 +55,28 @@ class ModalSelect extends React.Component {
     }
 
     listProjects() {
-        return (
-            this.state.projects.map((name, i) => 
-                // key not necessary but added for good practice. see: https://reactjs.org/docs/lists-and-keys.html
-                <ListGroupItem key={i} onClick={() => this.loadStructure(name)} action>{name}</ListGroupItem>)
-        );
+        // check, whether there are any projects to list
+        if (this.state.projects && this.state.projects.length > 0) {
+            return (
+                <ListGroup>
+                    {
+                        this.state.projects.map((name, i) => 
+                            // key not necessary but added for good practice. see: https://reactjs.org/docs/lists-and-keys.html
+                            <ListGroupItem key={i} onClick={() => this.loadStructure(name)} action>{name}</ListGroupItem>
+                        )
+                    }
+                </ListGroup>
+            );
+        }
+
+        // if there arent any, inform the user about it
+        else {
+            return (
+                <>
+                    There are no projects on the server
+                </>
+            );
+        }
     }
 
     render() {
@@ -68,9 +85,7 @@ class ModalSelect extends React.Component {
                 <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={this.props.className}>
                     <ModalHeader toggle={this.props.toggle}>Select Project</ModalHeader>
                     <ModalBody>
-                        <ListGroup>
-                            {this.listProjects()}
-                        </ListGroup>
+                        {this.listProjects()}
                     </ModalBody>
                     <ModalFooter>
                         <Button color="primary" onClick={this.loadProject}>Select</Button>{' '}

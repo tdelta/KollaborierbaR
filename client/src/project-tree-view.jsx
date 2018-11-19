@@ -127,8 +127,8 @@ ProjectTreeView.propTypes = {
     'onOpenFile': PropTypes.func,
     'project': PropTypes.shape({
         'contents': PropTypes.arrayOf(PropTypes.object),
-        'name': PropTypes.string.isRequired
-    }).isRequired
+        'name': PropTypes.string
+    })
 };
 
 // default values for some properties
