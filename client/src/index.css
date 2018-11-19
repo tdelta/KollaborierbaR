@@ -14,6 +14,9 @@ nav{
   right: 0px;
   bottom: 0px;
 }
+.ace_jml_comment{
+	color:#ff9955
+}
 
 #editor {
   position : relative;
