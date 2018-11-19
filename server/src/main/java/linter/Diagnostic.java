@@ -1,4 +1,4 @@
-package linting.linter;
+package linter;
 
 /** Holds diagnostic information regarding an error, warning etc. within a source code file. */
 public class Diagnostic {
