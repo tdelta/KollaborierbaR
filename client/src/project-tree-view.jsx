@@ -82,17 +82,24 @@ export default class ProjectTreeView extends React.Component {
         );
 
         // if the project is not empty, display its contents
-        if (this.props.project.hasOwnProperty('contents')) {
+        if (isProjectValid && this.props.project.hasOwnProperty('contents')) {
             return (
                 <>
-                    {header}
+                    {header /* display the header (contains project name) */}
 
                     {
+                        // render each element within the root folder of the
+                        // project as FileNode
                         this.props.project.contents.map((item) =>
                             <FileNode
                                 key={item.name}
-                                data={item}
+                                // ^when rendering a list of elements, react
+                                // requires a unique key for all of them
+                                data={item} // pass the element to thee FileNode
                                 path={[item.name]}
+                                // ^since this is the root of the project,
+                                // the path of each element consists just of its
+                                // own name
                                 onOpenFile={this.props.onOpenFile}
                             />
                         )
@@ -102,11 +109,20 @@ export default class ProjectTreeView extends React.Component {
         }
 
         else {
-            return (<>{header}</>);
+            // if there are no contents, just render the title and a message
+            // about missing contents
+            return (
+                <>
+                  {header}
+
+                  There are no files.
+                </>
+            );
         }
     }
 }
 
+// declare types of properties
 ProjectTreeView.propTypes = {
     'onOpenFile': PropTypes.func,
     'project': PropTypes.shape({
@@ -115,6 +131,7 @@ ProjectTreeView.propTypes = {
     }).isRequired
 };
 
+// default values for some properties
 ProjectTreeView.defaultProps = {
     'onOpenFile': () => {}
 };
