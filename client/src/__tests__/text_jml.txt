@@ -1,0 +1,9 @@
+/*@ requires amount >= 0;
+  @ ensures true;
+  @ signals (BankException e) amount > balance
+  @         && balance == \old(balance)
+  @         && e.getReason().equals("Amount too big");
+  @*/
+public int debit(int amount) throws BankException{
+    ...
+}
