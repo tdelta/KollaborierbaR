@@ -36,7 +36,7 @@ brace.define( // create a new ace module
         // Identifies, whether a given value is a special keyword, or just a regular
         // part of a jml comment
         const identifyKeywords = (value) => {
-            for (const keywordClass in syntax.keywords) {
+            for (const keywordClass in Object.assign(syntax.keywords,syntax.types)) {
                 // check whether the value is contained in the current keyword class
                 if (syntax.keywords[keywordClass].hasOwnProperty(value)) {
                     return 'keyword';
@@ -49,13 +49,8 @@ brace.define( // create a new ace module
         // Checks, whether a given value is a special JML symbol or
         // operator
         const identifySymbols = (value) => {
-            for (const symbolClass in Object.assign(syntax.special_symbols, syntax.operators)) {
-                // check whether the value is contained in the current symbol class
-                if (syntax[symbolClass].hasOwnProperty(value)) {
-                    return 'text';
-                }
-            }
-
+            if(syntax.special_symbols.hasOwnProperty(value)) return 'text';
+            if(syntax.operators.hasOwnProperty(value)) return 'text';
             return 'jml_comment';
         };
 
@@ -71,7 +66,7 @@ brace.define( // create a new ace module
                     {
                         token : (value) => identifySymbols(value),
                         // Regular expression matches all strings of special characters
-                        regex : /[#|<|>|=|:|!|.|{|}|`|\'|\||&|*]+/,
+                        regex : /[#|<|>|=|:|!|.|{|}|`|'|||&|*|+|-]+/,
                     },
                     {
                         defaultToken : 'jml_comment',
@@ -80,7 +75,7 @@ brace.define( // create a new ace module
             };
         };
 
-        // TODO: Was ist das?
+        // We used seperate rules for comment blocks and single line comments because they have seperate end conditions that should lead into the start state of the java highlighting rules.
         var JmlBlockHighlightRules = function() {
             this.$rules = {
                 'block-comment' : [
@@ -90,7 +85,7 @@ brace.define( // create a new ace module
                     },
                     {
                         token : (value) => identifySymbols(value),
-                        regex : /[#|<|>|=|:|!|.|{|}|`|\'|\||&|*]+/,
+                        regex : /[#|<|>|=|:|!|.|{|}|`|'|||&|*|+|-]+/,
                     }, {
                         defaultToken : 'jml_comment'
                     }
@@ -98,9 +93,8 @@ brace.define( // create a new ace module
             };
         };
 
-        // TODO: What is a start state?
         JmlBlockHighlightRules.getStartRule = function(start) {
-            // Generates a rule that goes into the start state, when /*@ is found.
+            // Generates a rule that goes into the state specified in start, when /*@ is found.
             return{
                 token : 'jml_comment',
                 regex : /\/\*@/,
