@@ -15,7 +15,15 @@ nav{
   bottom: 0px;
 }
 .ace_jml_comment{
-	color:#ff9955
+  color:#ff9955
+}
+
+.ace_jml_keyword{
+  color:#994f64
+}
+
+.ace_jml_predicate{
+  color:#f9e0a1
 }
 
 #editor {
