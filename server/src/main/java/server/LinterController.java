@@ -1,10 +1,10 @@
-package linting.server;
+package server;
 
 import java.util.Arrays;
 import java.util.List;
-import linting.linter.Diagnostic;
-import linting.linter.java.JavaCompilerLinter;
-import linting.linter.java.JavaSourceMemoryObject;
+import linter.Diagnostic;
+import linter.java.JavaCompilerLinter;
+import linter.java.JavaSourceMemoryObject;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

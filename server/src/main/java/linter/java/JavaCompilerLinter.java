@@ -1,4 +1,4 @@
-package linting.linter.java;
+package linter.java;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +8,7 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
-import linting.linter.Diagnostic;
+import linter.Diagnostic;
 
 /**
  * Checks java source files for errors and warnings using the system java compiler (usually javac)
