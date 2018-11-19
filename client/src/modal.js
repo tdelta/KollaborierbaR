@@ -36,23 +36,30 @@ function getProjectStructure(name) {
 class ModalSelect extends React.Component {
     constructor(props) {
         super(props);
+        this.project = [];
+        this.loadProject = this.loadProject.bind(this);
         this.state = {
             projects: []
         };
     }
 
+    // if selected to fast it is possible that no project is loaded, change!
     loadStructure(name) {
         getProjectStructure(name)
-        .then((response) => this.props.setStructure(response));
+            .then((response) => this.project = response);
+    }
+
+    loadProject() {
+        this.props.setStructure(this.project);
+        this.props.toggle();
     }
 
     listProjects() {
         return (
-                    this.state.projects.map((name, i) => 
-                        // note: we add a key prop here to allow react to uniquely identify each
-                        // element in this array. see: https://reactjs.org/docs/lists-and-keys.html
-                        <ListGroupItem key={i} onClick={() => this.loadStructure(name)} action>{name}</ListGroupItem>)
-                );
+            this.state.projects.map((name, i) => 
+                // key not necessary but added for good practice. see: https://reactjs.org/docs/lists-and-keys.html
+                <ListGroupItem key={i} onClick={() => this.loadStructure(name)} action>{name}</ListGroupItem>)
+        );
     }
 
     render() {
@@ -66,7 +73,7 @@ class ModalSelect extends React.Component {
                         </ListGroup>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={this.props.toggle}>Select</Button>{' '}
+                        <Button color="primary" onClick={this.loadProject}>Select</Button>{' '}
                         <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                     </ModalFooter>
                 </Modal>
@@ -74,6 +81,7 @@ class ModalSelect extends React.Component {
         );
     }
 
+    // right now this is only called once
     componentDidMount() {
         getProjects()
             .then((projects) => {this.setState({projects: projects});
