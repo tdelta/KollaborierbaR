@@ -119,13 +119,43 @@ class Editor extends React.Component {
             });
     }
 
+    // Function that sets and updates the annotations and markers
     setAnnotations(){
-        this.editor.getSession().setAnnotations(
-            this.props.diagnostics.map(toAnnotation));
+
+        // Transforms and sets the existing diagnostics to a format, which is compatible to Ace
+        let aceDiagnostics = this.props.diagnostics.map(toAnnotation);
+        this.editor.getSession().setAnnotations(aceDiagnostics);
+
+        // Removes existing marker in the editor
+        for (var i = 0; i < this.markers.length; i++) {
+            this.editor.session.removeMarker(this.markers[i]);
+        }
+
+        this.markers = [];
+
+        // Processs each element of array of aceDiagonistics
+        for (var i = 0; i < aceDiagnostics.length; i++) {
+            let startRow = aceDiagnostics[i]["startRow"];
+            let startCol = aceDiagnostics[i]["startCol"];
+            let endRow = aceDiagnostics[i]["endRow"];
+            let endCol = aceDiagnostics[i]["endCol"];
+
+            // Imports Range object
+            var Range = brace.acequire('ace/range').Range;
+
+            //Creates marker depending on the error type
+            if (aceDiagnostics[i]["type"] == "error")
+                this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), "errorMarker", "text"));
+            else
+                this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), "warningMarker", "text"));
+        }
+
+
     }
 
     componentDidMount(){
         this.editor = brace.edit('editor');
+        this.markers = [];
         this.timeTest = null;
         this.editor.setOptions({
             autoScrollEditorIntoView: true,
