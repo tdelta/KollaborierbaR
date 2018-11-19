@@ -76,6 +76,7 @@ ace.define('ace/mode/jml_highlight_rules',['require','exports','module','ace/lib
             return 'jml_comment';
         };
 
+        // The grammar rules try to match regular expressions over the whole text in the editor and return tokens that will be used to generate CSS classes. If a rule has a state attribute, the specified state will be used after the regular expression was matched.
         var JmlHighlightRules = function() {
             this.$rules = {
                 'comment' : [
@@ -114,6 +115,7 @@ ace.define('ace/mode/jml_highlight_rules',['require','exports','module','ace/lib
         };
 
         JmlBlockHighlightRules.getStartRule = function(start) {
+            // Generates a rule that goes into the start state, when /*@ is found.
             return{
                 token : 'jml_comment',
                 regex : /\/\*@/,
@@ -122,6 +124,7 @@ ace.define('ace/mode/jml_highlight_rules',['require','exports','module','ace/lib
         };
 
         JmlHighlightRules.getStartRule = function(start) {
+            // Generates a rule that goes into the start state, when //@ is found.
             return{
                 token : 'jml_comment',
                 regex : /\/\/@/,
@@ -130,6 +133,7 @@ ace.define('ace/mode/jml_highlight_rules',['require','exports','module','ace/lib
         };
 
         JmlHighlightRules.getEndRule = function(start) {
+            // Generates a rule that goes into the (JavaHighlight-) start state, when a line end is found
             return{
                 token : 'jml_comment',
                 regex : '$',
@@ -138,6 +142,7 @@ ace.define('ace/mode/jml_highlight_rules',['require','exports','module','ace/lib
         };
 
         JmlBlockHighlightRules.getEndRule = function(start) {
+            // Generates a rule that goes into the (JavaHighlight-) start state, when */ is found
             return{
                 token : 'jml_comment',
                 regex : /\*\//,
@@ -152,6 +157,7 @@ ace.define('ace/mode/jml_highlight_rules',['require','exports','module','ace/lib
         exports.JmlBlockHighlightRules = JmlBlockHighlightRules;
     }
 );
+// Unfortunately I had to copy the whole java highlighting rules in order to embed jml comments into the 'start' state. Everything else is unchanged.
 ace.define('ace/mode/java_highlight_rules',['require','exports','module','ace/lib/oop','ace/mode/doc_comment_highlight_rules','ace/mode/jml_highlight_rules','ace/mode/text_highlight_rules'], function(acequire, exports, module) {
     'use strict';
 
@@ -214,7 +220,7 @@ ace.define('ace/mode/java_highlight_rules',['require','exports','module','ace/li
 
         this.$rules = {
             'start' : [
-		// The JavaMode had to be changed here to insert jml comments into the start state
+		// The JavaMode had to be changed here to insert jml comments into the start state.
                 JmlHighlightRules.getStartRule('jml-comment'),
                 {
                     token : 'comment',
@@ -269,7 +275,7 @@ ace.define('ace/mode/java_highlight_rules',['require','exports','module','ace/li
             ]
         };
 
-
+        // embedRules adds the remaining grammar rules. It adds the endRule to every state of our newly added rules and prefixes the new rules with the second argument (jml-).
         this.embedRules(JmlHighlightRules,'jml-',
             [ JmlHighlightRules.getEndRule('start') ]);
 

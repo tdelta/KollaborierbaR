@@ -2,6 +2,8 @@ import ace from 'brace';
 import 'brace/mode/java';
 import './jml_highlighting.js';
 
+// Defines how code in the editor can be folded. (This is used to generate the little arrows in the gutter)
+// ace.define is used in order to import this somewhere else
 ace.define('ace/mode/folding/jml',['require','exports','module','ace/lib/oop','ace/range','ace/mode/folding/fold_mode'], 
     function(acequire, exports, module) {
         'use strict';
@@ -12,21 +14,17 @@ ace.define('ace/mode/folding/jml',['require','exports','module','ace/lib/oop','a
 
         var CStyleFoldMode = acequire('ace/mode/folding/cstyle').FoldMode;
 
+	// Constructor from super class
         var FoldMode = exports.FoldMode = function(commentRegex) {
-            if (commentRegex) {
-                this.foldingStartMarker = new RegExp(
-                    this.foldingStartMarker.source.replace(/\|[^|]*?$/, '|' + commentRegex.start)
-                );
-                this.foldingStopMarker = new RegExp(
-                    this.foldingStopMarker.source.replace(/\|[^|]*?$/, '|' + commentRegex.end)
-                );
-            }
+            CStyleFoldMode.constructor.call(this,commentRegex);
         };
 
         oop.inherits(FoldMode,CStyleFoldMode);
 
         (function() {
-            
+
+            // This function is called when a regular expression matches the start of foldable code.
+            // It returns a range from start to end of that code that will be hidden
             this.getFoldWidgetRange = function(session, foldStyle, row, forceMultiline) {
                 var _getCommentFoldRange = session.getCommentFoldRange.bind(session);
                 // I changed this function because it works with the CSS "comment" class that we are not using
@@ -49,30 +47,36 @@ ace.define('ace/mode/folding/jml',['require','exports','module','ace/lib/oop','a
                         range.end.column = iterator.getCurrentTokenColumn()+token.value.indexOf('@*/');
                         return range;
                     } else {
+			// Use the standard method for all other types (=CSS classes)
                         return _getCommentFoldRange(row,column,dir);
                     }
                 };
-		// Use the standard method for all other types (=CSS classes)
                 return CStyleFoldMode.prototype.getFoldWidgetRange.call(this,session, foldStyle, row, forceMultiline);
             };
+        // Calls the function in the context of FoldMode. That way we can write this instead of FoldMode.
         }).call(FoldMode.prototype);
         exports.FoldMode = FoldMode;
     }
 );
 
+// The JML Mode defined here combines folding, highlighting and indentation rules. This is what you have to import in order to use the JML Highlighting.
+// ace.define is used in order to import this somewhere else
 ace.define('ace/mode/jml',['require','exports','module','ace/lib/oop','ace/mode/javascript','ace/mode/java_highlight_rules'], function(acequire, exports, module) {
     'use strict';
 
+    // acequire imports ace modules
     var oop = acequire('../lib/oop');
     var JavaScriptMode = acequire('./javascript').Mode;
     var JavaHighlightRules = acequire('ace/mode/java_highlight_rules').JavaHighlightRules;
     var JmlFoldMode = acequire('ace/mode/folding/jml').FoldMode;
 
+    // Constructor of the JML mode
     var Mode = function() {
         JavaScriptMode.call(this);
         this.HighlightRules = JavaHighlightRules;
         this.foldingRules = new JmlFoldMode();
     };
+    // Extend the Javascript mode
     oop.inherits(Mode, JavaScriptMode);
 
     (function() {
@@ -95,6 +99,7 @@ ace.define('ace/mode/jml',['require','exports','module','ace/lib/oop','ace/mode/
         };
         
         this.$id = 'ace/mode/jml';
+    // Calls the function in the context of Mode.prototype. That way we can write this instead of Mode.
     }).call(Mode.prototype);
 
     exports.Mode = Mode;
