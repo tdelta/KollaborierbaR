@@ -26,19 +26,19 @@ public class ProjectController {
     /**
      * That method handels requests to /listProjects and creates a list of project names. 
      *
-     * @return a LinkedList containing Stings of the Names form of the Folders in the Projects folder(currently hardcoded)
+     * @return a List containing Stings of the Names form of the Folders in the Projects folder(currently hardcoded)
      */
     @RequestMapping("/listProjects")
     public List<String> listProjects() {
-        List<String> projects = new LinkedList<String>();
+        final List<String> projects = new LinkedList<String>();
 
-        File file = new File(projectPath);
-        File[] files = file.listFiles();
+        final File file = new File(projectPath);
+        final File[] files = file.listFiles();
 
-        for(File f: files){
-
+        for(final File f: files) {
             projects.add(f.getName());
         }
+
         return projects;
     }
 
@@ -67,13 +67,13 @@ public class ProjectController {
      * @return A Folder and its content 
      */
     public FolderItem createFolderItem(File file){
-        List<Item> entries = new LinkedList<Item>();
+        final List<Item> entries = new LinkedList<Item>();
 
         // Adding the content of the Folder to a list if it is a file just add it if its a folder add it and call the method again recursivly
-        for(File f: file.listFiles()){
+        for(final File f: file.listFiles()){
             if(f.isFile()){
                 entries.add(new FileItem(f.getName()));
-            }else{
+            } else {
                 entries.add(createFolderItem(f));
             }
         }
