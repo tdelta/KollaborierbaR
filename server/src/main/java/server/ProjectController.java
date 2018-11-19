@@ -19,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
+    private static final String projectPath = "projects";
 
     /**
      * That method handels requests to /listProjects and creates a list of project names. 
@@ -29,7 +30,7 @@ public class ProjectController {
     public List<String> listProjects() {
         List<String> projects = new LinkedList<String>();
 
-        File file = new File("/home/heckstrahler/Downloads");
+        File file = new File(projectPath);
         File[] files = file.listFiles();
 
         for(File f: files){
@@ -48,14 +49,11 @@ public class ProjectController {
      */
     @RequestMapping("/showProject")
     public FolderItem showProject(@RequestParam("name") String name){
-
-
         // Get the File/Folder form the file system
-        File file = new File("/home/heckstrahler/Downloads");
-        File[] files = file.listFiles();
+        final File file = new File(projectPath);
+        final File[] files = file.listFiles();
 
-
-        File selected = selectProjectFromArray(files, name);
+        final File selected = selectProjectFromArray(files, name);
 
         return createFolderItem(selected);
     }
@@ -89,7 +87,7 @@ public class ProjectController {
      * @return The folder matching the giving name or null if it does not exist
      */
     public File selectProjectFromArray(File[] files, String name){
-        for(File f : files){
+        for(final File f : files){
             if(f.getName().equals(name)){
                 return f;
             }
