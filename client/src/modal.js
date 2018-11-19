@@ -43,7 +43,7 @@ class ModalSelect extends React.Component {
 
     loadStructure(name) {
         getProjectStructure(name)
-        .then((response) => console.log(response));
+        .then((response) => this.props.setStructure(response));
     }
 
     listProjects() {
