@@ -113,6 +113,7 @@ class Top extends React.Component {
 Top.propTypes = {
     setText: PropTypes.func.isRequired,
     text: PropTypes.string,
+    showProject: PropTypes.func
 };
 
 class Editor extends React.Component {
