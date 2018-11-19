@@ -8,7 +8,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 import brace from 'brace';
 
 import {
-    Collapse,
     Navbar,
     NavbarBrand,
     Nav,
@@ -19,6 +18,7 @@ import {
 
 import lint from './linting.js';
 import toAnnotation from './diagnostics.js';
+import ModalSelect from './modal.js';
 
 import 'brace/mode/java';
 import 'brace/theme/monokai';
@@ -30,16 +30,17 @@ class Top extends React.Component {
         this.downloadSelector = React.createRef();
         this.onFileChosen = this.onFileChosen.bind(this);
         this.onFileLoaded = this.onFileLoaded.bind(this);
-        this.toggle = this.toggle.bind(this);
+        this.handleOpenModal = this.handleOpenModal.bind(this);
         this.state = {
-            isOpen: false
+            showModal: false
         };
     }
-    toggle() {
-        this.setState({
-            isOpen: !this.state.isOpen
-        });
-    }
+
+     handleOpenModal () {
+       this.setState({ showModal: true });
+     }
+     
+
     onFileChosen(event){
         this.fileReader = new FileReader();
         this.fileReader.onloadend = this.onFileLoaded;
@@ -55,23 +56,35 @@ class Top extends React.Component {
             <div>
                 <Navbar color="dark" dark expand="md">
                     <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
-                    <Collapse isOpen={this.state.isOpen} navbar>
                         <Nav className="ml-auto" navbar>
-                            <UncontrolledDropdown nav inNavbar>
-                                <DropdownToggle nav caret>
-                                File
-                                </DropdownToggle>
-                                <DropdownMenu right>
-                                    <DropdownItem onClick={() => this.downloadSelector.current.click()}>
-                                    Save
-                                    </DropdownItem>
-                                    <DropdownItem onClick={() => this.fileSelector.current.click()}>
-                                    Load
-                                    </DropdownItem>
-                                </DropdownMenu>
+                            <UncontrolledDropdown >
+                                    <DropdownToggle nav caret>
+                                    Project
+                                    </DropdownToggle>
+                                    <DropdownMenu right>
+                                        <DropdownItem onClick={this.handleOpenModal}>
+                                        Load Project
+                                        </DropdownItem>
+                                        <DropdownItem onClick={() => this.fileSelector.current.click()}>
+                                        Create Project
+                                        </DropdownItem>
+                                    </DropdownMenu>
+                            </UncontrolledDropdown>
+            <ModalSelect isOpen={this.state.showModal} />
+                            <UncontrolledDropdown>
+                                    <DropdownToggle nav caret>
+                                    File
+                                    </DropdownToggle>
+                                    <DropdownMenu right>
+                                        <DropdownItem onClick={() => this.downloadSelector.current.click()}>
+                                        Save
+                                        </DropdownItem>
+                                        <DropdownItem onClick={() => this.fileSelector.current.click()}>
+                                        Load
+                                        </DropdownItem>
+                                    </DropdownMenu>
                             </UncontrolledDropdown>
                         </Nav>
-                    </Collapse>
                 </Navbar>
 
                 <input
