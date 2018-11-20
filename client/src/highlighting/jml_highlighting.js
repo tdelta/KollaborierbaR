@@ -21,8 +21,6 @@ brace.define( // create a new ace module
         'ace/mode/text_highlight_rules' // we will include the existing basic highlight rules
     ],
     function(acequire, exports) {
-        'use strict';
-
         // we want OOP functionality (inheriting from existing ace modes, etc.)
         const oop = acequire('../lib/oop');
         // the lang module will provide use with `arrayToMap`, see below
@@ -36,9 +34,21 @@ brace.define( // create a new ace module
         // Identifies, whether a given value is a special keyword, or just a regular
         // part of a jml comment
         const identifyKeywords = (value) => {
-            for (const keywordClass in Object.assign(syntax.keywords,syntax.types)) {
+            for (const keywordClass in syntax.keywords) {
                 // check whether the value is contained in the current keyword class
                 if (syntax.keywords[keywordClass].hasOwnProperty(value)) {
+                    return 'jml_keyword';
+                }
+            }
+            for (const keywordClass in syntax.predicates) {
+                // check whether the value is contained in the current keyword class
+                if (syntax.predicates[keywordClass].hasOwnProperty(value)) {
+                    return 'jml_predicate';
+                }
+            }
+            for (const keywordClass in syntax.types) {
+                // check whether the value is contained in the current keyword class
+                if (syntax.types[keywordClass].hasOwnProperty(value)) {
                     return 'keyword';
                 }
             }
