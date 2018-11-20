@@ -126,35 +126,36 @@ class Editor extends React.Component {
 
     // Function that sets and updates the annotations and markers
     setAnnotations(){
+        // only show annotations, if there are any (valid) diagnostics
+        if (this.props.diagnostics && this.props.diagnostics.constructor === Array) {
+            // Transforms and sets the existing diagnostics to a format, which is compatible to Ace
+            let aceDiagnostics = this.props.diagnostics.map(toAnnotation);
+            this.editor.getSession().setAnnotations(aceDiagnostics);
 
-        // Transforms and sets the existing diagnostics to a format, which is compatible to Ace
-        let aceDiagnostics = this.props.diagnostics.map(toAnnotation);
-        this.editor.getSession().setAnnotations(aceDiagnostics);
+            // Removes existing marker in the editor
+            for (let i = 0; i < this.markers.length; i++) {
+                this.editor.session.removeMarker(this.markers[i]);
+            }
 
-        // Removes existing marker in the editor
-        for (let i = 0; i < this.markers.length; i++) {
-            this.editor.session.removeMarker(this.markers[i]);
+            this.markers = [];
+
+            // Processs each element of array of aceDiagonistics
+            for (let i = 0; i < aceDiagnostics.length; i++) {
+                const startRow = aceDiagnostics[i]['startRow'];
+                const startCol = aceDiagnostics[i]['startCol'];
+                const endRow = aceDiagnostics[i]['endRow'];
+                const endCol = aceDiagnostics[i]['endCol'];
+
+                // Imports Range object
+                var Range = brace.acequire('ace/range').Range;
+
+                //Creates marker depending on the error type
+                if (aceDiagnostics[i]['type'] === 'error')
+                    this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), 'errorMarker', 'text'));
+                else
+                    this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), 'warningMarker', 'text'));
+            }
         }
-
-        this.markers = [];
-
-        // Processs each element of array of aceDiagonistics
-        for (let i = 0; i < aceDiagnostics.length; i++) {
-            const startRow = aceDiagnostics[i]['startRow'];
-            const startCol = aceDiagnostics[i]['startCol'];
-            const endRow = aceDiagnostics[i]['endRow'];
-            const endCol = aceDiagnostics[i]['endCol'];
-
-            // Imports Range object
-            var Range = brace.acequire('ace/range').Range;
-
-            //Creates marker depending on the error type
-            if (aceDiagnostics[i]['type'] === 'error')
-                this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), 'errorMarker', 'text'));
-            else
-                this.markers.push(this.editor.session.addMarker(new Range(startRow, startCol, endRow, endCol), 'warningMarker', 'text'));
-        }
-
 
     }
 
