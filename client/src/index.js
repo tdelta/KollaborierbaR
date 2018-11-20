@@ -21,7 +21,7 @@ import lint from './linting.js';
 import toAnnotation from './diagnostics.js';
 
 import './highlighting/jml.js';
-import 'brace/theme/monokai';
+import 'brace/theme/solarized_dark';
 
 class Top extends React.Component {
     constructor(props) {
@@ -121,7 +121,8 @@ class Editor extends React.Component {
             firstLineNumber: 1,
         });
         this.editor.getSession().setMode('ace/mode/jml');
-        this.editor.setTheme('ace/theme/monokai');
+        this.editor.$blockScrolling = Infinity;
+        this.editor.setTheme('ace/theme/solarized_dark');
 
         // editor event handlers
         this.editor.on('change', () => {

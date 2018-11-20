@@ -13,7 +13,42 @@ nav{
 	right:0px;
 	bottom:0px
 }
-.ace_jml_comment{
-	color:#ff9955
+
+#editor {
+  position : relative;
+  top : 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
 }
 
+.errorMarker {
+  position:absolute;
+  z-index:20;
+  color: red;
+  text-decoration: none;
+  background: url(error-underline.png) bottom repeat-x;
+}
+
+.warningMarker {
+  position:absolute;
+  z-index:20;
+  color: red;
+  text-decoration: none;
+  background: url(warning-underline.png) bottom repeat-x;
+}
+.ace_jml_comment{
+  color:#009955
+}
+
+.ace_jml_keyword{
+  color:#2fa
+}
+
+.ace_jml_predicate{
+  color:#2ff
+}
+
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
