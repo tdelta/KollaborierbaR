@@ -112,7 +112,7 @@ brace.define( // see above, for how this define call works.
 
             // Creates the beginning of a new line when the user presses enter
             this.getNextLineIndent = function(state, line, tab){
-                if(state == 'jml-block-comment'){
+                if(state == 'jml-block-specs'){
                     // Count the characters in front of the first '@' in the current line
                     var indent = line.match(/[^@]+/).toString().length;
                     // Create a string of indent whitespaces and an @
