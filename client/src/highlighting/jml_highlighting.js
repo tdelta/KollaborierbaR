@@ -67,7 +67,7 @@ brace.define( // create a new ace module
         // The grammar rules try to match regular expressions over the whole text in the editor and return tokens that will be used to generate CSS classes. If a rule has a state attribute, the specified state will be used after the regular expression was matched.
         const JmlHighlightRules = function() {
             this.$rules = {
-                'comment' : [
+                'specs' : [
                     {
                         token : (value) => identifyKeywords(value),
                         // Regular expression matches all words made of characters and possibly starting with \
@@ -79,16 +79,27 @@ brace.define( // create a new ace module
                         regex : /[#|<|>|=|:|!|.|{|}|`|'|||&|*|+|-]+/,
                     },
                     {
+                        // Regular expression matches the start of a comment, we switch into the comment rule
+                        token : 'comment',
+                        regex : /\/\/\//,
+                        next : 'comment'
+                    },
+                    {
                         defaultToken : 'jml_comment',
                     },
                 ],
+                'comment' : [
+                    {
+                        defaultToken : 'comment',
+                    }
+		]
             };
         };
 
         // We used seperate rules for comment blocks and single line comments because they have seperate end conditions that should lead into the start state of the java highlighting rules.
         var JmlBlockHighlightRules = function() {
             this.$rules = {
-                'block-comment' : [
+                'block-specs' : [
                     {
                         token: (value) => identifyKeywords(value),
                         regex: /\\?\w+/,
@@ -96,8 +107,31 @@ brace.define( // create a new ace module
                     {
                         token : (value) => identifySymbols(value),
                         regex : /[#|<|>|=|:|!|.|{|}|`|'|||&|*|+|-]+/,
-                    }, {
+                    },
+                    {
+                        token : 'comment',
+                        regex : /\/\/\//,
+                        next : 'comment',
+                    },
+                    {
                         defaultToken : 'jml_comment'
+                    }
+                ],
+                'comment' : [
+                    {
+                        // Regular expression matches end of line, we go back into the jml-block-specs rule
+                        token : 'comment',
+                        regex : /$/,
+                        next : 'jml-block-specs',
+                    },
+                    {
+                        // Regular expression matches an @ only if it is followed by */
+                        // That way the end of jml-block-specs is highlighted correctly, if it is in the same line as a comment
+                        token : 'jml_comment',
+                        regex : /@(?=\*\/)/
+                    },
+                    {
+                        defaultToken : 'comment',
                     }
                 ]
             };
