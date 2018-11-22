@@ -80,12 +80,12 @@ brace.define( // we tell ace, that we want to define our own ace extension modul
                 'start' : [
                     // The JavaMode had to be changed here to insert jml comments
                     // into the start state.
-                    JmlHighlightRules.getStartRule('jml-comment'),
+                    JmlHighlightRules.getStartRule('jml-specs'),
                     {
                         token : 'comment',
                         regex : '\\/\\/.*$'
                     },
-                    JmlBlockHighlightRules.getStartRule('jml-block-comment'),
+                    JmlBlockHighlightRules.getStartRule('jml-block-specs'),
                     DocCommentHighlightRules.getStartRule('doc-start'),
                     {
                         token : 'comment', // multi line comment

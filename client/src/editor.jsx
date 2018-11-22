@@ -7,7 +7,7 @@ import toAnnotation from './diagnostics.js';
 import Sidebar from './sidebar.jsx';
 
 import brace from 'brace'; 
-import 'brace/theme/monokai';
+import 'brace/theme/pastel_on_dark';
 
 import './highlighting/jml.js';
 
@@ -67,7 +67,7 @@ export default class Editor extends React.Component {
             firstLineNumber: 1,
         });
         this.editor.getSession().setMode('ace/mode/jml');
-        this.editor.setTheme('ace/theme/monokai');
+        this.editor.setTheme('ace/theme/pastel_on_dark');
         this.editor.$blockScrolling = Infinity;
 
         // editor event handlers
