@@ -1,18 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import lint from './linting.js';
-import toAnnotation from './diagnostics.js';
+import lint from '../linting.js';
+import toAnnotation from '../diagnostics.js';
 
-import Sidebar from './sidebar.jsx';
+import Sidebar from './sidebar/sidebar.jsx';
 
 import brace from 'brace'; 
 import 'brace/theme/pastel_on_dark';
 
-import './highlighting/jml.js';
+import '../highlighting/jml.js';
 
-import './index.css';
-import './sidebar.css';
+import '../index.css';
+import './sidebar/sidebar.css';
 
 export default class Editor extends React.Component {
     callLinter(){
