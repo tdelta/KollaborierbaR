@@ -37,3 +37,5 @@ Damit Syntaxüberprüfungen etc. funktionieren, bitte Server starten
 cd linting-server
 make run
 ```
+
+(test)
