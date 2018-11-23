@@ -3,7 +3,7 @@ import React from 'react';
 import Editor from './editor.jsx';
 import Top from './top.jsx';
 
-import testSourceCode from './sample-text.js';
+import testSourceCode from '../sample-text.js';
 
 /**
  * Main component of KollaborierbaR. Renders all other components (Editor etc.)

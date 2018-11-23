@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import 'bootstrap/dist/css/bootstrap.css';
 
-import './index.css';
+import '../index.css';
 
 import {
     Navbar,
@@ -14,7 +14,7 @@ import {
     DropdownMenu,
     DropdownItem } from 'reactstrap';
 
-import ModalSelect from './modal.js';
+import ModalSelect from '../modal.js';
 
 export default class Top extends React.Component {
     constructor(props) {
