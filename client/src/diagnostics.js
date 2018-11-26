@@ -3,11 +3,8 @@ function toAnnotation(diagnostic) {
 
       {
         "message": "not a statement",
-        "column": 17,
-        "line": 4,
         "end": 103,
         "start": 100,
-        "position": 100,
         "kind":"ERROR"
       }
 
@@ -23,11 +20,6 @@ function toAnnotation(diagnostic) {
 
     var {
         message,
-        column,
-        line,
-        /*end,
-        start,
-        position,*/
         startRow,
         startCol,
         endRow,
@@ -61,8 +53,8 @@ function toAnnotation(diagnostic) {
     */
 
     return {
-        'row': line - 1,
-        'column': column, //also -1 ? TODO: Check this
+        'row': startRow,
+        'column': startCol, //also -1 ? TODO: Check this
         'text': message,
         'type': type,
         'startRow': startRow,
