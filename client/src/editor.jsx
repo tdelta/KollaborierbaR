@@ -18,6 +18,7 @@ export default class Editor extends React.Component {
     callLinter(){
         lint('LimitedIntegerSet', this.editor.getValue())
             .then((diagnostics) => {
+                console.log(diagnostics);
                 this.props.setDiagnostics(diagnostics);
             });
     }

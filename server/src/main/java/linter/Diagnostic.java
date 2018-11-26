@@ -3,6 +3,7 @@ package linter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.Locale;
 
 import javax.tools.JavaFileObject;
 
@@ -10,13 +11,10 @@ import javax.tools.JavaFileObject;
  * Holds diagnostic information regarding an error, warning etc. within a source
  * code file.
  */
-public class Diagnostic {
+public class Diagnostic{
 	final String message;
-	final long column;
-	final long line;
 	final long end;
 	final long start;
-	final long position;
 	final long startRow;
 	final long startCol;
 	final long endRow;
@@ -28,14 +26,11 @@ public class Diagnostic {
 		ERROR, WARNING, NOTE
 	}
 
-	public Diagnostic(final String message, final long column, final long line, final long start, final long end,
-			final long position, final JavaFileObject source, final Kind kind) {
+	public Diagnostic(final String message, final long start, final long end,
+		    final JavaFileObject source, final Kind kind) {
 		this.message = message;
-		this.column = column;
-		this.line = line;
 		this.end = end;
 		this.start = start;
-		this.position = position;
 		this.kind = kind;
 		long[] pos = getRowCol(source, start);
 		this.startRow = pos[0];
@@ -86,14 +81,6 @@ public class Diagnostic {
 		return message;
 	}
 
-	public long getColumn() {
-		return column;
-	}
-
-	public long getLine() {
-		return line;
-	}
-
 	/** Offset of described problem from start of source file */
 	public long getStart() {
 		return start;
@@ -102,11 +89,6 @@ public class Diagnostic {
 	/** Offset of described problem from end of source file */
 	public long getEnd() {
 		return end;
-	}
-
-	/** getStart() &lt;= getPosition() &lt;= getEnd() */
-	public long getPosition() {
-		return position;
 	}
 
 	public Kind getKind() {
