@@ -29,6 +29,40 @@ public class LinterController {
   @ResponseBody
   @CrossOrigin
   public List<Diagnostic> lint(@RequestParam("name") String name, @RequestBody String source) {
-    return linter.check(Arrays.asList(new JavaSourceMemoryObject(name, source)));
+	  
+	  // Cut away .java of the file name for the java compiler
+	  name = cutFileExtension(name);
+	  
+	  return linter.check(Arrays.asList(new JavaSourceMemoryObject(name, source)));
   }
+  
+  
+  /**
+   * 
+   * Method cuts of the .java file extension of a string, if .java is at the end of the string
+   * 
+   * @param name of the file, for which the extension should be cut off
+   * @return name without the file extension
+   */
+  private String cutFileExtension(String name) {
+	
+	  // Length of the name is necessary 
+	  int length = name.length();
+	  
+	  // If length is to small, it is not possible that there is an .java at the end
+	  if(length < 5) {
+		  return name;
+	  }
+	  
+	  // String that maybe contains the fileextension
+	  final String fileextension = name.substring(length-5);
+	  
+	  // If last 5 chars of string match .java, cut off the last 5 chars
+	  if(fileextension.equals(".java")) {
+		
+		  name = name.substring(0, length-5);
+		  
+	  }
+	  return name;
+  } 
 }
