@@ -14,9 +14,32 @@ import '../highlighting/jml.js';
 import '../index.css';
 import './sidebar/sidebar.css';
 
+import openFile from '../openFile.js'
+
 export default class Editor extends React.Component {
+
+    constructor(props){
+        super(props)
+
+        this.state = {
+
+            // This hardcoded filename is only for the example code.
+            // When a new file is opend, this property is set.
+            filename : 'LimitedIntegerSet' 
+        }
+
+        
+    }
+
+    // Basic setter function for file name
+    setFilename(name){
+        this.setState({
+            filename: name
+        });
+    }
+
     callLinter(){
-        lint('LimitedIntegerSet', this.editor.getValue())
+        lint(this.state.filename, this.editor.getValue())
             .then((diagnostics) => {
                 this.props.setDiagnostics(diagnostics);
             });
@@ -95,7 +118,15 @@ export default class Editor extends React.Component {
             <div id="mainContainer">
                 <Sidebar
                     project={this.props.project}
-                    onOpenFile={(path) => alert(path.join('/'))}
+                    onOpenFile={(path) => {
+                        // This string composition is necessary because path contains only the path within a project.
+                        openFile('/' + this.props.project.name + '/' + path.join('/'))
+                            .then((response) => {
+                                this.props.setText(response.fileText);
+                                this.setFilename(response.fileName);
+                            });
+                        }
+                    }
                 >
                     <div id="editor">
                     </div>
