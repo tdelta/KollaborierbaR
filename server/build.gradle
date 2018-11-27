@@ -1,7 +1,6 @@
 buildscript {
     repositories {
         mavenCentral()
-        "https://mvnrepository.com/artifact/com.sun/tools/1.7.0.13"
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
@@ -28,7 +27,9 @@ bootJar {
 
 repositories {
     mavenCentral()
-"https://mvnrepository.com/artifact/com.sun/tools/1.7.0.13"
+    maven {
+        url 'http://maven.nuiton.org/release/'
+    }
 }
 
 sourceCompatibility = 1.8
