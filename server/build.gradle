@@ -1,9 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url "https://mvnrepository.com/artifact/com.sun/tools"
-        }
+        "https://mvnrepository.com/artifact/com.sun/tools/1.7.0.13"
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
@@ -30,12 +28,14 @@ bootJar {
 
 repositories {
     mavenCentral()
+"https://mvnrepository.com/artifact/com.sun/tools/1.7.0.13"
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+    implementation "com.sun:tools:1.7.0.13"
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
