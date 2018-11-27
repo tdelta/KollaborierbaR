@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Arrays;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
-//import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Tree;
@@ -30,7 +30,7 @@ public class JmlNotSupportedScanner extends TreePathScanner<List<Diagnostic>, Tr
         this.sourceFile = sourceFile;
     }
 
-    /*@Override
+    @Override
     public List<Diagnostic> visitLambdaExpression(LambdaExpressionTree node,Trees trees){
         Diagnostic diagnostic = createError("Lambda expressions are not supported in key",node,trees);
         // The method from the superclass parses all children
@@ -39,7 +39,7 @@ public class JmlNotSupportedScanner extends TreePathScanner<List<Diagnostic>, Tr
         if(result == null) result = new LinkedList<Diagnostic>();
         result.add(diagnostic);
         return result;
-    }*/
+    }
 
     @Override
     public List<Diagnostic> visitLiteral(LiteralTree node, Trees trees){
