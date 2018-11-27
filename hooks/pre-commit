@@ -1,0 +1,20 @@
+#!/bin/bash
+# based on https://codeinthehole.com/tips/tips-for-using-a-git-pre-commit-hook/
+
+# Temporarily stash all changes which are not part of the commit
+git stash -q --keep-index
+./hooks/helpers/check_commit.sh
+RESULT=$?
+
+# restore stashed changes
+git stash pop -q
+
+if [ $RESULT -ne 0 ]
+then
+  echo "The git pre-commit hook failed. Fix the above errors to be able to commit."
+  echo "You can bypass these pre-commit checks using --no-verify."
+  echo "(But you probably shouldn't do that in most cases)"
+  exit 1
+fi
+
+exit 0
