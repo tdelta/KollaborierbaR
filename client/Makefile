@@ -1,4 +1,4 @@
-.PHONY: setup check pedantic run test clean
+.PHONY: setup check pedantic format run test clean
 
 all:
 	npm run-script build
@@ -9,11 +9,16 @@ setup:
 
 # run static analysis tools
 check:
-	npm run-script lint
+	npm run-script eslint
+	npm run-script tslint
 
 # run static analysis tools in aggressive mode
 pedantic:
-	npm run-script lint-pedantic
+	npm run-script eslint-pedantic
+	npm run-script tslint
+
+format:
+	npm run-script format
 
 # run project
 run:
