@@ -1,6 +1,8 @@
 
 enum Kind {
-    WARNING, ERROR, NOTE
+    WARNING = "WARNING",
+    ERROR = "ERROR",
+    NOTE = "NOTE"
 }
 
 interface Diagnostic {
@@ -18,7 +20,9 @@ interface Diagnostic {
 }
 
 enum AnnotationType {
-    error, warning, info
+    error = "error",
+    warning = "warning",
+    info = "info"
 }
 
 interface Annotation {
@@ -83,6 +87,9 @@ function toAnnotation(diagnostic: Diagnostic) : Annotation {
       default:
         type = AnnotationType.info;
     }
+
+    console.log(kind);
+    console.log(type);
 
     /*annotations format:
 
