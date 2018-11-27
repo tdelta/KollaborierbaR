@@ -5,8 +5,6 @@ function openFile(path) {
         'path':  path
     };
 
-    console.log(body);
-
     return fetch(url, {
         method: 'POST',
         mode: 'cors',
