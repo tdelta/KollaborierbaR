@@ -1,42 +1,42 @@
 
 enum Kind {
-    WARNING = "WARNING",
-    ERROR = "ERROR",
-    NOTE = "NOTE"
+    WARNING = 'WARNING',
+    ERROR = 'ERROR',
+    NOTE = 'NOTE',
 }
 
 interface Diagnostic {
-    message: string,
-    column: number,
-    line: number,
-    end: number,
-    start: number,
-    position: number,
-    startRow : number,
-    startCol : number,
-    endRow : number,
-    endCol : number,
-    kind: Kind
+    message: string;
+    column: number;
+    line: number;
+    end: number;
+    start: number;
+    position: number;
+    startRow: number;
+    startCol: number;
+    endRow: number;
+    endCol: number;
+    kind: Kind;
 }
 
 enum AnnotationType {
-    error = "error",
-    warning = "warning",
-    info = "info"
+    error = 'error',
+    warning = 'warning',
+    info = 'info',
 }
 
 interface Annotation {
-    row: number,
-    column: number,
-    text: string,
-    type: AnnotationType,
-    startRow : number,
-    startCol : number,
-    endRow : number,
-    endCol : number
+    row: number;
+    column: number;
+    text: string;
+    type: AnnotationType;
+    startRow: number;
+    startCol: number;
+    endRow: number;
+    endCol: number;
 }
 
-function toAnnotation(diagnostic: Diagnostic) : Annotation {
+function toAnnotation(diagnostic: Diagnostic): Annotation {
     /* server format of diagnostics
 
       {
@@ -46,20 +46,15 @@ function toAnnotation(diagnostic: Diagnostic) : Annotation {
         "end": 103,
         "start": 100,
         "position": 100,
+        "startRow": //..,
+        "startCol": //..,
+        "endRow": //..,
+        "endCol": //..,
         "kind":"ERROR"
-      }
-
-      annotations format:
-
-      {
-        row: 3, //line -1 !
-        column: 17,
-        text: "not a statement",
-        type: "error"     // alternatives: 'info' or 'warning', see https://github.com/ajaxorg/ace/blob/9b5b63d1dc7c1b81b58d30c87d14b5905d030ca5/lib/ace/edit_session.js
       }
     */
 
-    let {
+    const {
         message,
         column,
         line,
@@ -70,7 +65,7 @@ function toAnnotation(diagnostic: Diagnostic) : Annotation {
         startCol,
         endRow,
         endCol,
-        kind
+        kind,
     } = diagnostic;
 
     let type: AnnotationType;
@@ -88,28 +83,27 @@ function toAnnotation(diagnostic: Diagnostic) : Annotation {
         type = AnnotationType.info;
     }
 
-    console.log(kind);
-    console.log(type);
-
     /*annotations format:
 
       {
         row: 3, //line -1 !
         column: 17,
         text: "not a statement",
-        type: "error"     // alternatives: 'info' or 'warning', see https://github.com/ajaxorg/ace/blob/9b5b63d1dc7c1b81b58d30c87d14b5905d030ca5/lib/ace/edit_session.js
+        type: "error"     // alternatives: 'info' or 'warning',
+        // see https://github.com/ajaxorg/ace/blob
+        //     /9b5b63d1dc7c1b81b58d30c87d14b5905d030ca5/lib/ace/edit_session.js
       }
     */
 
     return {
         'row': line - 1,
-        'column': column, //also -1 ? TODO: Check this
+        'column': column, // also -1 ? TODO: Check this
         'text': message,
         'type': type,
         'startRow': startRow,
         'startCol': startCol,
         'endRow' : endRow,
-        'endCol': endCol
+        'endCol': endCol,
     };
 }
 

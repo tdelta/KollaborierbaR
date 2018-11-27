@@ -9,11 +9,13 @@ setup:
 
 # run static analysis tools
 check:
-	npm run-script lint
+	npm run-script eslint
+	npm run-script tslint
 
 # run static analysis tools in aggressive mode
 pedantic:
-	npm run-script lint-pedantic
+	npm run-script eslint-pedantic
+	npm run-script tslint
 
 # run project
 run:
