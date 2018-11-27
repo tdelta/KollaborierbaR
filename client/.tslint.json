@@ -12,10 +12,12 @@
     "rules": {
         "prettier": true,
 
-        "quotemark": [true, "single"],
+        "quotemark": [true, "single", "jsx-double"],
         "object-literal-key-quotes": [true, "as-needed"],
         "object-literal-sort-keys": false,
         "interface-name": false,
+
+        "import-name": false,
 
         "no-constant-condition": true,
         "no-control-regex": true,
@@ -36,12 +38,12 @@
         "ter-no-script-url": true,
         "ter-no-self-compare": true,
         "handle-callback-err": true,
-        "array-bracket-spacing": true,
+        "array-bracket-spacing": false,
         "block-spacing": true,
         "ter-computed-property-spacing": true,
         "ter-func-call-spacing": true,
         "ter-no-mixed-spaces-and-tabs": true,
-        "sort-imports": true,
+        "sort-imports": false,
         "ter-arrow-spacing": true
     },
     "rulesDirectory": []
