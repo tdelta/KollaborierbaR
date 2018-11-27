@@ -37,7 +37,6 @@ targetCompatibility = 1.8
 
 dependencies {
     implementation "com.sun:tools:1.7.0.13"
-    implementation "com.sun:source"
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
