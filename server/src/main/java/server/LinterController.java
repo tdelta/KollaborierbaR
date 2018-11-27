@@ -28,41 +28,43 @@ public class LinterController {
   @RequestMapping("/lint")
   @ResponseBody
   @CrossOrigin
-  public List<Diagnostic> lint(@RequestParam("name") String name, @RequestBody String source) {
+  public List<Diagnostic> lint(@RequestParam("name") String filename, @RequestBody String source) {
 	  
 	  // Cut away .java of the file name for the java compiler
-	  name = cutFileExtension(name);
+	  final String classname = cutFileExtension(filename);
 	  
-	  return linter.check(Arrays.asList(new JavaSourceMemoryObject(name, source)));
+	  return linter.check(Arrays.asList(new JavaSourceMemoryObject(classname, source)));
   }
   
   
   /**
-   * 
    * Method cuts of the .java file extension of a string, if .java is at the end of the string
    * 
-   * @param name of the file, for which the extension should be cut off
+   * @param filename of the file, for which the extension should be cut off
    * @return name without the file extension
    */
-  private String cutFileExtension(String name) {
+  private String cutFileExtension(String filename) {
 	
+    String classname = filename;
+
 	  // Length of the name is necessary 
-	  int length = name.length();
+	  final int length = filename.length();
 	  
-	  // If length is to small, it is not possible that there is an .java at the end
+	  // If length is too small, it is not possible that there is an .java at the end
 	  if(length < 5) {
-		  return name;
+		  classname = filename;
 	  }
-	  
-	  // String that maybe contains the fileextension
-	  final String fileextension = name.substring(length-5);
-	  
-	  // If last 5 chars of string match .java, cut off the last 5 chars
-	  if(fileextension.equals(".java")) {
-		
-		  name = name.substring(0, length-5);
-		  
-	  }
-	  return name;
+
+    else {
+      // String that maybe contains the fileextension
+      final String fileextension = filename.substring(length-5);
+      
+      // If last 5 chars of string match .java, cut off the last 5 chars
+      if(fileextension.equals(".java")) {
+        classname = filename.substring(0, length-5);
+      }
+    }
+
+	  return classname;
   } 
 }
