@@ -1,6 +1,9 @@
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+
 import server.ProjectController;
 
 import java.io.File;
@@ -15,6 +18,7 @@ public class ProjectControllerTest {
     ProjectController testProjectController= new ProjectController();
     List<String> testProjects = new LinkedList<String>();
     File testFile = new File("projects/HelloWorld");
+
     @Before
     public void hallo(){
         testProjects.add("HelloWorld");
@@ -27,20 +31,24 @@ public class ProjectControllerTest {
     @Test
     public void test() {
         // Testing listProjects()
-        TestCase.assertEquals(testProjects, testProjectController.listProjects());
+        assertThat(
+          "The server contains the default project folders", 
+          testProjectController.listProjects(),
+          containsInAnyOrder(testProjects.toArray())
+        );
 
         // Testing showProject()
-        TestCase.assertEquals("LICENSE", testProjectController.showProject("HelloWorld").contents.get(0).getName());
-        TestCase.assertEquals("file", testProjectController.showProject("HelloWorld").contents.get(0).gettype());
-        TestCase.assertEquals("src", testProjectController.showProject("HelloWorld").contents.get(1).getName());
-        TestCase.assertEquals("folder", testProjectController.showProject("HelloWorld").contents.get(1).gettype());
+        assertEquals("LICENSE", testProjectController.showProject("HelloWorld").contents.get(0).getName());
+        assertEquals("file", testProjectController.showProject("HelloWorld").contents.get(0).gettype());
+        assertEquals("src", testProjectController.showProject("HelloWorld").contents.get(1).getName());
+        assertEquals("folder", testProjectController.showProject("HelloWorld").contents.get(1).gettype());
 
         // Testing createFolderItem
-        TestCase.assertEquals("folder", testProjectController.createFolderItem(testFile).gettype());
-        TestCase.assertEquals("HelloWorld", testProjectController.createFolderItem(testFile).getName());
-        TestCase.assertEquals("LICENSE", testProjectController.createFolderItem(testFile).getContents().get(0).getName());
+        assertEquals("folder", testProjectController.createFolderItem(testFile).gettype());
+        assertEquals("HelloWorld", testProjectController.createFolderItem(testFile).getName());
+        assertEquals("LICENSE", testProjectController.createFolderItem(testFile).getContents().get(0).getName());
 
         // Testing selectProjectFromArray
-        TestCase.assertEquals("src", testProjectController.selectProjectFromArray(testFile.listFiles(), "src").getName());
+        assertEquals("src", testProjectController.selectProjectFromArray(testFile.listFiles(), "src").getName());
     }
 }
