@@ -1,6 +1,6 @@
-import react from 'react';
+import React from 'react';
 
-import propTypes from 'prop-types';
+import PropTypes from 'prop-types';
 
 import FileIcon from './file-icon.jsx';
 
@@ -56,6 +56,7 @@ export default class FileNode extends React.Component<Props, State> {
     };
 
     this.handleItemDoubleClick = this.handleItemDoubleClick.bind(this);
+    this.toggle = this.toggle.bind(this);
   }
 
   public render() {
