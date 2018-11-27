@@ -13,7 +13,7 @@ import FileIcon from './file-icon.jsx';
  * It will be displayed using a file symbol (@see FileIcon) and the node name.
  *
  * A file open action (double click on the node) can be handled, by providing
- * a `onOpenFile` handler. (`onOpenFile` : (filepath : [String]) -> ())
+ * a `onOpenFile` handler. (`onOpenFile` : (filepath: string[]) => void)
  *
  * Example:
  *
@@ -45,7 +45,22 @@ import FileIcon from './file-icon.jsx';
  * ```
  */
 export default class FileNode extends React.Component<Props, State> {
-  constructor(props) {
+  public static propType = {
+    onOpenFile: PropTypes.func,
+    data: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      type: PropTypes.oneOf(['file', 'folder']).isRequired,
+      contents: PropTypes.arrayOf(PropTypes.object),
+    }).isRequired,
+    path: PropTypes.arrayOf(PropTypes.string),
+  };
+
+  public static defaultProps = {
+    onOpenFile: () => undefined,
+    path: [],
+  };
+
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -73,12 +88,12 @@ export default class FileNode extends React.Component<Props, State> {
       </>
     );
 
-    // Does the node have children?
-    if (this.props.data.hasOwnProperty('contents')) {
+    // Does the node have children? (checks for null *and* undefined)
+    if (this.props.data.contents != null) {
       /*if so, are they visible / collapsed?
                (we'll use the css display property to hide them, if necessary)
             */
-      const visibility: boolean = {
+      const visibility: object = {
         display: this.state.collapsed ? 'none' : '',
       };
 
@@ -153,26 +168,11 @@ interface FileNodeData {
 }
 
 interface Props {
-  onOpenFile: (path: [string]) => void;
+  onOpenFile: (path: string[]) => void;
   data: FileNodeData;
-  path: [string];
+  path: string[];
 }
 
 interface State {
   collapsed: boolean;
 }
-
-FileNode.propTypes = {
-  onOpenFile: PropTypes.func,
-  data: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    type: PropTypes.oneOf(['file', 'folder']).isRequired,
-    contents: PropTypes.arrayOf(PropTypes.object),
-  }).isRequired,
-  path: PropTypes.arrayOf(PropTypes.string),
-};
-
-FileNode.defaultProps = {
-  onOpenFile: () => undefined,
-  path: [],
-};
