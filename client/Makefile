@@ -1,4 +1,4 @@
-.PHONY: setup check pedantic run test clean
+.PHONY: setup check pedantic format run test clean
 
 all:
 	npm run-script build
@@ -16,6 +16,9 @@ check:
 pedantic:
 	npm run-script eslint-pedantic
 	npm run-script tslint
+
+format:
+	npm run-script format
 
 # run project
 run:

@@ -2,13 +2,18 @@
     "defaultSeverity": "error",
     "extends": [
         "tslint:recommended",
+        "tslint-config-airbnb",
         "tslint-react",
-        "tslint-eslint-rules"
+        "tslint-eslint-rules",
+        "tslint-config-prettier",
+        "tslint-plugin-prettier"
     ],
     "jsRules": {},
     "rules": {
+        "prettier": true,
+
         "quotemark": [true, "single"],
-        "object-literal-key-quotes": [true, "always"],
+        "object-literal-key-quotes": [true, "as-needed"],
         "object-literal-sort-keys": false,
         "interface-name": false,
 

@@ -1,43 +1,42 @@
-
 enum Kind {
-    WARNING = 'WARNING',
-    ERROR = 'ERROR',
-    NOTE = 'NOTE',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+  NOTE = 'NOTE',
 }
 
 interface Diagnostic {
-    message: string;
-    column: number;
-    line: number;
-    end: number;
-    start: number;
-    position: number;
-    startRow: number;
-    startCol: number;
-    endRow: number;
-    endCol: number;
-    kind: Kind;
+  message: string;
+  column: number;
+  line: number;
+  end: number;
+  start: number;
+  position: number;
+  startRow: number;
+  startCol: number;
+  endRow: number;
+  endCol: number;
+  kind: Kind;
 }
 
 enum AnnotationType {
-    error = 'error',
-    warning = 'warning',
-    info = 'info',
+  error = 'error',
+  warning = 'warning',
+  info = 'info',
 }
 
 interface Annotation {
-    row: number;
-    column: number;
-    text: string;
-    type: AnnotationType;
-    startRow: number;
-    startCol: number;
-    endRow: number;
-    endCol: number;
+  row: number;
+  column: number;
+  text: string;
+  type: AnnotationType;
+  startRow: number;
+  startCol: number;
+  endRow: number;
+  endCol: number;
 }
 
 function toAnnotation(diagnostic: Diagnostic): Annotation {
-    /* server format of diagnostics
+  /* server format of diagnostics
 
       {
         "message": "not a statement",
@@ -54,36 +53,36 @@ function toAnnotation(diagnostic: Diagnostic): Annotation {
       }
     */
 
-    const {
-        message,
-        column,
-        line,
-        /*end,
+  const {
+    message,
+    column,
+    line,
+    /*end,
         start,
         position,*/
-        startRow,
-        startCol,
-        endRow,
-        endCol,
-        kind,
-    } = diagnostic;
+    startRow,
+    startCol,
+    endRow,
+    endCol,
+    kind,
+  } = diagnostic;
 
-    let type: AnnotationType;
+  let type: AnnotationType;
 
-    switch (kind) {
-      case Kind.ERROR:
-        type = AnnotationType.error;
-        break;
+  switch (kind) {
+    case Kind.ERROR:
+      type = AnnotationType.error;
+      break;
 
-      case Kind.WARNING:
-        type = AnnotationType.warning;
-        break;
+    case Kind.WARNING:
+      type = AnnotationType.warning;
+      break;
 
-      default:
-        type = AnnotationType.info;
-    }
+    default:
+      type = AnnotationType.info;
+  }
 
-    /*annotations format:
+  /*annotations format:
 
       {
         row: 3, //line -1 !
@@ -95,16 +94,16 @@ function toAnnotation(diagnostic: Diagnostic): Annotation {
       }
     */
 
-    return {
-        'row': line - 1,
-        'column': column, // also -1 ? TODO: Check this
-        'text': message,
-        'type': type,
-        'startRow': startRow,
-        'startCol': startCol,
-        'endRow' : endRow,
-        'endCol': endCol,
-    };
+  return {
+    type,
+    startRow,
+    startCol,
+    endRow,
+    endCol,
+    column, // also -1 ? TODO: Check this
+    row: line - 1,
+    text: message,
+  };
 }
 
 export default toAnnotation;
