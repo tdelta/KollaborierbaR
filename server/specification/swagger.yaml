@@ -3,7 +3,7 @@ info:
   description: "This is the central server of the KollaborierbaR collaborative Java specification and verification web app."
   version: "0.1"
   title: "KollaborierbaR Server"
-host: "localhost:8080"
+host: "localhost:9000"
 basePath: "/"
 tags:
 - name: "lint"
