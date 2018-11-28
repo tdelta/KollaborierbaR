@@ -1,0 +1,11 @@
+{
+  "name": "dredd-test",
+  "version": "1.0.0",
+  "description": "Server API tests using swagger specification and dredd tester",
+  "scripts": {
+    "test": "dredd ../swagger.yaml http://localhost:8080"
+  },
+  "devDependencies": {
+    "dredd": "^5.2.0"
+  }
+}
