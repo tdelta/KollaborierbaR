@@ -20,13 +20,13 @@ make -C ..
 
 # Run server without output in background
 echo "Running server."
-nohup make -C .. run
+nohup make -C .. run > /dev/null 2>&1 &
 serverPid=$!
 
 # Busy waiting until server is ready
 echo "Waiting for server to be ready..."
 tryCounter=0
-until [ "$(helpers/get.sh localhost 8080 /actuator/health 2> /dev/null | tail -n1)" = "{\"status\":\"UP\"}" ]; do
+until [ "$(helpers/get.sh localhost 9000 /actuator/health 2> /dev/null | tail -n1)" = "{\"status\":\"UP\"}" ]; do
     # Exit immediately, if it died
     kill -0 $serverPid
     serverDead=$?
