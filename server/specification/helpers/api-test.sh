@@ -20,7 +20,7 @@ make -C ..
 
 # Run server without output in background
 echo "Running server."
-nohup make -C .. run > /dev/null 2>&1 &
+nohup make -C .. run
 serverPid=$!
 
 # Busy waiting until server is ready
