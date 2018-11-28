@@ -5,7 +5,8 @@ all:
 
 # install dependencies etc.
 setup:
-	#No setup steps right now
+	# Specification tests need setup
+	make -C specification setup
 
 # run static analysis tools
 check:
