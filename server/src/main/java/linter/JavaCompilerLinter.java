@@ -9,7 +9,6 @@ import javax.tools.JavaCompiler.CompilationTask;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 import linter.Diagnostic;
-import linter.JmlNotSupportedProcessor;
 import linter.JmlNotSupportedScanner;
 
 /**
@@ -24,8 +23,7 @@ public class JavaCompilerLinter {
     final DiagnosticCollector<JavaFileObject> diagnosticsCollector =
         new DiagnosticCollector<JavaFileObject>();
 
-    final JmlNotSupportedScanner scanner = new JmlNotSupportedScanner(toCheck);
-    final JmlNotSupportedProcessor keyFeaturesParser = new JmlNotSupportedProcessor(scanner);
+    final JmlNotSupportedScanner scanner = new JmlNotSupportedScanner(toCheck.get(0));
 
     // setup compilation task
     final CompilationTask task =
@@ -41,7 +39,6 @@ public class JavaCompilerLinter {
             );
 
     // compile
-    task.setProcessors(Arrays.asList(keyFeaturesParser));
     task.call(); // WARNING: Result (success status) currently ignored
 
     // return diagnostics
@@ -54,11 +51,13 @@ public class JavaCompilerLinter {
         // @see linting.linter.Diagnostics
         .collect(Collectors.toList());
 
+    List<Diagnostic> keyErrors = scanner.getResults();
+
     if(diagnostics != null){
-        if(keyFeaturesParser.getResults() != null)
-            diagnostics.addAll(keyFeaturesParser.getResults());
+        if(keyErrors != null)
+            diagnostics.addAll(keyErrors);
     }
-    else diagnostics = keyFeaturesParser.getResults();
+    else diagnostics = keyErrors;
     return diagnostics;
   }
 
