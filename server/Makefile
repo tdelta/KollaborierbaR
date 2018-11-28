@@ -25,9 +25,10 @@ pedantic:
 run:
 	./gradlew bootRun
 
-# run unit tests
+# run unit and api tests
 test:
 	./gradlew test
+	make -C specification test
 
 clean:
 	./gradlew clean

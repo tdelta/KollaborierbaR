@@ -35,6 +35,10 @@ targetCompatibility = 1.8
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
+
+    // adds /actuator/health indicator, this way, other applications can check if the
+    // server is ready. Also useful for tests.
+    compile("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 wrapper {
