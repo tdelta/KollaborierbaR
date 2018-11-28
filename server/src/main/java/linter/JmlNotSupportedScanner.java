@@ -1,107 +1,54 @@
 package linter;
 
-import linter.Diagnostic;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import javax.tools.JavaFileObject;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Arrays;
-import com.sun.source.util.TreePathScanner;
-import com.sun.source.util.Trees;
-import com.sun.source.tree.LambdaExpressionTree;
-import com.sun.source.util.SourcePositions;
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.LiteralTree;
-import com.sun.source.tree.TypeParameterTree;
-import com.sun.source.tree.ParameterizedTypeTree;
+import java.util.LinkedList;
+import java.io.IOException;
+import linter.Diagnostic;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
+public class JmlNotSupportedScanner extends ASTVisitor{
 
-public class JmlNotSupportedScanner extends TreePathScanner<List<Diagnostic>, Trees>{
+private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
 
-    private List<JavaFileObject> sourceFile;
-    private CompilationUnitTree compilationUnitTree;
+    private JavaFileObject sourceFile;
+    private char[] sourceCode;
 
-    public void setCompilationUnitTree(CompilationUnitTree compilationUnitTree){
-        this.compilationUnitTree = compilationUnitTree;
-    }
-
-    public JmlNotSupportedScanner(List<JavaFileObject> sourceFile){
+    public JmlNotSupportedScanner(JavaFileObject sourceFile){
         this.sourceFile = sourceFile;
-    }
-
-    @Override
-    public List<Diagnostic> visitLambdaExpression(LambdaExpressionTree node,Trees trees){
-        Diagnostic diagnostic = createError("Lambda expressions are not supported in key",node,trees);
-        // The method from the superclass parses all children
-        List<Diagnostic> result = super.visitLambdaExpression(node,trees);
-        // If none of the visit methods for the children of this node was overridden in this class, the default null is returned
-        if(result == null) result = new LinkedList<Diagnostic>();
-        result.add(diagnostic);
-        return result;
-    }
-
-    @Override
-    public List<Diagnostic> visitLiteral(LiteralTree node, Trees trees){
-        String message = null;
-        if(node.getKind() == Tree.Kind.DOUBLE_LITERAL)
-                message = "Doubles are not supported in key";
-        if(node.getKind() == Tree.Kind.FLOAT_LITERAL)
-                message = "Floats are not supported in key";
-
-        if(message != null){
-            LinkedList<Diagnostic> result = new LinkedList<Diagnostic>();
-            result.add(createError(message,node,trees));
-            return result;
+        try{
+        sourceCode = sourceFile.getCharContent(true).toString().toCharArray();
+        } catch(IOException e) {
+            e.printStackTrace();
+            sourceCode = new char[0];
         }
-        return null;
     }
 
     @Override
-    public List<Diagnostic> visitTypeParameter(TypeParameterTree node, Trees trees){
-        Diagnostic diagnostic = createError("Generics are not supported in key",node,trees);
-        // The method from the superclass parses all children
-        List<Diagnostic> result = super.visitTypeParameter(node,trees);
-        // If none of the visit methods for the children of this node was overridden in this class, the default null is returned
-        if(result == null) result = new LinkedList<Diagnostic>();
-        result.add(diagnostic);
-        return result;
+    public boolean visit(LambdaExpression node){
+        int startPos = node.getStartPosition();
+        int endPos = startPos + node.getLength();
+        results.add(new Diagnostic(
+            "Lambda expressions are not supported in key",
+            startPos,
+            endPos,
+            sourceFile,
+            Diagnostic.Kind.ERROR));
+        return true;
     }
 
-    @Override
-    public List<Diagnostic> visitParameterizedType(ParameterizedTypeTree node, Trees trees){
-        Diagnostic diagnostic = createError("Generics are not supported in key",node,trees);
-        // The method from the superclass parses all children
-        List<Diagnostic> result = new LinkedList<Diagnostic>();
-        // If none of the visit methods for the children of this node was overridden in this class, the default null is returned
-        // if(result == null) result = new LinkedList<Diagnostic>();
-        result.add(diagnostic);
-        return result;
-    }
-
-    private Diagnostic createError(String message, Tree node,Trees trees){
-        SourcePositions positions = trees.getSourcePositions();
-        Diagnostic diagnostic = new Diagnostic(
-            message, // error message 
-            positions.getStartPosition(compilationUnitTree,node), // gets the absolute start position of the ast node in the source code
-            positions.getEndPosition(compilationUnitTree,node), // gets the absolute end position of the ast node in the source code
-            sourceFile.get(0), // Source file
-            Diagnostic.Kind.ERROR); // Type of diagnostic 
-        return diagnostic;
-    }
-
-    @Override
-    public List<Diagnostic> reduce(List<Diagnostic> d1, List<Diagnostic> d2){
-        // If one list is null return the other. If both are null return null
-        if(d1 == null){
-            if(d2 == null){
-                return null;
-            }
-            return d2;
-        }
-        if(d2 == null) return d1;
-        // merge the linked lists
-        d1.addAll(d2);
-        return d1;
+    public List<Diagnostic> getResults(){
+        // Create AST from source code
+        ASTParser parser = ASTParser.newParser(AST.JLS8);
+        parser.setSource(sourceCode);
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+        // Apply the visitor on the created tree (visit methods above will be called on the nodes)
+        cu.accept(this);
+        return results;
     }
 }
