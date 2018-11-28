@@ -1,4 +1,4 @@
 .PHONY: test
 
 test:
-	./api-test.sh
+	helpers/api-test.sh
