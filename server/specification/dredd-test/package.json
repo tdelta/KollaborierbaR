@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Server API tests using swagger specification and dredd tester",
   "scripts": {
-    "test": "dredd ../swagger.yaml http://localhost:9000"
+    "test": "dredd --color false ../swagger.yaml http://localhost:9000"
   },
   "devDependencies": {
     "dredd": "^5.2.0"
