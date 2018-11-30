@@ -3,6 +3,11 @@ import org.junit.Test;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 
 import server.ProjectController;
 
@@ -38,15 +43,32 @@ public class ProjectControllerTest {
         );
 
         // Testing showProject()
-        assertEquals("LICENSE", testProjectController.showProject("HelloWorld").contents.get(0).getName());
-        assertEquals("file", testProjectController.showProject("HelloWorld").contents.get(0).gettype());
-        assertEquals("src", testProjectController.showProject("HelloWorld").contents.get(1).getName());
-        assertEquals("folder", testProjectController.showProject("HelloWorld").contents.get(1).gettype());
+        assertThat(
+            "Project HelloWorld contains the file LICENSE",
+            testProjectController.showProject("HelloWorld").contents,
+            hasItem(
+                allOf(
+                    hasProperty("name", is("LICENSE")),
+                    hasProperty("type", is("file")))
+            ));
 
+        assertThat(
+            "Project HelloWorld contains the folder src",
+            testProjectController.showProject("HelloWorld").contents,
+            hasItem(
+                allOf(
+                hasProperty("name", is("src")),
+                hasProperty("type", is("folder")))
+            ));
+        
         // Testing createFolderItem
         assertEquals("folder", testProjectController.createFolderItem(testFile).gettype());
         assertEquals("HelloWorld", testProjectController.createFolderItem(testFile).getName());
-        assertEquals("LICENSE", testProjectController.createFolderItem(testFile).getContents().get(0).getName());
+        assertThat(
+            "Folder Item projects/HelloWorld contains the file LICENSE",
+            testProjectController.createFolderItem(testFile).getContents(),
+            hasItem(
+                hasProperty("name", is("LICENSE"))));
 
         // Testing selectProjectFromArray
         assertEquals("src", testProjectController.selectProjectFromArray(testFile.listFiles(), "src").getName());
