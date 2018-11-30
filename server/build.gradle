@@ -36,6 +36,10 @@ dependencies {
     implementation "org.eclipse.jdt:org.eclipse.jdt.core:3.15.0"
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
+
+    // adds /actuator/health indicator, this way, other applications can check if the
+    // server is ready. Also useful for tests.
+    compile("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 wrapper {
@@ -63,5 +67,25 @@ pmd {
     // see also https://pmd.sourceforge.io/pmd-5.3.3/customizing/rule-guidelines.html
     rulePriority = 2
     consoleOutput = true
+}
+
+// configure tests to show some actually useful debug information
+test {
+    // https://docs.gradle.org/current/dsl/org.gradle.api.tasks.testing.logging.TestLoggingContainer.html
+    testLogging {
+        // set options for log level LIFECYCLE
+        events "failed"
+        exceptionFormat "full"
+
+        // set options for log level DEBUG
+        debug {
+            events "started", "skipped", "failed"
+            exceptionFormat "full"
+        }
+
+        // remove standard output/error logging from --info builds
+        // by assigning only 'failed' and 'skipped' events
+        info.events = ["failed", "skipped"]
+    }
 }
 

@@ -1,5 +1,5 @@
 function lint(name, sourceCode) {
-    var url = new URL('http://localhost:8080/lint');
+    var url = new URL('http://localhost:9000/lint');
 
     const params = {'name': name};
 

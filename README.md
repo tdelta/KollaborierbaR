@@ -13,6 +13,18 @@ Eine einheitliche Bedienung (bauen, ausführen, testen, ...) wird zur Zeit durch
 * Ein automatisierter Build mit statischer Analyse und Tests lässt sich im Wurzelverzeichnis durch `make pipeline`
   auslösen.
 
+## Git Hooks
+
+Es wurden git-hook Skripte angelegt, welche einige Tests vor jedem Commit
+automatisch ausführen. Der Commit kann nur gelingen, wenn alle Tests erfolgreich
+verlaufen. Somit sollen die Skripte zur Vermeidung von Fehlern beitragen.
+
+Lokales Installieren der Hooks:
+
+```sh
+hooks/helpers/install_hooks.sh
+```
+
 # Hinweise Client
 
 ## Dependencies
