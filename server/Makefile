@@ -5,7 +5,8 @@ all:
 
 # install dependencies etc.
 setup:
-	#No setup steps right now
+	# Specification tests need setup
+	make -C specification setup
 
 # run static analysis tools
 check:
@@ -25,9 +26,10 @@ pedantic:
 run:
 	./gradlew bootRun
 
-# run unit tests
+# run unit and api tests
 test:
 	./gradlew test
+	make -C specification test
 
 clean:
 	./gradlew clean

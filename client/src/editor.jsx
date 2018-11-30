@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import lint from './linting.js';
-import toAnnotation from './diagnostics.js';
+import toAnnotation from './diagnostics.ts';
 
 import Sidebar from './sidebar.jsx';
 
