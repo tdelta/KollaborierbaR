@@ -4,7 +4,7 @@ enum Kind {
   NOTE = 'NOTE',
 }
 
-interface Diagnostic {
+export interface Diagnostic {
   message: string;
   column: number;
   line: number;
@@ -24,7 +24,7 @@ enum AnnotationType {
   info = 'info',
 }
 
-interface Annotation {
+export interface Annotation {
   row: number;
   column: number;
   text: string;
