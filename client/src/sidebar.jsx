@@ -119,6 +119,8 @@ export default class Sidebar extends React.Component {
                 this.setState({
                     'sidebarWidth': newWidth
                 });
+                // Make other components recalculate their width (Im looking at you ace)
+                window.dispatchEvent(new Event('resize'));
             }
         };
 
