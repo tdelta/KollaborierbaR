@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React, { RefObject, ReactSVG } from 'react';
 import PropTypes from 'prop-types';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -18,9 +18,8 @@ import ModalSelect from '../modal.js';
 
 export default class Top extends React.Component<Props, State> {
 
-    // TODO: Anton was macht <{}>
-    private fileSelector: RefObject<{}>;
-    private downloadSelector: RefObject<{}>;
+    private fileSelector: RefObject<HTMLInputElement>;
+    private downloadSelector: RefObject<HTMLInputElement>;
     private fileReader?: FileReader;
 
     constructor(props: Props) {
@@ -39,10 +38,13 @@ export default class Top extends React.Component<Props, State> {
         this.setState({ showModal: !this.state.showModal });
     }
      
-    onFileChosen(event): void{
+    onFileChosen(event: HTMLInputEvent): void{
         this.fileReader = new FileReader();
         this.fileReader.onloadend = this.onFileLoaded;
-        this.fileReader.readAsText(event.target.files[0]);
+
+        if(event.target != null && event.target.files != null){
+            this.fileReader.readAsText(event.target.files[0]);
+        }
     }
 
     onFileLoaded(): void {
@@ -65,7 +67,12 @@ export default class Top extends React.Component<Props, State> {
                                 <DropdownItem onClick={this.toggleModal}>
                                     Open project
                                 </DropdownItem>
-                                <DropdownItem onClick={() => this.fileSelector.current.click()}>
+                                <DropdownItem onClick={() =>{
+                                                            if(this.fileSelector.current != null){
+                                                                this.fileSelector.current.click();
+                                                            }
+                                                            }
+                                                      }>
                                     Create project
                                 </DropdownItem>
                             </DropdownMenu>
@@ -80,10 +87,20 @@ export default class Top extends React.Component<Props, State> {
                                 File
                             </DropdownToggle>
                             <DropdownMenu right>
-                                <DropdownItem onClick={() => this.downloadSelector.current.click()}>
+                                <DropdownItem onClick={() =>{
+                                                            if(this.downloadSelector.current != null){
+                                                                this.downloadSelector.current.click();
+                                                            }
+                                                            }
+                                                      }>
                                     Save
                                 </DropdownItem>
-                                <DropdownItem onClick={() => this.fileSelector.current.click()}>
+                                <DropdownItem onClick={() =>{
+                                                            if(this.fileSelector.current != null){
+                                                            this.fileSelector.current.click()
+                                                            }   
+                                                            }
+                                                      }>
                                     Load
                                 </DropdownItem>
                             </DropdownMenu>
@@ -109,13 +126,10 @@ export default class Top extends React.Component<Props, State> {
         );
     }
 }
-
-Top.propTypes = {
-    setText: PropTypes.func.isRequired,
-    text: PropTypes.string,
-    showProject: PropTypes.func
-};
-
+// defining HTMLInput Event
+interface HTMLInputEvent extends React.FormEvent<HTMLInputElement> {
+    target: HTMLInputElement & EventTarget;
+}
 
 // defining the strcuture of the state
 interface State{
