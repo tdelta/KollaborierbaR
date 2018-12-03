@@ -3,6 +3,9 @@
 import React from 'react';
 import { ListGroup, ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
+/*
+ * load the list of availlablle projects from the server
+ */
 function getProjects() {
     var url = new URL('http://localhost:9000/projects/listProjects');
     return fetch(url, {
@@ -16,6 +19,9 @@ function getProjects() {
 
 }
 
+/*
+ * load the related files for the project with name 'name' from the server
+ */
 function getProjectStructure(name) {
     var url = new URL('http://localhost:9000/projects/showProject');
 
@@ -36,45 +42,68 @@ function getProjectStructure(name) {
 class ModalSelect extends React.Component {
     constructor(props) {
         super(props);
-        this.project = [];
-        this.loadProject = this.loadProject.bind(this);
-        this.mark = this.mark.bind(this);
+        this.select = this.select.bind(this);
+        this.loadProjectFiles = this.loadProjectFiles.bind(this);
+        this.loadProjectNames = this.loadProjectNames.bind(this);
+        this.listProjects = this.listProjects.bind(this);
         this.state = {
             projects: [],
-            selected: -1
+            selected: {
+                'id': -1,
+                'name': ''
+            }
         };
     }
 
-    mark(i) {
+    /*
+     * update the state with the selected project
+     */
+    select(name, id) {
         this.setState({
-            'selected': i
+            'selected': {
+                'id': id,
+                'name': name
+            }
         });
     }
 
-    // if selected to fast it is possible that no project is loaded, change!
-    loadStructure(name) {
-        getProjectStructure(name)
-            .then((response) => this.project = response);
+    /*
+     * loads the files for the selected project when the select button is pressed
+     * through the setStructure props method the structure starts its long journey to the sidebar
+     */
+    loadProjectFiles() {
+        let name = this.state.selected.name;
+        if (name) {
+            getProjectStructure(this.state.selected.name)
+                .then((response) => this.props.setStructure(response));
+            this.props.toggle();
+        }
     }
 
-    loadProject() {
-        this.props.setStructure(this.project);
-        this.props.toggle();
+    /*
+     * loads the project list, called whenever the modal is opened
+     */
+    loadProjectNames() {
+        getProjects()
+            .then((projects) => {this.setState({projects: projects});
+            });
     }
 
+    /*
+     * generates  JSX items for each project name
+     */
     listProjects() {
-        // check, whether there are any projects to list
+        // check, whether there are any projects in list
         if (this.state.projects && this.state.projects.length > 0) {
             return (
                 <ListGroup>
                     {
-                        this.state.projects.map((name, i) => 
-                            // key not necessary but added for good practice. see: https://reactjs.org/docs/lists-and-keys.html
+                        // the id is an enumeration for the projects and used to check with project entry is active
+                        this.state.projects.map((name, id) => 
                             <ListGroupItem
-                                key={i}
-                                onClick={() => {this.loadStructure(name); this.mark(i);}}
-                                action
-                                active={this.state.selected === i}
+                                key={id}
+                                onClick={() => {this.select(name, id);}}
+                                active={this.state.selected.id === id}
                             >
                                 {name}
                             </ListGroupItem>
@@ -97,13 +126,21 @@ class ModalSelect extends React.Component {
     render() {
         return (
             <div>
-                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} className={this.props.className}>
+                {/*  
+                  * onOpened: reload the project list   
+                  * onClosed: when the modal is closed set the selected state to an invalid index, so that on a reopen no projects are highlighted
+                  */}
+                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={() => this.loadProjectNames()} 
+                    onClosed={() => this.select(-1, '')} className={this.props.className}
+                >
                     <ModalHeader toggle={this.props.toggle}>Select Project</ModalHeader>
-                    <ModalBody>
+                    {/* the style enables a scrollbar, when the project names don't fit on the screen (100vh) with a 210 pixels margin */}
+                    <ModalBody style={{'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto'}}>
+K                       {/* generate the listed project names dynamically */}
                         {this.listProjects()}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={this.loadProject}>Select</Button>{' '}
+                        <Button color="primary" onClick={this.loadProjectFiles}>Select</Button>
                         <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                     </ModalFooter>
                 </Modal>
@@ -111,12 +148,6 @@ class ModalSelect extends React.Component {
         );
     }
 
-    // right now this is only called once
-    componentDidMount() {
-        getProjects()
-            .then((projects) => {this.setState({projects: projects});
-            });
-    }
 }
 
 export default ModalSelect;
