@@ -1,4 +1,4 @@
-import brace from 'brace';
+import ace from 'ace-builds';
 
 import getSyntax from './jml-syntax.js';
 import './java-ex-highlighting.js';
@@ -9,7 +9,7 @@ import './java-ex-highlighting.js';
  * We extracted the keywords from here:
  * http://www.eecs.ucf.edu/~leavens/JML/jmlrefman/jmlrefman_22.html<Paste>
  */
-brace.define( // create a new ace module
+ace.define( // create a new ace module
     'ace/mode/jml_highlight_rules', // it shall be available through this name
     // we will use these ace internal helper functions and modules.
     // Therefore we will tell ace here, that we depend on them:

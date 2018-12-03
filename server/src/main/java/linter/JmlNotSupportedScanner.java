@@ -49,6 +49,11 @@ private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
         }
     }
 
+    /**
+     * @param node the node where the error was found (used to calculate the position of the error)
+     * @param message a message to include in the error
+     * @return a diagnostic object of the type NOT_SUPPORTED, containing the error message and the position of the AST node in the source code
+     */
     private void createError(ASTNode node,String message){
         int startPos = node.getStartPosition();
         int endPos = startPos + node.getLength();
@@ -57,9 +62,15 @@ private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
             startPos,
             endPos,
             sourceFile,
-            Diagnostic.Kind.ERROR));
+            Diagnostic.Kind.NOT_SUPPORTED));
     }
 
+    /**
+     * All visit methods work the same. They are called when the parser finds a node of the type specified by the parameter
+     * and create an error for unsupported features
+     * @param node the node found by the AST parser
+     * @return true if the children of this node should still be parsed
+     */
     @Override
     public boolean visit(LambdaExpression node){
         createError(node,"Lambda expressions are not supported in KeY");
@@ -183,6 +194,10 @@ private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
     // TODO: Imported classes that implement runnable or Thread
     // TODO: Does KeY support Autoboxing?
 
+    /**
+     * Creates and parses an AST from the source code
+     * @return A list of Diagnostics, containing all features that are not supported by key with their respective positions in the source code
+     */
     public List<Diagnostic> getResults(){
         // Create AST from source code
         ASTParser parser = ASTParser.newParser(AST.JLS8);

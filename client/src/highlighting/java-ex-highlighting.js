@@ -1,4 +1,5 @@
-import brace from 'brace';
+import ace from 'ace-builds';
+import './jml_highlighting.js';
 
 /**
  * This highlighting module is identical to the standard java highlighting
@@ -6,8 +7,8 @@ import brace from 'brace';
  *
  * Everything else is unchanged.
  */
-brace.define( // we tell ace, that we want to define our own ace extension module
-    'ace/mode/java_highlight_rules', // it shall be available at this (virtual) import path
+ace.define( // we tell ace, that we want to define our own ace extension module
+    'ace/mode/custom_java_highlight_rules', // it shall be available at this (virtual) import path
     // we will use these ace internal helper functions and modules.
     // Therefore we will tell ace here, that we depend on them:
     [
