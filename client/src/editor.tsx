@@ -139,7 +139,7 @@ export default class Editor extends React.Component<Props> {
     this.editor.session.setAnnotations(
       this.anchoredMarkers.map(this.toAnnotation)
     );
-    
+
     for (const annotation of this.annotations) {
       this.editor.session.removeGutterDecoration(
         annotation,
