@@ -11,24 +11,31 @@ import linter.JavaSourceMemoryObject;
 import linter.Diagnostic;
 import java.util.List;
 
+/**
+ * Tests implementation of linter, which checks java source code for java
+ * features, which are not supported by KeY
+*/
 public class NotSupportedErrorsTest{
-
-    String start = "public class Test{ public static void main(String[] args){\n";
-    String end = "}}";
+    private final String start = "public class Test{ public static void main(String[] args){\n";
+    private final String end = "}}";
 
     /**
      * Tests if the JmlNotSupportedScanner returns the correct error when given a lambda expression
      */
     @Test
     public void testLambda(){
-        String source =
+        final String source =
             "import java.util.function.Consumer;\n"+
             start+
             "Consumer<String> consumer = s -> {};"+
             end;
 
-        JmlNotSupportedScanner subject = new JmlNotSupportedScanner(new JavaSourceMemoryObject("Test.java",source));
-        List<Diagnostic> results = subject.getResults();
+        final JmlNotSupportedScanner subject =
+            new JmlNotSupportedScanner(
+                new JavaSourceMemoryObject("Test.java", source)
+            );
+
+        final List<Diagnostic> results = subject.run();
 
         // Lint the source
         assertThat(
@@ -48,11 +55,13 @@ public class NotSupportedErrorsTest{
      */
     @Test
     public void testNoInput(){
-        String source = "";
+        final String source = "";
 
         // Lint the source
-        JmlNotSupportedScanner subject = new JmlNotSupportedScanner(new JavaSourceMemoryObject("Test.java",source));
-        List<Diagnostic> results = subject.getResults();
+        final JmlNotSupportedScanner subject = new JmlNotSupportedScanner(
+            new JavaSourceMemoryObject("Test.java",source)
+        );
+        final List<Diagnostic> results = subject.run();
         
         assertThat(
             "Scanning an empty source code yields no results",
