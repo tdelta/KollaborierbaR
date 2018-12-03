@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Editor from './editor.tsx';
-import Top from './top.jsx';
+import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 
 import testSourceCode from '../sample-text.js';
