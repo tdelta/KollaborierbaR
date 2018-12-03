@@ -48,9 +48,12 @@ public class LinterController {
    * 
    * @param filename of the file, for which the extension should be cut off
    * @return name without the file extension
+   *
+   * @example
+   * cutFileExtension("Main.java") == "Main"
+   * cutFileExtension("LoremIpsum") == "LoremIpsum"
    */
-  private String cutFileExtension(String filename) {
-	
+  private String cutFileExtension(final String filename) {
     String classname = filename;
 
 	  // Length of the name is necessary 
@@ -62,7 +65,7 @@ public class LinterController {
 	  }
 
     else {
-      // String that maybe contains the fileextension
+      // String that might contain the file extension
       final String fileextension = filename.substring(length-5);
       
       // If last 5 chars of string match .java, cut off the last 5 chars
