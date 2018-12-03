@@ -119,6 +119,8 @@ export default class Sidebar extends React.Component {
                 this.setState({
                     'sidebarWidth': newWidth
                 });
+                // Make other components recalculate their width (Im looking at you ace)
+                window.dispatchEvent(new Event('resize'));
             }
         };
 
@@ -170,18 +172,6 @@ export default class Sidebar extends React.Component {
             'display': genVisibilityString(!this.state.collapsed)
         };
 
-        // if the sidebar is collapsed, keep a small margin from the left
-        // regarding the main content, such that the restoration button is 
-        // visible.
-        //
-        // If it is not collapsed, the left margin must be as wide as the
-        // sidebar.
-        var mainStyleMod = {
-            'marginLeft': this.state.collapsed ?
-                10
-                : this.state.sidebarWidth
-        };
-
         return(
             <>
                 {/* this bar will be used to restore the sidebar,
@@ -221,11 +211,6 @@ export default class Sidebar extends React.Component {
                             />
                         </div>
                     </div>
-                </div>
-
-                {/* main content. The sidebar will be displayed left from it. */}
-                <div className="sidebarMainContainer" ref={this.mainContent} style={mainStyleMod}>
-                    {this.props.children}
                 </div>
             </>
         );

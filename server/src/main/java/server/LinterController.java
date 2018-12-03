@@ -2,6 +2,7 @@ package server;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import linter.Diagnostic;
 import linter.java.JavaCompilerLinter;
 import linter.java.JavaSourceMemoryObject;
@@ -28,14 +29,19 @@ public class LinterController {
   @RequestMapping("/lint")
   @ResponseBody
   @CrossOrigin
-  public List<Diagnostic> lint(@RequestParam("name") String filename, @RequestBody String source) {
-	  
-	  // Cut away .java of the file name for the java compiler
-	  final String classname = cutFileExtension(filename);
-	  
-	  return linter.check(Arrays.asList(new JavaSourceMemoryObject(classname, source)));
+  public List<Diagnostic> lint(@RequestParam("name") String filename, @RequestBody(required=false) String source) {
+    // check, whether there is a body
+    if (source != null) {
+      // Cut away .java of the file name for the java compiler
+      final String classname = cutFileExtension(filename);
+
+      return linter.check(Arrays.asList(new JavaSourceMemoryObject(classname, source)));
+    }
+
+    else {
+      return new ArrayList<>(0);
+    }
   }
-  
   
   /**
    * Method cuts of the .java file extension of a string, if .java is at the end of the string

@@ -35,14 +35,6 @@
   width: 300px;
 }
 
-/* will contain the main content and be placed right from the sidebar */
-.sidebarMainContainer {
-  /* leave some space for the sidebar left from main content*/
-  margin-left: 200px;
-  
-  height: 100%;
-}
-
 /* a slim bar between sidebar and main content. It will allow the user to
  * change the sidebar width by dragging it around */
 .sidebar-split-bar {

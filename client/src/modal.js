@@ -4,7 +4,7 @@ import React from 'react';
 import { ListGroup, ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 function getProjects() {
-    var url = new URL('http://localhost:8080/projects/listProjects');
+    var url = new URL('http://localhost:9000/projects/listProjects');
     return fetch(url, {
         method: 'GET',
         mode: 'cors',
@@ -17,7 +17,7 @@ function getProjects() {
 }
 
 function getProjectStructure(name) {
-    var url = new URL('http://localhost:8080/projects/showProject');
+    var url = new URL('http://localhost:9000/projects/showProject');
 
     const params = {'name': name};
 
