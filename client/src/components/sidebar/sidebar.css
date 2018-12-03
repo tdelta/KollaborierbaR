@@ -91,6 +91,14 @@
     user-select: none;
 }
 
+.active {
+    background-color: #44a
+}
+
+.inactive {
+    background-color: inherit
+}
+
 /* file lists within the project view */
 .projectTreeList {
     list-style-type: none; /*we dont want the standard list bullet icons */
