@@ -2,7 +2,7 @@ import React from 'react';
 
 import Editor from './editor.tsx';
 import Top from './top.jsx';
-import Sidebar from './sidebar.jsx';
+import Sidebar from './sidebar/sidebar.jsx';
 
 import testSourceCode from '../sample-text.js';
 

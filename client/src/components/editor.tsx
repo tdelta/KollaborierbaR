@@ -2,12 +2,12 @@ import brace from 'brace';
 import 'brace/theme/pastel_on_dark';
 import PropTypes from 'prop-types';
 import React from 'react';
-import toAnnotation, { Annotation, Diagnostic } from './diagnostics';
-import './highlighting/jml.js';
-import './index.css';
-import lint from './linting.js';
-import './sidebar.css';
-import Sidebar from './sidebar.jsx';
+import toAnnotation, { Annotation, Diagnostic } from '../diagnostics';
+import '../highlighting/jml.js';
+import '../index.css';
+import lint from '../linting.js';
+import './sidebar/sidebar.css';
+import Sidebar from './sidebar/sidebar.jsx';
 
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
