@@ -67,6 +67,7 @@ export default class FileNode extends React.Component<Props, State> {
       /**
        * indicates, whether child nodes shall be visible or not
        */
+      selected: false,
       collapsed: false,
     };
 
@@ -93,8 +94,12 @@ export default class FileNode extends React.Component<Props, State> {
       /*if so, are they visible / collapsed?
                (we'll use the css display property to hide them, if necessary)
             */
-      const visibility: object = {
+      const display: object = {
         display: this.state.collapsed ? 'none' : '',
+      };
+
+      const background: object = {
+        backgroundColor: this.state.selected ? '#f00' : '#0f0',
       };
 
       return (
@@ -108,7 +113,7 @@ export default class FileNode extends React.Component<Props, State> {
             {label}
           </div>
           {/* display the children as unordered list */}
-          <ul className="projectTreeList" style={visibility}>
+          <ul className="projectTreeList" style={display}>
             {this.props.data.contents.map(child => (
               // when rendering components using map,
               // react needs a unique key for each sub
@@ -123,18 +128,22 @@ export default class FileNode extends React.Component<Props, State> {
                   data={child}
                   path={this.props.path.concat([child.name])}
                   onOpenFile={this.props.onOpenFile}
+                  onSelect={this.props.onSelect}
+                  selectedPath={this.props.selectedPath}
                 />
               </li>
             ))}
           </ul>
         </>
       );
+    } else {
+        // The node is a single file
+        const background = (this.props.selectedPath == this.props.path.join('/')) ? 'active' : 'inactive';
+        return (
+            /* double clicks are to be interpreted as opening files */
+            <div onDoubleClick={this.handleItemDoubleClick} className={background}>{label}</div>
+        );
     }
-
-    return (
-      /* double clicks are to be interpreted as opening files */
-      <div onDoubleClick={this.handleItemDoubleClick}>{label}</div>
-    );
   }
 
   /** changes the visibility of this nodes children, if there are any. */
@@ -152,6 +161,7 @@ export default class FileNode extends React.Component<Props, State> {
   private handleItemDoubleClick() {
     if (this.props.data.type === 'file') {
       this.props.onOpenFile(this.props.path);
+      this.props.onSelect(this.props.path.join('/'));
     }
   }
 }
@@ -169,10 +179,13 @@ interface FileNodeData {
 
 interface Props {
   onOpenFile: (path: string[]) => void;
+  onSelect: (path: string) => void;
   data: FileNodeData;
+  selectedPath: string;
   path: string[];
 }
 
 interface State {
   collapsed: boolean;
+  selected: boolean;
 }
