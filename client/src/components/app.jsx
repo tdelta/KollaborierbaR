@@ -4,7 +4,9 @@ import Editor from './editor.tsx';
 import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 
-import testSourceCode from '../sample-text.js';
+import openFile from '../openFile.js';
+
+import testSource from '../sample-text.js';
 
 /**
  * Main component of KollaborierbaR. Renders all other components (Editor etc.)
@@ -17,6 +19,7 @@ export default class App extends React.Component {
         // all methods should always refer to this instance of App, when
         // using the `this` variable.
         this.setText = this.setText.bind(this);
+        this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
 
@@ -29,7 +32,9 @@ export default class App extends React.Component {
             project: {}, 
 
             // content of the current file. Displayed within the editor.
-            text : '',
+            text: '',
+
+            filename: undefined,
 
             // warnings, errors, etc. within the currently open file
             diagnostics: []
@@ -58,6 +63,16 @@ export default class App extends React.Component {
     }
 
     /**
+     * Set the file name of the currently open file.
+     * Passed down to the sub components, since linters / compilers may need it.
+     */
+    setFileName(filename){
+        this.setState({
+            filename: filename
+        });
+    }
+
+    /**
      * Sets warnings, errors etc, for the currently opened file.
      * Passed down to the sub components, so that linter methods can be applied.
      */
@@ -73,7 +88,8 @@ export default class App extends React.Component {
      */
     componentDidMount() {
         this.setState({
-            text: testSourceCode // load some sample text for testing
+            text: testSource.text, // load some sample text for testing
+            filename: testSource.filename
         });
     }
 
@@ -99,7 +115,14 @@ export default class App extends React.Component {
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
-                        onOpenFile={(path) => alert(path.join('/'))}
+                        onOpenFile={(path) => {
+                            // This string composition is necessary because path contains only the path within a project.
+                            openFile('/' + this.state.project.name + '/' + path.join('/'))
+                                .then((response) => {
+                                    this.setText(response.fileText);
+                                    this.setFileName(response.fileName);
+                                });
+                        }}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}

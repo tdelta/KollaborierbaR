@@ -1,129 +1,178 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  description: "This is the central server of the KollaborierbaR collaborative Java specification and verification web app."
-  version: "0.1"
-  title: "KollaborierbaR Server"
-host: "localhost:9000"
-basePath: "/"
+  description: >-
+    This is the central server of the KollaborierbaR collaborative Java
+    specification and verification web app.
+  version: '0.1'
+  title: KollaborierbaR Server
+host: 'localhost:9000'
+basePath: /
 tags:
-- name: "lint"
-  description: "Generate diagnostics for Java code by static analysis"
-- name: "project"
-  description: "Access projects stored on server"
+  - name: lint
+    description: Generate diagnostics for Java code by static analysis
+  - name: project
+    description: Access projects stored on server
 schemes:
-- "http"
+  - http
 paths:
   /projects/listProjects:
     get:
       tags:
-      - "project"
-      summary: "List projects stored on server"
-      operationId: "project.listProjects"
+        - project
+      summary: List projects stored on server
+      operationId: project.listProjects
       produces:
-      - "application/json;charset=UTF-8"
+        - application/json;charset=UTF-8
       responses:
-        200:
-          description: "A json list of project names"
+        '200':
+          description: A json list of project names
           schema:
-            type: "array"
+            type: array
             items:
-              type: "string"
+              type: string
             example:
-            - "My Project"
-            - "KeY"
+              - My Project
+              - KeY
   /projects/showProject:
     get:
       tags:
-      - "project"
-      summary: "Load content list of a specific project stored on the server"
-      operationId: "project.showProject"
+        - project
+      summary: Load content list of a specific project stored on the server
+      operationId: project.showProject
       produces:
-      - "application/json;charset=UTF-8"
+        - application/json;charset=UTF-8
       parameters:
-      - in: "query"
-        name: "name"
-        description: "name of the project that shall be loaded"
-        required: true
-        type: "string"
-        x-example: "My Project"
+        - in: query
+          name: name
+          description: name of the project that shall be loaded
+          required: true
+          type: string
+          x-example: My Project
       responses:
-        200:
-          description: "Tree structure of a (java) project. Consists of files, folders and some project metadata"
+        '200':
+          description: >-
+            Tree structure of a (java) project. Consists of files, folders and
+            some project metadata
           schema:
-            $ref: "#/definitions/Project"
+            $ref: '#/definitions/Project'
+  /projects/openFile:
+    post:
+      tags:
+        - project
+      summary: Load content and name of specific file on the server
+      operationId: project.openFile
+      consumes:
+        - application/json;charset=UTF-8
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - in: body
+          name: RequestedFile
+          description: Json object containing the necessary information for file retrieval
+          required: true
+          schema:
+            $ref: '#/definitions/RequestedFile'
+      responses:
+        '200':
+          description: A json object which contains the filename and the filecontents
+          schema:
+            $ref: '#/definitions/OpenedFile'
   /lint:
     post:
       tags:
-      - "lint"
-      summary: "Check a java source file"
-      operationId: "lintClass"
+        - lint
+      summary: Check a java source file
+      operationId: lintClass
       consumes:
-      - "text/plain"
+        - text/plain
       produces:
-      - "application/json;charset=UTF-8"
+        - application/json;charset=UTF-8
       parameters:
-      - in: "query"
-        name: "name"
-        description: "Filename of the uploaded source code"
-        required: true
-        type: "string"
-        x-example: "LimitedIntegerSet"
-      - in: "body"
-        name: "source"
-        description: "Java source code to be linted"
-        required: true
-        schema:
-          type: "string"
-          example: "public class LimitedIntegerSet {\n\t//@ public invariant (\\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);\n\tprivate /*@ spec_public @*/ int[] arr;\n\t\n\t//@ public invariant size >= 0 && size <= arr.length;\n\tprivate /*@ spec_public @*/ int size;\n\n\tpublic LimitedIntegerSet(int limit) {\n\t\tthis.arr = new int[limit];\n\t}\n\n\t/*@ public normal_behavior ///This is a JML comment!\n      @ ensures \\result == (\\exists int i;\n      @                             0 <= i && i < size;\n      @                             arr[i] == elem);\n      @*/\n\tpublic /*@ pure @*/ boolean contains(int elem) {/*...*/ throw new RuntimeException(\"Not yet implemented\");}\n\n    private void provokeWarning() {\n        switch (1) {\n            case 1:\n                System.out.println(\"Hello World\");\n            case 2: // Theres a fall-through warning around here\n                break;\n        }\n    }\n\n\t/*@ public normal_behavior\n\t  @ requires contains(elem);\n      @ assignable size, arr[*];  // allows arbitrary reordering of the array elements\n      @ ensures !contains(elem); \n      @ ensures (\\forall int e;\n      @                  e != elem;\n      @                  contains(e) <==> \\old(contains(e)));\n      @ ensures size == \\old(size) - 1;\n      @\n      @ also\n      @ \n      @ public normal_behavior\n      @ requires !contains(elem);\n      @ assignable \\nothing;\n      @*/\n\tpublic void remove(int elem) {/*...*/}\n\n\n\t// we specify that the array is sorted afterwards and that the set has not changed; the latter works in this case and is easier \n\t// than if we would have to try to formalize permutation\n\t/*@ public normal_behavior\n\t  @ assignable a[0..size - 1];\n      @ ensures\n      @   (\\forall int i, j; i>=0 && i<j && j<size; arr[i]<arr[j]);\n      @ ensures (\\forall int e;  \n      @                  contains(e) <==> \\old(contains(e)));\n      @*/\n\tpublic void sort() { /* ... */ }\n\n\t\n\t/*@ public normal_behavior\n\t  @ requires size > 0;\n      @ assignable \\nothing;\n      @ ensures ( \\forall int i;\n      @                  i>=0 && i<size;\n      @                  \\result >= a[i] );\n      @ ensures ( \\exists int i;\n      @                  i>=0 && i<size;\n      @                  \\result == a[i] );\n      @\n      @ also\n      @ \n      @ public exceptional_behavior\n      @ requires size == 0;\n      @ assignable \\nothing;\n      @ signals  (RuntimeException) true;\n      @*/\n\tpublic int max() {\n\t\t// ...\n\t\tthrow new RuntimeException(\"Not yet implemented.\");\n\t}\n}\n"
-      responses:
-        200:
-          description: "Successful static analysis. Returning results"
+        - in: query
+          name: name
+          description: Filename of the uploaded source code
+          required: true
+          type: string
+          x-example: LimitedIntegerSet
+        - in: body
+          name: source
+          description: Java source code to be linted
+          required: true
           schema:
-            type: "array"
+            type: string
+            example: "public class LimitedIntegerSet {\n\t//@ public invariant (\\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);\n\tprivate /*@ spec_public @*/ int[] arr;\n\t\n\t//@ public invariant size >= 0 && size <= arr.length;\n\tprivate /*@ spec_public @*/ int size;\n\n\tpublic LimitedIntegerSet(int limit) {\n\t\tthis.arr = new int[limit];\n\t}\n\n\t/*@ public normal_behavior ///This is a JML comment!\n      @ ensures \\result == (\\exists int i;\n      @                             0 <= i && i < size;\n      @                             arr[i] == elem);\n      @*/\n\tpublic /*@ pure @*/ boolean contains(int elem) {/*...*/ throw new RuntimeException(\"Not yet implemented\");}\n\n    private void provokeWarning() {\n        switch (1) {\n            case 1:\n                System.out.println(\"Hello World\");\n            case 2: // Theres a fall-through warning around here\n                break;\n        }\n    }\n\n\t/*@ public normal_behavior\n\t  @ requires contains(elem);\n      @ assignable size, arr[*];  // allows arbitrary reordering of the array elements\n      @ ensures !contains(elem); \n      @ ensures (\\forall int e;\n      @                  e != elem;\n      @                  contains(e) <==> \\old(contains(e)));\n      @ ensures size == \\old(size) - 1;\n      @\n      @ also\n      @ \n      @ public normal_behavior\n      @ requires !contains(elem);\n      @ assignable \\nothing;\n      @*/\n\tpublic void remove(int elem) {/*...*/}\n\n\n\t// we specify that the array is sorted afterwards and that the set has not changed; the latter works in this case and is easier \n\t// than if we would have to try to formalize permutation\n\t/*@ public normal_behavior\n\t  @ assignable a[0..size - 1];\n      @ ensures\n      @   (\\forall int i, j; i>=0 && i<j && j<size; arr[i]<arr[j]);\n      @ ensures (\\forall int e;  \n      @                  contains(e) <==> \\old(contains(e)));\n      @*/\n\tpublic void sort() { /* ... */ }\n\n\t\n\t/*@ public normal_behavior\n\t  @ requires size > 0;\n      @ assignable \\nothing;\n      @ ensures ( \\forall int i;\n      @                  i>=0 && i<size;\n      @                  \\result >= a[i] );\n      @ ensures ( \\exists int i;\n      @                  i>=0 && i<size;\n      @                  \\result == a[i] );\n      @\n      @ also\n      @ \n      @ public exceptional_behavior\n      @ requires size == 0;\n      @ assignable \\nothing;\n      @ signals  (RuntimeException) true;\n      @*/\n\tpublic int max() {\n\t\t// ...\n\t\tthrow new RuntimeException(\"Not yet implemented.\");\n\t}\n}\n"
+      responses:
+        '200':
+          description: Successful static analysis. Returning results
+          schema:
+            type: array
             items:
-              $ref: "#/definitions/Diagnostic"
+              $ref: '#/definitions/Diagnostic'
 definitions:
   Diagnostic:
-    type: "object"
+    type: object
     properties:
       message:
-        type: "string"
+        type: string
       startRow:
-        type: "integer"
-        format: "int64"
+        type: integer
+        format: int64
       startCol:
-        type: "integer"
-        format: "int64"
+        type: integer
+        format: int64
       endRow:
-        type: "integer"
-        format: "int64"
+        type: integer
+        format: int64
       endCol:
-        type: "integer"
-        format: "int64"
+        type: integer
+        format: int64
       kind:
         type: "string"
-        enum: [ERROR, WARNING, NOTE, NOT_SUPPORTED]
+        enum:
+          - ERROR
+          - WARNING
+          - NOTE
+          - NOT_SUPPORTED
   File:
-    type: "object"
+    type: object
     required:
-    - name
-    - type
+      - name
+      - type
     properties:
       name:
-        type: "string"
+        type: string
       type:
-        type: "string"
-        enum: [file, folder]
+        type: string
+        enum:
+          - file
+          - folder
       contents:
-        type: "array"
+        type: array
         items:
-          type: "object" # A reference to itself should be placed here, but Dredd cant handle that yet. $ref: "#/definitions/File"
+          type: object
   Project:
-    type: "object"
+    type: object
     properties:
       name:
-        type: "string"
+        type: string
       contents:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/File"
+          $ref: '#/definitions/File'
+  RequestedFile:
+    type: object
+    properties:
+      path:
+        type: string
+    example:
+      path: 'My Project/README.md'
+  OpenedFile:
+    type: object
+    properties:
+      filename:
+        type: string
+      fileccontent:
+        type: string
+    example:
+      filename: 'README.md'
+      content: 'Hello!'
