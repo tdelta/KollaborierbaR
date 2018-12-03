@@ -17,6 +17,7 @@
         "object-literal-sort-keys": false,
         "interface-name": false,
         "ordered-imports": false,
+        "no-else-after-return": false,
 
         "member-ordering": [false],
         "jsx-boolean-value": false,
