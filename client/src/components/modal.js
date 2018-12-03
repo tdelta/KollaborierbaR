@@ -136,7 +136,7 @@ class ModalSelect extends React.Component {
                     <ModalHeader toggle={this.props.toggle}>Select Project</ModalHeader>
                     {/* the style enables a scrollbar, when the project names don't fit on the screen (100vh) with a 210 pixels margin */}
                     <ModalBody style={{'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto'}}>
-K                       {/* generate the listed project names dynamically */}
+                        {/* generate the listed project names dynamically */}
                         {this.listProjects()}
                     </ModalBody>
                     <ModalFooter>

@@ -15,7 +15,7 @@ import {
   DropdownItem,
 } from 'reactstrap';
 
-import ModalSelect from '../modal.js';
+import ModalSelect from './modal.js';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
