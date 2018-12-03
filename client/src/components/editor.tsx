@@ -7,7 +7,6 @@ import '../highlighting/jml.js';
 import '../index.css';
 import lint from '../linting.js';
 import './sidebar/sidebar.css';
-import Sidebar from './sidebar/sidebar.jsx';
 
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
