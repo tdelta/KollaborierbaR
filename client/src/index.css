@@ -52,3 +52,14 @@ nav{
   text-decoration: none;
   background: url(warning-underline.png) bottom repeat-x;
 }
+
+.not_supportedMarker {
+  position:absolute;
+  z-index:20;
+  background: url(not-supported-underline.png) bottom repeat-x;
+}
+
+.ace_gutter-cell.ace_not_supportedundefined {
+  background-image: url(not-supported-annotation.png);
+  background-position: 2px center;
+}

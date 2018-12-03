@@ -1,4 +1,4 @@
-package linter.java;
+package linter;
 
 import java.net.URI;
 import javax.tools.SimpleJavaFileObject;
