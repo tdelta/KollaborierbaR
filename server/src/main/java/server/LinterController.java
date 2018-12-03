@@ -2,6 +2,7 @@ package server;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import linter.Diagnostic;
 import linter.java.JavaCompilerLinter;
 import linter.java.JavaSourceMemoryObject;
@@ -28,7 +29,14 @@ public class LinterController {
   @RequestMapping("/lint")
   @ResponseBody
   @CrossOrigin
-  public List<Diagnostic> lint(@RequestParam("name") String name, @RequestBody String source) {
-    return linter.check(Arrays.asList(new JavaSourceMemoryObject(name, source)));
+  public List<Diagnostic> lint(@RequestParam("name") String name, @RequestBody(required=false) String source) {
+    // check, whether there is a body
+    if (source != null) {
+      return linter.check(Arrays.asList(new JavaSourceMemoryObject(name, source)));
+    }
+
+    else {
+      return new ArrayList<>(0);
+    }
   }
 }

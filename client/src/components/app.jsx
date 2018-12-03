@@ -1,7 +1,8 @@
 import React from 'react';
 
-import Editor from './editor.jsx';
+import Editor from './editor.tsx';
 import Top from './top.jsx';
+import Sidebar from './sidebar.jsx';
 
 import testSourceCode from '../sample-text.js';
 
@@ -95,13 +96,18 @@ export default class App extends React.Component {
                     setText={this.setText}
                     text={this.state.text}
                 />
-                <Editor
-                    project={this.state.project}
-                    setDiagnostics={this.setDiagnostics}
-                    diagnostics={this.state.diagnostics}
-                    setText={this.setText}
-                    text={this.state.text}
-                />
+                <div id="mainContainer">
+                    <Sidebar
+                        project={this.state.project}
+                        onOpenFile={(path) => alert(path.join('/'))}
+                    />
+                    <Editor
+                        setDiagnostics={this.setDiagnostics}
+                        diagnostics={this.state.diagnostics}
+                        setText={this.setText}
+                        text={this.state.text}
+                    />
+                </div>
             </div>
         );
     }
