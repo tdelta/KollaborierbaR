@@ -19,8 +19,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -r build/*",
-    "eslint": "eslint -c .eslintrc.js src/*.js src/**/*.js src/*.jsx src/**/*.jsx",
-    "eslint-pedantic": "eslint -c .eslint-pedantic.js src/*.js src/**/*.js src/*.jsx src/**/*.jsx",
+    "eslint": "eslint -c .eslintrc.js src/**/*.js*",
+    "eslint-pedantic": "eslint -c .eslint-pedantic.js src/**/*.js*",
     "tslint": "tslint -c .tslint.json --project tsconfig.json 'src/**/*.ts*'",
     "format": "prettier --write 'src/**/*.ts*'"
   },
