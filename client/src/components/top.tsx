@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { RefObject } from 'react';
 import PropTypes from 'prop-types';
 
 import 'bootstrap/dist/css/bootstrap.css';
@@ -16,8 +16,14 @@ import {
 
 import ModalSelect from '../modal.js';
 
-export default class Top extends React.Component {
-    constructor(props) {
+export default class Top extends React.Component<Props, State> {
+
+    // TODO: Anton was macht <{}>
+    private fileSelector: RefObject<{}>;
+    private downloadSelector: RefObject<{}>;
+    private fileReader?: FileReader;
+
+    constructor(props: Props) {
         super(props);
         this.fileSelector = React.createRef();
         this.downloadSelector = React.createRef();
@@ -29,18 +35,20 @@ export default class Top extends React.Component {
         };
     }
 
-    toggleModal() {
+    toggleModal(): void {
         this.setState({ showModal: !this.state.showModal });
     }
      
-    onFileChosen(event){
+    onFileChosen(event): void{
         this.fileReader = new FileReader();
         this.fileReader.onloadend = this.onFileLoaded;
         this.fileReader.readAsText(event.target.files[0]);
     }
 
-    onFileLoaded() {
-        this.props.setText(this.fileReader.result);
+    onFileLoaded(): void {
+        if (this.fileReader != null && typeof this.fileReader.result === 'string'){
+            this.props.setText(this.fileReader.result);
+        }
     }
 
     render() {
@@ -107,3 +115,16 @@ Top.propTypes = {
     text: PropTypes.string,
     showProject: PropTypes.func
 };
+
+
+// defining the strcuture of the state
+interface State{
+    showModal: boolean;
+}
+
+// defining the structure of this react components properties
+interface Props{
+    text: string;
+    setText(text: string) : void;
+    showProject(project: object): void;
+}
