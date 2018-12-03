@@ -1,7 +1,7 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 
-import FileIcon from '../file-icon.jsx';
+import FileIcon from '../components/sidebar/file-icon.jsx';
 
 test('file extension identification', () => {
     // build a file icon instance
