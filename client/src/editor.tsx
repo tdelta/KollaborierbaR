@@ -1,21 +1,24 @@
 import ace, { Range } from 'ace-builds';
 import * as ace_types from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-pastel_on_dark';
+
 import PropTypes from 'prop-types';
 import React from 'react';
+
 import { Annotation, Diagnostic } from './diagnostics';
+
 import './highlighting/jml.js';
-import './index.css';
 import lint from './linting.js';
+
 import './sidebar.css';
-import Sidebar from './sidebar.jsx';
+import './index.css';
 
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
   // The exclamation mark tells typescript not to check if this attribute gets initialized
-  private editor!: any;
+  private editor!: any; // ACE editor object
   private markers: number[];
-  private timeTest: number;
+  private timeTest: number; // will be used to regulate interval of calling the linter
   private anchoredMarkers: AnchoredMarker[];
   private annotations: number[];
 
@@ -92,12 +95,13 @@ export default class Editor extends React.Component<Props> {
    */
   private setAnchors(): void {
     this.anchoredMarkers = [];
+
     // only show annotations, if there are any (valid) diagnostics
     if (
       this.props.diagnostics &&
       this.props.diagnostics.constructor === Array
     ) {
-      // Processs each element of array of diagonistics
+      // Process each element of array of diagonistics
       for (const diagnostic of this.props.diagnostics) {
         const range = new Range(
           diagnostic.startRow,
@@ -105,6 +109,7 @@ export default class Editor extends React.Component<Props> {
           diagnostic.endRow,
           diagnostic.endCol
         );
+
         // Create Anchors in the document. These update their position when text is edited
         range.start = this.editor.session.doc.createAnchor(range.start);
         range.end = this.editor.session.doc.createAnchor(range.end);
@@ -119,6 +124,7 @@ export default class Editor extends React.Component<Props> {
           message,
         });
       }
+
       // Display the markers in the ace editor
       this.setMarkers();
     }
@@ -133,6 +139,7 @@ export default class Editor extends React.Component<Props> {
     this.editor.session.setAnnotations(
       this.anchoredMarkers.map(this.toAnnotation)
     );
+    
     for (const annotation of this.annotations) {
       this.editor.session.removeGutterDecoration(
         annotation,
@@ -158,6 +165,7 @@ export default class Editor extends React.Component<Props> {
           true
         )
       );
+
       // Custom annotations need to be added manually
       if (anchoredMarker.type === 'not_supported') {
         const line = anchoredMarker.range.start.row;
@@ -195,9 +203,18 @@ interface Props {
   setDiagnostics(diagnostics: Diagnostic[]): void;
 }
 
-// this structure is used to save all markers in the document together with their anchor points
+/**
+ * This structure is used to save markers in a document within ACE together with
+ * their anchor points
+ *
+ * This means it can be used to underline sections of a document and display
+ * messages with an icon in the gutter.
+ *
+ * If the document is edited, the marker will be moved with the document's
+ * contents.
+ */
 interface AnchoredMarker {
-  range: ace_types.Ace.Range;
-  type: string;
-  message: string;
+  range: ace_types.Ace.Range; // used to mark a region within the editor: https://ace.c9.io/#nav=api&api=range
+  type: string; // type of the marking, whether its an error, a warning, something else, ...
+  message: string; // displayed message at the marker
 }
