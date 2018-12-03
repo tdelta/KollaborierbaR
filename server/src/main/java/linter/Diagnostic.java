@@ -23,7 +23,7 @@ public class Diagnostic{
 
 	/** Indicates type of error */
 	public enum Kind {
-		ERROR, WARNING, NOTE
+		ERROR, WARNING, NOTE, NOT_SUPPORTED
 	}
 
 	public Diagnostic(final String message, final long start, final long end,

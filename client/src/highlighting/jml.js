@@ -1,5 +1,5 @@
-import brace from 'brace';
-import 'brace/mode/java';
+import ace from 'ace-builds';
+import 'ace-builds/src-noconflict/mode-java';
 import './jml_highlighting.js';
 
 /**
@@ -8,18 +8,8 @@ import './jml_highlighting.js';
  *
  * (based on existing java folding mode, only minimally changed for jml)
  **/
-brace.define( // we tell ace, that we want to define our own ace extension module
+ace.define( // we tell ace, that we want to define our own ace extension module
     'ace/mode/folding/jml', // it shall be available at this (virtual) import path
-    // we will use these ace internal helper functions and modules.
-    // Therefore we will tell ace here, that we depend on them:
-    [
-        'require', // we want to be able to load other ace modules
-        'exports', // we want to export our own functionality
-        'module',
-        'ace/lib/oop', // we want OOP functionality (inheriting from existing ace modes, etc.)
-        'ace/range', // allows us to define start and end positions inside code
-        'ace/mode/folding/fold_mode' // folding functionality we base our module on
-    ], 
     function(acequire, exports, module) {
         const oop = acequire('../../lib/oop');
         const Range = acequire('../../range').Range;
@@ -83,14 +73,13 @@ brace.define( // we tell ace, that we want to define our own ace extension modul
  * This is what you have to import in order to use the JML highlighting and
  * retain all other java editor features.
  */
-brace.define( // see above, for how this define call works.
+ace.define( // see above, for how this define call works.
     'ace/mode/jml',
-    ['require','exports','module','ace/lib/oop','ace/mode/javascript','ace/mode/java_highlight_rules'],
     function(acequire, exports, module) {
         // acequire imports ace modules
         var oop = acequire('../lib/oop');
         var JavaScriptMode = acequire('./javascript').Mode;
-        var JavaHighlightRules = acequire('ace/mode/java_highlight_rules').JavaHighlightRules;
+        var JavaHighlightRules = acequire('ace/mode/custom_java_highlight_rules').JavaHighlightRules;
         var JmlFoldMode = acequire('ace/mode/folding/jml').FoldMode;
 
         // Constructor of the JML mode
