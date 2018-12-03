@@ -42,6 +42,15 @@ import FileNode from './file-node.tsx';
  * ```
  */
 export default class ProjectTreeView extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.onSelect = this.onSelect.bind(this);
+        this.state = {
+            selected: '',
+        }
+    }
+
     render() {
         // determine, whether the project property is set and
         // contains at least a name. If not, the view will show an appropriate message.
@@ -101,6 +110,8 @@ export default class ProjectTreeView extends React.Component {
                                 // the path of each element consists just of its
                                 // own name
                                 onOpenFile={this.props.onOpenFile}
+                                onSelect={this.onSelect}
+                                selectedPath={this.state.selected}
                             />
                         )
                     }
@@ -119,6 +130,11 @@ export default class ProjectTreeView extends React.Component {
                 </>
             );
         }
+    }
+    onSelect(path){
+        this.setState({
+            selected: path
+        });
     }
 }
 
