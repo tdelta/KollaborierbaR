@@ -21,6 +21,10 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.util.Scanner;
+
+import java.util.NoSuchElementException;
+
 /**
  * @author Marc Arnold, David Heck
  *  This is a rest controller for handling the project file structure
@@ -108,49 +112,59 @@ public class ProjectController {
     /**
      * 
      * That method handels request to /openFile and returns the contents of a file
+     * and its name.
      * 
      * @param path to the file, which is supposed to be opened.
      * @return object containing filename and filetext (object for marshalling)
      */
     @RequestMapping("/openFile")
     @ResponseBody
-    public OpenedFile openFile(@RequestBody ProjectPath path) throws IOException{
-        	
-    	File file = null;
-    	InputStream filestream = null;
-		
+    public OpenedFileResponse openFile(@RequestBody FileRequest fileRequest) throws IOException{
     	try {
-			filestream = new FileInputStream(projectPath +path.getPath());
-			file = new File(projectPath +path.getPath());
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return new OpenedFile("Not found", "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:" + projectPath+ path.getPath());
-		}
-    	
-    	InputStreamReader filereader = new InputStreamReader(filestream, Charset.forName("UTF-8"));
-    	
-    	
-    	String filecontent = "";
-    	
-    	// Start reading from file
-    	int literal = filereader.read();
-    	while(literal != -1) {
-    		
-    		//Covert integer representation of literal into a char representation
-    		char convertedLiteral = (char) literal;
-    		
-    		// Append the returnString with the converted literal
-    		filecontent = filecontent + Character.toString(convertedLiteral);
-    		
-    		//Read next literal;
-    		literal = filereader.read();
-    		
-    	}
-    	
-    	// Finished reading from file
-    	filereader.close();
-    
-    	return new OpenedFile(file.getName(), filecontent);
+        final File file = new File(projectPath + fileRequest.getPath());
+
+        final String content = new Scanner( //scanners allow to read a file until a delimiter
+            file,
+            "utf-8"
+        ).useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
+        //^ using a scanner may not be optimal (could cause overhead),
+        //  but simplifies this code so much, that we keep it for now
+      
+        return new OpenedFileResponse(file.getName(), content);
+      }
+      
+      // TODO implement proper error handling (appropriate status code etc.)
+      catch (FileNotFoundException e) {
+        e.printStackTrace();
+
+        return new OpenedFileResponse(
+            "Not found",
+            "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:"
+            + projectPath + fileRequest.getPath()
+        );
+      }	
+
+      catch (NoSuchElementException e) {
+        e.printStackTrace();
+
+        return new OpenedFileResponse(
+            "Read error",
+            "Fehler beim Einlesen der angefragten Datei:"
+            + projectPath + fileRequest.getPath()
+        );
+      }	
+
+      catch (IllegalStateException e) {
+        e.printStackTrace();
+
+        return new OpenedFileResponse(
+            "Read error",
+            "Fehler beim Einlesen der angefragten Datei:"
+            + projectPath + fileRequest.getPath()
+        );
+      }	
     }
-    
+
+    // TODO: Proper HTTP error handler
+    //@ExceptionHandler({NoSuchElementException.class, IllegalStateException.class})
 }
