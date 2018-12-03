@@ -86,6 +86,8 @@ definitions:
   Diagnostic:
     type: "object"
     properties:
+      message:
+        type: "string"
       startRow:
         type: "integer"
         format: "int64"
@@ -100,7 +102,7 @@ definitions:
         format: "int64"
       kind:
         type: "string"
-        enum: [ERROR, WARNING, NOTE]
+        enum: [ERROR, WARNING, NOTE, NOT_SUPPORTED]
   File:
     type: "object"
     required:
