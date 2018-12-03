@@ -91,12 +91,14 @@
     user-select: none;
 }
 
-.active {
-    background-color: #44a
+.activeFileNode {
+    background-color: #374c55;
+    border-radius: 5px;
+    padding-left: 0.5em;
 }
 
-.inactive {
-    background-color: inherit
+.inactiveFileNode {
+    background-color: inherit;
 }
 
 /* file lists within the project view */

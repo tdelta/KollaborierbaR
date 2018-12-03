@@ -140,8 +140,8 @@ export default class FileNode extends React.Component<Props, State> {
       // The node is a single file
       const background =
         this.props.selectedPath === this.props.path.join('/')
-          ? 'active'
-          : 'inactive';
+          ? 'activeFileNode'
+          : 'inactiveFileNode';
       return (
         /* double clicks are to be interpreted as opening files */
         <div onDoubleClick={this.handleItemDoubleClick} className={background}>
