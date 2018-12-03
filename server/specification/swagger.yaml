@@ -71,7 +71,7 @@ paths:
           description: Json object containing the necessary information for file retrieval
           required: true
           schema:
-            $ref : '#/definitions/RequestedFile'
+            $ref: '#/definitions/RequestedFile'
       responses:
         '200':
           description: A json object which contains the filename and the filecontents
@@ -178,6 +178,8 @@ definitions:
     properties:
       path:
         type: string
+    example:
+      path: 'My Project/README.md'
   OpenedFile:
     type: object
     properties:
@@ -185,3 +187,6 @@ definitions:
         type: string
       fileccontent:
         type: string
+    example:
+      filename: 'README.md'
+      content: 'Hello!'
