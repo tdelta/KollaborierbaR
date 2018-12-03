@@ -22,6 +22,7 @@
         "no-constant-condition": true,
         "no-control-regex": true,
         "no-duplicate-case": true,
+        "no-duplicate-imports": false,
         "no-empty-character-class": true,
         "no-ex-assign": true,
         "no-extra-boolean-cast": true,
