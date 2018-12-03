@@ -23,7 +23,10 @@ public class Diagnostic{
 
 	/** Indicates type of error */
 	public enum Kind {
-		ERROR, WARNING, NOTE, NOT_SUPPORTED
+		ERROR,
+    WARNING,
+    NOTE,
+    NOT_SUPPORTED // indicates a java feature, which is not supported by KeY
 	}
 
 	public Diagnostic(final String message, final long start, final long end,
@@ -40,6 +43,7 @@ public class Diagnostic{
 		this.endCol = pos[1];
 	}
 
+  // TODO: Kommentieren, bitte!
 	private long[] getRowCol(JavaFileObject source, long position) {
 		long row, column = -1;
 		long count = 0;
