@@ -3,15 +3,27 @@ package server;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import projectmanagement.*;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
+
+import java.util.Scanner;
+
+import java.util.NoSuchElementException;
 
 /**
  * @author Marc Arnold, David Heck
@@ -96,4 +108,63 @@ public class ProjectController {
         }
         return null;
     }
+    
+    /**
+     * 
+     * That method handels request to /openFile and returns the contents of a file
+     * and its name.
+     * 
+     * @param path to the file, which is supposed to be opened.
+     * @return object containing filename and filetext (object for marshalling)
+     */
+    @RequestMapping("/openFile")
+    @ResponseBody
+    public OpenedFileResponse openFile(@RequestBody FileRequest fileRequest) throws IOException{
+    	try {
+        final File file = new File(projectPath + fileRequest.getPath());
+
+        final String content = new Scanner( //scanners allow to read a file until a delimiter
+            file,
+            "utf-8"
+        ).useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
+        //^ using a scanner may not be optimal (could cause overhead),
+        //  but simplifies this code so much, that we keep it for now
+      
+        return new OpenedFileResponse(file.getName(), content);
+      }
+      
+      // TODO implement proper error handling (appropriate status code etc.)
+      catch (FileNotFoundException e) {
+        e.printStackTrace();
+
+        return new OpenedFileResponse(
+            "Not found",
+            "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:"
+            + projectPath + fileRequest.getPath()
+        );
+      }	
+
+      catch (NoSuchElementException e) {
+        e.printStackTrace();
+
+        return new OpenedFileResponse(
+            "Read error",
+            "Fehler beim Einlesen der angefragten Datei:"
+            + projectPath + fileRequest.getPath()
+        );
+      }	
+
+      catch (IllegalStateException e) {
+        e.printStackTrace();
+
+        return new OpenedFileResponse(
+            "Read error",
+            "Fehler beim Einlesen der angefragten Datei:"
+            + projectPath + fileRequest.getPath()
+        );
+      }	
+    }
+
+    // TODO: Proper HTTP error handler
+    //@ExceptionHandler({NoSuchElementException.class, IllegalStateException.class})
 }
