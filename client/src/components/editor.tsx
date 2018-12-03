@@ -81,7 +81,7 @@ export default class Editor extends React.Component<Props> {
    * Function that calls lint, sending a request to the server, and passes the result to the app
    */
   private callLinter(): void {
-    lint('LimitedIntegerSet', this.editor.getValue()).then(
+    lint(this.props.filename, this.editor.getValue()).then(
       (diagnostics: Diagnostic[]) => {
         this.props.setDiagnostics(diagnostics);
         this.setAnchors();
@@ -199,6 +199,7 @@ export default class Editor extends React.Component<Props> {
 interface Props {
   diagnostics: Diagnostic[];
   text: string;
+  filename: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
 }

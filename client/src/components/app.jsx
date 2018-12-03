@@ -129,6 +129,7 @@ export default class App extends React.Component {
                         diagnostics={this.state.diagnostics}
                         setText={this.setText}
                         text={this.state.text}
+                        filename={this.state.filename}
                     />
                 </div>
             </div>
