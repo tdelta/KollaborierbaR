@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
-import FileNode from './file-node.jsx';
+import FileNode from './file-node.tsx';
 
 /**
  * Displays a project (file system like JSON structure, passed by `project`
