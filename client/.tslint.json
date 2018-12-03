@@ -16,6 +16,10 @@
         "object-literal-key-quotes": [true, "as-needed"],
         "object-literal-sort-keys": false,
         "interface-name": false,
+        "ordered-imports": false,
+
+        "member-ordering": [false],
+        "jsx-boolean-value": false,
 
         "import-name": false,
 
