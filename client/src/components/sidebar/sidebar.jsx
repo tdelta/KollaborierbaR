@@ -206,7 +206,6 @@ export default class Sidebar extends React.Component {
                                 onOpenFile={this.props.onOpenFile}
                                 onNewFile={(p) => {alert(p.join('/'));}}
                                 onNewFolder={(p) => {alert(p.join('/'));}}
-
                                 project={this.props.project}
                             />
                         </div>
@@ -218,7 +217,6 @@ export default class Sidebar extends React.Component {
 }
 
 Sidebar.propTypes = {
-    'children': PropTypes.element.isRequired,
     'project': PropTypes.shape({
         'name': PropTypes.string,
         'contents': PropTypes.arrayOf(PropTypes.object)
