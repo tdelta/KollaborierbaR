@@ -6,7 +6,7 @@ import Sidebar from './sidebar/sidebar.jsx';
 
 import openFile from '../openFile.js';
 
-import testSource from '../sample-text.js';
+//import testSource from '../sample-text.js';
 
 /**
  * Main component of KollaborierbaR. Renders all other components (Editor etc.)
@@ -88,8 +88,8 @@ export default class App extends React.Component {
      */
     componentDidMount() {
         this.setState({
-            text: testSource.text, // load some sample text for testing
-            filename: testSource.filename
+            text: '', // load some sample text for testing
+            filename: 'Main.java'
         });
     }
 

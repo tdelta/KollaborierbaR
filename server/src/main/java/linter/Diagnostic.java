@@ -62,7 +62,8 @@ public class Diagnostic{
 					count++;
 					column++;
 				}
-				truePos -= 1; // iteratively substract newlines
+        // for DOS line endings:
+//				truePos -= 1; // iteratively substract newlines
 				
 				if (column == line.length())
 					count++;
