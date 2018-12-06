@@ -131,7 +131,7 @@ class ModalSelect extends React.Component {
                   * onClosed: when the modal is closed set the selected state to an invalid index, so that on a reopen no projects are highlighted
                   */}
                 <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={() => this.loadProjectNames()} 
-                    onClosed={() => this.select(-1, '')} className={this.props.className}
+                    onClosed={() => this.select('', -1)} className={this.props.className}
                 >
                     <ModalHeader toggle={this.props.toggle}>Select Project</ModalHeader>
                     {/* the style enables a scrollbar, when the project names don't fit on the screen (100vh) with a 210 pixels margin */}
