@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.stream.Stream;
 
 /**
- * Checks java source files for errors and warnings using the system java compiler (usually javac)
+ * Checks java source files for errors and warnings using the eclipse jdt lib
  * Also checks for features not supported by KeY.
  */
-public class JavaCompilerLinter {
+public class JavaJDTLinter {
   final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
   /**
