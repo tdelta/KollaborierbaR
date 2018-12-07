@@ -64,6 +64,7 @@ export default class Editor extends React.Component<Props> {
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
+    this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
   public componentDidUpdate(): void {
     // Called when new properties are passed down from the app component
@@ -73,6 +74,26 @@ export default class Editor extends React.Component<Props> {
     }
   }
 
+  /**
+   * This function adds a type of annotation to the renderer of the gutter (left)
+   * we could have used session.addGutterDecoration instead, but get automatically updating positions this way for free
+   * @param gutterLayer the renderer to extend
+   */
+  private addKeyAnnotationType(gutterLayer: any) {
+    // save the default implementation in a variable
+    const superSetAnnotations = gutterLayer.setAnnotations;
+    gutterLayer.setAnnotations = function(annotations: Annotation[]) {
+      // call the default function first so we can overwrite the results
+      superSetAnnotations.call(gutterLayer, annotations);
+      for (const annotation of annotations) {
+        if (annotation.type === 'not_supported') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'ace_not_supported';
+        }
+      }
+    };
+  }
   public render() {
     return <div id="editor" />;
   }
@@ -125,6 +146,10 @@ export default class Editor extends React.Component<Props> {
         });
       }
 
+      this.editor.session.clearAnnotations();
+      this.editor.session.setAnnotations(
+        this.anchoredMarkers.map(this.toAnnotation)
+      );
       // Display the markers in the ace editor
       this.setMarkers();
     }
@@ -134,20 +159,6 @@ export default class Editor extends React.Component<Props> {
    * This function displays markers in the editor for all members of anchoredMarkers
    */
   private setMarkers(): void {
-    // Update the annotations displayed in the editor (icons on the left)
-    this.editor.session.clearAnnotations();
-    this.editor.session.setAnnotations(
-      this.anchoredMarkers.map(this.toAnnotation)
-    );
-
-    for (const annotation of this.annotations) {
-      this.editor.session.removeGutterDecoration(
-        annotation,
-        'ace_not_supported'
-      );
-    }
-    this.annotations = [];
-
     // Remove all current markers displayed in the editor
     for (const marker of this.markers) {
       this.editor.session.removeMarker(marker);
@@ -155,23 +166,27 @@ export default class Editor extends React.Component<Props> {
     this.markers = [];
 
     // Add markers for all anchoredMarkers
-    for (const anchoredMarker of this.anchoredMarkers) {
+    addLoop: for (let i = 0; i < this.anchoredMarkers.length; i = i + 1) {
+      for (let j = i + 1; j < this.anchoredMarkers.length; j = j + 1) {
+        // Dont add the marker if it overlaps with another marker
+        if (
+          this.anchoredMarkers[i].range.intersects(
+            this.anchoredMarkers[j].range
+          )
+        ) {
+          continue addLoop;
+        }
+      }
+
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
-          anchoredMarker.range,
-          `${anchoredMarker.type}Marker`,
+          this.anchoredMarkers[i].range,
+          `${this.anchoredMarkers[i].type}Marker`,
           'text',
           true
         )
       );
-
-      // Custom annotations need to be added manually
-      if (anchoredMarker.type === 'not_supported') {
-        const line = anchoredMarker.range.start.row;
-        this.editor.session.addGutterDecoration(line, 'ace_not_supported');
-        this.annotations.push(line);
-      }
     }
   }
 
