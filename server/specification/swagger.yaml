@@ -114,6 +114,21 @@ definitions:
     properties:
       message:
         type: string
+      column:
+        type: integer
+        format: int64
+      line:
+        type: integer
+        format: int64
+      end:
+        type: integer
+        format: int64
+      start:
+        type: integer
+        format: int64
+      position:
+        type: integer
+        format: int64
       startRow:
         type: integer
         format: int64
@@ -127,12 +142,11 @@ definitions:
         type: integer
         format: int64
       kind:
-        type: "string"
+        type: string
         enum:
           - ERROR
           - WARNING
           - NOTE
-          - NOT_SUPPORTED
   File:
     type: object
     required:
@@ -165,13 +179,13 @@ definitions:
       path:
         type: string
     example:
-      path: 'My Project/README.md'
+      path: '/My Project/README.md'
   OpenedFile:
     type: object
     properties:
       filename:
         type: string
-      fileccontent:
+      filecontent:
         type: string
     example:
       filename: 'README.md'

@@ -1,3 +1,5 @@
+import {serverAddress, serverRoutes} from './constants.ts';
+
 /**
  * Fetches contents and metadata of a file asynchronously from the server via
  * HTTP request.
@@ -16,7 +18,7 @@
  */
 function openFile(path) {
     // API URL of the server we will use for our request
-    const url = new URL('http://localhost:9000/projects/openFile');
+    const url = new URL(serverAddress + serverRoutes.projects.openFile);
 
     // for now, the request body shall contain only the file path as described
     // above, within a JSON object
