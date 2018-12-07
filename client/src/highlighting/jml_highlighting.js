@@ -81,7 +81,7 @@ ace.define( // create a new ace module
                     {
                         // Regular expression matches the start of a comment, we switch into the comment rule
                         token : 'comment',
-                        regex : /\/\/\//,
+                        regex : /\/\//,
                         next : 'comment'
                     },
                     {
@@ -110,7 +110,7 @@ ace.define( // create a new ace module
                     },
                     {
                         token : 'comment',
-                        regex : /\/\/\//,
+                        regex : /\/\//,
                         next : 'comment',
                     },
                     {
