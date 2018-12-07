@@ -49,7 +49,8 @@ public class JavaCompilerLinter {
    * @return        list of diagnostics, describing errors within the given files
    *                or empty list, if there are none
    */
-  private List<Diagnostic> checkForCompilerErrors(final List<JavaFileObject> toCheck) {
+  private List<Diagnostic> checkForCompilerErrors(final List<JavaFileObject> toCheck)
+  {
     // this collector allows to capture diagnostic data regarding the source code errors
     final DiagnosticCollector<JavaFileObject> diagnosticsCollector =
         new DiagnosticCollector<JavaFileObject>();
@@ -104,7 +105,8 @@ public class JavaCompilerLinter {
    * @return        list of diagnostics, describing not supported features within the given files
    *                or empty list, if there are none
    */
-  private List<Diagnostic> checkForUnsupportedFeatures(final List<JavaFileObject> toCheck) {
+  private List<Diagnostic> checkForUnsupportedFeatures(final List<JavaFileObject> toCheck)
+  {
     if (toCheck.size() > 0) {
       final JmlNotSupportedScanner scanner =
           new JmlNotSupportedScanner(toCheck.get(0));

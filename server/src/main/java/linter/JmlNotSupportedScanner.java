@@ -79,16 +79,24 @@ public class JmlNotSupportedScanner extends ASTVisitor {
      * @param message a message to include in the error
      * @return a diagnostic object of the type NOT_SUPPORTED, containing the error message and the position of the AST node in the source code
      */
-    private void saveDiagnostic(ASTNode node, String message){
+    private void saveDiagnostic(ASTNode node, String message) {
         final int startPos = node.getStartPosition();
         final int endPos = startPos + node.getLength();
 
-        results.add(new Diagnostic(
-            message,
-            startPos,
-            endPos,
-            sourceFile,
-            Diagnostic.Kind.NOT_SUPPORTED));
+				try {
+						results.add(new Diagnostic(
+								message,
+								startPos,
+								endPos,
+								sourceFile,
+								Diagnostic.Kind.NOT_SUPPORTED));
+				}
+
+				catch (final Exception e) {
+						e.printStackTrace();
+
+						// TODO: Deal with the exception properly by passing it on
+				}
     }
 
     /**
