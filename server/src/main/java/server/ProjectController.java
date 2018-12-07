@@ -85,7 +85,7 @@ public class ProjectController {
         for(final File f: file.listFiles()){
             if(f.isFile()){
                 entries.add(new FileItem(f.getName()));
-            } else {
+            } else if (f.isDirectory()) {
                 entries.add(createFolderItem(f));
             }
         }
@@ -166,5 +166,5 @@ public class ProjectController {
     }
 
     // TODO: Proper HTTP error handler
-    //@ExceptionHandler({NoSuchElementException.class, IllegalStateException.class})
+    ///@ExceptionHandler({NoSuchElementException.class, IllegalStateException.class})
 }
