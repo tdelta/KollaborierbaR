@@ -1,5 +1,9 @@
 package linter;
 
+import java.util.Arrays;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.JavaCore;
+import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import javax.tools.JavaFileObject;
@@ -31,22 +35,20 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class JmlNotSupportedScanner extends ASTVisitor{
 
-private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
+    private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
 
     private JavaFileObject sourceFile;
-    private char[] sourceCode;
 
     public JmlNotSupportedScanner(JavaFileObject sourceFile){
         this.sourceFile = sourceFile;
-        try{
-        sourceCode = sourceFile.getCharContent(true).toString().toCharArray();
-        } catch(IOException e) {
-            e.printStackTrace();
-            sourceCode = new char[0];
-        }
     }
 
     /**
@@ -144,7 +146,6 @@ private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
 
     @Override
     public boolean visit(EnumConstantDeclaration node){
-        // TODO: Not working
         createError(node,"Enums are not supported in KeY");
         return true;
     }
@@ -158,7 +159,6 @@ private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
     
     @Override
     public boolean visit(NumberLiteral node){
-        // TODO: Not working
         if(node.getToken().indexOf('b')>=0)
             createError(node,"Binary literals are not supported in KeY");
         return true;
@@ -191,19 +191,44 @@ private LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
         return true;
     }
 
-    // TODO: Imported classes that implement runnable or Thread
-    // TODO: Does KeY support Autoboxing?
+    @Override
+    public boolean visit(ArrayInitializer node){
+        return visitExpression(node);
+    }
+
+    @Override
+    public boolean visit(Assignment node){
+        return visitExpression(node);
+    }
+
+    @Override
+    public boolean visit(VariableDeclarationExpression node){
+        return visitExpression(node);
+    }
+
+    public boolean visitExpression(Expression node){
+        if(node.resolveBoxing() || node.resolveUnboxing())
+            createError(node,"Autoboxing is not supported in KeY");
+        return true;
+        //TODO: Not working
+    }
+
+    @Override
+    public boolean visit(MethodInvocation node){
+        for(ITypeBinding implemented: node.resolveMethodBinding().getDeclaringClass().getInterfaces()){
+            String qualifiedName = implemented.getQualifiedName();
+            if(qualifiedName.equals("java.lang.Runnable") ||
+                qualifiedName.equals("java.lang.Thread"))
+                createError(node, "Multithreading is not supported in KeY");
+        }
+        return true;
+    }
 
     /**
      * Creates and parses an AST from the source code
      * @return A list of Diagnostics, containing all features that are not supported by key with their respective positions in the source code
      */
-    public List<Diagnostic> getResults(){
-        // Create AST from source code
-        ASTParser parser = ASTParser.newParser(AST.JLS8);
-        parser.setSource(sourceCode);
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);
-        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+    public List<Diagnostic> parseAst(CompilationUnit cu){
         // Apply the visitor on the created tree (visit methods above will be called on the nodes)
         cu.accept(this);
         return results;

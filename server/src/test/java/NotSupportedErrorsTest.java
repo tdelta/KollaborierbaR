@@ -6,6 +6,9 @@ import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import linter.JmlNotSupportedScanner;
 import linter.JavaSourceMemoryObject;
 import linter.Diagnostic;
@@ -28,7 +31,8 @@ public class NotSupportedErrorsTest{
             end;
 
         JmlNotSupportedScanner subject = new JmlNotSupportedScanner(new JavaSourceMemoryObject("Test.java",source));
-        List<Diagnostic> results = subject.getResults();
+        CompilationUnit cu = createCompilationUnit(source,"Test.java");
+        List<Diagnostic> results = subject.parseAst(cu);
 
         // Lint the source
         assertThat(
@@ -52,11 +56,32 @@ public class NotSupportedErrorsTest{
 
         // Lint the source
         JmlNotSupportedScanner subject = new JmlNotSupportedScanner(new JavaSourceMemoryObject("Test.java",source));
-        List<Diagnostic> results = subject.getResults();
+        CompilationUnit cu = createCompilationUnit(source, "Test.java");
+        List<Diagnostic> results = subject.parseAst(cu);
         
         assertThat(
             "Scanning an empty source code yields no results",
             results.size(),
             is(0));
+    }
+
+    private CompilationUnit createCompilationUnit(String source, String name){
+        ASTParser parser = ASTParser.newParser(AST.JLS8);
+        parser.setResolveBindings(true);
+        try{
+            parser.setSource(source.toCharArray());
+        } catch (Exception e) {
+            parser.setSource(new char[0]);
+        }
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+        parser.setBindingsRecovery(true);
+        parser.setUnitName(name);
+
+        final String[] sources = {"[~/TODO]"};
+        final String[] classpath = {"[~/TODO]"};
+        parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true); 
+
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+        return cu;
     }
 }
