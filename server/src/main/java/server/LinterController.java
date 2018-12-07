@@ -35,7 +35,16 @@ public class LinterController {
       // Cut away .java of the file name for the java compiler
       final String classname = cutFileExtension(filename);
 
-      return linter.check(Arrays.asList(new JavaSourceMemoryObject(classname, source)));
+      try {
+        return linter.check(Arrays.asList(new JavaSourceMemoryObject(classname, source)));
+      }
+
+      catch (final Exception e) {
+        e.printStackTrace();
+        
+        // TODO proper error handling
+        return new ArrayList<>(0);
+      }
     }
 
     else {
