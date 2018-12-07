@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 
 public class JmlNotSupportedScanner extends ASTVisitor{
 
@@ -240,7 +241,10 @@ public class JmlNotSupportedScanner extends ASTVisitor{
 
     @Override
     public boolean visit(MethodInvocation node){
-        for(ITypeBinding implemented: node.resolveMethodBinding().getDeclaringClass().getInterfaces()){
+        IMethodBinding methodBinding = node.resolveMethodBinding();
+        if(methodBinding == null)
+            return true;
+        for(ITypeBinding implemented: methodBinding.getDeclaringClass().getInterfaces()){
             String qualifiedName = implemented.getQualifiedName();
             if(qualifiedName.equals("java.lang.Runnable") ||
                 qualifiedName.equals("java.lang.Thread"))
