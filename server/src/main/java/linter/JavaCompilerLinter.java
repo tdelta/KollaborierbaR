@@ -90,7 +90,7 @@ public class JavaCompilerLinter {
 
     return new Diagnostic(
         d.getMessage(),
-        d.getSourceStart()+1,
+        d.getSourceStart(),
         d.getSourceEnd()+1,
         source,
         kind);
