@@ -79,20 +79,20 @@ export default class Editor extends React.Component<Props> {
    * we could have used session.addGutterDecoration instead, but get automatically updating positions this way for free
    * @param gutterLayer the renderer to extend
    */
-  private addKeyAnnotationType(gutterLayer: any){
+  private addKeyAnnotationType(gutterLayer: any) {
     // save the default implementation in a variable
-    const __super__setAnnotations = gutterLayer.setAnnotations;
-    gutterLayer.setAnnotations = function (annotations: Annotation[]){
+    const superSetAnnotations = gutterLayer.setAnnotations;
+    gutterLayer.setAnnotations = function(annotations: Annotation[]) {
       // call the default function first so we can overwrite the results
-      __super__setAnnotations.call(gutterLayer,annotations);
-      for(const annotation of annotations){
-        if(annotation.type == "not_supported"){
+      superSetAnnotations.call(gutterLayer, annotations);
+      for (const annotation of annotations) {
+        if (annotation.type === 'not_supported') {
           // set a custom css class for our own error type
-          var rowInfo = this.$annotations[annotation.row];
-          rowInfo.className = "ace_not_supported";
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'ace_not_supported';
         }
       }
-    }
+    };
   }
   public render() {
     return <div id="editor" />;
@@ -145,7 +145,7 @@ export default class Editor extends React.Component<Props> {
           message,
         });
       }
-      
+
       this.editor.session.clearAnnotations();
       this.editor.session.setAnnotations(
         this.anchoredMarkers.map(this.toAnnotation)
@@ -166,13 +166,18 @@ export default class Editor extends React.Component<Props> {
     this.markers = [];
 
     // Add markers for all anchoredMarkers
-    addLoop: for (var i = 0;i < this.anchoredMarkers.length;i ++) {
-      for(var j = i+1;j < this.anchoredMarkers.length;j ++) {
+    addLoop: for (let i = 0; i < this.anchoredMarkers.length; i = i + 1) {
+      for (let j = i + 1; j < this.anchoredMarkers.length; j = j + 1) {
         // Dont add the marker if it overlaps with another marker
-        if(this.anchoredMarkers[i].range.intersects(this.anchoredMarkers[j].range))
+        if (
+          this.anchoredMarkers[i].range.intersects(
+            this.anchoredMarkers[j].range
+          )
+        ) {
           continue addLoop;
+        }
       }
-    
+
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
