@@ -16,6 +16,7 @@
         "object-literal-key-quotes": [true, "as-needed"],
         "object-literal-sort-keys": false,
         "interface-name": false,
+        "ordered-imports": false,
 
         "import-name": false,
 

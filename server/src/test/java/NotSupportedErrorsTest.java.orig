@@ -33,9 +33,18 @@ public class NotSupportedErrorsTest{
             "Consumer<String> consumer = s -> {};"+
             end;
 
+<<<<<<< HEAD
         JmlNotSupportedScanner subject = new JmlNotSupportedScanner(new JavaSourceMemoryObject("Test.java",source));
         CompilationUnit cu = createCompilationUnit(source,"Test.java");
         List<Diagnostic> results = subject.parseAst(cu);
+=======
+        final JmlNotSupportedScanner subject =
+            new JmlNotSupportedScanner(
+                new JavaSourceMemoryObject("Test.java", source)
+            );
+
+        final List<Diagnostic> results = subject.run();
+>>>>>>> 5fcf1c994a6a50572efeb0c3711b52e0927c4d5e
 
         // Lint the source
         assertThat(
@@ -58,9 +67,16 @@ public class NotSupportedErrorsTest{
         final String source = "";
 
         // Lint the source
+<<<<<<< HEAD
         JmlNotSupportedScanner subject = new JmlNotSupportedScanner(new JavaSourceMemoryObject("Test.java",source));
         CompilationUnit cu = createCompilationUnit(source, "Test.java");
         List<Diagnostic> results = subject.parseAst(cu);
+=======
+        final JmlNotSupportedScanner subject = new JmlNotSupportedScanner(
+            new JavaSourceMemoryObject("Test.java",source)
+        );
+        final List<Diagnostic> results = subject.run();
+>>>>>>> 5fcf1c994a6a50572efeb0c3711b52e0927c4d5e
         
         assertThat(
             "Scanning an empty source code yields no results",

@@ -1,11 +1,14 @@
 package linter;
 
+<<<<<<< HEAD
 import java.util.Arrays;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.JavaCore;
 import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+=======
+>>>>>>> 5fcf1c994a6a50572efeb0c3711b52e0927c4d5e
 import javax.tools.JavaFileObject;
 
 import java.util.List;
@@ -38,6 +41,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.SimpleType;
+<<<<<<< HEAD
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -52,6 +56,42 @@ public class JmlNotSupportedScanner extends ASTVisitor{
 
     public JmlNotSupportedScanner(JavaFileObject sourceFile){
         this.sourceFile = sourceFile;
+=======
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+
+/**
+ * Searches the AST of the given `sourceFile` for features not supported by
+ * KeY. (It implements the visitor pattern.)
+ *
+ * Produces a list of diagnostic information about discovered issues.
+ */
+public class JmlNotSupportedScanner extends ASTVisitor {
+    private final LinkedList<Diagnostic> results = new LinkedList<Diagnostic>();
+
+    private final JavaFileObject sourceFile;
+    private final char[] sourceCode;
+
+    public JmlNotSupportedScanner(JavaFileObject sourceFile){
+        this.sourceFile = sourceFile;
+
+        char[] sourceCodeInitVar = null;
+
+        try {
+            // Extract the source code of the given JavaFileObject as String
+            // and save it as a char array, such that it can be passed to the
+            // JDT AST parser later on
+            sourceCodeInitVar = sourceFile
+              .getCharContent(true)
+              .toString()
+              .toCharArray();
+        } catch(IOException e) {
+            e.printStackTrace();
+            sourceCodeInitVar = new char[0];
+        }
+
+        this.sourceCode = sourceCodeInitVar;
+>>>>>>> 5fcf1c994a6a50572efeb0c3711b52e0927c4d5e
     }
 
     /**
@@ -162,7 +202,12 @@ public class JmlNotSupportedScanner extends ASTVisitor{
 
     @Override
     public boolean visit(EnumConstantDeclaration node){
+<<<<<<< HEAD
+        createError(node,"Enums are not supported in KeY");
+=======
+        // TODO: Not working
         saveDiagnostic(node,"Enums are not supported in KeY");
+>>>>>>> 5fcf1c994a6a50572efeb0c3711b52e0927c4d5e
         return true;
     }
 
@@ -177,8 +222,16 @@ public class JmlNotSupportedScanner extends ASTVisitor{
     
     @Override
     public boolean visit(NumberLiteral node){
+<<<<<<< HEAD
         if(node.getToken().indexOf('b')>=0)
+            createError(node,"Binary literals are not supported in KeY");
+=======
+        // TODO: Not working
+        if(node.getToken().indexOf('b')>=0) {
             saveDiagnostic(node,"Binary literals are not supported in KeY");
+        }
+
+>>>>>>> 5fcf1c994a6a50572efeb0c3711b52e0927c4d5e
         return true;
     }
 
@@ -233,7 +286,7 @@ public class JmlNotSupportedScanner extends ASTVisitor{
 
     public boolean visitExpression(Expression node){
         if(node.resolveBoxing() || node.resolveUnboxing())
-            saveDiagnostic(node,"Autoboxing is not supported in KeY");
+            createError(node,"Autoboxing is not supported in KeY");
         return true;
         //TODO: Not working
     }
@@ -244,7 +297,7 @@ public class JmlNotSupportedScanner extends ASTVisitor{
             String qualifiedName = implemented.getQualifiedName();
             if(qualifiedName.equals("java.lang.Runnable") ||
                 qualifiedName.equals("java.lang.Thread"))
-                saveDiagnostic(node, "Multithreading is not supported in KeY");
+                createError(node, "Multithreading is not supported in KeY");
         }
         return true;
     }
@@ -254,7 +307,19 @@ public class JmlNotSupportedScanner extends ASTVisitor{
      *
      * @return A list of Diagnostics, containing all features that are not supported by key with their respective positions in the source code
      */
+<<<<<<< HEAD
     public List<Diagnostic> parseAst(CompilationUnit cu){
+=======
+    public List<Diagnostic> run(){
+        // Create AST from source code
+        final ASTParser parser = ASTParser.newParser(AST.JLS8);
+
+        parser.setSource(sourceCode);
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        final CompilationUnit cu = (CompilationUnit) parser
+            .createAST(null); // null means, we dont want to install a progress monitor object
+>>>>>>> 5fcf1c994a6a50572efeb0c3711b52e0927c4d5e
         // Apply the visitor on the created tree (visit methods above will be called on the nodes)
         cu.accept(this);
 
