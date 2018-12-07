@@ -32,7 +32,11 @@ import java.util.stream.Stream;
 public class JavaCompilerLinter {
   final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-  /** Checks given source files for errors and returns diagnostics of all of them */
+  /**
+    * Checks given source files for errors and returns diagnostics of all of them 
+    * @param toCheck the source code to be checked
+    * @return A list of errors that were found
+    */
   public List<Diagnostic> check(final List<JavaFileObject> toCheck) {
 
     // Create a syntax parser

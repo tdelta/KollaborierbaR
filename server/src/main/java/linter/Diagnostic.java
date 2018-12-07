@@ -85,16 +85,6 @@ public class Diagnostic{
 		return message;
 	}
 
-	/** Offset of described problem from start of source file */
-	public long getStart() {
-		return start;
-	}
-
-	/** Offset of described problem from end of source file */
-	public long getEnd() {
-		return end;
-	}
-
 	public Kind getKind() {
 		return kind;
 	}
