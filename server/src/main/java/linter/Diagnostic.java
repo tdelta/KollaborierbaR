@@ -3,6 +3,7 @@ package linter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.Reader;
 import java.util.Locale;
 
 import javax.tools.JavaFileObject;
@@ -35,52 +36,146 @@ public class Diagnostic{
 		this.end = end;
 		this.start = start;
 		this.kind = kind;
-		long[] pos = getRowCol(source, start);
-		this.startRow = pos[0];
-		this.startCol = pos[1];
-		pos = getRowCol(source, end);
-		this.endRow = pos[0];
-		this.endCol = pos[1];
+
+    {
+      final RowColPosition pos = getRowCol(source, start);
+
+      this.startRow = pos.row;
+      this.startCol = pos.column;
+    }
+
+    {
+      final RowColPosition pos = getRowCol(source, end);
+
+      this.endRow = pos.row;
+      this.endCol = pos.column;
+    }
 	}
 
-  // TODO: Kommentieren, bitte!
-	private long[] getRowCol(JavaFileObject source, long position) {
-		long row, column = -1;
-		long count = 0;
-		long truePos = position;
-		LineNumberReader r;
-		String line;
+  private class RowColPosition {
+    final long row;
+    final long column;
 
-		try {
-			r = new LineNumberReader(source.openReader(true)); //true == ignore coding errors
+    RowColPosition(final long row, final long column) {
+      this.row = row;
+      this.column = column;
+    }
+  }
 
-			while (count < truePos) {
-				column = 0;
-				line = r.readLine();
+  /**
+   * Calculates row and column of a character within a file, given its offset
+   * from the beginning of the file.
+   *
+   * Will return -1 on (IO) errors
+   *
+   * @return Row/Column position computed from an offset position
+   * @param source file the position is referencing
+   * @param position offset from the start of given file
+   **/
+  private RowColPosition getRowCol(final JavaFileObject source, final long position) {
+    // We start at the first column and first row
+    long seenRows = 0;
+    long seenCols = 0;
 
-				while (count < truePos && column < line.length()) {
-					count++;
-					column++;
-				}
-        // for DOS line endings:
-//				truePos -= 1; // iteratively substract newlines
-				
-				if (column == line.length())
-					count++;
-			}
-		} catch (Exception e) {
-			row = -1;
-			column = -1;
-			long[] results = { row, column };
-			return results;
+    // We need to keep track of carriage return ('\r') later on,
+    // if we are dealing with files with non-unix line endings.
+    boolean lastCharacterWasCarriageReturn = false;
 
-		}
+    try {
+      final Reader r = source.openReader(true); //true == ignore encoding errors
 
-		row = r.getLineNumber() - 1;
-		long[] results = { row, column };
+      // We are going to traverse the file, to the given position.
+      //
+      // While doing that, we will count rows for each line termination sequence.
+      // A line termination sequence can be one of the following:
+      //
+      // * "\n"
+      // * "\r"
+      // * "\r\n"
+      //
+      // We will also count the current column for each character in the current
+      // row. Therefore, if we detect a line termination, we will reset that
+      // counter.
+      for (
+          long seenCharacters = 0;   // we need to count the seen characters...
+          seenCharacters < position; // ...up to position
+          ++seenCharacters
+      ) {
+        final int currentCharacter = r.read();
+        final boolean characterIsCarriageReturn = currentCharacter == '\r';
+        final boolean characterIsLineFeed = currentCharacter == '\n';
 
-		return results;
-	}
+        // A newline always means a new line, so does a carriage return
+        if (characterIsLineFeed || characterIsCarriageReturn) {
+          // only increment seen rows on \n, if last character was not a carriage return
+          // otherwise, its a DOS line termination and we dont want to count
+          // two rows
+          if (!lastCharacterWasCarriageReturn | !characterIsLineFeed) {
+            ++seenRows;
+          }
+
+          // reset columns, since we have begun a new line
+          seenCols = 0;
+        }
+
+        else {
+          // for each non line termination character, count it as a column
+          ++seenCols;
+        }
+
+        // remember, whether last character was a carriage return
+        if (characterIsCarriageReturn) {
+          lastCharacterWasCarriageReturn = characterIsCarriageReturn;
+        }
+      }
+
+      return new RowColPosition(seenRows, seenCols);
+    }
+
+    catch (final Exception e) {
+      //TODO: Deal with exceptions properly
+
+      e.printStackTrace();
+
+      return new RowColPosition(-1, -1);
+    }
+
+
+    /*
+    long row, column = -1;
+    long positionCounter = position;
+
+    String line;
+
+    try {
+      final LineNumberReader r = new LineNumberReader(
+          source.openReader(true) //true == ignore encoding errors
+      );
+
+      line = r.readLine();
+      // this loop counts all characters in the lines up to position
+      while (positionCounter > line.length()) {
+        // The position is not in the current line;
+        //
+        // substract characters in the line to count and 2 characters for
+        // newline
+        positionCounter -= line.length() + 2;
+        line = r.readLine();
+      }
+      column = positionCounter;
+    } catch (Exception e) {
+      row = -1;
+      column = -1;
+      long[] results = { row, column };
+      return results;
+    }
+
+    row = r.getLineNumber() - 1;
+    long[] results = { row, column };
+
+    return results;
+    */
+  }
 
 	public String getMessage() {
 		return message;
