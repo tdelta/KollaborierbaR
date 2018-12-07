@@ -59,7 +59,7 @@ nav{
   background: url(not-supported-underline.png) bottom repeat-x;
 }
 
-.ace_gutter-cell.ace_not_supportedundefined {
+.ace_gutter-cell.ace_not_supported {
   background-image: url(not-supported-annotation.png);
   background-position: 2px center;
 }
