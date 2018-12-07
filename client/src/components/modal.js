@@ -4,7 +4,7 @@ import React from 'react';
 import { ListGroup, ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 /*
- * load the list of availlablle projects from the server
+ * load the list of available projects from the server
  */
 function getProjects() {
     var url = new URL('http://localhost:9000/projects/listProjects');
@@ -39,6 +39,9 @@ function getProjectStructure(name) {
         .then((response) => response.json());
 }
 
+/*
+ * open project dialog window, that shows a list with available projects
+ */
 class ModalSelect extends React.Component {
     constructor(props) {
         super(props);
