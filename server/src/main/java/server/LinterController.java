@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import linter.Diagnostic;
-import linter.JavaCompilerLinter;
+import linter.JavaJDTLinter;
 import linter.JavaSourceMemoryObject;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Naive HTTP API (RESTful?) for linting (java) source code */
 @RestController
 public class LinterController {
-  private final JavaCompilerLinter linter = new JavaCompilerLinter();
+  private final JavaJDTLinter linter = new JavaJDTLinter();
 
   /**
    * implements "/lint" routing

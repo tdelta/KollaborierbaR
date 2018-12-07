@@ -1,6 +1,6 @@
 import java.util.function.Consumer;
 
-public class LimitedIntegerSet {
+public class DosTest {
   private void provokeWarning() {
     Consumer<Integer> noLambdaSupport = x -> {};
 
