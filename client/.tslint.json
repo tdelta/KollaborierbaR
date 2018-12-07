@@ -23,7 +23,7 @@
         "jsx-boolean-value": false,
 
         "import-name": false,
-
+        "member-ordering": false,
         "no-constant-condition": true,
         "no-control-regex": true,
         "no-duplicate-case": true,
