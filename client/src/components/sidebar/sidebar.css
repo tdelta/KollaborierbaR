@@ -1,0 +1,114 @@
+/**
+ * Small bar on the left. Restores a collapsed sidebar when pressed
+ */
+.sidebarRestoreHandle {
+  float: left;
+
+  background-color: #212121;
+  color: white;
+
+  /* this handle contains a arrow symbol. It shall be centered. */
+  text-align: center;
+
+  /* it should be barely visible */
+  width: 10px;
+  height: 100%;
+
+  /* we want a cursor with a pointing finger, such that the user knows,
+     that it is an interactive element */
+  cursor: pointer;
+}
+
+/* (arrow) symbol within the sidebar restore handle (see above) */
+.sidebarRestoreButton {
+  margin-top: 0.8em;
+}
+
+/* Window left from main content. Meant to contain a project overview */
+.sidebar {
+  background-color: #455a64;
+  color: #cfd8dc;
+
+  float: left;
+
+  height: 100%;
+  width: 300px;
+}
+
+/* a slim bar between sidebar and main content. It will allow the user to
+ * change the sidebar width by dragging it around */
+.sidebar-split-bar {
+  background-color: #212121;
+
+  /* indicate to the user, that this element allows for resizing interaction
+     by changing the cursor accordingly */
+  cursor: col-resize;
+
+  float: right;
+
+  width: 4px;
+  height:100%;
+}
+
+.sidebarToggleButton {
+    /*circle shaped background*/
+    /*(the button shall not be transparent, but rectangle backgrounds would
+       have been ugly. This way we get a non transparent, circle shaped bg)*/
+    border-radius: 50%;
+    width: 1em;
+    height: 1em;
+
+    /* place button arrow symbol at the center of it */
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1;
+
+    background-color: #455a64;
+    color: #cfd8dc;
+
+    /* this will place it floating in the upper right corner */
+    position: relative;
+    display: inline-block;
+    top: 0.5em;
+    left: calc(100% - 1.8em);
+
+    /* this element is interactive, so we change the cursor to a pointer */
+    cursor: pointer;
+}
+
+/* contains the project view etc. */
+.sidebarContent {
+    margin-left: 0.5em;
+    margin-top: -1em;
+    /* ^this is needed to fill the space left by the toggle button */
+
+    /* dont wrap content of the sidebar, it should just be invisible,
+      when the sidebar gets too small */
+    white-space: nowrap;
+    overflow: hidden;
+
+    /* disallow text selections */
+    user-select: none;
+}
+
+.activeFileNode {
+    background-color: #374c55;
+    border-radius: 5px;
+    padding-left: 0.5em;
+}
+
+.inactiveFileNode {
+    background-color: inherit;
+}
+
+/* file lists within the project view */
+.projectTreeList {
+    list-style-type: none; /*we dont want the standard list bullet icons */
+    padding-left: 1em; /*smaller list indentation */
+}
+
+/* file and folder icons */
+.projectTreeIcon {
+    margin-right: 0.5em; /* leave some space to the file/folder name */
+    color: #caa576;
+}

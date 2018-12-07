@@ -6,12 +6,35 @@ nav{
 	left:0px;
 	right:0px;
 }
-#editor{
-	position:absolute;
-	top:55px;
-	left:0px;
-	right:0px;
-	bottom:0px
+
+#mainContainer {
+  position: absolute;
+  top: 55px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+}
+
+
+.ace_jml_comment{
+  color:#009955
+}
+
+.ace_jml_keyword{
+  color:#2fa
+}
+
+.ace_jml_predicate{
+  color:#2ff
+}
+
+#editor {
+  position : relative;
+  top : 0px;
+  left: 0px;
+  height: 100%;
+  width: auto;
+  overflow:hidden;
 }
 
 .errorMarker {
@@ -28,4 +51,15 @@ nav{
   color: red;
   text-decoration: none;
   background: url(warning-underline.png) bottom repeat-x;
+}
+
+.not_supportedMarker {
+  position:absolute;
+  z-index:20;
+  background: url(not-supported-underline.png) bottom repeat-x;
+}
+
+.ace_gutter-cell.ace_not_supportedundefined {
+  background-image: url(not-supported-annotation.png);
+  background-position: 2px center;
 }
