@@ -77,6 +77,17 @@ paths:
           description: A json object which contains the filename and the filecontents
           schema:
             $ref: '#/definitions/OpenedFile'
+  /projects/**:
+    delete:
+      tags:
+        - project
+      summary: Delete a specific resource on the server
+      operationId: project.deleteFile
+      responses:
+          '204':
+            description: The resource was deleted successfully.
+          '404':
+            description: The resource was not found
   /lint:
     post:
       tags:
