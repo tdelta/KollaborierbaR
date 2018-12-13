@@ -15,7 +15,11 @@ import {
   DropdownItem,
 } from 'reactstrap';
 
-import ModalSelect from './modal.js';
+import {
+    OpenModal, 
+    DeleteModal
+} from './modal.js';
+
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -28,17 +32,22 @@ export default class Top extends React.Component<Props, State> {
     this.downloadSelector = React.createRef();
     this.onFileChosen = this.onFileChosen.bind(this);
     this.onFileLoaded = this.onFileLoaded.bind(this);
-    this.toggleModal = this.toggleModal.bind(this);
+    this.toggleOpenModal = this.toggleOpenModal.bind(this);
+    this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
     this.state = {
-      showModal: false,
+      showOpenModal: false,
+      showDeleteModal: false
     };
   }
 
-  private toggleModal(): void {
-    this.setState({ showModal: !this.state.showModal });
+  private toggleOpenModal(): void {
+    this.setState({ showOpenModal: !this.state.showOpenModal });
+  }
+  private toggleDeleteModal(): void {
+    this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
 
   private onFileChosen(event: HTMLInputEvent): void {
@@ -85,17 +94,25 @@ export default class Top extends React.Component<Props, State> {
                 Project
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.toggleModal}>
+                <DropdownItem onClick={this.toggleOpenModal}>
                   Open project
+                </DropdownItem>
+                <DropdownItem onClick={this.toggleDeleteModal}>
+                  Delete project
                 </DropdownItem>
                 <DropdownItem onClick={this.openProjectOnClick}>
                   Create project
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
-            <ModalSelect
-              isOpen={this.state.showModal}
-              toggle={this.toggleModal}
+            <OpenModal
+              isOpen={this.state.showOpenModal}
+              toggle={this.toggleOpenModal}
+              setStructure={this.props.showProject}
+            />
+            <DeleteModal
+              isOpen={this.state.showDeleteModal}
+              toggle={this.toggleDeleteModal}
               setStructure={this.props.showProject}
             />
             <UncontrolledDropdown>
@@ -144,7 +161,8 @@ interface HTMLInputEvent extends React.FormEvent<HTMLInputElement> {
 
 // defining the strcuture of the state
 interface State {
-  showModal: boolean;
+  showOpenModal: boolean;
+  showDeleteModal: boolean;
 }
 
 // defining the structure of this react components properties
