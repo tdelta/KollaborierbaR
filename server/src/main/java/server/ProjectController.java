@@ -201,6 +201,11 @@ public class ProjectController {
             return new ResponseEntity(HttpStatus.OK);
         }
     }
+    
+    /* TODO: Anton will auf uns zurückkommen.
+     * @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
+    	public void deleteFile(@PathVariable String var, HttpServletRequest request) throws IOException{
+     */
 
     /**
      * Helper method that handles the deletion of a giving file type.
