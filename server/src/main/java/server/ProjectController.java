@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 import projectmanagement.*;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -159,6 +158,13 @@ public class ProjectController {
       }	
     }
 
+    /**
+     * This Method handles the creation of Files and Folders
+     * @param type Type of the kind of structure to be created can be file or folder
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the right type was given.
+     * @throws IOException when a new file could not be created
+     */
     @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity createFile(@RequestParam("type") String type,HttpServletRequest request) throws IOException {
@@ -166,7 +172,8 @@ public class ProjectController {
     	//TODO: Schönere Lösung finden!
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
     	File file = new File(path);
-    	
+
+    	//check which kind of structure should be created
     	if(type.equals("file")) {
     		file.createNewFile();
     	} else if(type.equals("folder")) {
@@ -178,10 +185,9 @@ public class ProjectController {
     }
 
     /**
-     * This method handels delete requests to files, folders and projects
-     *
-     *
-     * @return Http Response Code depending on whether the request off successful or not.
+     * This Method handles the deletion of files and folders
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the file to be deleted exists.
      * @throws IOException
      */
     @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
