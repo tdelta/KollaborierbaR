@@ -1,0 +1,13 @@
+{
+  "name": "conclave-lib",
+  "version": "1.0.0",
+  "description": "CRDT data structure and helpers from the Conclave peer-to-peer collaborative text editor",
+  "main": "index.js",
+  "typings": "conclave-lib.d.ts",
+  "author": "conclave-team",
+  "license": "MIT",
+  "homepage": "https://github.com/conclave-team/conclave",
+  "dependencies": {
+    "sorted-cmp-array": "^2.0.1"
+  }
+}
