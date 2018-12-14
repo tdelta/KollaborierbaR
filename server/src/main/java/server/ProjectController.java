@@ -168,14 +168,14 @@ public class ProjectController {
         file.createNewFile();
     }
 
-//    @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
-//    @ResponseBody
-//    public void createFolder(HttpServletRequest request){
-//        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-//
-//        File folder = new File(path);
-//        folder.mkdir();
-//    }
+    @RequestMapping(value = {"/**/"}, method = RequestMethod.PUT)
+    @ResponseBody
+    public void createFolder(HttpServletRequest request){
+        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+        File folder = new File(path);
+        folder.mkdir();
+    }
 
     /**
      * This method handels delete requests to files, folders and projects
@@ -216,10 +216,11 @@ public class ProjectController {
                 //if the current directory is empty, delete it
                 file.delete();
             }else{
-                //if the current directroy is not empty  list its content and call delete recursively
+                //if the current directory is not empty  list its content and call delete recursively
                 for(File f: file.listFiles()){
                     delete(f);
                 }
+                //do not forget to delete the current directory itself
                 file.delete();
             }
         }else{
