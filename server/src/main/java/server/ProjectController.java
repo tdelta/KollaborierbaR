@@ -1,5 +1,7 @@
 package server;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.servlet.HandlerMapping;
@@ -168,15 +170,15 @@ public class ProjectController {
     }
 
     /**
-     * This method handels delete requests to ...
+     * This method handels delete requests to files, folders and projects
      *
      *
-     * @return
+     * @return Http Response Code depending on whether the request off successful or not.
      * @throws IOException
      */
     @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
     @ResponseBody
-    public String deleteFile(HttpServletRequest request) throws IOException{
+    public ResponseEntity deleteFile(HttpServletRequest request) throws IOException{
     	
     	//TODO: Schönere Lösung finden!
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -184,11 +186,12 @@ public class ProjectController {
         File file = new File(path);
         //check if the given path actually leads to a valid directory
         if(!file.exists()){
-            System.out.println("error");
+            //System.out.println("error");
+        	return new ResponseEntity(HttpStatus.NOT_FOUND);
         }else{
             delete(file);
+            return new ResponseEntity(HttpStatus.OK);
         }
-        return path;
     }
 
     /**
