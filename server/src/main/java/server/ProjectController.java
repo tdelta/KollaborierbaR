@@ -177,15 +177,16 @@ public class ProjectController {
     @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
     @ResponseBody
     public String deleteFile(HttpServletRequest request) throws IOException{
-        String path = (String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
-        path = "/home/heckstrahler/Sync/uni/2018ss/BP/git/kollaborierbar/server/projects/test";
+    	
+    	//TODO: Schönere Lösung finden!
+        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
 
-        File directory = new File(path);
+        File file = new File(path);
         //check if the given path actually leads to a valid directory
-        if(!directory.exists()){
+        if(!file.exists()){
             System.out.println("error");
         }else{
-            delete(directory);
+            delete(file);
         }
         return path;
     }
