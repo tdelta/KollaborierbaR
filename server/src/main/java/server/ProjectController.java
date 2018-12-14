@@ -1,6 +1,5 @@
 package server;
 
-import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,13 +11,8 @@ import org.springframework.web.servlet.HandlerMapping;
 import projectmanagement.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -166,37 +160,49 @@ public class ProjectController {
       }	
     }
 
-    public boolean createFile(){
-
-        return true;
+    public void createFile(String relativePath) throws IOException {
+        File file = new File(relativePath);
+        file.createNewFile();
     }
 
-    public boolean createFolder(){
-
-        return true;
+    public void createFolder(String relativePath){
+        File folder = new File(relativePath);
+        folder.mkdir();
     }
 
+    /**
+     * This method handels delete requests to ...
+     *
+     *
+     * @return
+     * @throws IOException
+     */
+//    @RequestMapping(value = {"/someChildUrlIfYouWant/**", method=RequestMethod.DELETE})
+//    @ResponseBody
+//    public boolean deleteFile() throws IOException{
+//        String path = request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
+//
+//        File directory = new File(path);
+//
+//        //check if the given path actually leads to a valid directory
+//        if(!directory.exists()){
+//            return false;
+//        }else{
+//            delete(directory);
+//            return true;
+//        }
+//    }
 
-    @RequestMapping(value = {"/someChildUrlIfYouWant/**", method=RequestMethod.DELETE})
-    @ResponseBody
-    public boolean deleteFile() throws IOException{
-        String path = request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
-
-        File directory = new File(path);
-
-        //check if the given path actually leads to a valid directory
-        if(!directory.exists()){
-            return false;
-        }else{
-            delete(directory);
-            return true;
-        }
-    }
-
+    /**
+     * Helper method that handles the deletion of a giving file type.
+     * Needs to be called recursively to delete a folders content.
+     *
+     * @param file File or directory that is supposed to be deleted.
+     * @throws IOException
+     */
     private void delete(File file) throws IOException{
+        // if the currenct file is not a file but a directory we need to delete its content first.
         if(file.isDirectory()){
-
-
             if(file.list().length==0){
                 //if the current directory is empty, delete it
                 file.delete();
