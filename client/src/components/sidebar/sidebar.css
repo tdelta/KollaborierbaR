@@ -95,6 +95,7 @@
     background-color: #374c55;
     border-radius: 5px;
     padding-left: 0.5em;
+    padding-right: 0.5em;
 }
 
 .inactiveFileNode {
@@ -111,4 +112,22 @@
 .projectTreeIcon {
     margin-right: 0.5em; /* leave some space to the file/folder name */
     color: #caa576;
+}
+
+.contextList {
+    background-color: #cfd8dc;
+    color: #455a64;
+    border-radius: 5px;
+    margin-left: 1.5em;
+    margin-bottom: 0.5em;
+    list-style:none;
+}
+
+.contextItem {
+    margin-left: .5em;
+    margin-right: .5em;
+}
+
+ul > li{
+    display: table;
 }

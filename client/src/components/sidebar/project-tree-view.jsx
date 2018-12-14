@@ -48,7 +48,8 @@ export default class ProjectTreeView extends React.Component {
         this.onSelect = this.onSelect.bind(this);
         this.state = {
             selected: '',
-        }
+            file: null
+        };
     }
 
     render() {
@@ -96,25 +97,29 @@ export default class ProjectTreeView extends React.Component {
                 <>
                     {header /* display the header (contains project name) */}
 
-                    {
-                        // render each element within the root folder of the
-                        // project as FileNode
-                        this.props.project.contents.map((item) =>
-                            <FileNode
-                                key={item.name}
-                                // ^when rendering a list of elements, react
-                                // requires a unique key for all of them
-                                data={item} // pass the element to thee FileNode
-                                path={[item.name]}
-                                // ^since this is the root of the project,
-                                // the path of each element consists just of its
-                                // own name
-                                onOpenFile={this.props.onOpenFile}
-                                onSelect={this.onSelect}
-                                selectedPath={this.state.selected}
-                            />
-                        )
-                    }
+                        <div ref={elem => !this.state.file && this.setState({ file: elem })}>
+                            {
+                                // render each element within the root folder of the
+                                // project as FileNode
+                                this.props.project.contents.map((item) =>
+                                    <FileNode
+                                        tree={() => this.state.file}
+                                        key={item.name}
+                                        // ^when rendering a list of elements, react
+                                        // requires a unique key for all of them
+                                        data={item} // pass the element to thee FileNode
+                                        path={[item.name]}
+                                        // ^since this is the root of the project,
+                                        // the path of each element consists just of its
+                                        // own name
+                                        onOpenFile={this.props.onOpenFile}
+                                        onOpenContext={this.props.onOpenContext}
+                                        onSelect={this.onSelect}
+                                        selectedPath={this.state.selected}
+                                    />
+                                )
+                            }
+                        </div>
                 </>
             );
         }
@@ -141,6 +146,7 @@ export default class ProjectTreeView extends React.Component {
 // declare types of properties
 ProjectTreeView.propTypes = {
     'onOpenFile': PropTypes.func,
+    'onOpenContext': PropTypes.func,
     'project': PropTypes.shape({
         'contents': PropTypes.arrayOf(PropTypes.object),
         'name': PropTypes.string
@@ -149,6 +155,7 @@ ProjectTreeView.propTypes = {
 
 // default values for some properties
 ProjectTreeView.defaultProps = {
-    'onOpenFile': () => {}
+    'onOpenFile': () => {},
+    'onOpenContext': () => {}
 };
         
