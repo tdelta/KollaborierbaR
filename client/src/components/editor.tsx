@@ -13,6 +13,16 @@ import lint from '../linting.js';
 import './sidebar/sidebar.css';
 import '../index.css';
 
+import CollabController from '../collaborative/CollabController';
+import TextPosition from '../collaborative/TextPosition';
+
+interface AceChangeEvent {
+  action: string;
+  start: TextPosition;
+  end: TextPosition;
+  lines: string[]
+}
+
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
   // The exclamation mark tells typescript not to check if this attribute gets initialized
@@ -65,7 +75,27 @@ export default class Editor extends React.Component<Props> {
       this.setMarkers();
     });
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
+
+    this.editor.on('change', (change: AceChangeEvent) => {
+      if (this.editor.curOp && this.editor.curOp.command.name) {
+        switch(change.action) {
+          case 'insert':
+              this.props.collabController.localInsertLines(
+                change.lines,
+                change.start
+              );
+            break;
+          case 'remove':
+              this.props.collabController.localDelete(
+                change.start,
+                change.end
+              );
+            break;
+        }
+      }
+    });
   }
+
   public componentDidUpdate(): void {
     // Called when new properties are passed down from the app component
     // only update the text if it actually changed to prevent infinite loops
@@ -196,9 +226,7 @@ export default class Editor extends React.Component<Props> {
    * @param marker AnchoredMarker to convert
    * @return Annotation object with the same values
    */
-  private toAnnotation(marker: AnchoredMarker): Annotation {
-    return {
-      row: marker.range.start.row,
+  private toAnnotation(marker: AnchoredMarker): Annotation { return { row: marker.range.start.row,
       column: marker.range.start.column,
       text: marker.message,
       type: marker.type,
@@ -207,6 +235,24 @@ export default class Editor extends React.Component<Props> {
       endRow: marker.range.end.row,
       endCol: marker.range.end.column,
     };
+  }
+
+  public insert(text: string, position: TextPosition) {
+    this.editor.getSession().getDocument().insertMergedLines(
+      position,
+      text.split('\n')
+    );
+  }
+
+  public delete(from: TextPosition, to: TextPosition) {
+    this.editor.getSession().getDocument().remove(
+      new ace.Range(
+        from.row,
+        from.column,
+        to.row,
+        to.column
+      )
+    );
   }
 }
 
@@ -217,6 +263,7 @@ interface Props {
   filename: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
+  collabController: CollabController;
 }
 
 /**
