@@ -157,15 +157,23 @@ public class ProjectController {
       }	
     }
 
-    public void createFile(String relativePath) throws IOException {
-        File file = new File(relativePath);
+    @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
+    @ResponseBody
+    public void createFile(HttpServletRequest request) throws IOException {
+        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+        File file = new File(path);
         file.createNewFile();
     }
 
-    public void createFolder(String relativePath){
-        File folder = new File(relativePath);
-        folder.mkdir();
-    }
+//    @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
+//    @ResponseBody
+//    public void createFolder(HttpServletRequest request){
+//        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+//
+//        File folder = new File(path);
+//        folder.mkdir();
+//    }
 
     /**
      * This method handels delete requests to ...
@@ -206,12 +214,17 @@ public class ProjectController {
                 file.delete();
             }else{
                 //if the current directroy is not empty  list its content and call delete recursively
-                String content[] = file.list();
+                //String content[] = file.list();
 
-                for (String temp : content){
-                    File fileDelete = new File(file, temp);
-                    delete(fileDelete);
+                for(File f: file.listFiles()){
+                    delete(f);
                 }
+
+
+                ///for (String temp : content){
+                //    File fileDelete = new File(file, temp);
+                //    delete(fileDelete);
+                //}
             }
         }else{
             //if the current directory is not a directory but a file, delete it
