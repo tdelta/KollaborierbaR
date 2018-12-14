@@ -21,8 +21,9 @@ function getProjects() {
 
 /*
  * load the related files for the project with name 'name' from the server
+ * the handler displays the returned project in the editor
  */
-function getProjectStructure(name) {
+function openProject(name, handler) {
     var url = new URL('http://localhost:9000/projects/showProject');
 
     const params = {'name': name};
@@ -36,7 +37,33 @@ function getProjectStructure(name) {
             'Accept': 'application/json',
         },
     })
-        .then((response) => response.json());
+        .then((response) => {
+            response.json()
+                .then((json) => handler(json));
+            return {'status': response.status, 
+                'statusText': response.statusText};
+        });
+}
+
+/*
+ * load the related files for the project with name 'name' from the server
+ */
+function deleteProject(name, handler, previous) {
+    var url = 'http://localhost:9000/projects/' + name;
+
+    return fetch(url, {
+        method: 'DELETE',
+        mode: 'cors',
+    })
+        .then((response) => {
+            return {'status': response.status, 
+                'statusText': response.statusText};
+            // when the currently loaded project is deleted, delete the loaded files
+            // aka set an empty json object
+            if (previous === name && response.status === 200) {
+                handler({});
+            }
+        })
 }
 
 /*
@@ -46,7 +73,7 @@ class ModalSelect extends React.Component {
     constructor(props) {
         super(props);
         this.select = this.select.bind(this);
-        this.loadProjectFiles = this.loadProjectFiles.bind(this);
+        this.projectAction = this.projectAction.bind(this);
         this.loadProjectNames = this.loadProjectNames.bind(this);
         this.listProjects = this.listProjects.bind(this);
         this.state = {
@@ -54,10 +81,17 @@ class ModalSelect extends React.Component {
             selected: {
                 'id': -1,
                 'name': ''
-            }
+            },
         };
     }
 
+    /*
+     * Static class variable that holds the name of the previously selected project
+     * when a new one is selected. Is used to detected if the deleted project 
+     * is the loaded project
+     */
+    static previous = "";
+  
     /*
      * update the state with the selected project
      */
@@ -71,25 +105,25 @@ class ModalSelect extends React.Component {
     }
 
     /*
-     * loads the files for the selected project when the select button is pressed
-     * through the setStructure props method the structure starts its long journey to the sidebar
-     */
-    loadProjectFiles() {
-        let name = this.state.selected.name;
-        if (name) {
-            getProjectStructure(this.state.selected.name)
-                .then((response) => this.props.setStructure(response));
-            this.props.toggle();
-        }
-    }
-
-    /*
      * loads the project list, called whenever the modal is opened
      */
     loadProjectNames() {
         getProjects()
             .then((projects) => {this.setState({projects: projects});
             });
+    }
+
+    /*
+     * performs the esired operation for the selected project when the select button is pressed
+     * through the setStructure props method the structure starts its long journey to the sidebar
+     */
+    projectAction() {
+        let name = this.state.selected.name;
+        if (name) {
+            this.props.projectOperation(this.state.selected.name, this.props.setStructure, ModalSelect.previous)
+            this.props.toggle();
+            ModalSelect.previous = this.state.selected.name;
+        }
     }
 
     /*
@@ -136,14 +170,15 @@ class ModalSelect extends React.Component {
                 <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={() => this.loadProjectNames()} 
                     onClosed={() => this.select('', -1)} className={this.props.className}
                 >
-                    <ModalHeader toggle={this.props.toggle}>Select Project</ModalHeader>
+                    <ModalHeader toggle={this.props.toggle}>{'Select Project ' + this.props.usecase}</ModalHeader>
                     {/* the style enables a scrollbar, when the project names don't fit on the screen (100vh) with a 210 pixels margin */}
                     <ModalBody style={{'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto'}}>
                         {/* generate the listed project names dynamically */}
                         {this.listProjects()}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={this.loadProjectFiles}>Select</Button>
+                        {/* projectAction is a prop and defines what to do with a project (e.g. deletion) */}
+                        <Button color="primary" onClick={this.projectAction}>Select</Button>
                         <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
                     </ModalFooter>
                 </Modal>
@@ -153,4 +188,20 @@ class ModalSelect extends React.Component {
 
 }
 
-export default ModalSelect;
+/*
+ * No inheritance from ModalSelect because it is considered bad practice in React.
+ * See https://reactjs.org/docs/composition-vs-inheritance.html
+ */
+function OpenModal(props) {
+    return (
+        <ModalSelect {...props} projectOperation={openProject} usecase="To Open" />
+    );
+}
+
+function DeleteModal(props) {
+    return (
+        <ModalSelect {...props} projectOperation={deleteProject} usecase="To Delete"/>
+    );
+}
+
+export {OpenModal, DeleteModal};
