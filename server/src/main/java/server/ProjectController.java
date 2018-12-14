@@ -217,17 +217,10 @@ public class ProjectController {
                 file.delete();
             }else{
                 //if the current directroy is not empty  list its content and call delete recursively
-                //String content[] = file.list();
-
                 for(File f: file.listFiles()){
                     delete(f);
                 }
-
-
-                ///for (String temp : content){
-                //    File fileDelete = new File(file, temp);
-                //    delete(fileDelete);
-                //}
+                file.delete();
             }
         }else{
             //if the current directory is not a directory but a file, delete it
