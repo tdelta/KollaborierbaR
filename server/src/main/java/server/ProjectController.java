@@ -161,22 +161,22 @@ public class ProjectController {
 
     @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
     @ResponseBody
-    public void createFile(HttpServletRequest request) throws IOException {
-        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+    public ResponseEntity createFile(@RequestParam("type") String type,HttpServletRequest request) throws IOException {
 
-        File file = new File(path);
-        file.createNewFile();
+    	//TODO: Schönere Lösung finden!
+    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+    	File file = new File(path);
+    	
+    	if(type.equals("file")) {
+    		file.createNewFile();
+    	} else if(type.equals("folder")) {
+    		file.mkdir();
+    	} else {
+    		return new ResponseEntity(HttpStatus.BAD_REQUEST);
+    	}
+    	return new ResponseEntity(HttpStatus.OK);
     }
-
-//    @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
-//    @ResponseBody
-//    public void createFolder(HttpServletRequest request){
-//        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-//
-//        File folder = new File(path);
-//        folder.mkdir();
-//    }
-
+    
     /**
      * This method handels delete requests to files, folders and projects
      *
