@@ -1,15 +1,13 @@
 package server;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.servlet.HandlerMapping;
 import projectmanagement.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -160,38 +158,60 @@ public class ProjectController {
       }	
     }
 
-    public void createFile(String relativePath) throws IOException {
-        File file = new File(relativePath);
-        file.createNewFile();
-    }
+    /**
+     * This Method handles the creation of Files and Folders
+     * @param type Type of the kind of structure to be created can be file or folder
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the right type was given.
+     * @throws IOException when a new file could not be created
+     */
+    @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity createFile(@RequestParam("type") String type,HttpServletRequest request) throws IOException {
 
-    public void createFolder(String relativePath){
-        File folder = new File(relativePath);
-        folder.mkdir();
+    	//TODO: Schönere Lösung finden!
+    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+    	File file = new File(path);
+
+    	//check which kind of structure should be created
+    	if(type.equals("file")) {
+    		file.createNewFile();
+    	} else if(type.equals("folder")) {
+    		file.mkdir();
+    	} else {
+    		return new ResponseEntity(HttpStatus.BAD_REQUEST);
+    	}
+    	return new ResponseEntity(HttpStatus.OK);
     }
 
     /**
-     * This method handels delete requests to ...
-     *
-     *
-     * @return
+     * This Method handles the deletion of files and folders
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the file to be deleted exists.
      * @throws IOException
      */
-//    @RequestMapping(value = {"/someChildUrlIfYouWant/**", method=RequestMethod.DELETE})
-//    @ResponseBody
-//    public boolean deleteFile() throws IOException{
-//        String path = request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
-//
-//        File directory = new File(path);
-//
-//        //check if the given path actually leads to a valid directory
-//        if(!directory.exists()){
-//            return false;
-//        }else{
-//            delete(directory);
-//            return true;
-//        }
-//    }
+    @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity deleteFile(HttpServletRequest request) throws IOException{
+    	
+    	//TODO: Schönere Lösung finden!
+        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+        File file = new File(path);
+        //check if the given path actually leads to a valid directory
+        if(!file.exists()){
+            //System.out.println("error");
+        	return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }else{
+            delete(file);
+            return new ResponseEntity(HttpStatus.OK);
+        }
+    }
+    
+    /* TODO: Anton will auf uns zurückkommen.
+     * @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
+    	public void deleteFile(@PathVariable String var, HttpServletRequest request) throws IOException{
+     */
 
     /**
      * Helper method that handles the deletion of a giving file type.
@@ -207,13 +227,12 @@ public class ProjectController {
                 //if the current directory is empty, delete it
                 file.delete();
             }else{
-                //if the current directroy is not empty  list its content and call delete recursively
-                String content[] = file.list();
-
-                for (String temp : content){
-                    File fileDelete = new File(file, temp);
-                    delete(fileDelete);
+                //if the current directory is not empty  list its content and call delete recursively
+                for(File f: file.listFiles()){
+                    delete(f);
                 }
+                //do not forget to delete the current directory itself
+                file.delete();
             }
         }else{
             //if the current directory is not a directory but a file, delete it
