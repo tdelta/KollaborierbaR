@@ -176,7 +176,7 @@ public class ProjectController {
     	}
     	return new ResponseEntity(HttpStatus.OK);
     }
-    
+
     /**
      * This method handels delete requests to files, folders and projects
      *
@@ -216,10 +216,11 @@ public class ProjectController {
                 //if the current directory is empty, delete it
                 file.delete();
             }else{
-                //if the current directroy is not empty  list its content and call delete recursively
+                //if the current directory is not empty  list its content and call delete recursively
                 for(File f: file.listFiles()){
                     delete(f);
                 }
+                //do not forget to delete the current directory itself
                 file.delete();
             }
         }else{
