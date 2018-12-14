@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.servlet.HandlerMapping;
 import projectmanagement.*;
 
 import java.io.File;
@@ -114,7 +115,7 @@ public class ProjectController {
      * That method handels request to /openFile and returns the contents of a file
      * and its name.
      * 
-     * @param path to the file, which is supposed to be opened.
+     * @param fileRequest to the file, which is supposed to be opened.
      * @return object containing filename and filetext (object for marshalling)
      */
     @RequestMapping("/openFile")
@@ -163,6 +164,55 @@ public class ProjectController {
             + projectPath + fileRequest.getPath()
         );
       }	
+    }
+
+    public boolean createFile(){
+
+        return true;
+    }
+
+    public boolean createFolder(){
+
+        return true;
+    }
+
+
+    @RequestMapping(value = {"/someChildUrlIfYouWant/**", method=RequestMethod.DELETE})
+    @ResponseBody
+    public boolean deleteFile() throws IOException{
+        String path = request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
+
+        File directory = new File(path);
+
+        //check if the given path actually leads to a valid directory
+        if(!directory.exists()){
+            return false;
+        }else{
+            delete(directory);
+            return true;
+        }
+    }
+
+    private void delete(File file) throws IOException{
+        if(file.isDirectory()){
+
+
+            if(file.list().length==0){
+                //if the current directory is empty, delete it
+                file.delete();
+            }else{
+                //if the current directroy is not empty  list its content and call delete recursively
+                String content[] = file.list();
+
+                for (String temp : content){
+                    File fileDelete = new File(file, temp);
+                    delete(fileDelete);
+                }
+            }
+        }else{
+            //if the current directory is not a directory but a file, delete it
+            file.delete();
+        }
     }
 
     // TODO: Proper HTTP error handler
