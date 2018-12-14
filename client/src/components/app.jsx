@@ -123,6 +123,9 @@ export default class App extends React.Component {
                                     this.setFileName(response.fileName);
                                 });
                         }}
+                        onOpenContext={(path) => {
+                            console.log(path)
+                        }}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}
