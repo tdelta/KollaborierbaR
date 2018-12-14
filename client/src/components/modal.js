@@ -46,7 +46,7 @@ function openProject(name, handler) {
 }
 
 /*
- * load the related files for the project with name 'name' from the server
+ * delete projects from server
  */
 function deleteProject(name, handler, previous) {
     var url = 'http://localhost:9000/projects/' + name;
@@ -56,13 +56,30 @@ function deleteProject(name, handler, previous) {
         mode: 'cors',
     })
         .then((response) => {
-            return {'status': response.status, 
-                'statusText': response.statusText};
             // when the currently loaded project is deleted, delete the loaded files
             // aka set an empty json object
             if (previous === name && response.status === 200) {
                 handler({});
             }
+            return {'status': response.status, 
+                'statusText': response.statusText};
+        })
+}
+
+/*
+ * create file/folder/project on the server. Files have type == file. 
+ * Projects/folders have type == folder
+ */
+function createFile(name, handler, previous, type) {
+    var url = 'http://localhost:9000/projects/' + name + "?type=" + type;
+
+    return fetch(url, {
+        method: 'PUT',
+        mode: 'cors',
+    })
+        .then((response) => {
+            return {'status': response.status, 
+                'statusText': response.statusText};
         })
 }
 
