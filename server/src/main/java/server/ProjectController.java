@@ -1,15 +1,12 @@
 package server;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.servlet.HandlerMapping;
 import projectmanagement.*;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -177,21 +174,21 @@ public class ProjectController {
      * @return
      * @throws IOException
      */
-//    @RequestMapping(value = {"/someChildUrlIfYouWant/**", method=RequestMethod.DELETE})
-//    @ResponseBody
-//    public boolean deleteFile() throws IOException{
-//        String path = request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
-//
-//        File directory = new File(path);
-//
-//        //check if the given path actually leads to a valid directory
-//        if(!directory.exists()){
-//            return false;
-//        }else{
-//            delete(directory);
-//            return true;
-//        }
-//    }
+    @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
+    @ResponseBody
+    public String deleteFile(HttpServletRequest request) throws IOException{
+        String path = (String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
+        path = "/home/heckstrahler/Sync/uni/2018ss/BP/git/kollaborierbar/server/projects/test";
+
+        File directory = new File(path);
+        //check if the given path actually leads to a valid directory
+        if(!directory.exists()){
+            System.out.println("error");
+        }else{
+            delete(directory);
+        }
+        return path;
+    }
 
     /**
      * Helper method that handles the deletion of a giving file type.
