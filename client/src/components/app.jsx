@@ -6,6 +6,9 @@ import Sidebar from './sidebar/sidebar.jsx';
 
 import openFile from '../openFile.js';
 
+import CollabController from '../collaborative/CollabController';
+import Network from '../collaborative/Network';
+
 //import testSource from '../sample-text.js';
 
 /**
@@ -22,6 +25,8 @@ export default class App extends React.Component {
         this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
+
+        this.editor = React.createRef();
 
         // setup initial state
         this.state = {
@@ -87,6 +92,11 @@ export default class App extends React.Component {
      * and inserted into the DOM tree.
      */
     componentDidMount() {
+        this.collabController = new CollabController(
+            new Network(),
+            this.editor.current
+        );
+
         this.setState({
             text: '', // load some sample text for testing
             filename: 'Main.java'
@@ -130,6 +140,8 @@ export default class App extends React.Component {
                         setText={this.setText}
                         text={this.state.text}
                         filename={this.state.filename}
+                        collabController={this.collabController}
+                        ref={this.editor}
                     />
                 </div>
             </div>
