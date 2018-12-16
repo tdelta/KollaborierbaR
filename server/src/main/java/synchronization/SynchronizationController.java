@@ -1,7 +1,7 @@
 package synchronization;
 
 import synchronization.data.Delta;
-import synchronization.data.WelcomeMessageg
+import synchronization.data.WelcomeMessage;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.security.Principal;
@@ -25,13 +25,14 @@ private ConcurrentHashMap<Principal,String> users = new ConcurrentHashMap<Princi
 private SimpMessagingTemplate messagingTemplate;
 
   @CrossOrigin
-  @MessageMapping("/synchronization")
-  public void greeting(@Header("file") String file, Principal user, Delta message) throws Exception {
+  @MessageMapping("/operation")
+  public void greeting(Principal user, Delta message) throws Exception {
     // Send to everyone else who is connected
-    String document = users.get(user);
+    String file = users.get(user);
     for(ConcurrentHashMap.Entry<Principal,String> other: users.entrySet()){
-      if(other.getValue().equals(document) && !other.getKey().getName().equals(user.getName()))
-        messagingTemplate.convertAndSendToUser(other.getKey().getName(), "/synchronization", message);
+      if(other.getValue().equals(file) && !other.getKey().getName().equals(user.getName())){
+        messagingTemplate.convertAndSendToUser(other.getKey().getName(), "/operation", message);
+      }
     }
   }
 
@@ -40,7 +41,7 @@ private SimpMessagingTemplate messagingTemplate;
     messagingTemplate.convertAndSendToUser(message.getUser(), "/welcome", message.getContent());
   }
 
-  @SubscribeMapping("/user/synchronization")
+  @SubscribeMapping("/user/operation")
   public void handleSubscription(@Header("file") String file, Principal user){
     for(ConcurrentHashMap.Entry<Principal,String> other: users.entrySet()){
       if(other.getValue().equals(file)){
