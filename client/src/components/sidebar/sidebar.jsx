@@ -204,6 +204,7 @@ export default class Sidebar extends React.Component {
                         <div id="projectTree">
                             <ProjectTreeView
                                 onOpenFile={this.props.onOpenFile}
+                                onDeleteFile={this.props.onDeleteFile}
                                 onOpenContext={this.props.onOpenContext}
                                 onNewFile={(p) => {alert(p.join('/'));}}
                                 onNewFolder={(p) => {alert(p.join('/'));}}
