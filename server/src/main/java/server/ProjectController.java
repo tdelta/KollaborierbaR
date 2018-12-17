@@ -199,9 +199,9 @@ public class ProjectController {
      * @return Returns a HttpStatus depending on whether the file to be deleted exists.
      * @throws IOException
      */
-    @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{projectname}/**", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteFile(HttpServletRequest request) throws IOException{
+    public ResponseEntity<FolderItem> deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
     	
     	//TODO: Schönere Lösung finden!
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -209,10 +209,17 @@ public class ProjectController {
         File file = new File(path);
         //check if the given path actually leads to a valid directory
         if(!file.exists()){
-        	return new ResponseEntity<String>("The file you try to delete does not exists.", HttpStatus.NOT_FOUND);
+        	
+        	System.out.println("Du bist ein depp");
+        	return null;
+        	
+        	//return new ResponseEntity<String>("The file you try to delete does not exists.", HttpStatus.NOT_FOUND);
         }else{
             delete(file);
-            return new ResponseEntity<>(HttpStatus.OK);
+            //return new ResponseEntity<>(HttpStatus.OK);
+            System.out.println("Ich lösche etwas");
+            
+            return new ResponseEntity<FolderItem>(showProject(projectname), HttpStatus.OK);
         }
     }
     
