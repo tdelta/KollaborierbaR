@@ -18,13 +18,7 @@ import {serverAddress, serverRoutes} from './constants.ts';
  */
 function openFile(path) {
     // API URL of the server we will use for our request
-    const url = new URL(serverAddress + "/projects/" +path/*serverRoutes.projects.openFile*/);
-
-    // for now, the request body shall contain only the file path as described
-    // above, within a JSON object
-    // const body = { 
-    //     'path':  path
-    // };
+    const url = new URL(serverAddress + "/projects/" +path);
 
     return fetch(url, {
         method: 'GET',
@@ -33,7 +27,6 @@ function openFile(path) {
             'Accept' : 'application/json', // we want a json object back
             //'Content-Type': 'application/json', // we are sending a json object
         },
-        //body: JSON.stringify(body) // convert js object to json string
     })
         .then((response) =>  response.json()); // parse the response body as json
 }
