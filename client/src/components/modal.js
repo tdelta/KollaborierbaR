@@ -7,7 +7,7 @@ import { ListGroup, ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalF
  * load the list of available projects from the server
  */
 function getProjects() {
-    var url = new URL('http://localhost:9000/projects/listProjects');
+    var url = new URL('http://localhost:9000/projects');
     return fetch(url, {
         method: 'GET',
         mode: 'cors',
@@ -24,18 +24,11 @@ function getProjects() {
  * the handler displays the returned project in the editor
  */
 function openProject(name, handler) {
-    var url = new URL('http://localhost:9000/projects/showProject');
-
-    const params = {'name': name};
-
-    url.search = new URLSearchParams(params);
+    var url = new URL('http://localhost:9000/projects/'+ name);
 
     return fetch(url, {
         method: 'GET',
         mode: 'cors',
-        headers: {
-            'Accept': 'application/json',
-        },
     })
         .then((response) => {
             response.json()

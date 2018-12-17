@@ -33,7 +33,7 @@ public class ProjectController {
      *
      * @return a List containing Stings of the Names form of the Folders in the Projects folder(currently hardcoded)
      */
-    @RequestMapping("/listProjects")
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public List<String> listProjects() {
         final List<String> projects = new LinkedList<String>();
 
@@ -48,19 +48,19 @@ public class ProjectController {
     }
 
     /**
-     * That method handels requests to /showProject and creates a folderItem object which models the folder structure
+     * That method handles requests to /showProject and creates a folderItem object which models the folder structure
      * of the given folder name. The object will later be marshalled through Java Spring, resulting in a JSON object. 
      *
      * @param name is given in the http request.
      * @return the content of a chooses Projekt (currently hardcoded) in the form of a folder
      */
-    @RequestMapping("/showProject")
-    public FolderItem showProject(@RequestParam("name") String name){
+    @RequestMapping(value = "/{projectname}", method = RequestMethod.GET)
+    public FolderItem showProject(@PathVariable("projectname") String projectname, HttpServletRequest request){
         // Get the File/Folder form the file system
         final File file = new File(projectPath);
         final File[] files = file.listFiles();
 
-        final File selected = selectProjectFromArray(files, name);
+        final File selected = selectProjectFromArray(files, projectname);
 
         return createFolderItem(selected);
     }
@@ -110,51 +110,49 @@ public class ProjectController {
      * @param fileRequest to the file, which is supposed to be opened.
      * @return object containing filename and filetext (object for marshalling)
      */
-    @RequestMapping("/openFile")
+    @RequestMapping(value = "/**", method = RequestMethod.GET)
     @ResponseBody
-    public OpenedFileResponse openFile(@RequestBody FileRequest fileRequest) throws IOException{
+    public ResponseEntity openFile(HttpServletRequest request) throws IOException{
+    	
+    	// Get the file path for the request resource
+    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+    	
     	try {
-        final File file = new File(projectPath + fileRequest.getPath());
+    		
+        final File file = new File(path);
 
-        final String content = new Scanner( //scanners allow to read a file until a delimiter
-            file,
-            "utf-8"
-        ).useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
+        Scanner scan = new Scanner( /*scanners allow to read a file until a delimiter*/ file, "utf-8");
+        
+        // Check whether the requested file is empty
+        if(!scan.hasNext()) {
+        	scan.close();
+        	return new ResponseEntity<OpenedFileResponse>(new OpenedFileResponse(file.getName(),""), HttpStatus.OK);
+        }
+        
+        final String content = scan.useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
         //^ using a scanner may not be optimal (could cause overhead),
         //  but simplifies this code so much, that we keep it for now
       
-        return new OpenedFileResponse(file.getName(), content);
+        scan.close();
+        return new ResponseEntity<OpenedFileResponse>(new OpenedFileResponse(file.getName(), content), HttpStatus.OK);
       }
       
-      // TODO implement proper error handling (appropriate status code etc.)
       catch (FileNotFoundException e) {
         e.printStackTrace();
-
-        return new OpenedFileResponse(
-            "Not found",
-            "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("File could not be found. The following path was used for search:"+ path
+        								  , HttpStatus.NOT_FOUND);
       }	
 
       catch (NoSuchElementException e) {
         e.printStackTrace();
-
-        return new OpenedFileResponse(
-            "Read error",
-            "Fehler beim Einlesen der angefragten Datei:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + path 
+        								  , HttpStatus.BAD_REQUEST);
       }	
 
       catch (IllegalStateException e) {
         e.printStackTrace();
-
-        return new OpenedFileResponse(
-            "Read error",
-            "Fehler beim Einlesen der angefragten Datei:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + path
+        								  , HttpStatus.BAD_REQUEST);
       }	
     }
 
@@ -165,9 +163,9 @@ public class ProjectController {
      * @return Returns a HttpStatus depending on whether the right type was given.
      * @throws IOException when a new file could not be created
      */
-    @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
+    @RequestMapping(value = "/{projectname}/**", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> createFile(@RequestParam("type") String type,HttpServletRequest request) throws IOException {
+    public ResponseEntity createFile(@PathVariable("projectname") String projectname ,@RequestParam("type") String type,HttpServletRequest request) throws IOException {
 
     	//TODO: Schönere Lösung finden!
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -187,10 +185,12 @@ public class ProjectController {
     		file.mkdir();
     	} else {
     		// Wrong type parameter was selected, respond with Bad request code
-    		return new ResponseEntity<String>("Wrong type parameter was choosen in the request. To create a file, please select file or folder as type.", HttpStatus.BAD_REQUEST);
+    		
+    		return new ResponseEntity<>("Wrong type parameter was choosen in the request. To create a file, please select file or folder as type.", HttpStatus.BAD_REQUEST);
     	}
 
-    	return new ResponseEntity<>(HttpStatus.OK);
+    	// If everything was good, return the new project structure together with a HTTP OK response code
+    	return new ResponseEntity<FolderItem>(showProject(projectname, request),HttpStatus.OK);
     }
 
     /**
@@ -201,7 +201,7 @@ public class ProjectController {
      */
     @RequestMapping(value = "/{projectname}/**", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<FolderItem> deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
+    public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
     	
     	//TODO: Schönere Lösung finden!
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -209,24 +209,13 @@ public class ProjectController {
         File file = new File(path);
         //check if the given path actually leads to a valid directory
         if(!file.exists()){
-        	
-        	System.out.println("Du bist ein depp");
-        	return null;
-        	
-        	//return new ResponseEntity<String>("The file you try to delete does not exists.", HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
         }else{
             delete(file);
-            //return new ResponseEntity<>(HttpStatus.OK);
-            System.out.println("Ich lösche etwas");
-            
-            return new ResponseEntity<FolderItem>(showProject(projectname), HttpStatus.OK);
+            return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);
         }
     }
     
-    /* TODO: Anton will auf uns zurückkommen.
-     * @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
-    	public void deleteFile(@PathVariable String var, HttpServletRequest request) throws IOException{
-     */
 
     /**
      * Helper method that handles the deletion of a giving file type.
