@@ -89,7 +89,7 @@ export default class ProjectTreeView extends React.Component {
                         <Context tree={() => this.state.file}>
                             {projectTitle}
                             <ContextMenu>
-                                <li className='contextItem' onClick={this.handleDeleteClick}>Delete Project</li>
+                                <li className='contextItem' onClick={this.props.onDeleteProject}>Delete Project</li>
                                 <li className='contextItem'>Rename Project</li>
                                 <li className='contextItem'>Create Folder</li>
                                 <li className='contextItem'>Create File</li>
