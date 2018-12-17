@@ -21,6 +21,7 @@ export default class Context extends React.Component{
     }
 
     render() {
+        console.log(this.state.context)
         const childrenWithProps = React.Children.map(this.props.children, child =>
             React.cloneElement(child, {context: this.state.context})
         );
@@ -34,7 +35,7 @@ export default class Context extends React.Component{
 
     handleContextClose(e) {
         e.preventDefault();
-        if (e.target !== this.node) {
+        if (e.target !== this.node && !this.node.contains(e.target)) {
             this.setState({ context: false });
         }
     }
@@ -62,14 +63,13 @@ Context.propTypes = {
 class ContextMenu extends React.Component{
     constructor(props) {
         super(props);
-        this.node = null;
     }
 
 
     render() {
         return (
             <Collapse isOpen={this.props.context}>
-                <ListGroup ref={elem => this.node = elem} className='contextList' onContextMenu={this.handleRightClick}>
+                <ListGroup className='contextList'>
                     {this.props.children}
                 </ListGroup>
             </Collapse>
