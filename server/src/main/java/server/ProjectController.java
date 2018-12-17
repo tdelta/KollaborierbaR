@@ -33,7 +33,7 @@ public class ProjectController {
      *
      * @return a List containing Stings of the Names form of the Folders in the Projects folder(currently hardcoded)
      */
-    @RequestMapping("/listProjects")
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public List<String> listProjects() {
         final List<String> projects = new LinkedList<String>();
 
@@ -48,19 +48,19 @@ public class ProjectController {
     }
 
     /**
-     * That method handels requests to /showProject and creates a folderItem object which models the folder structure
+     * That method handles requests to /showProject and creates a folderItem object which models the folder structure
      * of the given folder name. The object will later be marshalled through Java Spring, resulting in a JSON object. 
      *
      * @param name is given in the http request.
      * @return the content of a chooses Projekt (currently hardcoded) in the form of a folder
      */
-    @RequestMapping("/showProject")
-    public FolderItem showProject(@RequestParam("name") String name){
+    @RequestMapping(value = "/{projectname}", method = RequestMethod.GET)
+    public FolderItem showProject(@PathVariable("projectname") String projectname, HttpServletRequest request){
         // Get the File/Folder form the file system
         final File file = new File(projectPath);
         final File[] files = file.listFiles();
 
-        final File selected = selectProjectFromArray(files, name);
+        final File selected = selectProjectFromArray(files, projectname);
 
         return createFolderItem(selected);
     }
@@ -110,11 +110,16 @@ public class ProjectController {
      * @param fileRequest to the file, which is supposed to be opened.
      * @return object containing filename and filetext (object for marshalling)
      */
-    @RequestMapping("/openFile")
+    @RequestMapping(value = "/**", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity openFile(@RequestBody FileRequest fileRequest) throws IOException{
+    public ResponseEntity openFile(HttpServletRequest request) throws IOException{
+    	
+    	// Get the file path for the request resource
+    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+    	
     	try {
-        final File file = new File(projectPath + fileRequest.getPath());
+    		
+        final File file = new File(path);
 
         Scanner scan = new Scanner( /*scanners allow to read a file until a delimiter*/ file, "utf-8");
         
@@ -134,20 +139,20 @@ public class ProjectController {
       
       catch (FileNotFoundException e) {
         e.printStackTrace();
-        return new ResponseEntity<String>("File could not be found. The following path was used for search:"+ projectPath + fileRequest.getPath()
+        return new ResponseEntity<String>("File could not be found. The following path was used for search:"+ path
         								  , HttpStatus.NOT_FOUND);
       }	
 
       catch (NoSuchElementException e) {
         e.printStackTrace();
-        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + projectPath + fileRequest.getPath() 
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + path 
         								  , HttpStatus.BAD_REQUEST);
       }	
 
       catch (IllegalStateException e) {
         e.printStackTrace();
-        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + projectPath + fileRequest.getPath() 
-		  , HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + path
+        								  , HttpStatus.BAD_REQUEST);
       }	
     }
 
@@ -185,7 +190,7 @@ public class ProjectController {
     	}
 
     	// If everything was good, return the new project structure together with a HTTP OK response code
-    	return new ResponseEntity<FolderItem>(showProject(projectname),HttpStatus.OK);
+    	return new ResponseEntity<FolderItem>(showProject(projectname, request),HttpStatus.OK);
     }
 
     /**
@@ -207,7 +212,7 @@ public class ProjectController {
         	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
         }else{
             delete(file);
-            return new ResponseEntity<FolderItem>(showProject(projectname), HttpStatus.OK);
+            return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);
         }
     }
     
