@@ -26,16 +26,9 @@ function getProjects() {
 function openProject(name, handler) {
     var url = new URL('http://localhost:9000/projects/'+ name);
 
-    //const params = {'name': name};
-
-    //url.search = new URLSearchParams(params);
-
     return fetch(url, {
         method: 'GET',
         mode: 'cors',
-        // headers: {
-        //     'Accept': 'application/json',
-        // },
     })
         .then((response) => {
             response.json()
