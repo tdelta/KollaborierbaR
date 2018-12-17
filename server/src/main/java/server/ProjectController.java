@@ -216,6 +216,31 @@ public class ProjectController {
         }
     }
     
+    // TODO für MARC: Noch David und Co. erklären 
+    /**
+     * This Method handles the deletion of projects
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the file to be deleted exists.
+     * @throws IOException
+     */
+    @RequestMapping(value = "/{projectname}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity deleteProject(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
+    	
+    	//TODO: Schönere Lösung finden!
+        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+        File file = new File(path);
+        //check if the given path actually leads to a valid directory
+        if(!file.exists()){
+        	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
+        }else{
+            delete(file);
+            // WICHTIG: Der Grund für diese Funktion ist, das wenn wir ein Project löschen, wir kein neues Json Object davon zurücken können
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+    
 
     /**
      * Helper method that handles the deletion of a giving file type.
