@@ -6,7 +6,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
 import FileNode from './file-node.tsx';
-import {Context, ContextMenu} from './context.jsx'
+import {Context, ContextMenu} from './context.jsx';
 
 /**
  * Displays a project (file system like JSON structure, passed by `project`
@@ -122,6 +122,7 @@ export default class ProjectTreeView extends React.Component {
                                     // own name
                                     onOpenFile={this.props.onOpenFile}
                                     onDeleteFile={this.props.onDeleteFile}
+                                    onCreateFile={this.props.onCreateFile}
                                     onOpenContext={this.props.onOpenContext}
                                     onSelect={this.onSelect}
                                     selectedPath={this.state.selected}
@@ -156,6 +157,8 @@ export default class ProjectTreeView extends React.Component {
 ProjectTreeView.propTypes = {
     'onOpenFile': PropTypes.func,
     'onOpenContext': PropTypes.func,
+    'onDeleteFile': PropTypes.func,
+    'onCreateFile': PropTypes.func,
     'project': PropTypes.shape({
         'contents': PropTypes.arrayOf(PropTypes.object),
         'name': PropTypes.string
@@ -165,6 +168,7 @@ ProjectTreeView.propTypes = {
 // default values for some properties
 ProjectTreeView.defaultProps = {
     'onOpenFile': () => {},
-    'onOpenContext': () => {}
+    'onDeleteFile': () => {},
+    'onCreateFile': () => {},
 };
         
