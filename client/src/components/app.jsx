@@ -6,7 +6,7 @@ import Sidebar from './sidebar/sidebar.jsx';
 
 import openFile from '../openFile.js';
 
-import {deleteFile} from './modal.js';
+import {deleteFile, createFile} from './modal.js';
 
 //import testSource from '../sample-text.js';
 
@@ -51,7 +51,6 @@ export default class App extends React.Component {
     showProject(project) {
         this.setState({
             'project': project,
-            'text': ''
         });
     }
 
@@ -138,11 +137,13 @@ export default class App extends React.Component {
                                         this.setFileName(undefined);
                                     }
                                 });
-                        }
-
-                        }
-                        onOpenContext={(path) => {
-                            console.log(path)
+                        }}
+                        onCreateFile={(path) => {
+                        
+                            createFile('/' + this.state.project.name + '/' + path.join('/'))
+                                .then((response) => {
+                                    this.showProject(response);
+                                });
                         }}
                     />
                     <Editor
