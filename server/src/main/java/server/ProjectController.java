@@ -236,6 +236,7 @@ public class ProjectController {
         	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
         }else{
             delete(file);
+            // WICHTIG: Der Grund für diese Funktion ist, das wenn wir ein Project löschen, wir kein neues Json Object davon zurücken können
             return new ResponseEntity<>(HttpStatus.OK);
         }
     }
