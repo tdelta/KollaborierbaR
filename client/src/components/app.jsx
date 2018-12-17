@@ -7,7 +7,6 @@ import Sidebar from './sidebar/sidebar.jsx';
 import openFile from '../openFile.js';
 
 import {deleteFile} from './modal.js';
-import Modal from 'reactstrap/lib/Modal';
 
 //import testSource from '../sample-text.js';
 
@@ -51,7 +50,8 @@ export default class App extends React.Component {
      */
     showProject(project) {
         this.setState({
-            'project': project
+            'project': project,
+            'text': ''
         });
     }
 
@@ -132,6 +132,11 @@ export default class App extends React.Component {
                                 .then((response) => {
                                     // The response contains the new file structure, where the choosen file it deleted.
                                     this.showProject(response);
+                                    // if the deleted file is the opened one, empty the editor
+                                    if (path[path.length-1] === this.state.filename) {
+                                        this.setText('');
+                                        this.setFileName(undefined);
+                                    }
                                 });
                         }
 
