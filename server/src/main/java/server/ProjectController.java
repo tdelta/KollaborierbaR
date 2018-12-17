@@ -132,47 +132,22 @@ public class ProjectController {
         return new ResponseEntity<OpenedFileResponse>(new OpenedFileResponse(file.getName(), content), HttpStatus.OK);
       }
       
-      // TODO implement proper error handling (appropriate status code etc.)
       catch (FileNotFoundException e) {
         e.printStackTrace();
-
         return new ResponseEntity<String>("File could not be found. The following path was used for search:"+ projectPath + fileRequest.getPath()
         								  , HttpStatus.NOT_FOUND);
-        
-        //Old error handling without response codes
-//        return new OpenedFileResponse(
-//            "Not found",
-//            "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:"
-//            + projectPath + fileRequest.getPath()
-//        );
       }	
 
       catch (NoSuchElementException e) {
         e.printStackTrace();
-
         return new ResponseEntity<String>("Read Error. Error while reading the request file: " + projectPath + fileRequest.getPath() 
         								  , HttpStatus.BAD_REQUEST);
-        
-        // Old error handling without response codes
-//        return new OpenedFileResponse(
-//            "Read error",
-//            "Fehler beim Einlesen der angefragten Datei:"
-//            + projectPath + fileRequest.getPath()
-//        );
       }	
 
       catch (IllegalStateException e) {
         e.printStackTrace();
-
         return new ResponseEntity<String>("Read Error. Error while reading the request file: " + projectPath + fileRequest.getPath() 
 		  , HttpStatus.BAD_REQUEST);
-        
-        // Old error handling without response codes
-//        return new OpenedFileResponse(
-//            "Read error",
-//            "Fehler beim Einlesen der angefragten Datei:"
-//            + projectPath + fileRequest.getPath()
-//        );
       }	
     }
 
