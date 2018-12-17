@@ -208,6 +208,7 @@ export default class Sidebar extends React.Component {
                                 onOpenContext={this.props.onOpenContext}
                                 onNewFile={(p) => {alert(p.join('/'));}}
                                 onNewFolder={(p) => {alert(p.join('/'));}}
+                                onClickProject={(p) => {alert(p);}}
                                 project={this.props.project}
                             />
                         </div>
@@ -224,5 +225,6 @@ Sidebar.propTypes = {
         'contents': PropTypes.arrayOf(PropTypes.object)
     }),
     'onOpenFile': PropTypes.func,
-    'onOpenContext': PropTypes.func
+    'onOpenContext': PropTypes.func,
+    'onDeleteFile': PropTypes.func
 };

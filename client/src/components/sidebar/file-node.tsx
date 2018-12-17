@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import FileIcon from './file-icon.jsx';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
+import {Context, ContextMenu} from './context.jsx'
 import './sidebar.css'
 /**
  * Displays a node and its children (recursively) in a filesystem-like tree.
@@ -56,7 +57,6 @@ export default class FileNode extends React.Component<Props, State> {
     path: PropTypes.arrayOf(PropTypes.string),
   };
 
-    private node: HTMLDivElement | null;
   public static defaultProps = {
     onOpenFile: () => undefined,
     path: [],
@@ -65,7 +65,6 @@ export default class FileNode extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.node = null;
 
     this.state = {
       /**
@@ -73,13 +72,9 @@ export default class FileNode extends React.Component<Props, State> {
        */
       selected: false,
       collapsed: false,
-      context: false,
     };
 
     this.handleItemDoubleClick = this.handleItemDoubleClick.bind(this);
-      this.handleRightClick = this.handleRightClick.bind(this);
-      this.handleContextClose = this.handleContextClose.bind(this);
-
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.toggle = this.toggle.bind(this);
   }
@@ -118,8 +113,16 @@ export default class FileNode extends React.Component<Props, State> {
 
                         Double clicks are to be interpreted as opening files
                     */}
-          <div onClick={this.toggle} onDoubleClick={this.handleItemDoubleClick} >
-            {label}
+          <div onClick={this.toggle} onDoubleClick={this.handleItemDoubleClick}>
+            <Context tree={this.props.tree}>
+                {label}
+                <ContextMenu>
+                    <li className='contextItem' onClick={() => this.props.onDeleteFile}>Delete Folder</li>
+                    <li className='contextItem'>Rename Folder</li>
+                    <li className='contextItem'>Create Folder</li>
+                    <li className='contextItem'>Create File</li>
+                </ContextMenu>
+            </Context>
           </div>
           {/* display the children as unordered list */}
           <ul className="projectTreeList" style={display}>
@@ -156,14 +159,14 @@ export default class FileNode extends React.Component<Props, State> {
           : 'inactiveFileNode';
       return (
         /* double clicks are to be interpreted as opening files */
-        <div ref={elem => this.node = elem} onDoubleClick={this.handleItemDoubleClick} onContextMenu={this.handleRightClick} className={background}>
-          {label}
-       <Collapse isOpen={this.state.context}>
-         <ListGroup compact className='contextList'>
-            <li className='contextItem' onClick={this.handleDeleteClick}>Delete File</li>
-            <li className='contextItem'>Rename File</li>
-          </ListGroup>
-        </Collapse>
+        <div onDoubleClick={this.handleItemDoubleClick} className={background}>
+            <Context tree={this.props.tree}>
+              {label}
+              <ContextMenu>
+                <li className='contextItem' onClick={this.handleDeleteClick}>Delete File</li>
+                <li className='contextItem'>Rename File</li>
+             </ContextMenu>
+          </Context>
       </div>
       );
     }
@@ -189,39 +192,10 @@ export default class FileNode extends React.Component<Props, State> {
     }
   }
 
-  private handleContextClose(e: Event) {
-    e.preventDefault();
-    if (e.target !== this.node) {
-      this.setState({ context: false });
-    }
-  }
-  private handleRightClick() {
-    this.props.onOpenContext(this.props.path);
-      this.setState({ context: !this.state.context });
-    
-  }
-
   private handleDeleteClick(){
     this.props.onDeleteFile(this.props.path);
   }
 
-  componentDidUpdate() {
-    // When the component is mounted, add your DOM listener to the "nv" elem.
-    // (The "nv" elem is assigned in the render function.)
-      if (this.props.tree() != null){
-
-        console.log("Sucess")
-        this.props.tree().addEventListener("contextmenu", this.handleContextClose);
-      }
-      else {
-        console.log("Fail")
-      }
-  }
-
-  componentWillUnmount() {
-    // Make sure to remove the DOM listener when the component is unmounted.
-        this.props.tree().removeEventListener("contextmenu", this.handleContextClose);
-  }
 }
 
 enum FileType {
@@ -249,5 +223,4 @@ interface Props {
 interface State {
   collapsed: boolean;
   selected: boolean;
-  context: boolean;
 }
