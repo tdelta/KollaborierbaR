@@ -112,49 +112,67 @@ public class ProjectController {
      */
     @RequestMapping("/openFile")
     @ResponseBody
-    public OpenedFileResponse openFile(@RequestBody FileRequest fileRequest) throws IOException{
+    public ResponseEntity openFile(@RequestBody FileRequest fileRequest) throws IOException{
     	try {
         final File file = new File(projectPath + fileRequest.getPath());
 
-        final String content = new Scanner( //scanners allow to read a file until a delimiter
-            file,
-            "utf-8"
-        ).useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
+        Scanner scan = new Scanner( /*scanners allow to read a file until a delimiter*/ file, "utf-8");
+        
+        // Check whether the requested file is empty
+        if(!scan.hasNext()) {
+        	scan.close();
+        	return new ResponseEntity<OpenedFileResponse>(new OpenedFileResponse(file.getName(),""), HttpStatus.OK);
+        }
+        
+        final String content = scan.useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
         //^ using a scanner may not be optimal (could cause overhead),
         //  but simplifies this code so much, that we keep it for now
       
-        return new OpenedFileResponse(file.getName(), content);
+        scan.close();
+        return new ResponseEntity<OpenedFileResponse>(new OpenedFileResponse(file.getName(), content), HttpStatus.OK);
       }
       
       // TODO implement proper error handling (appropriate status code etc.)
       catch (FileNotFoundException e) {
         e.printStackTrace();
 
-        return new OpenedFileResponse(
-            "Not found",
-            "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("File could not be found. The following path was used for search:"+ projectPath + fileRequest.getPath()
+        								  , HttpStatus.NOT_FOUND);
+        
+        //Old error handling without response codes
+//        return new OpenedFileResponse(
+//            "Not found",
+//            "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:"
+//            + projectPath + fileRequest.getPath()
+//        );
       }	
 
       catch (NoSuchElementException e) {
         e.printStackTrace();
 
-        return new OpenedFileResponse(
-            "Read error",
-            "Fehler beim Einlesen der angefragten Datei:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + projectPath + fileRequest.getPath() 
+        								  , HttpStatus.BAD_REQUEST);
+        
+        // Old error handling without response codes
+//        return new OpenedFileResponse(
+//            "Read error",
+//            "Fehler beim Einlesen der angefragten Datei:"
+//            + projectPath + fileRequest.getPath()
+//        );
       }	
 
       catch (IllegalStateException e) {
         e.printStackTrace();
 
-        return new OpenedFileResponse(
-            "Read error",
-            "Fehler beim Einlesen der angefragten Datei:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + projectPath + fileRequest.getPath() 
+		  , HttpStatus.BAD_REQUEST);
+        
+        // Old error handling without response codes
+//        return new OpenedFileResponse(
+//            "Read error",
+//            "Fehler beim Einlesen der angefragten Datei:"
+//            + projectPath + fileRequest.getPath()
+//        );
       }	
     }
 
