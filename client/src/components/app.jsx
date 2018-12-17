@@ -3,10 +3,11 @@ import React from 'react';
 import Editor from './editor.tsx';
 import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
+import ConfirmationModal from './confirmation-modal.tsx';
 
 import openFile from '../openFile.js';
 
-import {deleteFile, createFile} from './modal.js';
+import {deleteFile, createFile, deleteProject} from './modal.js';
 
 //import testSource from '../sample-text.js';
 
@@ -24,6 +25,8 @@ export default class App extends React.Component {
         this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
+
+        this.confirmationModal = React.createRef();
 
         // setup initial state
         this.state = {
@@ -149,6 +152,21 @@ export default class App extends React.Component {
                                     });
                             }
                         }}
+                        onDeleteProject={() => {
+                            // Show a dialog to confirm the deletion of the project
+                            this.confirmationModal.current.ask(
+                                `Really delete project ${this.state.project.name}?`,
+                                // Called when the dialog was confirmed
+                                () => {
+                                    deleteProject(
+                                        this.state.project.name, // Project to delete, in this case always the project that was opened
+                                        this.showProject, // Callback that renders the resulting project
+                                        this.state.project.name // Currently opened project
+                                    );
+                                },
+                                // Empty function called when the dialog was canceled
+                                ()=>{});
+                        }}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}
@@ -158,6 +176,7 @@ export default class App extends React.Component {
                         filename={this.state.filename}
                     />
                 </div>
+                <ConfirmationModal ref={this.confirmationModal}/>
             </div>
         );
     }
