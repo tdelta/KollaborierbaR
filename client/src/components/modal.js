@@ -225,4 +225,4 @@ function DeleteModal(props) {
     );
 }
 
-export {OpenModal, DeleteModal, deleteFile, createFile};
+export {OpenModal, DeleteModal, deleteFile, createFile, deleteProject};
