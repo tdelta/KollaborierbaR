@@ -118,9 +118,9 @@ export default class FileNode extends React.Component<Props, State> {
                 </div>
                 <ContextMenu>
                     <li className='contextItem' onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</li>
-                    <li className='contextItem' onClick={() => this.props.onCreateFile(this.props.path)}>Rename Folder</li>
-                    <li className='contextItem'>Create Folder</li>
-                    <li className='contextItem'>Create File</li>
+                    <li className='contextItem'>Rename Folder</li>
+                    <li className='contextItem' onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</li>
+                    <li className='contextItem' onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</li>
                 </ContextMenu>
             </Context>
           {/* display the children as unordered list */}
@@ -141,7 +141,7 @@ export default class FileNode extends React.Component<Props, State> {
                   path={this.props.path.concat([child.name])}
                   onOpenFile={this.props.onOpenFile}
                   onDeleteFile={this.props.onDeleteFile}
-                  onCreateFile={this.props.onDeleteFile}
+                  onCreateFile={this.props.onCreateFile}
                   onOpenContext={this.props.onOpenContext}
                   onSelect={this.props.onSelect}
                   selectedPath={this.props.selectedPath}
@@ -165,7 +165,7 @@ export default class FileNode extends React.Component<Props, State> {
             </div>
             <ContextMenu>
                 <li className='contextItem' onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</li>
-                <li className='contextItem' onClick={() => this.props.onCreateFile(this.props.path)}>Rename File</li>
+                <li className='contextItem'>Rename File</li>
             </ContextMenu>
         </Context>
       );
@@ -209,7 +209,7 @@ interface FileNodeData {
 interface Props {
   onOpenFile: (path: string[]) => void;
   onDeleteFile: (path: string[]) => void;
-  onCreateFile: (path: string[]) => void;
+  onCreateFile: (path: string[], type: string) => void;
   onOpenContext: (path: string[]) => void;
   onSelect: (path: string) => void;
   data: FileNodeData;
