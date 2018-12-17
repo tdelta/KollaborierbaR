@@ -113,6 +113,7 @@ export default class ProjectTreeView extends React.Component {
                                         // the path of each element consists just of its
                                         // own name
                                         onOpenFile={this.props.onOpenFile}
+                                        onDeleteFile={this.props.onDeleteFile}
                                         onOpenContext={this.props.onOpenContext}
                                         onSelect={this.onSelect}
                                         selectedPath={this.state.selected}

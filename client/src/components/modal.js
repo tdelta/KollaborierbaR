@@ -66,6 +66,20 @@ function deleteProject(name, handler, previous) {
         })
 }
 
+ 
+export function deleteFile(path){
+    var url = 'http://localhost:9000/projects/' +  path;
+    
+    return fetch(url, {
+        method: 'DELETE',
+        mode: 'cors', // enable cross origin requests. Server must also allow this!
+        headers: {
+            'Accept' : 'application/json', // we want a json object back
+        }
+    })
+        .then((response) =>  response.json()); // parse the response body as json
+}
+
 /*
  * create file/folder/project on the server. Files have type == file. 
  * Projects/folders have type == folder

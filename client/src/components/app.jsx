@@ -6,6 +6,9 @@ import Sidebar from './sidebar/sidebar.jsx';
 
 import openFile from '../openFile.js';
 
+import {deleteFile} from './modal.js';
+import Modal from 'reactstrap/lib/Modal';
+
 //import testSource from '../sample-text.js';
 
 /**
@@ -123,6 +126,16 @@ export default class App extends React.Component {
                                     this.setFileName(response.fileName);
                                 });
                         }}
+                        onDeleteFile={(path) => {
+                            // This string composition is necessary because path contains only the path within a project.
+                            deleteFile('/' + this.state.project.name + '/' + path.join('/'))
+                                .then((response) => {
+                                    // The response contains the new file structure, where the choosen file it deleted.
+                                    this.showProject(response);
+                                });
+                        }
+
+                        }
                         onOpenContext={(path) => {
                             console.log(path)
                         }}

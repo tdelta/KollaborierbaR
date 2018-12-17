@@ -79,6 +79,8 @@ export default class FileNode extends React.Component<Props, State> {
     this.handleItemDoubleClick = this.handleItemDoubleClick.bind(this);
       this.handleRightClick = this.handleRightClick.bind(this);
       this.handleContextClose = this.handleContextClose.bind(this);
+
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.toggle = this.toggle.bind(this);
   }
 
@@ -136,6 +138,7 @@ export default class FileNode extends React.Component<Props, State> {
                   data={child}
                   path={this.props.path.concat([child.name])}
                   onOpenFile={this.props.onOpenFile}
+                  onDeleteFile={this.props.onDeleteFile}
                   onOpenContext={this.props.onOpenContext}
                   onSelect={this.props.onSelect}
                   selectedPath={this.props.selectedPath}
@@ -157,7 +160,7 @@ export default class FileNode extends React.Component<Props, State> {
           {label}
        <Collapse isOpen={this.state.context}>
          <ListGroup compact className='contextList'>
-            <li className='contextItem'>Delete File</li>
+            <li className='contextItem' onClick={this.handleDeleteClick}>Delete File</li>
             <li className='contextItem'>Rename File</li>
           </ListGroup>
         </Collapse>
@@ -198,6 +201,10 @@ export default class FileNode extends React.Component<Props, State> {
     
   }
 
+  private handleDeleteClick(){
+    this.props.onDeleteFile(this.props.path);
+  }
+
   componentDidUpdate() {
     // When the component is mounted, add your DOM listener to the "nv" elem.
     // (The "nv" elem is assigned in the render function.)
@@ -230,6 +237,7 @@ interface FileNodeData {
 
 interface Props {
   onOpenFile: (path: string[]) => void;
+  onDeleteFile: (path: string[]) => void;
   onOpenContext: (path: string[]) => void;
   onSelect: (path: string) => void;
   data: FileNodeData;
