@@ -15,7 +15,7 @@ tags:
 schemes:
   - http
 paths:
-  /projects/listProjects:
+  /projects:
     get:
       tags:
         - project
@@ -33,7 +33,7 @@ paths:
             example:
               - My Project
               - KeY
-  /projects/showProject:
+  /projects/'projectname':
     get:
       tags:
         - project
@@ -41,13 +41,6 @@ paths:
       operationId: project.showProject
       produces:
         - application/json;charset=UTF-8
-      parameters:
-        - in: query
-          name: name
-          description: name of the project that shall be loaded
-          required: true
-          type: string
-          x-example: My Project
       responses:
         '200':
           description: >-
@@ -55,23 +48,14 @@ paths:
             some project metadata
           schema:
             $ref: '#/definitions/Project'
-  /projects/openFile:
-    post:
+  /projects/'projectname'/**/'filename':
+    get:
       tags:
         - project
       summary: Load content and name of specific file on the server
       operationId: project.openFile
-      consumes:
-        - application/json;charset=UTF-8
       produces:
         - application/json;charset=UTF-8
-      parameters:
-        - in: body
-          name: RequestedFile
-          description: Json object containing the necessary information for file retrieval
-          required: true
-          schema:
-            $ref: '#/definitions/RequestedFile'
       responses:
         '200':
           description: A json object which contains the filename and the filecontents
@@ -88,6 +72,28 @@ paths:
             description: The resource was deleted successfully.
           '404':
             description: The resource was not found
+  /projects/'projectname1':
+    put:
+      tags:
+        - project
+      summary: Creates a new project one the server
+      operationId: project.createProject
+      responses:
+        '200':
+          description: The project was created successfully
+        '400':
+          description: The project was not created
+  /projects/**/'filename'?type=file/folder:
+    put:
+      tags:
+        - project
+      summary: Depending on the type, this endpoint creates a file or a folder
+      operationId: project.createFile
+      responses:
+        '200':
+          description: The project was created successfully
+        '400':
+          description: The project was not created
   /lint:
     post:
       tags:
