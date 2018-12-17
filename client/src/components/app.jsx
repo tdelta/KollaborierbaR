@@ -117,6 +117,7 @@ export default class App extends React.Component {
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
+                        //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={(path) => {
                             // This string composition is necessary because path contains only the path within a project.
                             openFile('/' + this.state.project.name + '/' + path.join('/'))
@@ -138,12 +139,15 @@ export default class App extends React.Component {
                                     }
                                 });
                         }}
-                        onCreateFile={(path) => {
-                        
-                            createFile('/' + this.state.project.name + '/' + path.join('/'))
-                                .then((response) => {
-                                    this.showProject(response);
-                                });
+                        onCreateFile={(path, type) => {
+                            let file = prompt('Enter Name', '');
+                            if (file !== null) {
+                                path.push(file);
+                                createFile('/' + this.state.project.name + '/' + path.join('/'), type)
+                                    .then((response) => {
+                                        this.showProject(response);
+                                    });
+                            }
                         }}
                     />
                     <Editor
