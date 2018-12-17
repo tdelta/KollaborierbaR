@@ -165,9 +165,9 @@ public class ProjectController {
      * @return Returns a HttpStatus depending on whether the right type was given.
      * @throws IOException when a new file could not be created
      */
-    @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
+    @RequestMapping(value = "/{projectname}/**", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> createFile(@RequestParam("type") String type,HttpServletRequest request) throws IOException {
+    public ResponseEntity createFile(@PathVariable("projectname") String projectname ,@RequestParam("type") String type,HttpServletRequest request) throws IOException {
 
     	//TODO: Schönere Lösung finden!
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -187,10 +187,12 @@ public class ProjectController {
     		file.mkdir();
     	} else {
     		// Wrong type parameter was selected, respond with Bad request code
-    		return new ResponseEntity<String>("Wrong type parameter was choosen in the request. To create a file, please select file or folder as type.", HttpStatus.BAD_REQUEST);
+    		
+    		return new ResponseEntity<>("Wrong type parameter was choosen in the request. To create a file, please select file or folder as type.", HttpStatus.BAD_REQUEST);
     	}
 
-    	return new ResponseEntity<>(HttpStatus.OK);
+    	// If everything was good, return the new project structure together with a HTTP OK response code
+    	return new ResponseEntity<FolderItem>(showProject(projectname),HttpStatus.OK);
     }
 
     /**
@@ -201,7 +203,7 @@ public class ProjectController {
      */
     @RequestMapping(value = "/{projectname}/**", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<FolderItem> deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
+    public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
     	
     	//TODO: Schönere Lösung finden!
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -209,24 +211,13 @@ public class ProjectController {
         File file = new File(path);
         //check if the given path actually leads to a valid directory
         if(!file.exists()){
-        	
-        	System.out.println("Du bist ein depp");
-        	return null;
-        	
-        	//return new ResponseEntity<String>("The file you try to delete does not exists.", HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
         }else{
             delete(file);
-            //return new ResponseEntity<>(HttpStatus.OK);
-            System.out.println("Ich lösche etwas");
-            
             return new ResponseEntity<FolderItem>(showProject(projectname), HttpStatus.OK);
         }
     }
     
-    /* TODO: Anton will auf uns zurückkommen.
-     * @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
-    	public void deleteFile(@PathVariable String var, HttpServletRequest request) throws IOException{
-     */
 
     /**
      * Helper method that handles the deletion of a giving file type.
