@@ -16,6 +16,7 @@ import {
 } from 'reactstrap';
 
 import {
+    createFile,
     OpenModal, 
     DeleteModal
 } from './modal.js';
@@ -46,8 +47,20 @@ export default class Top extends React.Component<Props, State> {
   private toggleOpenModal(): void {
     this.setState({ showOpenModal: !this.state.showOpenModal });
   }
+
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
+  }
+
+  private openCreateDialog(): void {
+    let file = prompt('Enter Name', '');
+    if (file !== null) {
+      createFile(file, 'folder')
+        .then((response) => {
+            console.log(response)
+          this.props.showProject(response);
+        });
+    }
   }
 
   private onFileChosen(event: HTMLInputEvent): void {
@@ -100,7 +113,7 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.toggleDeleteModal}>
                   Delete project
                 </DropdownItem>
-                <DropdownItem onClick={this.openProjectOnClick}>
+                <DropdownItem onClick={() => this.openCreateDialog()}>
                   Create project
                 </DropdownItem>
               </DropdownMenu>
