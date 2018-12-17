@@ -60,7 +60,7 @@ function deleteProject(name, handler, previous) {
 }
 
  
-export function deleteFile(path){
+function deleteFile(path){
     var url = 'http://localhost:9000/projects/' +  path;
     
     return fetch(url, {
@@ -77,17 +77,14 @@ export function deleteFile(path){
  * create file/folder/project on the server. Files have type == file. 
  * Projects/folders have type == folder
  */
-function createFile(name, handler, previous, type) {
+function createFile(name, type) {
     var url = 'http://localhost:9000/projects/' + name + "?type=" + type;
 
     return fetch(url, {
         method: 'PUT',
         mode: 'cors',
     })
-        .then((response) => {
-            return {'status': response.status, 
-                'statusText': response.statusText};
-        })
+        .then((response) => response.json());
 }
 
 /*
@@ -228,4 +225,4 @@ function DeleteModal(props) {
     );
 }
 
-export {OpenModal, DeleteModal};
+export {OpenModal, DeleteModal, deleteFile, createFile};
