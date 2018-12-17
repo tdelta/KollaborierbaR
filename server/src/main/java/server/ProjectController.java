@@ -167,11 +167,18 @@ public class ProjectController {
      */
     @RequestMapping(value = {"/**"}, method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity createFile(@RequestParam("type") String type,HttpServletRequest request) throws IOException {
+    public ResponseEntity<String> createFile(@RequestParam("type") String type,HttpServletRequest request) throws IOException {
 
     	//TODO: Schönere Lösung finden!
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
     	File file = new File(path);
+    	
+    	// Java createNewFile and mkdir are not able to create a file if a file 
+    	// with the same name already exists. Therefore, if someone tries to create
+    	// a file with the same name, return a Http Bad Request Response
+    	if(file.exists()) {
+    		return new ResponseEntity<String>("It already exists a file with the same name you try create",HttpStatus.BAD_REQUEST);
+    	}
 
     	//check which kind of structure should be created
     	if(type.equals("file")) {
@@ -179,9 +186,11 @@ public class ProjectController {
     	} else if(type.equals("folder")) {
     		file.mkdir();
     	} else {
-    		return new ResponseEntity(HttpStatus.BAD_REQUEST);
+    		// Wrong type parameter was selected, respond with Bad request code
+    		return new ResponseEntity<String>("Wrong type parameter was choosen in the request. To create a file, please select file or folder as type.", HttpStatus.BAD_REQUEST);
     	}
-    	return new ResponseEntity(HttpStatus.OK);
+
+    	return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -192,7 +201,7 @@ public class ProjectController {
      */
     @RequestMapping(value = {"/**"}, method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity deleteFile(HttpServletRequest request) throws IOException{
+    public ResponseEntity<String> deleteFile(HttpServletRequest request) throws IOException{
     	
     	//TODO: Schönere Lösung finden!
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -200,11 +209,10 @@ public class ProjectController {
         File file = new File(path);
         //check if the given path actually leads to a valid directory
         if(!file.exists()){
-            //System.out.println("error");
-        	return new ResponseEntity(HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<String>("The file you try to delete does not exists.", HttpStatus.NOT_FOUND);
         }else{
             delete(file);
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
     }
     
