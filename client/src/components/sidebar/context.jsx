@@ -21,8 +21,8 @@ export default class Context extends React.Component{
     }
 
     render() {
-        console.log(this.state.context)
         const childrenWithProps = React.Children.map(this.props.children, child =>
+            //TODO: Fix warning
             React.cloneElement(child, {context: this.state.context})
         );
 
