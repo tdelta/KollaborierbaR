@@ -6,6 +6,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
 import FileNode from './file-node.tsx';
+import {Context, ContextMenu} from './context.jsx'
 
 /**
  * Displays a project (file system like JSON structure, passed by `project`
@@ -85,8 +86,15 @@ export default class ProjectTreeView extends React.Component {
         // (...and a little icon on the left)
         const header = (
             <>
-                {projectTitle}
-
+                        <Context tree={() => this.state.file}>
+                            {projectTitle}
+                            <ContextMenu>
+                                <li className='contextItem' onClick={this.handleDeleteClick}>Delete Project</li>
+                                <li className='contextItem'>Rename Project</li>
+                                <li className='contextItem'>Create Folder</li>
+                                <li className='contextItem'>Create File</li>
+                            </ContextMenu>
+                        </Context>
                 <hr />
             </>
         );
@@ -95,32 +103,32 @@ export default class ProjectTreeView extends React.Component {
         if (isProjectValid && this.props.project.hasOwnProperty('contents')) {
             return (
                 <>
-                    {header /* display the header (contains project name) */}
+                    <div ref={elem => !this.state.file && this.setState({ file: elem })}>
+                        {header /* display the header (contains project name) */}
 
-                        <div ref={elem => !this.state.file && this.setState({ file: elem })}>
-                            {
-                                // render each element within the root folder of the
-                                // project as FileNode
-                                this.props.project.contents.map((item) =>
-                                    <FileNode
-                                        tree={() => this.state.file}
-                                        key={item.name}
-                                        // ^when rendering a list of elements, react
-                                        // requires a unique key for all of them
-                                        data={item} // pass the element to thee FileNode
-                                        path={[item.name]}
-                                        // ^since this is the root of the project,
-                                        // the path of each element consists just of its
-                                        // own name
-                                        onOpenFile={this.props.onOpenFile}
-                                        onDeleteFile={this.props.onDeleteFile}
-                                        onOpenContext={this.props.onOpenContext}
-                                        onSelect={this.onSelect}
-                                        selectedPath={this.state.selected}
-                                    />
-                                )
-                            }
-                        </div>
+                        {
+                            // render each element within the root folder of the
+                            // project as FileNode
+                            this.props.project.contents.map((item) =>
+                                <FileNode
+                                    tree={() => this.state.file}
+                                    key={item.name}
+                                    // ^when rendering a list of elements, react
+                                    // requires a unique key for all of them
+                                    data={item} // pass the element to thee FileNode
+                                    path={[item.name]}
+                                    // ^since this is the root of the project,
+                                    // the path of each element consists just of its
+                                    // own name
+                                    onOpenFile={this.props.onOpenFile}
+                                    onDeleteFile={this.props.onDeleteFile}
+                                    onOpenContext={this.props.onOpenContext}
+                                    onSelect={this.onSelect}
+                                    selectedPath={this.state.selected}
+                                />
+                            )
+                        }
+                    </div>
                 </>
             );
         }
