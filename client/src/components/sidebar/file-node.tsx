@@ -108,7 +108,7 @@ export default class FileNode extends React.Component<Props, State> {
 
                         Double clicks are to be interpreted as opening files
                     */}
-            <Context tree={this.props.tree}>
+            <Context>
                 <div onClick={this.toggle} onDoubleClick={this.handleItemDoubleClick}>
                     {label}
                 </div>
@@ -132,7 +132,6 @@ export default class FileNode extends React.Component<Props, State> {
                                         path, to create it's own path.
                                     */}
                 <FileNode
-                  tree={this.props.tree}
                   data={child}
                   path={this.props.path.concat([child.name])}
                   onOpenFile={this.props.onOpenFile}
@@ -155,7 +154,7 @@ export default class FileNode extends React.Component<Props, State> {
           : 'inactiveFileNode';
       return (
         /* double clicks are to be interpreted as opening files */
-        <Context tree={this.props.tree}>
+        <Context>
             <div onDoubleClick={this.handleItemDoubleClick} className={background}>
               {label}
             </div>
@@ -207,7 +206,6 @@ interface Props {
   onCreateFile: (path: string[], type: string) => void;
   onOpenContext: (path: string[]) => void;
   data: FileNodeData;
-  tree: () => HTMLDivElement;
   openedPath: string[];
   path: string[];
 }
