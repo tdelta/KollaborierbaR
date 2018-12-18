@@ -86,8 +86,8 @@ export default class ProjectTreeView extends React.Component {
                             <ContextMenu>
                                 <ContextAction onClick={this.props.onDeleteProject}>Delete Project</ContextAction>
                                 <ContextAction>Rename Project</ContextAction>
-                                <ContextAction>Create Folder</ContextAction>
-                                <ContextAction>Create File</ContextAction>
+                                <ContextAction onClick={() => this.props.onCreateFile([], 'folder')}>Create Folder</ContextAction>
+                                <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
                             </ContextMenu>
                         </Context>
                 <hr />
