@@ -83,6 +83,10 @@ export default class Top extends React.Component<Props, State> {
     }
   }
 
+  private deleteFileClick(): void {
+    // TODO
+  }
+
   public render() {
     return (
       <div>
@@ -124,6 +128,7 @@ export default class Top extends React.Component<Props, State> {
                   Save
                 </DropdownItem>
                 <DropdownItem onClick={this.openFileOnClick}>Load</DropdownItem>
+                <DropdownItem onClick={this.deleteFileClick}>Delete</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>

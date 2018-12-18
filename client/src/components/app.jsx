@@ -25,6 +25,7 @@ export default class App extends React.Component {
         this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
+        this.openFile = this.openFile.bind(this);
 
         this.confirmationModal = React.createRef();
 
@@ -40,6 +41,8 @@ export default class App extends React.Component {
             text: '',
 
             filename: undefined,
+
+            openedPath: [],
 
             // warnings, errors, etc. within the currently open file
             diagnostics: []
@@ -94,8 +97,21 @@ export default class App extends React.Component {
     componentDidMount() {
         this.setState({
             text: '', // load some sample text for testing
-            filename: 'Main.java'
+            filename: 'Main.java',
+            openedPath: ['Main.java'] // TODO: replace filename with this
         });
+    }
+
+    openFile(path) {
+        // This string composition is necessary because path contains only the path within a project.
+        openFile('/' + this.state.project.name + '/' + path.join('/'))
+            .then((response) => {
+                this.setState({
+                    text: response.fileText,
+                    filename: response.fileName,
+                    openedPath: path
+                });
+            });
     }
 
     /**
@@ -120,35 +136,46 @@ export default class App extends React.Component {
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
+                        openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
-                        onOpenFile={(path) => {
-                            // This string composition is necessary because path contains only the path within a project.
-                            openFile('/' + this.state.project.name + '/' + path.join('/'))
-                                .then((response) => {
-                                    this.setText(response.fileText);
-                                    this.setFileName(response.fileName);
-                                });
-                        }}
+                        onOpenFile={this.openFile}
                         onDeleteFile={(path) => {
-                            // This string composition is necessary because path contains only the path within a project.
-                            deleteFile('/' + this.state.project.name + '/' + path.join('/'))
-                                .then((response) => {
-                                    // The response contains the new file structure, where the choosen file it deleted.
-                                    this.showProject(response);
-                                    // if the deleted file is the opened one, empty the editor
-                                    if (path[path.length-1] === this.state.filename) {
-                                        this.setText('');
-                                        this.setFileName(undefined);
+                            if (path.length < 1) {
+                                throw new Error('Tried to delete an empty path!');
+                            }
+
+                            else {
+                                const filename = path[path.length - 1];
+
+                                this.confirmationModal.current.ask(
+                                    'Do you really want to delete ' + filename,
+                                    () => {
+                                        // This string composition is necessary because path contains only the path within a project.
+                                        deleteFile('/' + this.state.project.name + '/' + path.join('/'))
+                                            .then((response) => {
+                                            // The response contains the new file structure, where the choosen file it deleted.
+                                                this.showProject(response);
+                                                // if the deleted file is the opened one, empty the editor
+                                                if (path[path.length-1] === this.state.filename) {
+                                                    this.setText('');
+                                                    this.setFileName(undefined);
+                                                }
+                                            });
                                     }
-                                });
+                                );
+                            }
                         }}
                         onCreateFile={(path, type) => {
                             let file = prompt('Enter Name', '');
+
                             if (file !== null) {
                                 path.push(file);
-                                createFile('/' + this.state.project.name + '/' + path.join('/'), type)
+
+                                const requestPath = '/' + this.state.project.name + '/' + path.join('/');
+                                createFile(requestPath, type)
                                     .then((response) => {
                                         this.showProject(response);
+                                        this.openFile(path);
                                     });
                             }
                         }}

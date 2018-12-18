@@ -6,7 +6,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
 import FileNode from './file-node.tsx';
-import {Context, ContextMenu} from './context.jsx';
+import {Context, ContextMenu, ContextAction} from './context.jsx';
 
 /**
  * Displays a project (file system like JSON structure, passed by `project`
@@ -46,9 +46,7 @@ export default class ProjectTreeView extends React.Component {
 
     constructor(props){
         super(props);
-        this.onSelect = this.onSelect.bind(this);
         this.state = {
-            selected: '',
             file: null
         };
     }
@@ -89,10 +87,10 @@ export default class ProjectTreeView extends React.Component {
                         <Context tree={() => this.state.file}>
                             {projectTitle}
                             <ContextMenu>
-                                <li className='contextItem' onClick={this.props.onDeleteProject}>Delete Project</li>
-                                <li className='contextItem'>Rename Project</li>
-                                <li className='contextItem'>Create Folder</li>
-                                <li className='contextItem'>Create File</li>
+                                <ContextAction onClick={this.props.onDeleteProject}>Delete Project</ContextAction>
+                                <ContextAction>Rename Project</ContextAction>
+                                <ContextAction>Create Folder</ContextAction>
+                                <ContextAction>Create File</ContextAction>
                             </ContextMenu>
                         </Context>
                 <hr />
@@ -124,8 +122,7 @@ export default class ProjectTreeView extends React.Component {
                                     onDeleteFile={this.props.onDeleteFile}
                                     onCreateFile={this.props.onCreateFile}
                                     onOpenContext={this.props.onOpenContext}
-                                    onSelect={this.onSelect}
-                                    selectedPath={this.state.selected}
+                                    openedPath={this.props.openedPath}
                                 />
                             )
                         }
@@ -145,11 +142,6 @@ export default class ProjectTreeView extends React.Component {
                 </>
             );
         }
-    }
-    onSelect(path){
-        this.setState({
-            selected: path
-        });
     }
 }
 

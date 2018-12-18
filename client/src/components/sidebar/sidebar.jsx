@@ -211,6 +211,7 @@ export default class Sidebar extends React.Component {
                                 onNewFolder={(p) => {alert(p.join('/'));}}
                                 onClickProject={(p) => {alert(p);}}
                                 project={this.props.project}
+                                openedPath={this.props.openedPath}
                             />
                         </div>
                     </div>
