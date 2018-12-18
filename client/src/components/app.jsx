@@ -26,6 +26,8 @@ export default class App extends React.Component {
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
+        this.deleteFile = this.deleteFile.bind(this);
+        this.deleteProject = this.deleteProject.bind(this);
 
         this.confirmationModal = React.createRef();
 
@@ -114,6 +116,49 @@ export default class App extends React.Component {
             });
     }
 
+    deleteFile(path) {
+        if (path.length < 1) {
+            throw new Error('Tried to delete an empty path!');
+        }
+
+        else {
+            const filename = path[path.length - 1];
+
+            this.confirmationModal.current.ask(
+                'Do you really want to delete ' + filename,
+                () => {
+                    // This string composition is necessary because path contains only the path within a project.
+                    deleteFile('/' + this.state.project.name + '/' + path.join('/'))
+                        .then((response) => {
+                        // The response contains the new file structure, where the choosen file it deleted.
+                            this.showProject(response);
+                            // if the deleted file is the opened one, empty the editor
+                            if (path[path.length-1] === this.state.filename) {
+                                this.setText('');
+                                this.setFileName(undefined);
+                            }
+                        });
+                }
+            );
+        }
+    }
+
+    deleteProject() {
+        // Show a dialog to confirm the deletion of the project
+        this.confirmationModal.current.ask(
+            `Really delete project ${this.state.project.name}?`,
+            // Called when the dialog was confirmed
+            () => {
+                deleteProject(
+                    this.state.project.name, // Project to delete, in this case always the project that was opened
+                    this.showProject, // Callback that renders the resulting project
+                    this.state.project.name // Currently opened project
+                );
+            },
+            // Nothing happens when the dialog was canceled
+        );
+    }
+
     /**
      * Creates the displayed HTML for this component.
      *
@@ -132,6 +177,8 @@ export default class App extends React.Component {
                     showProject={this.showProject}
                     setText={this.setText}
                     text={this.state.text}
+                    onDeleteFile={() => this.deleteFile(this.state.openedPath)}
+                    //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
                     <Sidebar
@@ -139,32 +186,7 @@ export default class App extends React.Component {
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}
-                        onDeleteFile={(path) => {
-                            if (path.length < 1) {
-                                throw new Error('Tried to delete an empty path!');
-                            }
-
-                            else {
-                                const filename = path[path.length - 1];
-
-                                this.confirmationModal.current.ask(
-                                    'Do you really want to delete ' + filename,
-                                    () => {
-                                        // This string composition is necessary because path contains only the path within a project.
-                                        deleteFile('/' + this.state.project.name + '/' + path.join('/'))
-                                            .then((response) => {
-                                            // The response contains the new file structure, where the choosen file it deleted.
-                                                this.showProject(response);
-                                                // if the deleted file is the opened one, empty the editor
-                                                if (path[path.length-1] === this.state.filename) {
-                                                    this.setText('');
-                                                    this.setFileName(undefined);
-                                                }
-                                            });
-                                    }
-                                );
-                            }
-                        }}
+                        onDeleteFile={this.deleteFile}
                         onCreateFile={(path, type) => {
                             let file = prompt('Enter Name', '');
 
@@ -179,21 +201,7 @@ export default class App extends React.Component {
                                     });
                             }
                         }}
-                        onDeleteProject={() => {
-                            // Show a dialog to confirm the deletion of the project
-                            this.confirmationModal.current.ask(
-                                `Really delete project ${this.state.project.name}?`,
-                                // Called when the dialog was confirmed
-                                () => {
-                                    deleteProject(
-                                        this.state.project.name, // Project to delete, in this case always the project that was opened
-                                        this.showProject, // Callback that renders the resulting project
-                                        this.state.project.name // Currently opened project
-                                    );
-                                },
-                                // Empty function called when the dialog was canceled
-                                ()=>{});
-                        }}
+                        onDeleteProject={this.deleteProject}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}
