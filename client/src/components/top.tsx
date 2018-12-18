@@ -96,10 +96,6 @@ export default class Top extends React.Component<Props, State> {
     }
   }
 
-  private deleteFileClick(): void {
-    // TODO
-  }
-
   public render() {
     return (
       <div>
@@ -138,10 +134,10 @@ export default class Top extends React.Component<Props, State> {
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem onClick={this.downloadFileOnClick}>
-                  Save
+                  Download
                 </DropdownItem>
-                <DropdownItem onClick={this.openFileOnClick}>Load</DropdownItem>
-                <DropdownItem onClick={this.deleteFileClick}>Delete</DropdownItem>
+                <DropdownItem onClick={this.openFileOnClick}>Upload</DropdownItem>
+                <DropdownItem onClick={this.props.onDeleteFile}>Delete</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>
@@ -188,4 +184,6 @@ interface Props {
   text: string;
   setText(text: string): void;
   showProject(project: object): void;
+  onDeleteFile(): void;
+  onDeleteProject(): void;
 }
