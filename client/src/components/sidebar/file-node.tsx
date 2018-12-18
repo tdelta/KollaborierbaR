@@ -114,7 +114,7 @@ export default class FileNode extends React.Component<Props, State> {
                 </div>
                 <ContextMenu>
                     <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
-                    <ContextAction>Rename Folder</ContextAction>
+                    {/*<ContextAction>Rename Folder</ContextAction>*/}
                     <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</ContextAction>
                     <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</ContextAction>
                 </ContextMenu>
@@ -160,7 +160,7 @@ export default class FileNode extends React.Component<Props, State> {
             </div>
             <ContextMenu>
                 <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
-                <ContextAction>Rename File</ContextAction>
+                {/*<ContextAction>Rename File</ContextAction>*/}
             </ContextMenu>
         </Context>
       );
