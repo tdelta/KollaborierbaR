@@ -46,9 +46,6 @@ export default class ProjectTreeView extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = {
-            file: null
-        };
     }
 
     render() {
@@ -101,7 +98,7 @@ export default class ProjectTreeView extends React.Component {
         if (isProjectValid && this.props.project.hasOwnProperty('contents')) {
             return (
                 <>
-                    <div ref={elem => !this.state.file && this.setState({ file: elem })}>
+                    <div>
                         {header /* display the header (contains project name) */}
 
                         {
@@ -109,7 +106,6 @@ export default class ProjectTreeView extends React.Component {
                             // project as FileNode
                             this.props.project.contents.map((item) =>
                                 <FileNode
-                                    tree={() => this.state.file}
                                     key={item.name}
                                     // ^when rendering a list of elements, react
                                     // requires a unique key for all of them
@@ -150,6 +146,7 @@ ProjectTreeView.propTypes = {
     'onOpenFile': PropTypes.func,
     'onOpenContext': PropTypes.func,
     'onDeleteFile': PropTypes.func,
+    'onDeleteProject': PropTypes.func,
     'onCreateFile': PropTypes.func,
     'project': PropTypes.shape({
         'contents': PropTypes.arrayOf(PropTypes.object),
