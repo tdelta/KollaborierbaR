@@ -73,29 +73,12 @@ Context.propTypes = {
 
 
 class ContextMenu extends React.Component{
-    constructor(props) {
-        super(props);
-    }
 
     render() {
-        const childrenWithProps = React.Children.map(this.props.children, child => {
-            //TODO: Fix warning
-            if (child.type === ContextAction) {
-                return React.cloneElement(
-                    child,
-                    {closeContext: this.props.closeContext}
-                );
-            }
-
-            else {
-                return child;
-            }
-        });
-
         return (
             <Collapse isOpen={this.props.context}>
                 <ListGroup className='contextList'>
-                    {childrenWithProps}
+                    {this.props.children}
                 </ListGroup>
             </Collapse>
         );
@@ -108,19 +91,9 @@ ContextMenu.propTypes = {
 };
 
 export class ContextAction extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.onClick = this.onClick.bind(this);
-    }
-
-    onClick() {
-        this.props.closeContext();
-        this.props.onClick();
-    }
 
     render() {
-        return <li className='contextAction' onClick={this.onClick}>{this.props.children}</li>;
+        return <li className='contextAction' onClick={this.props.onClick}>{this.props.children}</li>;
     }
 }
 
@@ -128,7 +101,6 @@ export class ContextAction extends React.Component {
 ContextAction.propTypes = {
     children: PropTypes.node,
     onClick: PropTypes.func,
-    closeContext: PropTypes.func
 };
 
 export {Context, ContextMenu};
