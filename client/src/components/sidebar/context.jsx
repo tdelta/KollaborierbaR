@@ -9,8 +9,9 @@ export default class Context extends React.Component{
         super(props);
         this.node = null;
         this.handleRightClick = this.handleRightClick.bind(this);
-        this.handleContextClose = this.handleContextClose.bind(this);
+        this.handleContextClick = this.handleContextClick.bind(this);
         this.closeContext = this.closeContext.bind(this);
+        this.handleMouseDown = this.handleMouseDown.bind(this);
 
         this.state = {
             context: false,
@@ -33,7 +34,6 @@ export default class Context extends React.Component{
                     child,
                     {
                         context: this.state.context,
-                        closeContext: this.closeContext
                     }
                 )
                 : child
@@ -46,23 +46,30 @@ export default class Context extends React.Component{
         );
     }
 
-    handleContextClose(e) {
+    handleContextClick(e) {
         e.preventDefault();
         if (this.node !== null && e.target !== this.node && !this.node.contains(e.target)) {
-            this.setState({ context: false });
+            this.closeContext();
+        }
+    }
+
+    handleMouseDown(e) {
+        // if its a left click, close the context menu.
+        if (e.which === 1) {
+            this.closeContext();
         }
     }
 
     componentDidMount() {
         // addeventlistener doesnt add handlers twice 
-        document.addEventListener('contextmenu', this.handleContextClose);
-        document.addEventListener('click', this.handleContextClose);
+        document.addEventListener('contextmenu', this.handleContextClick);
+        document.addEventListener('click', this.handleMouseDown);
     }
 
     componentWillUnmount() {
         // Make sure to remove the DOM listener when the component is unmounted.
-        document.removeEventListener('contextmenu', this.handleContextClose);
-        document.addEventListener('click', this.handleContextClose);
+        document.removeEventListener('contextmenu', this.handleContextClick);
+        document.removeEventListener('click', this.handleMouseDown);
     }
 
 }
@@ -71,9 +78,7 @@ Context.propTypes = {
     children: PropTypes.node
 };
 
-
 class ContextMenu extends React.Component{
-
     render() {
         return (
             <Collapse isOpen={this.props.context}>
@@ -91,7 +96,6 @@ ContextMenu.propTypes = {
 };
 
 export class ContextAction extends React.Component {
-
     render() {
         return <li className='contextAction' onClick={this.props.onClick}>{this.props.children}</li>;
     }
