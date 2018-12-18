@@ -10,6 +10,7 @@ export default class Context extends React.Component{
         this.node = null;
         this.handleRightClick = this.handleRightClick.bind(this);
         this.handleContextClose = this.handleContextClose.bind(this);
+        this.closeContext = this.closeContext.bind(this);
 
         this.state = {
             context: false,
@@ -20,10 +21,22 @@ export default class Context extends React.Component{
         this.setState({ context: !this.state.context });
     }
 
+    closeContext() {
+        this.setState({ context: false });
+    }
+
     render() {
         const childrenWithProps = React.Children.map(this.props.children, child =>
             //TODO: Fix warning
-            React.cloneElement(child, {context: this.state.context})
+            child.type === ContextMenu ?
+                React.cloneElement(
+                    child,
+                    {
+                        context: this.state.context,
+                        closeContext: this.closeContext
+                    }
+                )
+                : child
         );
 
         return(
@@ -65,15 +78,45 @@ class ContextMenu extends React.Component{
         super(props);
     }
 
-
     render() {
+        const childrenWithProps = React.Children.map(this.props.children, child => {
+            //TODO: Fix warning
+            if (child.type === ContextAction) {
+                return React.cloneElement(
+                    child,
+                    {closeContext: this.props.closeContext}
+                );
+            }
+
+            else {
+                return child;
+            }
+        });
+
         return (
             <Collapse isOpen={this.props.context}>
                 <ListGroup className='contextList'>
-                    {this.props.children}
+                    {childrenWithProps}
                 </ListGroup>
             </Collapse>
         );
+    }
+}
+
+export class ContextAction extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.onClick = this.onClick.bind(this);
+    }
+
+    onClick() {
+        this.props.closeContext();
+        this.props.onClick();
+    }
+
+    render() {
+        return <li className='contextAction' onClick={this.onClick}>{this.props.children}</li>;
     }
 }
 

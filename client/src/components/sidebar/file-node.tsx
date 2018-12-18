@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import FileIcon from './file-icon.jsx';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
-import {Context, ContextMenu} from './context.jsx'
+import {Context, ContextMenu, ContextAction} from './context.jsx'
 import './sidebar.css'
 /**
  * Displays a node and its children (recursively) in a filesystem-like tree.
@@ -101,10 +101,6 @@ export default class FileNode extends React.Component<Props, State> {
         display: this.state.collapsed ? 'none' : '',
       };
 
-      const background: object = {
-        backgroundColor: this.state.selected ? '#f00' : '#0f0',
-      };
-
       return (
         <>
           {/* allow toggling the visibility of the node's children
@@ -117,10 +113,10 @@ export default class FileNode extends React.Component<Props, State> {
                     {label}
                 </div>
                 <ContextMenu>
-                    <li className='contextItem' onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</li>
-                    <li className='contextItem'>Rename Folder</li>
-                    <li className='contextItem' onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</li>
-                    <li className='contextItem' onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</li>
+                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
+                    <ContextAction>Rename Folder</ContextAction>
+                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</ContextAction>
+                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</ContextAction>
                 </ContextMenu>
             </Context>
           {/* display the children as unordered list */}
@@ -143,8 +139,7 @@ export default class FileNode extends React.Component<Props, State> {
                   onDeleteFile={this.props.onDeleteFile}
                   onCreateFile={this.props.onCreateFile}
                   onOpenContext={this.props.onOpenContext}
-                  onSelect={this.props.onSelect}
-                  selectedPath={this.props.selectedPath}
+                  openedPath={this.props.openedPath}
                 />
               </li>
             ))}
@@ -154,7 +149,8 @@ export default class FileNode extends React.Component<Props, State> {
     } else {
       // The node is a single file
       const background =
-        this.props.selectedPath === this.props.path.join('/')
+        // TODO: higher efficency when comparing paths
+        this.props.openedPath.join('/') === this.props.path.join('/')
           ? 'activeFileNode'
           : 'inactiveFileNode';
       return (
@@ -164,8 +160,8 @@ export default class FileNode extends React.Component<Props, State> {
               {label}
             </div>
             <ContextMenu>
-                <li className='contextItem' onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</li>
-                <li className='contextItem'>Rename File</li>
+                <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
+                <ContextAction>Rename File</ContextAction>
             </ContextMenu>
         </Context>
       );
@@ -188,7 +184,6 @@ export default class FileNode extends React.Component<Props, State> {
   private handleItemDoubleClick() {
     if (this.props.data.type === 'file') {
       this.props.onOpenFile(this.props.path);
-      this.props.onSelect(this.props.path.join('/'));
     }
   }
 
@@ -211,10 +206,9 @@ interface Props {
   onDeleteFile: (path: string[]) => void;
   onCreateFile: (path: string[], type: string) => void;
   onOpenContext: (path: string[]) => void;
-  onSelect: (path: string) => void;
   data: FileNodeData;
   tree: () => HTMLDivElement;
-  selectedPath: string;
+  openedPath: string[];
   path: string[];
 }
 
