@@ -1,8 +1,44 @@
+import {serverAddress} from '../constants.ts';
+
+/**
+ * Fetches contents and metadata of a file asynchronously from the server via
+ * HTTP request.
+ * 
+ * @param {string} path: path to file that shall be opened.
+ *     It shall contain a leading '/' and the first folder shall be the
+ *     project name.
+ *
+ * @returns {Promise} promise which will resolve to said contents and metadata.
+ *
+ * @example
+ * openFile('/My Project/README.md').then((response) =>
+ *   console.log(response.fileName); // yields "README.md"
+ *   console.log(response.fileText); // yields contents of the README.md file
+ * });
+ */
+function openFile(path) {
+    // API URL of the server we will use for our request
+    const url = serverAddress + '/projects/' +path;
+
+    return fetch(url, {
+        method: 'GET',
+        mode: 'cors', // enable cross origin requests. Server must also allow this!
+        headers: {
+            'Accept' : 'application/json', // we want a json object back
+            //'Content-Type': 'application/json', // we are sending a json object
+        },
+    })
+        .then((response) =>  response.json()); // parse the response body as json
+}
+
+export default openFile;
+
+
 /*
  * load the list of available projects from the server
  */
 function getProjects() {
-    var url = new URL('http://localhost:9000/projects');
+    var url = serverAddress + '/projects';
     return fetch(url, {
         method: 'GET',
         mode: 'cors',
@@ -20,7 +56,7 @@ function getProjects() {
  * the handler displays the returned project in the editor
  */
 function openProject(name) {
-    var url = new URL('http://localhost:9000/projects/'+ name);
+    var url = serverAddress + '/projects/'+ name;
 
     return fetch(url, {
         method: 'GET',
@@ -28,7 +64,12 @@ function openProject(name) {
     })
         .then((response) => {
             response.json()
-                .then((json) => this.showProject(json));
+                .then((json) => {
+                    this.showProject(json);
+                    this.setText('');
+                    this.setFileName(undefined);
+                
+                });
             return {'status': response.status, 
                 'statusText': response.statusText};
         });
@@ -36,7 +77,7 @@ function openProject(name) {
 
 
 function deleteOverall(path){
-    var url = 'http://localhost:9000/projects/' +  path;
+    var url = serverAddress + '/projects/' +  path;
     
     return fetch(url, {
         method: 'DELETE',
@@ -105,7 +146,7 @@ function deleteProject(path) {
  * Projects/folders have type == folder
  */
 function createOverall(path, type) {
-    var url = 'http://localhost:9000/projects/' + path + '?type=' + type;
+    var url = serverAddress + '/projects/' + path + '?type=' + type;
 
     return fetch(url, {
         method: 'PUT',
@@ -113,6 +154,7 @@ function createOverall(path, type) {
     })
         .then((response) => response.json());
 }
+
 
 function createFile(path, type) {
     let file = prompt('Enter Name', '');
@@ -128,6 +170,7 @@ function createFile(path, type) {
     }
 }
 
+
 function createProject() {
     let file = prompt('Enter Name', '');
     if (file !== null) {
@@ -142,4 +185,4 @@ function createProject() {
 }
 
 
-export {deleteFile, deleteProject, createFile, createProject, getProjects, openProject};
+export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject};
