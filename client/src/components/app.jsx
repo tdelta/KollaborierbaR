@@ -7,7 +7,7 @@ import ConfirmationModal from './confirmation-modal.tsx';
 
 import openFile from '../openFile.js';
 
-import {deleteFile, createFile, deleteProject} from './modal.js';
+import {deleteFile, deleteProject, createFile, createProject, openProject} from './projectmanagement.js';
 
 //import testSource from '../sample-text.js';
 
@@ -26,8 +26,11 @@ export default class App extends React.Component {
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
-        this.deleteFile = this.deleteFile.bind(this);
-        this.deleteProject = this.deleteProject.bind(this);
+        this.deleteFile = deleteFile.bind(this);
+        this.deleteProject = deleteProject.bind(this);
+        this.createFile = createFile.bind(this);
+        this.createProject = createProject.bind(this);
+        this.openProject = openProject.bind(this);
 
         this.confirmationModal = React.createRef();
 
@@ -116,48 +119,6 @@ export default class App extends React.Component {
             });
     }
 
-    deleteFile(path) {
-        if (path.length < 1) {
-            throw new Error('Tried to delete an empty path!');
-        }
-
-        else {
-            const filename = path[path.length - 1];
-
-            this.confirmationModal.current.ask(
-                'Do you really want to delete ' + filename,
-                () => {
-                    // This string composition is necessary because path contains only the path within a project.
-                    deleteFile('/' + this.state.project.name + '/' + path.join('/'))
-                        .then((response) => {
-                        // The response contains the new file structure, where the choosen file it deleted.
-                            this.showProject(response);
-                            // if the deleted file is the opened one, empty the editor
-                            if (path[path.length-1] === this.state.filename) {
-                                this.setText('');
-                                this.setFileName(undefined);
-                            }
-                        });
-                }
-            );
-        }
-    }
-
-    deleteProject() {
-        // Show a dialog to confirm the deletion of the project
-        this.confirmationModal.current.ask(
-            `Really delete project ${this.state.project.name}?`,
-            // Called when the dialog was confirmed
-            () => {
-                deleteProject(
-                    this.state.project.name, // Project to delete, in this case always the project that was opened
-                    this.showProject, // Callback that renders the resulting project
-                    this.state.project.name // Currently opened project
-                );
-            },
-            // Nothing happens when the dialog was canceled
-        );
-    }
 
     /**
      * Creates the displayed HTML for this component.
@@ -178,6 +139,9 @@ export default class App extends React.Component {
                     setText={this.setText}
                     text={this.state.text}
                     onDeleteFile={() => this.deleteFile(this.state.openedPath)}
+                    onDeleteProject={this.deleteProject}
+                    onOpenProject={this.openProject}
+                    onCreateProject={this.createProject}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
@@ -187,20 +151,7 @@ export default class App extends React.Component {
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}
                         onDeleteFile={this.deleteFile}
-                        onCreateFile={(path, type) => {
-                            let file = prompt('Enter Name', '');
-
-                            if (file !== null) {
-                                path.push(file);
-
-                                const requestPath = '/' + this.state.project.name + '/' + path.join('/');
-                                createFile(requestPath, type)
-                                    .then((response) => {
-                                        this.showProject(response);
-                                        this.openFile(path);
-                                    });
-                            }
-                        }}
+                        onCreateFile={this.createFile}
                         onDeleteProject={this.deleteProject}
                     />
                     <Editor

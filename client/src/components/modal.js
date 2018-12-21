@@ -2,90 +2,8 @@
 
 import React from 'react';
 import { ListGroup, ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { getProjects } from './projectmanagement';
 
-/*
- * load the list of available projects from the server
- */
-function getProjects() {
-    var url = new URL('http://localhost:9000/projects');
-    return fetch(url, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-            'Accept': 'application/json',
-        },
-    })
-        .then((response) => response.json());
-
-}
-
-/*
- * load the related files for the project with name 'name' from the server
- * the handler displays the returned project in the editor
- */
-function openProject(name, handler) {
-    var url = new URL('http://localhost:9000/projects/'+ name);
-
-    return fetch(url, {
-        method: 'GET',
-        mode: 'cors',
-    })
-        .then((response) => {
-            response.json()
-                .then((json) => handler(json));
-            return {'status': response.status, 
-                'statusText': response.statusText};
-        });
-}
-
-/*
- * delete projects from server
- */
-function deleteProject(name, handler, previous) {
-    var url = 'http://localhost:9000/projects/' + name;
-
-    return fetch(url, {
-        method: 'DELETE',
-        mode: 'cors',
-    })
-        .then((response) => {
-            // when the currently loaded project is deleted, delete the loaded files
-            // aka set an empty json object
-            if (previous === name && response.status === 200) {
-                handler({});
-            }
-            return {'status': response.status, 
-                'statusText': response.statusText};
-        })
-}
-
- 
-function deleteFile(path){
-    var url = 'http://localhost:9000/projects/' +  path;
-    
-    return fetch(url, {
-        method: 'DELETE',
-        mode: 'cors', // enable cross origin requests. Server must also allow this!
-        headers: {
-            'Accept' : 'application/json', // we want a json object back
-        }
-    })
-        .then((response) =>  response.json()); // parse the response body as json
-}
-
-/*
- * create file/folder/project on the server. Files have type == file. 
- * Projects/folders have type == folder
- */
-function createFile(name, type) {
-    var url = 'http://localhost:9000/projects/' + name + "?type=" + type;
-
-    return fetch(url, {
-        method: 'PUT',
-        mode: 'cors',
-    })
-        .then((response) => response.json());
-}
 
 /*
  * open project dialog window, that shows a list with available projects
@@ -106,12 +24,6 @@ class ModalSelect extends React.Component {
         };
     }
 
-    /*
-     * Static class variable that holds the name of the previously selected project
-     * when a new one is selected. Is used to detected if the deleted project 
-     * is the loaded project
-     */
-    static previous = "";
   
     /*
      * update the state with the selected project
@@ -141,9 +53,8 @@ class ModalSelect extends React.Component {
     projectAction() {
         let name = this.state.selected.name;
         if (name) {
-            this.props.projectOperation(this.state.selected.name, this.props.setStructure, ModalSelect.previous)
+            this.props.projectOperation(this.state.selected.name);
             this.props.toggle();
-            ModalSelect.previous = this.state.selected.name;
         }
     }
 
@@ -199,8 +110,8 @@ class ModalSelect extends React.Component {
                     </ModalBody>
                     <ModalFooter>
                         {/* projectAction is a prop and defines what to do with a project (e.g. deletion) */}
-                        <Button color="primary" onClick={this.projectAction}>Select</Button>
-                        <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
+                        <Button color='primary' onClick={this.projectAction}>Select</Button>
+                        <Button color='secondary' onClick={this.props.toggle}>Cancel</Button>
                     </ModalFooter>
                 </Modal>
             </div>
@@ -215,14 +126,14 @@ class ModalSelect extends React.Component {
  */
 function OpenModal(props) {
     return (
-        <ModalSelect {...props} projectOperation={openProject} usecase="To Open" />
+        <ModalSelect {...props} usecase='To Open' />
     );
 }
 
 function DeleteModal(props) {
     return (
-        <ModalSelect {...props} projectOperation={deleteProject} usecase="To Delete"/>
+        <ModalSelect {...props} usecase='To Delete'/>
     );
 }
 
-export {OpenModal, DeleteModal, deleteFile, createFile, deleteProject};
+export {OpenModal, DeleteModal};
