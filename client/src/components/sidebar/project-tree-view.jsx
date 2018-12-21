@@ -44,10 +44,6 @@ import {Context, ContextMenu, ContextAction} from './context.jsx';
  */
 export default class ProjectTreeView extends React.Component {
 
-    constructor(props){
-        super(props);
-    }
-
     render() {
         // determine, whether the project property is set and
         // contains at least a name. If not, the view will show an appropriate message.
@@ -148,6 +144,7 @@ ProjectTreeView.propTypes = {
     'onDeleteFile': PropTypes.func,
     'onDeleteProject': PropTypes.func,
     'onCreateFile': PropTypes.func,
+    'openedPath': PropTypes.arrayOf(PropTypes.string),
     'project': PropTypes.shape({
         'contents': PropTypes.arrayOf(PropTypes.object),
         'name': PropTypes.string

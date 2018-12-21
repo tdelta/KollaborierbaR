@@ -229,5 +229,6 @@ Sidebar.propTypes = {
     'onOpenFile': PropTypes.func,
     'onDeleteFile': PropTypes.func,
     'onCreateFile': PropTypes.func,
-    'onDeleteProject': PropTypes.func
+    'onDeleteProject': PropTypes.func,
+    'openedPath': PropTypes.arrayOf(PropTypes.string),
 };
