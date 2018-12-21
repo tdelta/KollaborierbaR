@@ -16,7 +16,8 @@ import {serverAddress} from '../constants.ts';
  *   console.log(response.fileText); // yields contents of the README.md file
  * });
  */
-function openFile(path) {
+function openFile(path) { 
+    path = encodeURIComponent(path);
     // API URL of the server we will use for our request
     const url = serverAddress + '/projects/' +path;
 
@@ -56,6 +57,8 @@ function getProjects() {
  * the handler displays the returned project in the editor
  */
 function openProject(name) {
+    name = encodeURIComponent(name);
+    
     var url = serverAddress + '/projects/'+ name;
 
     return fetch(url, {
@@ -77,8 +80,10 @@ function openProject(name) {
 
 
 function deleteOverall(path){
+    path = encodeURIComponent(path);
+    console.log(path);
     var url = serverAddress + '/projects/' +  path;
-    
+    console.log(url);
     return fetch(url, {
         method: 'DELETE',
         mode: 'cors', // enable cross origin requests. Server must also allow this!
@@ -92,6 +97,7 @@ function deleteOverall(path){
 
 
 function deleteFile(path){
+    
     if (path.length < 1) {
         throw new Error('Tried to delete an empty path!');
     }
@@ -123,7 +129,7 @@ function deleteFile(path){
 /*
  * delete projects from server
  */
-function deleteProject(path) {
+function deleteProject(path) { 
     // Show a dialog to confirm the deletion of the project
     this.confirmationModal.current.ask(
         `Really delete project ${path}?`,
@@ -146,6 +152,7 @@ function deleteProject(path) {
  * Projects/folders have type == folder
  */
 function createOverall(path, type) {
+    path = encodeURIComponent(path);
     var url = serverAddress + '/projects/' + path + '?type=' + type;
 
     return fetch(url, {
@@ -159,10 +166,8 @@ function createOverall(path, type) {
 function createFile(path, type) {
     let file = prompt('Enter Name', '');
     if (file !== null && !file.includes("/")) {
-        
         path.push(file);
         const requestPath = this.state.project.name + '/' + path.join('/');
-
         createOverall(requestPath, type)
             .then((response) => {
                 this.showProject(response);
@@ -176,15 +181,17 @@ function createFile(path, type) {
 
 function createProject() {
     let file = prompt('Enter Name', '');
-    if (file !== null) {
-
+    if (file !== null && !file.includes("/")) {
         createOverall(file, 'folder')
             .then((response) => {
                 this.showProject(response);
                 this.setText('');
                 this.setFileName(undefined);
             });
+    }if(file !== null && file.includes("/")){
+        alert('No appropriate filename. Filename includes: / ');
     }
+
 }
 
 
