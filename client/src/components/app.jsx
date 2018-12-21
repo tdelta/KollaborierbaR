@@ -5,9 +5,7 @@ import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 
-import openFile from '../openFile.js';
-
-import {deleteFile, deleteProject, createFile, createProject, openProject} from './projectmanagement.js';
+import {deleteFile, deleteProject, createFile, createProject, openProject, openFile} from './projectmanagement.js';
 
 //import testSource from '../sample-text.js';
 
