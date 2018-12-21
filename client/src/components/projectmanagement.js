@@ -70,12 +70,14 @@ function openProject(name) {
                     this.setFileName(undefined);
                 
                 });
-            return {'status': response.status, 
-                'statusText': response.statusText};
+            //return {'status': response.status, 
+            //  'statusText': response.statusText};
         });
 }
 
-
+/*
+ * Calls the REST delete method. only used internally
+ */
 function deleteOverall(path){
     var url = serverAddress + '/projects/' +  path;
     
@@ -90,7 +92,9 @@ function deleteOverall(path){
         .catch(() => {}); // if the json body is empty (e.g. after project delete) return an empty json object
 }
 
-
+/*
+ * Deletes a file from the loaded project on the server
+ */
 function deleteFile(path){
     if (path.length < 1) {
         throw new Error('Tried to delete an empty path!');
@@ -103,7 +107,7 @@ function deleteFile(path){
             'Do you really want to delete ' + filename,
             () => {
                 // This string composition is necessary because path contains only the path within a project.
-                deleteOverall('/' + this.state.project.name + '/' + path.join('/'))
+                deleteOverall(this.state.project.name + '/' + path.join('/'))
                     .then((response) => {
                     // The response contains the new file structure, where the choosen file it deleted.
                         this.showProject(response);
@@ -122,6 +126,7 @@ function deleteFile(path){
 
 /*
  * delete projects from server
+ * the main difference from deleteFile is that the path to delete is composed differently
  */
 function deleteProject(path) {
     // Show a dialog to confirm the deletion of the project
@@ -129,7 +134,7 @@ function deleteProject(path) {
         `Really delete project ${path}?`,
         // Called when the dialog was confirmed
         () => {
-            deleteOverall('/' + path); // Project to delete, in this case always the project that was opened
+            deleteOverall(path); // Project to delete, in this case always the project that was opened
             if (path === this.state.project.name) {
                 this.showProject({});
                 this.setText('');
@@ -144,6 +149,7 @@ function deleteProject(path) {
 /*
  * create file/folder/project on the server. Files have type == file. 
  * Projects/folders have type == folder
+ * only used internally
  */
 function createOverall(path, type) {
     var url = serverAddress + '/projects/' + path + '?type=' + type;
@@ -155,10 +161,12 @@ function createOverall(path, type) {
         .then((response) => response.json());
 }
 
-
+/*
+ * create a file in the active project
+ */
 function createFile(path, type) {
     let file = prompt('Enter Name', '');
-    if (file !== null && !file.includes("/")) {
+    if (file !== null && !file.includes('/')) {
         
         path.push(file);
         const requestPath = this.state.project.name + '/' + path.join('/');
@@ -168,12 +176,16 @@ function createFile(path, type) {
                 this.showProject(response);
                 this.openFile(path);
             });
-    } else if(file !== null && file.includes("/")){
+    } else if(file !== null && file.includes('/')){
         alert('No appropriate filename. Filename includes: / ');
     }
 }
 
 
+/*
+ * create a new project
+ * the main difference from createFile is that the path is composed differently
+ */ 
 function createProject() {
     let file = prompt('Enter Name', '');
     if (file !== null) {
