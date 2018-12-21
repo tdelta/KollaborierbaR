@@ -18,7 +18,7 @@ import {
 import {
     OpenModal, 
     DeleteModal
-} from './modal.js';
+} from './project-modals.jsx';
 
 import {
     createFile,
