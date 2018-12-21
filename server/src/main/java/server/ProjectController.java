@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,7 +54,7 @@ public class ProjectController {
      * That method handles requests to /showProject and creates a folderItem object which models the folder structure
      * of the given folder name. The object will later be marshalled through Java Spring, resulting in a JSON object. 
      *
-     * @param name is given in the http request.
+     * @param request is given in the http request.
      * @return the content of a chooses Projekt (currently hardcoded) in the form of a folder
      */
     @RequestMapping(value = "/{projectname}", method = RequestMethod.GET)
@@ -107,7 +110,7 @@ public class ProjectController {
      * That method handels request to /openFile and returns the contents of a file
      * and its name.
      * 
-     * @param fileRequest to the file, which is supposed to be opened.
+     * @param request to the file, which is supposed to be opened.
      * @return object containing filename and filetext (object for marshalling)
      */
     @RequestMapping(value = "/**", method = RequestMethod.GET)
@@ -116,7 +119,9 @@ public class ProjectController {
     	
     	// Get the file path for the request resource
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-    	
+        // if the path contains special characters they need to be decoded to be used properly
+        path = decode(path);
+
     	try {
     		
         final File file = new File(path);
@@ -169,6 +174,9 @@ public class ProjectController {
 
     	//TODO: Schönere Lösung finden!
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+        // if the path contains special characters they need to be decoded to be used properly
+        path = decode(path);
+
     	File file = new File(path);
     	
     	// Java createNewFile and mkdir are not able to create a file if a file 
@@ -203,8 +211,9 @@ public class ProjectController {
     @ResponseBody
     public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
     	
-    	//TODO: Schönere Lösung finden!
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+        // if the path contains special characters they need to be decoded to be used properly
+        path = decode(path);
 
         File file = new File(path);
         //check if the given path actually leads to a valid directory
@@ -216,7 +225,6 @@ public class ProjectController {
         }
     }
     
-    // TODO für MARC: Noch David und Co. erklären 
     /**
      * This Method handles the deletion of projects
      * @param request HttpServletRequest in order to get the full path
@@ -227,8 +235,9 @@ public class ProjectController {
     @ResponseBody
     public ResponseEntity deleteProject(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
     	
-    	//TODO: Schönere Lösung finden!
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+        // if the path contains special characters they need to be decoded to be used properly
+        path = decode(path);
 
         File file = new File(path);
         //check if the given path actually leads to a valid directory
@@ -269,6 +278,18 @@ public class ProjectController {
         }
     }
 
+    /**
+     * Helper method that handles decoding a giving string.
+     * @param value The string to be decoded
+     * @return The decoded string.
+     */
+    private String decode(String value) throws UnsupportedEncodingException{
+        return URLDecoder.decode(value, StandardCharsets.UTF_8.toString());
+    }
     // TODO: Proper HTTP error handler
-    ///@ExceptionHandler({NoSuchElementException.class, IllegalStateException.class})
+
+    @ExceptionHandler({UnsupportedEncodingException.class})
+    public ResponseEntity handleUnsupportedEncoding(){
+        return new ResponseEntity<String>("Not supported encoding string found", HttpStatus.BAD_REQUEST);
+    }
 }
