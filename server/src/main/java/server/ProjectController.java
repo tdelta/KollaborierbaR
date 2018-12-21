@@ -119,8 +119,6 @@ public class ProjectController {
     	
     	// Get the file path for the request resource
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-        // if the path contains special characters they need to be decoded to be used properly
-        path = decode(path);
 
     	try {
     		
@@ -172,10 +170,7 @@ public class ProjectController {
     @ResponseBody
     public ResponseEntity createFile(@PathVariable("projectname") String projectname ,@RequestParam("type") String type,HttpServletRequest request) throws IOException {
 
-    	//TODO: Schönere Lösung finden!
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-        // if the path contains special characters they need to be decoded to be used properly
-        path = decode(path);
 
     	File file = new File(path);
     	
@@ -212,8 +207,6 @@ public class ProjectController {
     public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
     	
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-        // if the path contains special characters they need to be decoded to be used properly
-        path = decode(path);
 
         File file = new File(path);
         //check if the given path actually leads to a valid directory
@@ -236,8 +229,6 @@ public class ProjectController {
     public ResponseEntity deleteProject(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
     	
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-        // if the path contains special characters they need to be decoded to be used properly
-        path = decode(path);
 
         File file = new File(path);
         //check if the given path actually leads to a valid directory
@@ -278,18 +269,11 @@ public class ProjectController {
         }
     }
 
-    /**
-     * Helper method that handles decoding a giving string.
-     * @param value The string to be decoded
-     * @return The decoded string.
-     */
-    private String decode(String value) throws UnsupportedEncodingException{
-        return URLDecoder.decode(value, StandardCharsets.UTF_8.toString());
-    }
+
     // TODO: Proper HTTP error handler
 
-    @ExceptionHandler({UnsupportedEncodingException.class})
-    public ResponseEntity handleUnsupportedEncoding(){
-        return new ResponseEntity<String>("Not supported encoding string found", HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler({UnsupportedEncodingException.class})
+//    public ResponseEntity handleUnsupportedEncoding(){
+//        return new ResponseEntity<String>("Not supported encoding string found", HttpStatus.BAD_REQUEST);
+//    }
 }
