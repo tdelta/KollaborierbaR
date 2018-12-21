@@ -16,10 +16,13 @@ import {
 } from 'reactstrap';
 
 import {
-    createFile,
     OpenModal, 
     DeleteModal
 } from './modal.js';
+
+import {
+    createFile,
+} from './projectmanagement.js';
 
 
 export default class Top extends React.Component<Props, State> {
@@ -50,17 +53,6 @@ export default class Top extends React.Component<Props, State> {
 
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
-  }
-
-  private openCreateDialog(): void {
-    let file = prompt('Enter Name', '');
-    if (file !== null) {
-      createFile(file, 'folder')
-        .then((response) => {
-            console.log(response)
-          this.props.showProject(response);
-        });
-    }
   }
 
   private onFileChosen(event: HTMLInputEvent): void {
@@ -113,7 +105,7 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.toggleDeleteModal}>
                   Delete project
                 </DropdownItem>
-                <DropdownItem onClick={() => this.openCreateDialog()}>
+                <DropdownItem onClick={this.props.onCreateProject}>
                   Create project
                 </DropdownItem>
               </DropdownMenu>
@@ -121,12 +113,12 @@ export default class Top extends React.Component<Props, State> {
             <OpenModal
               isOpen={this.state.showOpenModal}
               toggle={this.toggleOpenModal}
-              setStructure={this.props.showProject}
+              projectOperation={this.props.onOpenProject}
             />
             <DeleteModal
               isOpen={this.state.showDeleteModal}
               toggle={this.toggleDeleteModal}
-              setStructure={this.props.showProject}
+              projectOperation={this.props.onDeleteProject}
             />
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -186,4 +178,6 @@ interface Props {
   showProject(project: object): void;
   onDeleteFile(): void;
   onDeleteProject(): void;
+  onOpenProject(): void;
+  onCreateProject(): void;
 }
