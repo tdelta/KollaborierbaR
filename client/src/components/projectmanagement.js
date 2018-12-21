@@ -158,7 +158,8 @@ function createOverall(path, type) {
 
 function createFile(path, type) {
     let file = prompt('Enter Name', '');
-    if (file !== null) {
+    if (file !== null && !file.includes("/")) {
+        
         path.push(file);
         const requestPath = this.state.project.name + '/' + path.join('/');
 
@@ -167,6 +168,8 @@ function createFile(path, type) {
                 this.showProject(response);
                 this.openFile(path);
             });
+    } else if(file !== null && file.includes("/")){
+        alert('No appropriate filename. Filename includes: / ');
     }
 }
 
