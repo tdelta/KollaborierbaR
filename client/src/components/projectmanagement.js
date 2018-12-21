@@ -17,7 +17,7 @@ import {serverAddress} from '../constants.ts';
  * });
  */
 function openFile(path) { 
-    path = encodeURIComponent(path);
+    path = escape(path);
     // API URL of the server we will use for our request
     const url = serverAddress + '/projects/' +path;
 
@@ -57,7 +57,7 @@ function getProjects() {
  * the handler displays the returned project in the editor
  */
 function openProject(name) {
-    name = encodeURIComponent(name);
+    name = escape(name);
     
     var url = serverAddress + '/projects/'+ name;
 
@@ -82,10 +82,8 @@ function openProject(name) {
  * Calls the REST delete method. only used internally
  */
 function deleteOverall(path){
-    path = encodeURIComponent(path);
-    console.log(path);
+    path = escape(path);
     var url = serverAddress + '/projects/' +  path;
-    console.log(url);
     return fetch(url, {
         method: 'DELETE',
         mode: 'cors', // enable cross origin requests. Server must also allow this!
@@ -158,9 +156,8 @@ function deleteProject(path) {
  * only used internally
  */
 function createOverall(path, type) {
-    path = encodeURIComponent(path);
+    path = escape(path);
     var url = serverAddress + '/projects/' + path + '?type=' + type;
-
     return fetch(url, {
         method: 'PUT',
         mode: 'cors',
