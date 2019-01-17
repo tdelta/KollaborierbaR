@@ -6,6 +6,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
 import FileNode from './file-node.tsx';
+import {Context, ContextMenu, ContextAction} from './context.jsx';
 
 /**
  * Displays a project (file system like JSON structure, passed by `project`
@@ -43,14 +44,6 @@ import FileNode from './file-node.tsx';
  */
 export default class ProjectTreeView extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.onSelect = this.onSelect.bind(this);
-        this.state = {
-            selected: '',
-        }
-    }
-
     render() {
         // determine, whether the project property is set and
         // contains at least a name. If not, the view will show an appropriate message.
@@ -84,8 +77,15 @@ export default class ProjectTreeView extends React.Component {
         // (...and a little icon on the left)
         const header = (
             <>
-                {projectTitle}
-
+                        <Context tree={() => this.state.file}>
+                            {projectTitle}
+                            <ContextMenu>
+                                <ContextAction onClick={() => this.props.onDeleteProject(this.props.project.name)}>Delete Project</ContextAction>
+                                {/*<ContextAction>Rename Project</ContextAction>*/}
+                                <ContextAction onClick={() => this.props.onCreateFile([], 'folder')}>Create Folder</ContextAction>
+                                <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
+                            </ContextMenu>
+                        </Context>
                 <hr />
             </>
         );
@@ -94,27 +94,31 @@ export default class ProjectTreeView extends React.Component {
         if (isProjectValid && this.props.project.hasOwnProperty('contents')) {
             return (
                 <>
-                    {header /* display the header (contains project name) */}
+                    <div>
+                        {header /* display the header (contains project name) */}
 
-                    {
-                        // render each element within the root folder of the
-                        // project as FileNode
-                        this.props.project.contents.map((item) =>
-                            <FileNode
-                                key={item.name}
-                                // ^when rendering a list of elements, react
-                                // requires a unique key for all of them
-                                data={item} // pass the element to thee FileNode
-                                path={[item.name]}
-                                // ^since this is the root of the project,
-                                // the path of each element consists just of its
-                                // own name
-                                onOpenFile={this.props.onOpenFile}
-                                onSelect={this.onSelect}
-                                selectedPath={this.state.selected}
-                            />
-                        )
-                    }
+                        {
+                            // render each element within the root folder of the
+                            // project as FileNode
+                            this.props.project.contents.map((item) =>
+                                <FileNode
+                                    key={item.name}
+                                    // ^when rendering a list of elements, react
+                                    // requires a unique key for all of them
+                                    data={item} // pass the element to thee FileNode
+                                    path={[item.name]}
+                                    // ^since this is the root of the project,
+                                    // the path of each element consists just of its
+                                    // own name
+                                    onOpenFile={this.props.onOpenFile}
+                                    onDeleteFile={this.props.onDeleteFile}
+                                    onCreateFile={this.props.onCreateFile}
+                                    onOpenContext={this.props.onOpenContext}
+                                    openedPath={this.props.openedPath}
+                                />
+                            )
+                        }
+                    </div>
                 </>
             );
         }
@@ -131,16 +135,16 @@ export default class ProjectTreeView extends React.Component {
             );
         }
     }
-    onSelect(path){
-        this.setState({
-            selected: path
-        });
-    }
 }
 
 // declare types of properties
 ProjectTreeView.propTypes = {
     'onOpenFile': PropTypes.func,
+    'onOpenContext': PropTypes.func,
+    'onDeleteFile': PropTypes.func,
+    'onDeleteProject': PropTypes.func,
+    'onCreateFile': PropTypes.func,
+    'openedPath': PropTypes.arrayOf(PropTypes.string),
     'project': PropTypes.shape({
         'contents': PropTypes.arrayOf(PropTypes.object),
         'name': PropTypes.string
@@ -149,6 +153,8 @@ ProjectTreeView.propTypes = {
 
 // default values for some properties
 ProjectTreeView.defaultProps = {
-    'onOpenFile': () => {}
+    'onOpenFile': () => {},
+    'onDeleteFile': () => {},
+    'onCreateFile': () => {},
 };
         

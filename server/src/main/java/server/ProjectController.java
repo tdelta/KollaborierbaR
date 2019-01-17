@@ -1,23 +1,19 @@
 package server;
 
-import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.servlet.HandlerMapping;
 import projectmanagement.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +36,7 @@ public class ProjectController {
      *
      * @return a List containing Stings of the Names form of the Folders in the Projects folder(currently hardcoded)
      */
-    @RequestMapping("/listProjects")
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public List<String> listProjects() {
         final List<String> projects = new LinkedList<String>();
 
@@ -55,19 +51,19 @@ public class ProjectController {
     }
 
     /**
-     * That method handels requests to /showProject and creates a folderItem object which models the folder structure
+     * That method handles requests to /showProject and creates a folderItem object which models the folder structure
      * of the given folder name. The object will later be marshalled through Java Spring, resulting in a JSON object. 
      *
-     * @param name is given in the http request.
+     * @param request is given in the http request.
      * @return the content of a chooses Projekt (currently hardcoded) in the form of a folder
      */
-    @RequestMapping("/showProject")
-    public FolderItem showProject(@RequestParam("name") String name){
+    @RequestMapping(value = "/{projectname}", method = RequestMethod.GET)
+    public FolderItem showProject(@PathVariable("projectname") String projectname, HttpServletRequest request){
         // Get the File/Folder form the file system
         final File file = new File(projectPath);
         final File[] files = file.listFiles();
 
-        final File selected = selectProjectFromArray(files, name);
+        final File selected = selectProjectFromArray(files, projectname);
 
         return createFolderItem(selected);
     }
@@ -114,57 +110,170 @@ public class ProjectController {
      * That method handels request to /openFile and returns the contents of a file
      * and its name.
      * 
-     * @param path to the file, which is supposed to be opened.
+     * @param request to the file, which is supposed to be opened.
      * @return object containing filename and filetext (object for marshalling)
      */
-    @RequestMapping("/openFile")
+    @RequestMapping(value = "/**", method = RequestMethod.GET)
     @ResponseBody
-    public OpenedFileResponse openFile(@RequestBody FileRequest fileRequest) throws IOException{
-    	try {
-        final File file = new File(projectPath + fileRequest.getPath());
+    public ResponseEntity openFile(HttpServletRequest request) throws IOException{
+    	
+    	// Get the file path for the request resource
+    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
 
-        final String content = new Scanner( //scanners allow to read a file until a delimiter
-            file,
-            "utf-8"
-        ).useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
+    	try {
+    		
+        final File file = new File(path);
+
+        Scanner scan = new Scanner( /*scanners allow to read a file until a delimiter*/ file, "utf-8");
+        
+        // Check whether the requested file is empty
+        if(!scan.hasNext()) {
+        	scan.close();
+        	return new ResponseEntity<OpenedFileResponse>(new OpenedFileResponse(file.getName(),""), HttpStatus.OK);
+        }
+        
+        final String content = scan.useDelimiter("\\Z").next(); // read until end of file (Z delimiter)
         //^ using a scanner may not be optimal (could cause overhead),
         //  but simplifies this code so much, that we keep it for now
       
-        return new OpenedFileResponse(file.getName(), content);
+        scan.close();
+        return new ResponseEntity<OpenedFileResponse>(new OpenedFileResponse(file.getName(), content), HttpStatus.OK);
       }
       
-      // TODO implement proper error handling (appropriate status code etc.)
       catch (FileNotFoundException e) {
         e.printStackTrace();
-
-        return new OpenedFileResponse(
-            "Not found",
-            "Die Datei konnte nicht geöffnet werden. Der folgende Path wurde genutzt:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("File could not be found. The following path was used for search:"+ path
+        								  , HttpStatus.NOT_FOUND);
       }	
 
       catch (NoSuchElementException e) {
         e.printStackTrace();
-
-        return new OpenedFileResponse(
-            "Read error",
-            "Fehler beim Einlesen der angefragten Datei:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + path 
+        								  , HttpStatus.BAD_REQUEST);
       }	
 
       catch (IllegalStateException e) {
         e.printStackTrace();
-
-        return new OpenedFileResponse(
-            "Read error",
-            "Fehler beim Einlesen der angefragten Datei:"
-            + projectPath + fileRequest.getPath()
-        );
+        return new ResponseEntity<String>("Read Error. Error while reading the request file: " + path
+        								  , HttpStatus.BAD_REQUEST);
       }	
     }
 
+    /**
+     * This Method handles the creation of Files and Folders
+     * @param type Type of the kind of structure to be created can be file or folder
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the right type was given.
+     * @throws IOException when a new file could not be created
+     */
+    @RequestMapping(value = "/{projectname}/**", method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity createFile(@PathVariable("projectname") String projectname ,@RequestParam("type") String type,HttpServletRequest request) throws IOException {
+
+    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+    	File file = new File(path);
+    	
+    	// Java createNewFile and mkdir are not able to create a file if a file 
+    	// with the same name already exists. Therefore, if someone tries to create
+    	// a file with the same name, return a Http Bad Request Response
+    	if(file.exists()) {
+    		return new ResponseEntity<String>("It already exists a file with the same name you try create",HttpStatus.BAD_REQUEST);
+    	}
+
+    	//check which kind of structure should be created
+    	if(type.equals("file")) {
+    		file.createNewFile();
+    	} else if(type.equals("folder")) {
+    		file.mkdir();
+    	} else {
+    		// Wrong type parameter was selected, respond with Bad request code
+    		
+    		return new ResponseEntity<>("Wrong type parameter was choosen in the request. To create a file, please select file or folder as type.", HttpStatus.BAD_REQUEST);
+    	}
+
+    	// If everything was good, return the new project structure together with a HTTP OK response code
+    	return new ResponseEntity<FolderItem>(showProject(projectname, request),HttpStatus.OK);
+    }
+
+    /**
+     * This Method handles the deletion of files and folders
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the file to be deleted exists.
+     * @throws IOException
+     */
+    @RequestMapping(value = "/{projectname}/**", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
+    	
+        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+        File file = new File(path);
+        //check if the given path actually leads to a valid directory
+        if(!file.exists()){
+        	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
+        }else{
+            delete(file);
+            return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);
+        }
+    }
+    
+    /**
+     * This Method handles the deletion of projects
+     * @param request HttpServletRequest in order to get the full path
+     * @return Returns a HttpStatus depending on whether the file to be deleted exists.
+     * @throws IOException
+     */
+    @RequestMapping(value = "/{projectname}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity deleteProject(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
+    	
+        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+        File file = new File(path);
+        //check if the given path actually leads to a valid directory
+        if(!file.exists()){
+        	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
+        }else{
+            delete(file);
+            // WICHTIG: Der Grund für diese Funktion ist, das wenn wir ein Project löschen, wir kein neues Json Object davon zurücken können
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+    
+
+    /**
+     * Helper method that handles the deletion of a giving file type.
+     * Needs to be called recursively to delete a folders content.
+     *
+     * @param file File or directory that is supposed to be deleted.
+     * @throws IOException
+     */
+    private void delete(File file) throws IOException{
+        // if the currenct file is not a file but a directory we need to delete its content first.
+        if(file.isDirectory()){
+            if(file.list().length==0){
+                //if the current directory is empty, delete it
+                file.delete();
+            }else{
+                //if the current directory is not empty  list its content and call delete recursively
+                for(File f: file.listFiles()){
+                    delete(f);
+                }
+                //do not forget to delete the current directory itself
+                file.delete();
+            }
+        }else{
+            //if the current directory is not a directory but a file, delete it
+            file.delete();
+        }
+    }
+
+
     // TODO: Proper HTTP error handler
-    ///@ExceptionHandler({NoSuchElementException.class, IllegalStateException.class})
+
+//    @ExceptionHandler({UnsupportedEncodingException.class})
+//    public ResponseEntity handleUnsupportedEncoding(){
+//        return new ResponseEntity<String>("Not supported encoding string found", HttpStatus.BAD_REQUEST);
+//    }
 }

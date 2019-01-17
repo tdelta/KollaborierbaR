@@ -3,8 +3,9 @@ import React from 'react';
 import Editor from './editor.tsx';
 import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
+import ConfirmationModal from './confirmation-modal.tsx';
 
-import openFile from '../openFile.js';
+import {deleteFile, deleteProject, createFile, createProject, openProject, openFile} from './projectmanagement.js';
 
 //import testSource from '../sample-text.js';
 
@@ -22,6 +23,14 @@ export default class App extends React.Component {
         this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
+        this.openFile = this.openFile.bind(this);
+        this.deleteFile = deleteFile.bind(this);
+        this.deleteProject = deleteProject.bind(this);
+        this.createFile = createFile.bind(this);
+        this.createProject = createProject.bind(this);
+        this.openProject = openProject.bind(this);
+
+        this.confirmationModal = React.createRef();
 
         // setup initial state
         this.state = {
@@ -36,6 +45,8 @@ export default class App extends React.Component {
 
             filename: undefined,
 
+            openedPath: [],
+
             // warnings, errors, etc. within the currently open file
             diagnostics: []
         };
@@ -48,7 +59,7 @@ export default class App extends React.Component {
      */
     showProject(project) {
         this.setState({
-            'project': project
+            'project': project,
         });
     }
 
@@ -89,9 +100,23 @@ export default class App extends React.Component {
     componentDidMount() {
         this.setState({
             text: '', // load some sample text for testing
-            filename: 'Main.java'
+            filename: 'Main.java',
+            openedPath: ['Main.java'] // TODO: replace filename with this
         });
     }
+
+    openFile(path) {
+        // This string composition is necessary because path contains only the path within a project.
+        openFile('/' + this.state.project.name + '/' + path.join('/'))
+            .then((response) => {
+                this.setState({
+                    text: response.fileText,
+                    filename: response.fileName,
+                    openedPath: path
+                });
+            });
+    }
+
 
     /**
      * Creates the displayed HTML for this component.
@@ -111,18 +136,21 @@ export default class App extends React.Component {
                     showProject={this.showProject}
                     setText={this.setText}
                     text={this.state.text}
+                    onDeleteFile={() => this.deleteFile(this.state.openedPath)}
+                    onDeleteProject={this.deleteProject}
+                    onOpenProject={this.openProject}
+                    onCreateProject={this.createProject}
+                    //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
-                        onOpenFile={(path) => {
-                            // This string composition is necessary because path contains only the path within a project.
-                            openFile('/' + this.state.project.name + '/' + path.join('/'))
-                                .then((response) => {
-                                    this.setText(response.fileText);
-                                    this.setFileName(response.fileName);
-                                });
-                        }}
+                        openedPath={this.state.openedPath}
+                        //TODO: Code auslagern in die aufrufenden Funktionen
+                        onOpenFile={this.openFile}
+                        onDeleteFile={this.deleteFile}
+                        onCreateFile={this.createFile}
+                        onDeleteProject={this.deleteProject}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}
@@ -132,6 +160,7 @@ export default class App extends React.Component {
                         filename={this.state.filename}
                     />
                 </div>
+                <ConfirmationModal ref={this.confirmationModal}/>
             </div>
         );
     }
