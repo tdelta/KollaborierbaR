@@ -28,6 +28,7 @@ public class ProjectControllerTest {
     public void hallo(){
         testProjects.add("HelloWorld");
         testProjects.add("My Project");
+        testProjects.add("JMLProject");
     }
 
     /**
