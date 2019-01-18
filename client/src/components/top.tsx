@@ -20,10 +20,6 @@ import {
     DeleteModal
 } from './project-modals.jsx';
 
-import {
-    createFile,
-} from './projectmanagement.js';
-
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -46,6 +42,8 @@ export default class Top extends React.Component<Props, State> {
       showDeleteModal: false
     };
   }
+
+  
 
   private toggleOpenModal(): void {
     this.setState({ showOpenModal: !this.state.showOpenModal });
@@ -94,6 +92,14 @@ export default class Top extends React.Component<Props, State> {
         <Navbar color="dark" dark expand="md">
           <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
+            <UncontrolledDropdown>
+              <DropdownToggle nav caret>
+                Key
+              </DropdownToggle>
+              <DropdownMenu right>
+                <DropdownItem onClick={this.props.onRunProof}>Run Proof</DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
                 Project
@@ -180,4 +186,5 @@ interface Props {
   onDeleteProject(): void;
   onOpenProject(): void;
   onCreateProject(): void;
+  onRunProof(): void;
 }
