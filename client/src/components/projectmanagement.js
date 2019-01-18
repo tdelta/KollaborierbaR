@@ -204,9 +204,10 @@ function createProject() {
 }
 
 function runProof(path){
+    console.log(path);
     path = escape(path);
     // API URL of the server we will use for our request
-    const url = serverAddress + '/proof/' +path.join("/");
+    const url = serverAddress + '/proof/' +path;
 
     console.log(url);
 
@@ -218,7 +219,9 @@ function runProof(path){
             //'Content-Type': 'application/json', // we are sending a json object
         },
     })
-        .then((response) => console.log(response)); // parse the response body as json}
+        .then((response) => 
+          response.json()
+            .then((res) => console.log(res))); // parse the response body as json};
 }
 
 export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, runProof};
