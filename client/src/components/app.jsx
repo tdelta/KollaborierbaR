@@ -29,7 +29,7 @@ export default class App extends React.Component {
         this.createFile = createFile.bind(this);
         this.createProject = createProject.bind(this);
         this.openProject = openProject.bind(this);
-        this.runProof = runProof.bind(this);
+        this.runProof = this.runProof.bind(this);
 
         this.confirmationModal = React.createRef();
 
