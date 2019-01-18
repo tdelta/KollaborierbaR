@@ -203,5 +203,44 @@ function createProject() {
 
 }
 
+/*
+ * updates the filename of the given resource path 
+ *
+ */
+function updateFile(path){
+    let name = prompt('Enter Name', '');
 
-export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject};
+    if(name !== null && !name.includes("/")){
+
+        // Path to the ressource we want to rename
+        var url = serverAddress + '/projects/' + this.state.project.name + '/' +path.join('/');
+
+        // Remove the current filename from the path array
+        // and then create path for the renamed ressource:
+        path.pop();
+        var renamedRes = '/projects/' + this.state.project.name + '/' + path.join('/') + '/' + name; 
+
+        var requestbody = {
+            'fileName' : renamedRes
+        };
+
+        return fetch(url, {
+            method: 'POST',
+            mode: 'cors', 
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestbody) // necessary if you want to send a JSON object in a fetch request
+        })
+            .then((response) =>  
+                response.json()
+                    .then(res => this.showProject(res))
+            )
+
+    } if(name !== null && name.includes("/")){
+        alert('No appropriate filename. Filename includes: /');
+    }
+}
+
+export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, updateFile};
