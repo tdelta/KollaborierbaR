@@ -205,7 +205,7 @@ public class ProjectController {
      */
     @RequestMapping(value = "/{projectname}/**", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
+    public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request){
 
         // Removes the first character from the path string, we need this because java.io.File need a path that does not start with a "/"
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
@@ -215,8 +215,14 @@ public class ProjectController {
         if(!file.exists()){
         	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
         }else{
-            delete(file);
-            return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);
+            try {
+                delete(file);
+                return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new ResponseEntity<>("File exists, but could still not be deleted" ,HttpStatus.BAD_REQUEST);
+            }
+
         }
     }
     
