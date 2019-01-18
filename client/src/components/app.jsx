@@ -141,6 +141,7 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
+                    onUpdateFile={() => {this.updateFile(this.state.openedPath);}}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
