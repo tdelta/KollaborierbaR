@@ -5,7 +5,7 @@ import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 
-import {deleteFile, deleteProject, createFile, createProject, openProject, openFile} from './projectmanagement.js';
+import {deleteFile, deleteProject, createFile, createProject, openProject, openFile, runProof} from './projectmanagement.js';
 
 //import testSource from '../sample-text.js';
 
@@ -29,6 +29,7 @@ export default class App extends React.Component {
         this.createFile = createFile.bind(this);
         this.createProject = createProject.bind(this);
         this.openProject = openProject.bind(this);
+        this.runProof = runProof.bind(this);
 
         this.confirmationModal = React.createRef();
 
@@ -117,6 +118,11 @@ export default class App extends React.Component {
             });
     }
 
+  // es ist scheiss egal
+    runProof(){
+        runProof('/' + this.state.project.name + '/' + this.state.openedPath.join('/'))
+    }
+
 
     /**
      * Creates the displayed HTML for this component.
@@ -140,6 +146,7 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
+                    onRunProof={this.runProof}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">

@@ -203,5 +203,22 @@ function createProject() {
 
 }
 
+function runProof(path){
+    path = escape(path);
+    // API URL of the server we will use for our request
+    const url = serverAddress + '/proof/' +path.join("/");
 
-export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject};
+    console.log(url);
+
+    return fetch(url, {
+        method: 'GET',
+        mode: 'cors', // enable cross origin requests. Server must also allow this!
+        headers: {
+            'Accept' : 'application/json', // we want a json object back
+            //'Content-Type': 'application/json', // we are sending a json object
+        },
+    })
+        .then((response) => console.log(response)); // parse the response body as json}
+}
+
+export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, runProof};
