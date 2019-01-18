@@ -9,6 +9,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.key_project.util.collection.ImmutableSet;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,11 +46,12 @@ public class ProofController {
     */
     @RequestMapping(value = "/**", method = RequestMethod.GET)
     @ResponseBody
-   public String proveSpec(HttpServletRequest request) {
+   public ResponseEntity proveSpec(HttpServletRequest request) {
       // Get the file path for the request resource
-      String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+      String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(7);
+      System.out.println("Das ist der Pfad zur Datei: " + path);
       String proofStatus = "";
-      File location = new File(path); // Path to the source code folder/file or to a *.proof file
+      File location = new File("projects/" + path); // Path to the source code folder/file or to a *.proof file
       List<File> classPaths = null; // Optionally: Additional specifications for API classes
       File bootClassPath = null; // Optionally: Different default specifications for Java API
       List<File> includes = null; // Optionally: Additional includes to consider
@@ -127,6 +130,6 @@ public class ProofController {
          e.printStackTrace();
       }
       
-      return proofStatus;
+      return new ResponseEntity<String>(proofStatus, HttpStatus.OK);
    }
 }

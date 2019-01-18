@@ -190,26 +190,23 @@ function createFile(path, type) {
  */ 
 function createProject() {
     let file = prompt('Enter Name', '');
-    if (file !== null && !file.includes("/")) {
+    if (file !== null && !file.includes('/')) {
         createOverall(file, 'folder')
             .then((response) => {
                 this.showProject(response);
                 this.setText('');
                 this.setFileName(undefined);
             });
-    }if(file !== null && file.includes("/")){
+    }if(file !== null && file.includes('/')){
         alert('No appropriate filename. Filename includes: / ');
     }
 
 }
 
 function runProof(path){
-    console.log(path);
     path = escape(path);
     // API URL of the server we will use for our request
     const url = serverAddress + '/proof/' +path;
-
-    console.log(url);
 
     return fetch(url, {
         method: 'GET',
@@ -220,8 +217,8 @@ function runProof(path){
         },
     })
         .then((response) => 
-          response.json()
-            .then((res) => console.log(res))); // parse the response body as json};
+            response.json()
+                .then((result) => result.text())); // parse the response body as json};
 }
 
 export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, runProof};
