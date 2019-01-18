@@ -118,7 +118,7 @@ export default class App extends React.Component {
             });
     }
 
-  // es ist scheiss egal
+    // sets the path for the runProof rest method in projectmanagement
     runProof(){
         runProof('/' + this.state.project.name + '/' + this.state.openedPath.join('/'))
     }
