@@ -216,9 +216,7 @@ function runProof(path){
             //'Content-Type': 'application/json', // we are sending a json object
         },
     })
-        .then((response) => 
-            response.json()
-                .then((result) => result.text())); // parse the response body as json};
+        .then((response) => response.text()); // parse the response body as json};
 }
 
 export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, runProof};

@@ -20,6 +20,7 @@ import {
     DeleteModal
 } from './project-modals.jsx';
 
+import KeyModal from './proof-response-modal.jsx'
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -34,12 +35,14 @@ export default class Top extends React.Component<Props, State> {
     this.onFileLoaded = this.onFileLoaded.bind(this);
     this.toggleOpenModal = this.toggleOpenModal.bind(this);
     this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
+    this.toggleKeyModal = this.toggleKeyModal.bind(this);
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
     this.state = {
       showOpenModal: false,
-      showDeleteModal: false
+      showDeleteModal: false,
+      showKeyModal: false
     };
   }
 
@@ -52,6 +55,10 @@ export default class Top extends React.Component<Props, State> {
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
+
+ private toggleKeyModal() {
+    this.setState({ showKeyModal: !this.state.showKeyModal});
+ }
 
   private onFileChosen(event: HTMLInputEvent): void {
     this.fileReader = new FileReader();
@@ -97,7 +104,7 @@ export default class Top extends React.Component<Props, State> {
                 Key
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.props.onRunProof}>Run Proof</DropdownItem>
+                <DropdownItem onClick={this.toggleKeyModal}>Run Proof</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
             <UncontrolledDropdown>
@@ -125,6 +132,11 @@ export default class Top extends React.Component<Props, State> {
               isOpen={this.state.showDeleteModal}
               toggle={this.toggleDeleteModal}
               projectOperation={this.props.onDeleteProject}
+            />
+            <KeyModal
+              isOpen={this.state.showKeyModal}
+              toggle={this.toggleKeyModal}
+              runProof={this.props.onRunProof}
             />
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -175,6 +187,7 @@ interface HTMLInputEvent extends React.FormEvent<HTMLInputElement> {
 interface State {
   showOpenModal: boolean;
   showDeleteModal: boolean;
+  showKeyModal: boolean;
 }
 
 // defining the structure of this react components properties
