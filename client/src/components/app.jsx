@@ -6,6 +6,8 @@ import Sidebar from './sidebar/sidebar.jsx';
 
 import openFile from '../openFile.js';
 
+import Network from '../network.ts';
+
 //import testSource from '../sample-text.js';
 
 /**
@@ -39,6 +41,9 @@ export default class App extends React.Component {
             // warnings, errors, etc. within the currently open file
             diagnostics: []
         };
+
+        this.network = new Network();
+        this.network.openProject('test');
     }
 
     /**
