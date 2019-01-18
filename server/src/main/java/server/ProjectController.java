@@ -334,7 +334,7 @@ public class ProjectController {
         	boolean success = file.renameTo(new File (updateData.fileName.substring(1)));
         		
         	if(success) {
-        		return new ResponseEntity<>("The file was successfully renamed." ,HttpStatus.OK);
+        		return new ResponseEntity<>(showProject(projectname, request) ,HttpStatus.OK);
         	} else {
         		return new ResponseEntity<>("The file could no be renamed." ,HttpStatus.BAD_REQUEST);
         	}
@@ -347,7 +347,7 @@ public class ProjectController {
 				writer = new BufferedWriter(new FileWriter(path));
 	        	writer.write(updateData.fileContent);
 	    		writer.close();
-	    		return new ResponseEntity<>("The files content was successfully updated.", HttpStatus.OK);
+	    		return new ResponseEntity<>(showProject(projectname, request), HttpStatus.OK);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return new ResponseEntity<>("Something went wrong while updating the file content.", HttpStatus.BAD_REQUEST);
