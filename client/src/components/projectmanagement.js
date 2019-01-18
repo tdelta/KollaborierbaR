@@ -210,16 +210,19 @@ function createProject() {
 function updateFile(path){
     let name = prompt('Enter Name', '');
 
-    if(name !== null && !name.includes("/")){
+    if(name !== '..' && name !== '.' && name !== null && !name.includes("/")){
 
         // Path to the ressource we want to rename
         var url = serverAddress + '/projects/' + this.state.project.name + '/' +path.join('/');
 
         // Remove the current filename from the path array
         // and then create path for the renamed ressource:
-        path.pop();
+        var oldfilename = path.pop();
         var renamedRes = '/projects/' + this.state.project.name + '/' + path.join('/') + '/' + name; 
 
+        // Create a new array with the modify openPath
+        var newOpenPath = path.concat([name]);
+        
         var requestbody = {
             'fileName' : renamedRes
         };
@@ -235,11 +238,19 @@ function updateFile(path){
         })
             .then((response) =>  
                 response.json()
-                    .then(res => this.showProject(res))
+                    .then(res => {this.showProject(res);
+                                  // If set openedPath isn't set after renaming, the currently openedFile would not math
+                                  // to the openedPath.
+                                  this.setState({openedPath: newOpenPath})
+                                  if(this.state.filename === oldfilename){
+                                    this.setFileName(name);
+                                  }})
             )
 
     } if(name !== null && name.includes("/")){
         alert('No appropriate filename. Filename includes: /');
+    } if(name === '..' || name === '.'){
+        alert('No appropriate filename. Cannot be .. or .');
     }
 }
 
