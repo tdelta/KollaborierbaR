@@ -57,8 +57,8 @@ public class ProjectController {
     }
 
     /**
-     * That method handles requests to /showProject and creates a folderItem object which models the folder structure
-     * of the given folder name. The object will later be marshalled through Java Spring, resulting in a JSON object. 
+     * That method handles requests to /{projectname} and creates a folderItem object which models the folder structure
+     * of the given folder/project name. The object will later be marshalled through Java Spring, resulting in a JSON object. 
      *
      * @param request is given in the http request.
      * @return the content of a chooses Projekt (currently hardcoded) in the form of a folder
@@ -113,7 +113,7 @@ public class ProjectController {
     
     /**
      * 
-     * That method handels request to /openFile and returns the contents of a file
+     * That method handels request to /** (which should represend a path to a file) and returns the contents of a file
      * and its name.
      * 
      * @param request to the file, which is supposed to be opened.
@@ -176,6 +176,7 @@ public class ProjectController {
     @ResponseBody
     public ResponseEntity createFile(@PathVariable("projectname") String projectname ,@RequestParam("type") String type,HttpServletRequest request) throws IOException {
 
+        // Removes the first character from the path string, we need this because java.io.File need a path that does not start with a "/"
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
 
     	File file = new File(path);
@@ -184,7 +185,7 @@ public class ProjectController {
     	// with the same name already exists. Therefore, if someone tries to create
     	// a file with the same name, return a Http Bad Request Response
     	if(file.exists()) {
-    		return new ResponseEntity<String>("It already exists a file with the same name you try create",HttpStatus.BAD_REQUEST);
+    		return new ResponseEntity<String>("It already exists a file with the same name you try to create",HttpStatus.BAD_REQUEST);
     	}
 
     	//check which kind of structure should be created
@@ -211,7 +212,8 @@ public class ProjectController {
     @RequestMapping(value = "/{projectname}/**", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
-    	
+
+        // Removes the first character from the path string, we need this because java.io.File need a path that does not start with a "/"
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
 
         File file = new File(path);
@@ -232,8 +234,9 @@ public class ProjectController {
      */
     @RequestMapping(value = "/{projectname}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity deleteProject(@PathVariable("projectname") String projectname ,HttpServletRequest request) throws IOException{
-    	
+    public ResponseEntity deleteProject(@PathVariable("projectname") String projectname ,HttpServletRequest request){
+
+        // Removes the first character from the path string, we need this because java.io.File need a path that does not start with a "/"
         String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
 
         File file = new File(path);
@@ -241,15 +244,21 @@ public class ProjectController {
         if(!file.exists()){
         	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
         }else{
-            delete(file);
-            // WICHTIG: Der Grund für diese Funktion ist, das wenn wir ein Project löschen, wir kein neues Json Object davon zurücken können
-            return new ResponseEntity<>(HttpStatus.OK);
+            try {
+                delete(file);
+                // WICHTIG: Der Grund für die Existenz dieser Funktion separat von deleteFile ist, dass wenn wir ein Project löschen, wir kein neues Json Object davon zurücken können
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new ResponseEntity<>("File exists, but could still not be deleted" ,HttpStatus.BAD_REQUEST);
+            }
+
         }
     }
     
 
     /**
-     * Helper method that handles the deletion of a giving file type.
+     * Helper method that handles the deletion of a given file type.
      * Needs to be called recursively to delete a folders content.
      *
      * @param file File or directory that is supposed to be deleted.
@@ -257,22 +266,34 @@ public class ProjectController {
      */
     private void delete(File file) throws IOException{
         // if the currenct file is not a file but a directory we need to delete its content first.
-        if(file.isDirectory()){
-            if(file.list().length==0){
-                //if the current directory is empty, delete it
-                file.delete();
-            }else{
-                //if the current directory is not empty  list its content and call delete recursively
+//        if(file.isDirectory()){
+//            if(file.list().length==0){
+//                //if the current directory is empty, delete it
+//                file.delete();
+//            }else{
+//                //if the current directory is not empty  list its content and call delete recursively
+//                for(File f: file.listFiles()){
+//                    delete(f);
+//                }
+//                //do not forget to delete the current directory itself
+//                file.delete();
+//            }
+//        }else{
+//            //if the current directory is not a directory but a file, delete it
+//            file.delete();
+//        }
+
+        // if the currenct file is not a file but a directory we need to delete its content first.
+        if(file.isDirectory()) {
+            //if the current directory is not empty  list its content and call delete recursively
+            if(file.list().length!=0){
                 for(File f: file.listFiles()){
                     delete(f);
                 }
-                //do not forget to delete the current directory itself
-                file.delete();
             }
-        }else{
-            //if the current directory is not a directory but a file, delete it
-            file.delete();
         }
+        //if the current directory is an empty directory or a file, delete it
+        file.delete();
     }
     
     /**
