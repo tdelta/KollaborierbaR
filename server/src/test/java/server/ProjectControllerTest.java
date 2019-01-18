@@ -1,3 +1,5 @@
+package server;
+
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertThat;
@@ -46,7 +48,7 @@ public class ProjectControllerTest {
         // Testing showProject()
         assertThat(
             "Project HelloWorld contains the file LICENSE",
-            testProjectController.showProject("HelloWorld").contents,
+            testProjectController.showProject("HelloWorld", null).contents,
             hasItem(
                 allOf(
                     hasProperty("name", is("LICENSE")),
@@ -55,7 +57,7 @@ public class ProjectControllerTest {
 
         assertThat(
             "Project HelloWorld contains the folder src",
-            testProjectController.showProject("HelloWorld").contents,
+            testProjectController.showProject("HelloWorld", null).contents,
             hasItem(
                 allOf(
                 hasProperty("name", is("src")),

@@ -6,7 +6,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.key_project.util.collection.ImmutableSet;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.HandlerMapping;
 
 import de.uka.ilkd.key.control.KeYEnvironment;
 import de.uka.ilkd.key.java.abstraction.KeYJavaType;
@@ -26,15 +34,21 @@ import de.uka.ilkd.key.util.MiscTools;
  * the source folder 'example' using KeY.
  * @author Martin Hentschel
  */
+@RestController
+@CrossOrigin
+@RequestMapping("/proof")
 public class ProofController {
    /**
     * The program entry point.
     * @param args The start parameters.
     */
-   public static void main(String[] args) {
-      File location = args.length == 1  ?
-                      new File(args[0]) :
-                      new File("projects/JMLProject/src/main/java/Book.java"); // Path to the source code folder/file or to a *.proof file
+    @RequestMapping(value = "/**", method = RequestMethod.GET)
+    @ResponseBody
+   public String proveSpec(HttpServletRequest request) {
+      // Get the file path for the request resource
+      String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+      String proofStatus = "";
+      File location = new File(path); // Path to the source code folder/file or to a *.proof file
       List<File> classPaths = null; // Optionally: Additional specifications for API classes
       File bootClassPath = null; // Optionally: Different default specifications for Java API
       List<File> includes = null; // Optionally: Additional includes to consider
@@ -91,7 +105,7 @@ public class ProofController {
                   env.getUi().getProofControl().startAndWaitForAutoMode(proof);
                   // Show proof result
                   boolean closed = proof.openGoals().isEmpty();
-                  System.out.println("Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is " + (closed ? "verified" : "still open") + ".");
+                  proofStatus += "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is " + (closed ? "verified" : "still open") + ".\n";
                }
                catch (ProofInputException e) {
                   System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
@@ -112,5 +126,7 @@ public class ProofController {
          System.out.println("Exception at '" + location + "':");
          e.printStackTrace();
       }
+      
+      return proofStatus;
    }
 }

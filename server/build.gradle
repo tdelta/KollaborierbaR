@@ -23,7 +23,7 @@ apply plugin: 'pmd'
 // import KeY ant project
 def keyFolder = "../key/key"
 ant.importBuild "${keyFolder}/scripts/build.xml"
-build.dependsOn jarAll
+compileJava.dependsOn jarAll
 
 bootJar {
     baseName = 'gs-rest-service'
