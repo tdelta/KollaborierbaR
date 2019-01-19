@@ -26,7 +26,7 @@ interface AceChangeEvent {
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
   // The exclamation mark tells typescript not to check if this attribute gets initialized
-  private editor!: any; // ACE editor object
+  public editor!: any; // ACE editor object
   private markers: number[];
   private timeTest: number; // will be used to regulate interval of calling the linter
   private anchoredMarkers: AnchoredMarker[];
@@ -74,26 +74,8 @@ export default class Editor extends React.Component<Props> {
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
-    this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
 
-    this.editor.on('change', (change: AceChangeEvent) => {
-      if (this.editor.curOp && this.editor.curOp.command.name) {
-        switch(change.action) {
-          case 'insert':
-              this.props.collabController.localInsertLines(
-                change.lines,
-                change.start
-              );
-            break;
-          case 'remove':
-              this.props.collabController.localDelete(
-                change.start,
-                change.end
-              );
-            break;
-        }
-      }
-    });
+    this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
   public componentDidUpdate(): void {

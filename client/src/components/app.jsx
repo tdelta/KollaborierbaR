@@ -72,6 +72,7 @@ export default class App extends React.Component {
      * Passed down to the sub components, since linters / compilers may need it.
      */
     setFileName(filename){
+        this.collabController.setFile(this.state.project+'/'+filename);
         this.setState({
             filename: filename
         });
@@ -94,7 +95,8 @@ export default class App extends React.Component {
     componentDidMount() {
         this.collabController = new CollabController(
             new Network(),
-            this.editor.current
+            this.editor.current,
+            this.setText.bind(this)
         );
 
         this.setState({
