@@ -3,7 +3,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import FileIcon from './file-icon.jsx';
-
+import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
+import {Context, ContextMenu, ContextAction} from './context.jsx'
+import './sidebar.css'
 /**
  * Displays a node and its children (recursively) in a filesystem-like tree.
  *
@@ -60,6 +62,7 @@ export default class FileNode extends React.Component<Props, State> {
     path: [],
   };
 
+
   constructor(props: Props) {
     super(props);
 
@@ -98,10 +101,6 @@ export default class FileNode extends React.Component<Props, State> {
         display: this.state.collapsed ? 'none' : '',
       };
 
-      const background: object = {
-        backgroundColor: this.state.selected ? '#f00' : '#0f0',
-      };
-
       return (
         <>
           {/* allow toggling the visibility of the node's children
@@ -109,9 +108,17 @@ export default class FileNode extends React.Component<Props, State> {
 
                         Double clicks are to be interpreted as opening files
                     */}
-          <div onClick={this.toggle} onDoubleClick={this.handleItemDoubleClick}>
-            {label}
-          </div>
+            <Context>
+                <div onClick={this.toggle} onDoubleClick={this.handleItemDoubleClick}>
+                    {label}
+                </div>
+                <ContextMenu>
+                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
+                    {/*<ContextAction>Rename Folder</ContextAction>*/}
+                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</ContextAction>
+                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</ContextAction>
+                </ContextMenu>
+            </Context>
           {/* display the children as unordered list */}
           <ul className="projectTreeList" style={display}>
             {this.props.data.contents.map(child => (
@@ -128,8 +135,10 @@ export default class FileNode extends React.Component<Props, State> {
                   data={child}
                   path={this.props.path.concat([child.name])}
                   onOpenFile={this.props.onOpenFile}
-                  onSelect={this.props.onSelect}
-                  selectedPath={this.props.selectedPath}
+                  onDeleteFile={this.props.onDeleteFile}
+                  onCreateFile={this.props.onCreateFile}
+                  onOpenContext={this.props.onOpenContext}
+                  openedPath={this.props.openedPath}
                 />
               </li>
             ))}
@@ -139,14 +148,21 @@ export default class FileNode extends React.Component<Props, State> {
     } else {
       // The node is a single file
       const background =
-        this.props.selectedPath === this.props.path.join('/')
+        // TODO: higher efficency when comparing paths
+        this.props.openedPath.join('/') === this.props.path.join('/')
           ? 'activeFileNode'
           : 'inactiveFileNode';
       return (
         /* double clicks are to be interpreted as opening files */
-        <div onDoubleClick={this.handleItemDoubleClick} className={background}>
-          {label}
-        </div>
+        <Context>
+            <div onDoubleClick={this.handleItemDoubleClick} className={background}>
+              {label}
+            </div>
+            <ContextMenu>
+                <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
+                {/*<ContextAction>Rename File</ContextAction>*/}
+            </ContextMenu>
+        </Context>
       );
     }
   }
@@ -158,6 +174,7 @@ export default class FileNode extends React.Component<Props, State> {
     });
   }
 
+
   /**
    * Called, whenever the node is double clicked. Will fire the
    * `onOpenFile` handler with the node's path, if the node represents
@@ -166,9 +183,10 @@ export default class FileNode extends React.Component<Props, State> {
   private handleItemDoubleClick() {
     if (this.props.data.type === 'file') {
       this.props.onOpenFile(this.props.path);
-      this.props.onSelect(this.props.path.join('/'));
     }
   }
+
+
 }
 
 enum FileType {
@@ -184,9 +202,11 @@ interface FileNodeData {
 
 interface Props {
   onOpenFile: (path: string[]) => void;
-  onSelect: (path: string) => void;
+  onDeleteFile: (path: string[]) => void;
+  onCreateFile: (path: string[], type: string) => void;
+  onOpenContext: (path: string[]) => void;
   data: FileNodeData;
-  selectedPath: string;
+  openedPath: string[];
   path: string[];
 }
 

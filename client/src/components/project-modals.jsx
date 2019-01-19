@@ -2,42 +2,8 @@
 
 import React from 'react';
 import { ListGroup, ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { getProjects } from './projectmanagement';
 
-/*
- * load the list of available projects from the server
- */
-function getProjects() {
-    var url = new URL('http://localhost:9000/projects/listProjects');
-    return fetch(url, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-            'Accept': 'application/json',
-        },
-    })
-        .then((response) => response.json());
-
-}
-
-/*
- * load the related files for the project with name 'name' from the server
- */
-function getProjectStructure(name) {
-    var url = new URL('http://localhost:9000/projects/showProject');
-
-    const params = {'name': name};
-
-    url.search = new URLSearchParams(params);
-
-    return fetch(url, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-            'Accept': 'application/json',
-        },
-    })
-        .then((response) => response.json());
-}
 
 /*
  * open project dialog window, that shows a list with available projects
@@ -46,7 +12,7 @@ class ModalSelect extends React.Component {
     constructor(props) {
         super(props);
         this.select = this.select.bind(this);
-        this.loadProjectFiles = this.loadProjectFiles.bind(this);
+        this.projectAction = this.projectAction.bind(this);
         this.loadProjectNames = this.loadProjectNames.bind(this);
         this.listProjects = this.listProjects.bind(this);
         this.state = {
@@ -54,10 +20,11 @@ class ModalSelect extends React.Component {
             selected: {
                 'id': -1,
                 'name': ''
-            }
+            },
         };
     }
 
+  
     /*
      * update the state with the selected project
      */
@@ -71,25 +38,24 @@ class ModalSelect extends React.Component {
     }
 
     /*
-     * loads the files for the selected project when the select button is pressed
-     * through the setStructure props method the structure starts its long journey to the sidebar
-     */
-    loadProjectFiles() {
-        let name = this.state.selected.name;
-        if (name) {
-            getProjectStructure(this.state.selected.name)
-                .then((response) => this.props.setStructure(response));
-            this.props.toggle();
-        }
-    }
-
-    /*
      * loads the project list, called whenever the modal is opened
      */
     loadProjectNames() {
         getProjects()
             .then((projects) => {this.setState({projects: projects});
             });
+    }
+
+    /*
+     * performs the esired operation for the selected project when the select button is pressed
+     * through the setStructure props method the structure starts its long journey to the sidebar
+     */
+    projectAction() {
+        let name = this.state.selected.name;
+        if (name) {
+            this.props.projectOperation(this.state.selected.name);
+            this.props.toggle();
+        }
     }
 
     /*
@@ -136,15 +102,16 @@ class ModalSelect extends React.Component {
                 <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={() => this.loadProjectNames()} 
                     onClosed={() => this.select('', -1)} className={this.props.className}
                 >
-                    <ModalHeader toggle={this.props.toggle}>Select Project</ModalHeader>
+                    <ModalHeader toggle={this.props.toggle}>{'Select Project ' + this.props.usecase}</ModalHeader>
                     {/* the style enables a scrollbar, when the project names don't fit on the screen (100vh) with a 210 pixels margin */}
                     <ModalBody style={{'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto'}}>
                         {/* generate the listed project names dynamically */}
                         {this.listProjects()}
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={this.loadProjectFiles}>Select</Button>
-                        <Button color="secondary" onClick={this.props.toggle}>Cancel</Button>
+                        {/* projectAction is a prop and defines what to do with a project (e.g. deletion) */}
+                        <Button color='primary' onClick={this.projectAction}>Select</Button>
+                        <Button color='secondary' onClick={this.props.toggle}>Cancel</Button>
                     </ModalFooter>
                 </Modal>
             </div>
@@ -153,4 +120,20 @@ class ModalSelect extends React.Component {
 
 }
 
-export default ModalSelect;
+/*
+ * No inheritance from ModalSelect because it is considered bad practice in React.
+ * See https://reactjs.org/docs/composition-vs-inheritance.html
+ */
+function OpenModal(props) {
+    return (
+        <ModalSelect {...props} usecase='To Open' />
+    );
+}
+
+function DeleteModal(props) {
+    return (
+        <ModalSelect {...props} usecase='To Delete'/>
+    );
+}
+
+export {OpenModal, DeleteModal};
