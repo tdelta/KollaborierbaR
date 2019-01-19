@@ -8,21 +8,21 @@ info:
 host: 'localhost:9000'
 basePath: /
 tags:
-- name: lint
-  description: Generate diagnostics for Java code by static analysis
-- name: project
-  description: Access projects stored on server
+  - name: lint
+    description: Generate diagnostics for Java code by static analysis
+  - name: project
+    description: Access projects stored on server
 schemes:
-- http
+  - http
 paths:
   /projects:
     get:
       tags:
-      - project
+        - project
       summary: List projects stored on server
       operationId: project.listProjects
       produces:
-      - application/json;charset=UTF-8
+        - application/json;charset=UTF-8
       responses:
         '200':
           description: A json list of project names
@@ -31,22 +31,23 @@ paths:
             items:
               type: string
             example:
-            - My Project
-            - KeY
-  /projects/{projectname}:
+              - My Project
+              - KeY
+  '/projects/{projectname}':
     get:
       tags:
-      - project
+        - project
       summary: Load content list of a specific project stored on the server
       operationId: project.showProject
       produces:
-      - application/json;charset=UTF-8
+        - application/json;charset=UTF-8
       parameters:
-      - name: "projectname"
-        in: "path"
-        description: "Name of the selected project"
-        required: true
-        type: "string"
+        - name: projectname
+          in: path
+          description: Name of the selected project
+          required: true
+          type: string
+          x-example: 'Hello World'
       responses:
         '200':
           description: >-
@@ -54,75 +55,93 @@ paths:
             some project metadata
           schema:
             $ref: '#/definitions/Project'
-  /projects/{projectname}/**/{filename}:
+  '/projects/{projectname}/**/{filename}':
     get:
       tags:
-      - project
+        - project
       summary: Load content and name of specific file on the server
       operationId: project.openFile
       produces:
-      - application/json;charset=UTF-8
+        - application/json;charset=UTF-8
       parameters:
-      - name: "projectname"
-        in: "path"
-        description: "Name of the selected project containing the wanted file"
-        required: true
-        type: "string"
-      - name: "filename"
-        in: "path"
-        description: "Name of the file to be opened"
-        required: true
-        type: "string"
+        #- name: **
+        #  in: path
+        #  description: filepath within project. Can contain / 
+        #  required: true
+        #  type: string
+        - name: projectname
+          in: path
+          description: Name of the selected project containing the wanted file
+          required: true
+          type: string
+          x-example: 'Hello World'
+        - name: filename
+          in: path
+          description: Name of the file to be opened
+          required: true
+          type: string
+          x-example: 'LICENSE'
       responses:
         '200':
           description: A json object which contains the filename and the filecontents
           schema:
             $ref: '#/definitions/OpenedFile'
-  /projects/**:
+  '/projects/**':
     delete:
       tags:
-      - project
+        - project
       summary: Delete a specific resource on the server
       operationId: project.deleteFile
+      #parameters:
+        #- name: **
+        #  in: path
+        #  description: filepath, starting with project name. Can contain / 
+        #  required: true
+        #  type: string
       responses:
         '204':
           description: The resource was deleted successfully.
-        '404':
-          description: The resource was not found.
         '400':
           description: The resourse was found but could not be deleted.
-  /projects/{projectname}/**:
+        '404':
+          description: The resource was not found.
     put:
       tags:
-      - project
-      summary: Creates a new project one the server
-      operationId: project.createProject
+        - project
+      summary: 'Depending on the type, this endpoint creates a file or a folder'
+      operationId: project.createFile
       parameters:
-      - name: "projectname"
-        in: "path"
-        description: "Name of the project about to be created"
-        required: true
-        type: "string"
+        #- name: **
+        #  in: path
+        #  description: filepath, starting with project name. Can contain / 
+        #  required: true
+        #  type: string
+        - name: type
+          in: query
+          description: 'type of file to create: Either file or folder'
+          required: true
+          type: string
+          enum:
+            - file
+            - folder
       responses:
         '200':
           description: The project was created successfully
         '400':
           description: The project was not created
-  /projects/**?type=file/folder:
+  '/projects/{projectname}/**':
     put:
       tags:
-      - project
-      summary: 'Depending on the type, this endpoint creates a file or a folder'
-      operationId: project.createFile
+        - project
+      summary: Creates a new project one the server
+      operationId: project.createProject
       parameters:
-      - name: "type"
-        in: "query"
-        description: "type of file to create: Either file or folder"
-        required: true
-        type: "string"
-        enum:
-        - "file"
-        - "folder"
+        - name: projectname
+          in: path
+          description: Name of the project about to be created
+          required: true
+          type: string
+          x-example: 'Hello World'
       responses:
         '200':
           description: The project was created successfully
@@ -131,27 +150,27 @@ paths:
   /lint:
     post:
       tags:
-      - lint
+        - lint
       summary: Check a java source file
       operationId: lintClass
       consumes:
-      - text/plain
+        - text/plain
       produces:
-      - application/json;charset=UTF-8
+        - application/json;charset=UTF-8
       parameters:
-      - in: query
-        name: name
-        description: Filename of the uploaded source code
-        required: true
-        type: string
-        x-example: LimitedIntegerSet
-      - in: body
-        name: source
-        description: Java source code to be linted
-        required: true
-        schema:
+        - in: query
+          name: name
+          description: Filename of the uploaded source code
+          required: true
           type: string
-          example: "public class LimitedIntegerSet {\n\t//@ public invariant (\\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);\n\tprivate /*@ spec_public @*/ int[] arr;\n\t\n\t//@ public invariant size >= 0 && size <= arr.length;\n\tprivate /*@ spec_public @*/ int size;\n\n\tpublic LimitedIntegerSet(int limit) {\n\t\tthis.arr = new int[limit];\n\t}\n\n\t/*@ public normal_behavior ///This is a JML comment!\n      @ ensures \\result == (\\exists int i;\n      @                             0 <= i && i < size;\n      @                             arr[i] == elem);\n      @*/\n\tpublic /*@ pure @*/ boolean contains(int elem) {/*...*/ throw new RuntimeException(\"Not yet implemented\");}\n\n    private void provokeWarning() {\n        switch (1) {\n            case 1:\n                System.out.println(\"Hello World\");\n            case 2: // Theres a fall-through warning around here\n                break;\n        }\n    }\n\n\t/*@ public normal_behavior\n\t  @ requires contains(elem);\n      @ assignable size, arr[*];  // allows arbitrary reordering of the array elements\n      @ ensures !contains(elem); \n      @ ensures (\\forall int e;\n      @                  e != elem;\n      @                  contains(e) <==> \\old(contains(e)));\n      @ ensures size == \\old(size) - 1;\n      @\n      @ also\n      @ \n      @ public normal_behavior\n      @ requires !contains(elem);\n      @ assignable \\nothing;\n      @*/\n\tpublic void remove(int elem) {/*...*/}\n\n\n\t// we specify that the array is sorted afterwards and that the set has not changed; the latter works in this case and is easier \n\t// than if we would have to try to formalize permutation\n\t/*@ public normal_behavior\n\t  @ assignable a[0..size - 1];\n      @ ensures\n      @   (\\forall int i, j; i>=0 && i<j && j<size; arr[i]<arr[j]);\n      @ ensures (\\forall int e;  \n      @                  contains(e) <==> \\old(contains(e)));\n      @*/\n\tpublic void sort() { /* ... */ }\n\n\t\n\t/*@ public normal_behavior\n\t  @ requires size > 0;\n      @ assignable \\nothing;\n      @ ensures ( \\forall int i;\n      @                  i>=0 && i<size;\n      @                  \\result >= a[i] );\n      @ ensures ( \\exists int i;\n      @                  i>=0 && i<size;\n      @                  \\result == a[i] );\n      @\n      @ also\n      @ \n      @ public exceptional_behavior\n      @ requires size == 0;\n      @ assignable \\nothing;\n      @ signals  (RuntimeException) true;\n      @*/\n\tpublic int max() {\n\t\t// ...\n\t\tthrow new RuntimeException(\"Not yet implemented.\");\n\t}\n}\n"
+          x-example: LimitedIntegerSet
+        - in: body
+          name: source
+          description: Java source code to be linted
+          required: true
+          schema:
+            type: string
+            example: "public class LimitedIntegerSet {\n\t//@ public invariant (\\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);\n\tprivate /*@ spec_public @*/ int[] arr;\n\t\n\t//@ public invariant size >= 0 && size <= arr.length;\n\tprivate /*@ spec_public @*/ int size;\n\n\tpublic LimitedIntegerSet(int limit) {\n\t\tthis.arr = new int[limit];\n\t}\n\n\t/*@ public normal_behavior ///This is a JML comment!\n      @ ensures \\result == (\\exists int i;\n      @                             0 <= i && i < size;\n      @                             arr[i] == elem);\n      @*/\n\tpublic /*@ pure @*/ boolean contains(int elem) {/*...*/ throw new RuntimeException(\"Not yet implemented\");}\n\n    private void provokeWarning() {\n        switch (1) {\n            case 1:\n                System.out.println(\"Hello World\");\n            case 2: // Theres a fall-through warning around here\n                break;\n        }\n    }\n\n\t/*@ public normal_behavior\n\t  @ requires contains(elem);\n      @ assignable size, arr[*];  // allows arbitrary reordering of the array elements\n      @ ensures !contains(elem); \n      @ ensures (\\forall int e;\n      @                  e != elem;\n      @                  contains(e) <==> \\old(contains(e)));\n      @ ensures size == \\old(size) - 1;\n      @\n      @ also\n      @ \n      @ public normal_behavior\n      @ requires !contains(elem);\n      @ assignable \\nothing;\n      @*/\n\tpublic void remove(int elem) {/*...*/}\n\n\n\t// we specify that the array is sorted afterwards and that the set has not changed; the latter works in this case and is easier \n\t// than if we would have to try to formalize permutation\n\t/*@ public normal_behavior\n\t  @ assignable a[0..size - 1];\n      @ ensures\n      @   (\\forall int i, j; i>=0 && i<j && j<size; arr[i]<arr[j]);\n      @ ensures (\\forall int e;  \n      @                  contains(e) <==> \\old(contains(e)));\n      @*/\n\tpublic void sort() { /* ... */ }\n\n\t\n\t/*@ public normal_behavior\n\t  @ requires size > 0;\n      @ assignable \\nothing;\n      @ ensures ( \\forall int i;\n      @                  i>=0 && i<size;\n      @                  \\result >= a[i] );\n      @ ensures ( \\exists int i;\n      @                  i>=0 && i<size;\n      @                  \\result == a[i] );\n      @\n      @ also\n      @ \n      @ public exceptional_behavior\n      @ requires size == 0;\n      @ assignable \\nothing;\n      @ signals  (RuntimeException) true;\n      @*/\n\tpublic int max() {\n\t\t// ...\n\t\tthrow new RuntimeException(\"Not yet implemented.\");\n\t}\n}\n"
       responses:
         '200':
           description: Successful static analysis. Returning results
@@ -195,22 +214,22 @@ definitions:
       kind:
         type: string
         enum:
-        - ERROR
-        - WARNING
-        - NOTE
+          - ERROR
+          - WARNING
+          - NOTE
   File:
     type: object
     required:
-    - name
-    - type
+      - name
+      - type
     properties:
       name:
         type: string
       type:
         type: string
         enum:
-        - file
-        - folder
+          - file
+          - folder
       contents:
         type: array
         items:
