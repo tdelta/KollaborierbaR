@@ -44,6 +44,9 @@ export default class App extends React.Component {
             // warnings, errors, etc. within the currently open file
             diagnostics: []
         };
+
+        this.network = new Network();
+        this.network.openProject('test');
     }
 
     /**
