@@ -1,7 +1,11 @@
 package synchronization;
 
-import synchronization.SynchronizationController;
+import synchronization.ProjectSyncController;
 import synchronization.CustomHandshakeHandler;
+import synchronization.Project;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Controller;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;

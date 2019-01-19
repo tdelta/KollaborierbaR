@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import projectmanagement.*;
 
@@ -25,6 +27,8 @@ import java.util.Scanner;
 
 import java.util.NoSuchElementException;
 
+import server.TestEvent;
+
 /**
  * @author Marc Arnold, David Heck
  *  This is a rest controller for handling the project file structure
@@ -34,6 +38,16 @@ import java.util.NoSuchElementException;
 @RequestMapping("/projects")
 public class ProjectController {
     private static final String projectPath = "projects";
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    @RequestMapping("/test")
+    public void test() {
+        System.out.println("Publishing custom event. ");
+        TestEvent customSpringEvent = new TestEvent(this, "LOL");
+        applicationEventPublisher.publishEvent(customSpringEvent);
+    }
 
     /**
      * That method handels requests to /listProjects and creates a list of project names. 
