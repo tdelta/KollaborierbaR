@@ -1,4 +1,4 @@
-package server;
+package events;
 
 import org.springframework.context.ApplicationEvent;
 

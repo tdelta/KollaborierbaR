@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { ListGroup, ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { getProjects } from './projectmanagement';
-
+import ProjectManagement from '../projectmanagement.ts';
 
 /*
  * open project dialog window, that shows a list with available projects
@@ -41,7 +40,7 @@ class ModalSelect extends React.Component {
      * loads the project list, called whenever the modal is opened
      */
     loadProjectNames() {
-        getProjects()
+        ProjectManagement.getProjects()
             .then((projects) => {this.setState({projects: projects});
             });
     }
