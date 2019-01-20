@@ -254,4 +254,26 @@ function updateFileName(path){
     }
 }
 
-export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, updateFileName};
+function updateFileContent(path, content){
+
+    // Path to the ressource we want to save
+    var url = serverAddress + '/projects/' + this.state.project.name + '/' +path.join('/');
+
+    var requestbody = {
+        'fileContent' : content
+    }
+
+    return fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Accept' : 'application/json',
+            'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify(requestbody) // necessary if you want to send a JSON object in a fetch request
+    }).then((response) =>  {if(response.status !== 200) 
+                                alert('Uups! Something went wrong while saving your filecontent to the server')
+                            });
+}
+
+export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, updateFileName, updateFileContent};
