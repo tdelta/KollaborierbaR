@@ -5,7 +5,7 @@ import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 
-import {deleteFile, deleteProject, createFile, createProject, openProject, openFile, updateFile} from './projectmanagement.js';
+import {deleteFile, deleteProject, createFile, createProject, openProject, openFile, updateFileName} from './projectmanagement.js';
 
 //import testSource from '../sample-text.js';
 
@@ -29,7 +29,7 @@ export default class App extends React.Component {
         this.createFile = createFile.bind(this);
         this.createProject = createProject.bind(this);
         this.openProject = openProject.bind(this);
-        this.updateFile = updateFile.bind(this);
+        this.updateFileName = updateFileName.bind(this);
 
         this.confirmationModal = React.createRef();
 
@@ -141,7 +141,7 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
-                    onUpdateFile={() => {this.updateFile(this.state.openedPath);}}
+                    onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
@@ -153,7 +153,7 @@ export default class App extends React.Component {
                         onDeleteFile={this.deleteFile}
                         onCreateFile={this.createFile}
                         onDeleteProject={this.deleteProject}
-                        onUpdateFile={this.updateFile}
+                        onUpdateFileName={this.updateFileName}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}

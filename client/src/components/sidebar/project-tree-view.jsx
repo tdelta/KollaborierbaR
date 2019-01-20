@@ -113,7 +113,7 @@ export default class ProjectTreeView extends React.Component {
                                     onOpenFile={this.props.onOpenFile}
                                     onDeleteFile={this.props.onDeleteFile}
                                     onCreateFile={this.props.onCreateFile}
-                                    onUpdateFile={this.props.onUpdateFile}
+                                    onUpdateFileName={this.props.onUpdateFileName}
                                     onOpenContext={this.props.onOpenContext}
                                     openedPath={this.props.openedPath}
                                 />

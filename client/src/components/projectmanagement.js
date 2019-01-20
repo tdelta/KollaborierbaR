@@ -207,7 +207,7 @@ function createProject() {
  * updates the filename of the given resource path 
  *
  */
-function updateFile(path){
+function updateFileName(path){
     let name = prompt('Enter Name', '');
 
     if(name !== '..' && name !== '.' && name !== null && !name.includes("/")){
@@ -254,4 +254,4 @@ function updateFile(path){
     }
 }
 
-export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, updateFile};
+export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, updateFileName};
