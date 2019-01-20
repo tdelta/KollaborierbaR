@@ -114,7 +114,7 @@ export default class FileNode extends React.Component<Props, State> {
                 </div>
                 <ContextMenu>
                     <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
-                    <ContextAction onClick={() => this.props.onUpdateFile(this.props.path)}>Rename Folder</ContextAction>
+                    <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename Folder</ContextAction>
                     <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</ContextAction>
                     <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</ContextAction>
                 </ContextMenu>
@@ -137,7 +137,7 @@ export default class FileNode extends React.Component<Props, State> {
                   onOpenFile={this.props.onOpenFile}
                   onDeleteFile={this.props.onDeleteFile}
                   onCreateFile={this.props.onCreateFile}
-                  onUpdateFile={this.props.onUpdateFile}
+                  onUpdateFileName={this.props.onUpdateFileName}
                   onOpenContext={this.props.onOpenContext}
                   openedPath={this.props.openedPath}
                 />
@@ -161,7 +161,7 @@ export default class FileNode extends React.Component<Props, State> {
             </div>
             <ContextMenu>
                 <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
-                <ContextAction onClick={() => this.props.onUpdateFile(this.props.path)}>Rename File</ContextAction>
+                <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename File</ContextAction>
             </ContextMenu>
         </Context>
       );
@@ -205,7 +205,7 @@ interface Props {
   onOpenFile: (path: string[]) => void;
   onDeleteFile: (path: string[]) => void;
   onCreateFile: (path: string[], type: string) => void;
-  onUpdateFile: (path: string[]) => void;
+  onUpdateFileName: (path: string[]) => void;
   onOpenContext: (path: string[]) => void;
   data: FileNodeData;
   openedPath: string[];
