@@ -1,13 +1,13 @@
 import React from 'react';
 
+import NotificationSystem from 'react-notification-system';
+
 import Editor from './editor.tsx';
 import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 
-import {deleteFile, deleteProject, createFile, createProject, openProject, openFile} from './projectmanagement.js';
-
-import Network from '../network.ts';
+import ProjectManagement from '../projectmanagement.ts';
 
 //import testSource from '../sample-text.js';
 
@@ -19,6 +19,20 @@ export default class App extends React.Component {
     constructor(props){
         super(props);
 
+        this.confirmationModal = React.createRef();
+        this.notificationSystem = React.createRef();
+
+        this.projectManagement = new ProjectManagement(
+            this.showProject.bind(this),
+            () => this.state.project,
+            this.setText.bind(this),
+            this.setFileName.bind(this),
+            () => this.state.openedPath,
+            this.confirmationModal,
+            this.notificationSystem,
+            this.openFile.bind(this)
+        );
+
         // all methods should always refer to this instance of App, when
         // using the `this` variable.
         this.setText = this.setText.bind(this);
@@ -26,13 +40,11 @@ export default class App extends React.Component {
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
-        this.deleteFile = deleteFile.bind(this);
-        this.deleteProject = deleteProject.bind(this);
-        this.createFile = createFile.bind(this);
-        this.createProject = createProject.bind(this);
-        this.openProject = openProject.bind(this);
-
-        this.confirmationModal = React.createRef();
+        this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.filename, this.state.project.name, path);
+        this.deleteProject = (path) => this.projectManagement.deleteProject(this.state.project.name, path);
+        this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
+        this.createProject = this.projectManagement.createProject.bind(this.projectManagement);
+        this.openProject = this.projectManagement.openProject.bind(this.projectManagement);
 
         // setup initial state
         this.state = {
@@ -52,9 +64,6 @@ export default class App extends React.Component {
             // warnings, errors, etc. within the currently open file
             diagnostics: []
         };
-
-        this.network = new Network();
-        this.network.openProject('test');
     }
 
     /**
@@ -108,11 +117,17 @@ export default class App extends React.Component {
             filename: 'Main.java',
             openedPath: ['Main.java'] // TODO: replace filename with this
         });
+
+        this.notificationSystem.current.addNotification({
+            message: 'Notification message',
+            level: 'success',
+            position: 'bc'
+        });
     }
 
     openFile(path) {
         // This string composition is necessary because path contains only the path within a project.
-        openFile('/' + this.state.project.name + '/' + path.join('/'))
+        ProjectManagement.openFile('/' + this.state.project.name + '/' + path.join('/'))
             .then((response) => {
                 this.setState({
                     text: response.fileText,
@@ -166,6 +181,7 @@ export default class App extends React.Component {
                     />
                 </div>
                 <ConfirmationModal ref={this.confirmationModal}/>
+                <NotificationSystem ref={this.notificationSystem}/>
             </div>
         );
     }

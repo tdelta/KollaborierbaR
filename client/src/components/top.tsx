@@ -20,11 +20,6 @@ import {
     DeleteModal
 } from './project-modals.jsx';
 
-import {
-    createFile,
-} from './projectmanagement.js';
-
-
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
   private downloadSelector: RefObject<HTMLInputElement>;

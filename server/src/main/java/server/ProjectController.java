@@ -30,7 +30,9 @@ import java.util.Scanner;
 
 import java.util.NoSuchElementException;
 
-import server.TestEvent;
+import events.TestEvent;
+import events.UpdatedProjectEvent;
+import events.DeletedProjectEvent;
 
 /**
  * @author Marc Arnold, David Heck
@@ -194,13 +196,29 @@ public class ProjectController {
         // Removes the first character from the path string, we need this because java.io.File need a path that does not start with a "/"
     	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
 
+      //final String projectName;
+      //{
+      //  final String[] pathSplit = path.split("/");
+      //  if (pathSplit.length < 1) {
+      //    return new ResponseEntity<String>("The path may not be empty.",HttpStatus.BAD_REQUEST);
+      //  }
+
+      //  else if (pathSplit.length < 2) {
+      //    return new ResponseEntity<String>("The path must contain a project name.",HttpStatus.BAD_REQUEST);
+      //  }
+
+      //  else {
+      //    projectName = pathSplit[1];
+      //  }
+      //}
+
     	File file = new File(path);
     	
     	// Java createNewFile and mkdir are not able to create a file if a file 
     	// with the same name already exists. Therefore, if someone tries to create
     	// a file with the same name, return a Http Bad Request Response
     	if(file.exists()) {
-    		return new ResponseEntity<String>("It already exists a file with the same name you try to create",HttpStatus.BAD_REQUEST);
+    		return new ResponseEntity<String>("There already exists a file with the same name you try to create",HttpStatus.BAD_REQUEST);
     	}
 
     	//check which kind of structure should be created
@@ -213,6 +231,9 @@ public class ProjectController {
     		
     		return new ResponseEntity<>("Wrong type parameter was choosen in the request. To create a file, please select file or folder as type.", HttpStatus.BAD_REQUEST);
     	}
+
+      final UpdatedProjectEvent event = new UpdatedProjectEvent(this, projectname);
+      applicationEventPublisher.publishEvent(event);
 
     	// If everything was good, return the new project structure together with a HTTP OK response code
     	return new ResponseEntity<FolderItem>(showProject(projectname, request),HttpStatus.OK);
@@ -238,6 +259,10 @@ public class ProjectController {
         }else{
             try {
                 delete(file);
+
+                final UpdatedProjectEvent event = new UpdatedProjectEvent(this, projectname);
+                applicationEventPublisher.publishEvent(event);
+
                 return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -267,6 +292,10 @@ public class ProjectController {
         }else{
             try {
                 delete(file);
+
+                final DeletedProjectEvent event = new DeletedProjectEvent(this, projectname);
+                applicationEventPublisher.publishEvent(event);
+
                 // WICHTIG: Der Grund für die Existenz dieser Funktion separat von deleteFile ist, dass wenn wir ein Project löschen, wir kein neues Json Object davon zurücken können
                 return new ResponseEntity<>(HttpStatus.OK);
             } catch (IOException e) {
