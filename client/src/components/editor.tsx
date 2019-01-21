@@ -30,6 +30,7 @@ export default class Editor extends React.Component<Props> {
   private markers: number[];
   private timeTest: number; // will be used to regulate interval of calling the linter
   private anchoredMarkers: AnchoredMarker[];
+  private anchoredHighlightings: AnchoredMarker[];
   private annotations: number[];
 
   constructor(props: Props) {
@@ -37,6 +38,7 @@ export default class Editor extends React.Component<Props> {
     this.markers = [];
     this.timeTest = 0;
     this.anchoredMarkers = [];
+    this.anchoredHighlightings = [];
     this.annotations = [];
   }
 
@@ -122,6 +124,38 @@ export default class Editor extends React.Component<Props> {
     );
   }
 
+  public addBackMarker(start: any, end: any, uid: number){ 
+    let range = new Range(
+      start.row,
+      start.column,
+      end.row,
+      end.column
+    );
+    for (let j = 0; j < this.anchoredHighlightings.length; j = j + 1) {
+      // Dont add the marker if it overlaps with another marker
+      if (
+        range.intersects(
+          this.anchoredHighlightings[j].range
+        )
+      ) {
+        return;
+      }
+    }
+    range.start = this.editor.session.doc.createAnchor(range.start);
+    range.end = this.editor.session.doc.createAnchor(range.end);
+    const type: string = `n${uid} highlighting`;
+    const message: string = '';
+
+    this.anchoredHighlightings.push(
+      {
+        range,
+        type,
+        message,
+      }
+    );
+    this.setMarkers();
+  }
+
   /**
    * This function sets anchor points for the positions of all entries of this.props.diagnostics
    * so that their markers and annotations can automatically move, when the text changes
@@ -176,27 +210,35 @@ export default class Editor extends React.Component<Props> {
       this.editor.session.removeMarker(marker);
     }
     this.markers = [];
-
+    console.log(this.anchoredMarkers);
     // Add markers for all anchoredMarkers
-    addLoop: for (let i = 0; i < this.anchoredMarkers.length; i = i + 1) {
-      for (let j = i + 1; j < this.anchoredMarkers.length; j = j + 1) {
+    this.processMarkerArray(this.anchoredMarkers,true);
+    this.processMarkerArray(this.anchoredHighlightings,false);
+  }
+
+  /**
+   * Helper function for setMarkers
+   */
+  private processMarkerArray(anchoredMarkers: AnchoredMarker[],front: boolean){
+    addLoop: for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
+      for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
         // Dont add the marker if it overlaps with another marker
         if (
-          this.anchoredMarkers[i].range.intersects(
-            this.anchoredMarkers[j].range
+          anchoredMarkers[i].range.intersects(
+            anchoredMarkers[j].range
           )
         ) {
           continue addLoop;
         }
       }
-
+      console.log(anchoredMarkers[i].range);
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
-          this.anchoredMarkers[i].range,
-          `${this.anchoredMarkers[i].type}Marker`,
+          anchoredMarkers[i].range,
+          `${anchoredMarkers[i].type}Marker`,
           'text',
-          true
+          front
         )
       );
     }

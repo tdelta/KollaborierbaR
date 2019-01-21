@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import './collaborative/marker-colors.css'
 
 import App from './components/app.jsx';
 

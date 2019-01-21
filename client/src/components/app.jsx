@@ -7,7 +7,7 @@ import Sidebar from './sidebar/sidebar.jsx';
 import openFile from '../openFile.js';
 
 import CollabController from '../collaborative/CollabController';
-import Network from '../collaborative/Network';
+import Network from '../network';
 
 //import testSource from '../sample-text.js';
 
@@ -75,7 +75,6 @@ export default class App extends React.Component {
      * Passed down to the sub components, since linters / compilers may need it.
      */
     setFileName(filename){
-        this.collabController.setFile(this.state.project+'/'+filename);
         this.setState({
             filename: filename
         });
@@ -136,6 +135,7 @@ export default class App extends React.Component {
                                 .then((response) => {
                                     this.setText(response.fileText);
                                     this.setFileName(response.fileName);
+                                    this.collabController.setFile(this.state.project.name+'/'+response.fileName,response.fileText);
                                 });
                         }}
                     />
