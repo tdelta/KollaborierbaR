@@ -31,6 +31,7 @@ export default class App extends React.Component {
         this.openProject = openProject.bind(this);
         this.updateFileName = updateFileName.bind(this);
         this.updateFileContent = updateFileContent.bind(this);
+        //this.handleCtrlS = handleCtrlS.bind(this);
 
         this.confirmationModal = React.createRef();
 
@@ -105,6 +106,7 @@ export default class App extends React.Component {
             filename: 'Main.java',
             openedPath: ['Main.java'] // TODO: replace filename with this
         });
+        document.addEventListener("keydown", this.handleCtrlS.bind(this));
     }
 
     openFile(path) {
@@ -117,6 +119,19 @@ export default class App extends React.Component {
                     openedPath: path
                 });
             });
+    }
+
+    /**
+     * Eventhandler method for keyevent (CTRL + S).
+     * On CTRL + S the opened file will be saved persistent on the server
+     * 
+     */
+    handleCtrlS(event){
+        if(event.keyCode === 83 && event.ctrlKey){
+            // Prevent default save file context menu
+            event.preventDefault();
+            this.updateFileContent(this.state.openedPath, this.state.text);
+        }
     }
 
 
