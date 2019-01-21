@@ -26,6 +26,8 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import events.UpdatedProjectEvent;
 import events.DeletedProjectEvent;
 import events.DeletedFileEvent;
+import events.RenamedFileEvent;
+import events.UpdatedFileEvent;
 
 @Controller
 public class ProjectSyncController {
@@ -160,6 +162,28 @@ public class ProjectSyncController {
 
     for (final Principal user : users) {
       System.out.println("Sending file deletion to " + user.getName() + " at " + event.getProjectName());
+      messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
+    }
+  }
+
+  @EventListener
+  public void handleRenamedFile(final RenamedFileEvent event) {
+    System.out.println("File renamed from " + event.getOriginalPath() + " to " + event.getNewPath());
+    final List<Principal> users = getUsersOfProject(event.getProjectName());
+
+    for (final Principal user : users) {
+      System.out.println("Sending file rename to " + user.getName() + " at " + event.getProjectName());
+      messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
+    }
+  }
+
+  @EventListener
+  public void handleUpdatedFile(final UpdatedFileEvent event) {
+    System.out.println("Contents updated of file  " + event.getFilePath());
+    final List<Principal> users = getUsersOfProject(event.getProjectName());
+
+    for (final Principal user : users) {
+      System.out.println("Sending file content update to " + user.getName() + " at " + event.getProjectName());
       messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
     }
   }

@@ -6,7 +6,9 @@ import {serverAddress} from './constants';
 export enum ProjectEventType {
   UpdatedProject = 'UpdatedProjectEvent',
   DeletedProject = 'DeletedProjectEvent',
-  DeletedFile = 'DeletedFileEvent'
+  DeletedFile = 'DeletedFileEvent',
+  RenamedFile = 'RenamedFileEvent',
+  UpdatedFile = 'UpdatedFileEvent'
 }
 
 export interface ProjectEvent {
@@ -18,8 +20,13 @@ export interface ProjectFileEvent extends ProjectEvent {
     filePath: string
 }
 
+export interface RenamedFileEvent extends ProjectEvent {
+    originalPath: string;
+    newPath: string;
+}
+
 interface EventObserver {
-  onProjectEvent(event: ProjectEvent): void;
+  onProjectEvent(event: ProjectEvent | ProjectFileEvent | RenamedFileEvent): void;
   onConnect(): void;
 }
 
@@ -173,7 +180,7 @@ export class Network {
       `/user/projects/${projectName}`,
       (msg) => {
         try {
-          const event: ProjectEvent | ProjectFileEvent = JSON.parse(msg.body);
+          const event: ProjectEvent | ProjectFileEvent | RenamedFileEvent = JSON.parse(msg.body);
 
           console.log(`incoming event`);
           console.log(event);

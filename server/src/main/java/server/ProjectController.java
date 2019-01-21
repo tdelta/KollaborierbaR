@@ -40,6 +40,8 @@ import events.TestEvent;
 import events.UpdatedProjectEvent;
 import events.DeletedProjectEvent;
 import events.DeletedFileEvent;
+import events.RenamedFileEvent;
+import events.UpdatedFileEvent;
 
 /**
  * @author Marc Arnold, David Heck
@@ -383,16 +385,45 @@ public class ProjectController {
     	
     	// Get the file path for the request resource
     	// substring(1) remove the "/..." at the beginning of a path
-    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
-    	
+    	final String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+
+      final String originalPath;
+      {
+          final int separatorIdx = path.indexOf('/', path.indexOf('/') + 1);
+          if (separatorIdx == -1 || separatorIdx + 1 >= path.length()) {
+              return new ResponseEntity<>("A file path within the project needs to be specified." ,HttpStatus.NOT_FOUND);
+          }
+
+          originalPath = path.substring(separatorIdx + 1);
+      }
+	
     	// Rename a file or a folder
     	if(updateData.fileContent == null) {
         		
-    		File file = new File(path);
+    		final File file = new File(path);
     		// substring(1) remove the "/..." at the beginning of a path
-        	boolean success = file.renameTo(new File (updateData.fileName.substring(1)));
+          final String path2 = updateData.fileName.substring(1);
+        	final boolean success = file.renameTo(new File (path2));
         		
         	if(success) {
+            final String newPath;
+            {
+                final int separatorIdx = path2.indexOf('/', path2.indexOf('/') + 1);
+                if (separatorIdx == -1 || separatorIdx + 1 >= path2.length()) {
+                    return new ResponseEntity<>("A file path within the project needs to be specified as target path." ,HttpStatus.NOT_FOUND);
+                }
+
+                newPath = path2.substring(separatorIdx + 1);
+            }
+
+            final RenamedFileEvent event = new RenamedFileEvent(
+                this,
+                projectname,
+                originalPath,
+                newPath
+            );
+            applicationEventPublisher.publishEvent(event);
+
         		return new ResponseEntity<>(showProject(projectname, request) ,HttpStatus.OK);
         	} else {
         		return new ResponseEntity<>("The file could no be renamed." ,HttpStatus.BAD_REQUEST);
@@ -401,16 +432,24 @@ public class ProjectController {
     	// If you are in this branch, the fileContent wasn't null. That implies that you do have a file and that the
     	// caller of that functions wants to update the content, not the name of the file.
     	else {
-    	    BufferedWriter writer;
-			try {
-				writer = new BufferedWriter(new FileWriter(path));
-	        	writer.write(updateData.fileContent);
-	    		writer.close();
-	    		return new ResponseEntity<>(showProject(projectname, request), HttpStatus.OK);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return new ResponseEntity<>("Something went wrong while updating the file content.", HttpStatus.BAD_REQUEST);
-			}
+          try {
+              final BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
+              writer.write(updateData.fileContent);
+              writer.close();
+
+              final UpdatedFileEvent event = new UpdatedFileEvent(
+                  this,
+                  projectname,
+                  originalPath
+              );
+              applicationEventPublisher.publishEvent(event);
+
+              return new ResponseEntity<>(showProject(projectname, request), HttpStatus.OK);
+          } catch (IOException e) {
+              e.printStackTrace();
+              return new ResponseEntity<>("Something went wrong while updating the file content.", HttpStatus.BAD_REQUEST);
+          }
     	} 
     }
     

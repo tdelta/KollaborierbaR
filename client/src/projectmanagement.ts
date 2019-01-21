@@ -3,7 +3,7 @@ import NotificationSystem from 'react-notification-system';
 import {serverAddress} from './constants';
 import ConfirmationModal from './components/confirmation-modal';
 
-import {Network, ProjectEvent, ProjectEventType} from './network';
+import {Network, ProjectEvent, RenamedFileEvent, ProjectFileEvent, ProjectEventType} from './network';
 
 interface OpenFileData {
     fileName: string;
@@ -65,7 +65,7 @@ export default class ProjectManagement {
         this.openFile = openFile;
 
         this.network = new Network({
-            onProjectEvent: (event: ProjectEvent) => {
+            onProjectEvent: (event: ProjectEvent | RenamedFileEvent | ProjectFileEvent) => {
                 const currentProject = this.getCurrentProject();
 
                 switch (event.eventType) {
@@ -92,6 +92,53 @@ export default class ProjectManagement {
                                 level: 'error',
                                 position: 'bc'
                             });
+                        }
+                        
+                        break;
+                    case ProjectEventType.RenamedFile:
+                        this.openProject(
+                            (<Project>currentProject).name,
+                            false
+                        );
+
+                        const renameEvent: RenamedFileEvent = (<RenamedFileEvent> event);
+
+                        if (renameEvent.originalPath === this.getOpenedPath().join('/')) {
+                            // TODO: Evtl abstimmen mit Collab controller
+                            const newPathArray: string[] = renameEvent.newPath.split('/');
+
+                            if (newPathArray.length < 1) {
+                                console.log('Error: Updated file path is invalied.');
+                            }
+
+                            else {
+                                this.setFileName(newPathArray[newPathArray.length - 1]);
+                                this.setOpenedPath(newPathArray);
+                            }
+                        }
+
+                        if (this.notificationSystem.current) {
+                            this.notificationSystem.current.clearNotifications();
+                            this.notificationSystem.current.addNotification({
+                                message: `File ${renameEvent.originalPath} got renamed to ${renameEvent.newPath}.`,
+                                level: 'info',
+                                position: 'bc'
+                            });
+                        }
+                        
+                        break;
+                    case ProjectEventType.UpdatedFile:
+                        const fileEvent: ProjectFileEvent = (<ProjectFileEvent> event);
+
+                        if (fileEvent.filePath === this.getOpenedPath().join('/')) {
+                            if (this.notificationSystem.current) {
+                                this.notificationSystem.current.clearNotifications();
+                                this.notificationSystem.current.addNotification({
+                                    message: `Permanently saved the contents of your currently opened file.`,
+                                    level: 'success',
+                                    position: 'bc'
+                                });
+                            }
                         }
                         
                         break;
