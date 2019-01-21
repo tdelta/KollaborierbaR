@@ -110,10 +110,8 @@ export default class Network {
 
   public broadcast(messageType: string,headers: any,message: any){
     message = JSON.stringify(message);
-    this.safePublish(
-      {destination: messageType, headers: headers, body: message},
-      ()=>{},
-      ()=>{}
+    this.stompClient.publish(
+      {destination: messageType, headers: headers, body: message}
     );
   }
 
