@@ -190,18 +190,33 @@ function createFile(path, type) {
  */ 
 function createProject() {
     let file = prompt('Enter Name', '');
-    if (file !== null && !file.includes("/")) {
+    if (file !== null && !file.includes('/')) {
         createOverall(file, 'folder')
             .then((response) => {
                 this.showProject(response);
                 this.setText('');
                 this.setFileName(undefined);
             });
-    }if(file !== null && file.includes("/")){
+    }if(file !== null && file.includes('/')){
         alert('No appropriate filename. Filename includes: / ');
     }
 
 }
 
+function runProof(path){
+    path = escape(path);
+    // API URL of the server we will use for our request
+    const url = serverAddress + '/proof/' +path;
 
-export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject};
+    return fetch(url, {
+        method: 'GET',
+        mode: 'cors', // enable cross origin requests. Server must also allow this!
+        headers: {
+            'Accept' : 'application/json', // we want a json object back
+            //'Content-Type': 'application/json', // we are sending a json object
+        },
+    })
+        .then((response) => response.text()); // parse the response body as json};
+}
+
+export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, runProof};
