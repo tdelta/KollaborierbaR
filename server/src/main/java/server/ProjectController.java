@@ -33,6 +33,7 @@ import java.util.NoSuchElementException;
 import events.TestEvent;
 import events.UpdatedProjectEvent;
 import events.DeletedProjectEvent;
+import events.DeletedFileEvent;
 
 /**
  * @author Marc Arnold, David Heck
@@ -46,13 +47,6 @@ public class ProjectController {
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
-
-    @RequestMapping("/test")
-    public void test() {
-        System.out.println("Publishing custom event. ");
-        TestEvent customSpringEvent = new TestEvent(this, "LOL");
-        applicationEventPublisher.publishEvent(customSpringEvent);
-    }
 
     /**
      * That method handels requests to /listProjects and creates a list of project names. 
@@ -250,9 +244,18 @@ public class ProjectController {
     public ResponseEntity deleteFile(@PathVariable("projectname") String projectname ,HttpServletRequest request){
 
         // Removes the first character from the path string, we need this because java.io.File need a path that does not start with a "/"
-        String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+        final String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+        final String filePath;
+        {
+            final int separatorIdx = path.indexOf('/');
+            if (separatorIdx == -1 || separatorIdx + 1 >= path.length()) {
+                return new ResponseEntity<>("A file path withing the project needs to be specified." ,HttpStatus.NOT_FOUND);
+            }
 
-        File file = new File(path);
+            filePath = path.substring(separatorIdx + 1);
+        }
+
+        final File file = new File(path);
         //check if the given path actually leads to a valid directory
         if(!file.exists()){
         	return new ResponseEntity<>("The file you try to delete does not exist." ,HttpStatus.NOT_FOUND);
@@ -260,7 +263,7 @@ public class ProjectController {
             try {
                 delete(file);
 
-                final UpdatedProjectEvent event = new UpdatedProjectEvent(this, projectname);
+                final DeletedFileEvent event = new DeletedFileEvent(this, projectname, filePath);
                 applicationEventPublisher.publishEvent(event);
 
                 return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);

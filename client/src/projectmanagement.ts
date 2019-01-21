@@ -3,7 +3,7 @@ import NotificationSystem from 'react-notification-system';
 import {serverAddress} from './constants';
 import ConfirmationModal from './components/confirmation-modal';
 
-import {Network, ProjectEvent} from './network';
+import {Network, ProjectEvent, ProjectEventType} from './network';
 
 interface OpenFileData {
     fileName: string;
@@ -59,14 +59,43 @@ export default class ProjectManagement {
         this.openFile = openFile;
 
         this.network = new Network({
-            onProjectEvent: (event: ProjectEvent, message: any) => {
-                switch (event) {
-                    case ProjectEvent.ProjectDeleted:
+            onProjectEvent: (event: ProjectEvent) => {
+                const currentProject = this.getCurrentProject();
+
+                switch (event.eventType) {
+                    case ProjectEventType.DeletedFile:
+                        this.openProject(
+                            (<Project>currentProject).name,
+                            false
+                        );
+
+                        if (
+                            !ProjectManagement.projectContainsPath(
+                                (<Project>currentProject),
+                                this.getOpenedPath()
+                            )
+                        ) {
+                            this.setText('');
+                            this.setFileName(undefined);
+                        }
+
+                        if (this.notificationSystem.current) {
+                            this.notificationSystem.current.clearNotifications();
+                            this.notificationSystem.current.addNotification({
+                                message: 'A file got deleted',
+                                level: 'error',
+                                position: 'bc'
+                            });
+                        }
+                        
+                        break;
+                    case ProjectEventType.DeletedProject:
                         this.showProject({});
                         this.setText('');
                         this.setFileName(undefined);
 
                         if (this.notificationSystem.current) {
+                            this.notificationSystem.current.clearNotifications();
                             this.notificationSystem.current.addNotification({
                                 message: 'Your project got deleted.',
                                 level: 'error',
@@ -75,9 +104,7 @@ export default class ProjectManagement {
                         }
                         
                         break;
-                    case ProjectEvent.ProjectUpdated:
-                        const currentProject = this.getCurrentProject();
-
+                    case ProjectEventType.UpdatedProject:
                         if (!((<any>currentProject).name == null || (<any>currentProject).contents == null)) {
                             this.openProject(
                                 (<Project>currentProject).name,
@@ -96,16 +123,12 @@ export default class ProjectManagement {
                         }
 
                         if (this.notificationSystem.current) {
-                            console.log('Displaying notification');
+                            // TODO evtl. nicht alle Notifications entfernen
+                            this.notificationSystem.current.clearNotifications();
                             this.notificationSystem.current.addNotification({
                                 message: 'The project files got updated.',
                                 level: 'info',
-                                position: 'bc',
-                              onRemove: (n) => {
-                                console.log('gotta remove stuff');
-                                if (this.notificationSystem.current)
-                                  this.notificationSystem.current.removeNotification(n);
-                              }
+                                position: 'bc'
                             });
                         }
 
@@ -201,33 +224,55 @@ export default class ProjectManagement {
             resetFile = true;
         }
 
-        name = escape(name);
+        const escapedName = escape(name);
         
-        const url = serverAddress + '/projects/'+ name;
+        const url = serverAddress + '/projects/'+ escapedName;
 
-        this.network.openProject(
-            name,
+        this.closeProject(
             () => 
-                fetch(url, {
-                    method: 'GET',
-                    mode: 'cors',
-                })
-                    .then((response) => {
-                        response.json()
-                            .then((json: Project) => {
-                                this.showProject(json);
+                this.network.openProject(
+                    name,
+                    () => 
+                        fetch(url, {
+                            method: 'GET',
+                            mode: 'cors',
+                        })
+                            .then((response) => {
+                                response.json()
+                                    .then((json: Project) => {
+                                        this.showProject(json);
 
-                                if (resetFile) {
-                                    this.setText('');
-                                    this.setFileName(undefined);
-                                }
-                            
-                            });
-                        //return {'status': response.status, 
-                        //  'statusText': response.statusText};
-                    }),
-            () => console.log("Could not sync with server to open project")
+                                        if (resetFile) {
+                                            this.setText('');
+                                            this.setFileName(undefined);
+                                        }
+                                    
+                                    });
+                                //return {'status': response.status, 
+                                //  'statusText': response.statusText};
+                            }),
+                    () => console.log("Could not sync with server to open project")
+                )
         );
+    }
+
+    public closeProject(cb:() => void): void {
+        const project = this.getCurrentProject();
+
+        if ((<Project>project).name == null) {
+            cb();
+        }
+
+        else {
+            this.network.closeProject(
+              (<Project>project).name,
+              cb,
+              () => {
+                console.log('Failed to unsubscribe, you may still receive messages for your closed project');
+                cb()
+              }
+            );
+        }
     }
 
     /*

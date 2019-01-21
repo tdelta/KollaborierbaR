@@ -117,12 +117,6 @@ export default class App extends React.Component {
             filename: 'Main.java',
             openedPath: ['Main.java'] // TODO: replace filename with this
         });
-
-        this.notificationSystem.current.addNotification({
-            message: 'Notification message',
-            level: 'success',
-            position: 'bc'
-        });
     }
 
     openFile(path) {
