@@ -1,0 +1,3 @@
+[submodule "key"]
+	path = key
+	url = https://git.key-project.org/key/key

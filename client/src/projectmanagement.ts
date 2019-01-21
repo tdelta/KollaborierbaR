@@ -32,8 +32,10 @@ export default class ProjectManagement {
     private showProject: (p: Project | EmptyObject) => void;
     private getCurrentProject: () => Project | EmptyObject;
     private setText: (s: string) => void;
+    private getFileName: () => string | undefined;
     private setFileName: (name: string | undefined) => void;
     private getOpenedPath: () => string[];
+    private setOpenedPath: (path: string[]) => void;
     private confirmationModal: React.RefObject<ConfirmationModal>;
     private notificationSystem: React.RefObject<NotificationSystem.System>;
     private openFile: (path: string[]) => void;
@@ -43,8 +45,10 @@ export default class ProjectManagement {
         showProject: (p: Project | EmptyObject) => void,
         getCurrentProject: () => Project | EmptyObject,
         setText: (s: string) => void,
+        getFileName: () => string | undefined,
         setFileName: (name: string | undefined) => void,
         getOpenedPath: () => string[],
+        setOpenedPath: (path: string[]) => void,
         confirmationModal: React.RefObject<ConfirmationModal>,
         notificationSystem: React.RefObject<NotificationSystem.System>,
         openFile: (path: string[]) => void
@@ -52,8 +56,10 @@ export default class ProjectManagement {
         this.showProject = showProject;
         this.getCurrentProject = getCurrentProject;
         this.setText = setText;
+        this.getFileName = getFileName;
         this.setFileName = setFileName;
         this.getOpenedPath = getOpenedPath;
+        this.setOpenedPath = setOpenedPath;
         this.confirmationModal = confirmationModal;
         this.notificationSystem = notificationSystem;
         this.openFile = openFile;
@@ -422,5 +428,96 @@ export default class ProjectManagement {
             alert('No appropriate filename. Filename includes: / ');
         }
 
+    }
+
+    public runProof(path: string): Promise<string> {
+        path = escape(path);
+        // API URL of the server we will use for our request
+        const url = serverAddress + '/proof/' +path;
+
+        return fetch(url, {
+            method: 'GET',
+            mode: 'cors', // enable cross origin requests. Server must also allow this!
+            headers: {
+                'Accept' : 'application/json', // we want a json object back
+                //'Content-Type': 'application/json', // we are sending a json object
+            },
+        })
+      .then((response) => response.text()); // parse the response body as string/text};
+    }
+
+    /*
+     * updates the filename of the given resource path 
+     *
+     */
+    public updateFileName(path: string[]): void {
+        const name = prompt('Enter Name', '');
+
+        if(name !== '..' && name !== '.' && name !== null && !name.includes('/')){
+
+            // Path to the ressource we want to rename
+            // TODO: Handle if project not set
+            const url = serverAddress + '/projects/' + (<Project>this.getCurrentProject()).name + '/' +path.join('/');
+
+            // Remove the current filename from the path array
+            // and then create path for the renamed ressource:
+            const oldfilename = path.pop();
+            const renamedRes = '/projects/' + (<Project>this.getCurrentProject()).name + '/' + path.join('/') + '/' + name; 
+
+            // Create a new array with the modify openPath
+            const newOpenPath = path.concat([name]);
+            
+            const requestbody = {
+                'fileName' : renamedRes
+            };
+
+            fetch(url, {
+                method: 'POST',
+                mode: 'cors', 
+                headers: {
+                    'Accept' : 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestbody) // necessary if you want to send a JSON object in a fetch request
+            })
+                .then((response) =>  
+                    response.json()
+                        .then(res => {this.showProject(res);
+                            // If set openedPath isn't set after renaming, the currently openedFile would not math
+                            // to the openedPath.
+                            this.setOpenedPath(newOpenPath);
+
+                            if(this.getFileName() === oldfilename){
+                                this.setFileName(name);
+                            }})
+                );
+
+        } if(name !== null && name.includes('/')){
+            alert('No appropriate filename. Filename includes: /');
+        } if(name === '..' || name === '.'){
+            alert('No appropriate filename. Cannot be .. or .');
+        }
+    }
+
+    public updateFileContent(path: string[], content: string): void {
+        // Path to the ressource we want to save
+        // TODO: Check if project exists
+      const url = serverAddress + '/projects/' + (<Project>this.getCurrentProject()).name + '/' +path.join('/');
+
+        const requestbody = {
+            'fileContent' : content
+        };
+
+        fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(requestbody) // necessary if you want to send a JSON object in a fetch request
+        }).then((response) =>  {if(response.status !== 200) 
+            alert('Uups! Something went wrong while saving your filecontent to the server');
+        });
     }
 }
