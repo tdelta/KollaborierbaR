@@ -42,6 +42,8 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
     compile("org.springframework.boot:spring-boot-starter-websocket")
+    compile('org.reactivestreams:reactive-streams:1.0.2')
+    compile files('libs/logootsplit.jar')
 
     // adds /actuator/health indicator, this way, other applications can check if the
     // server is ready. Also useful for tests.

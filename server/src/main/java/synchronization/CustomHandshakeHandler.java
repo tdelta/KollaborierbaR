@@ -9,6 +9,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 public class CustomHandshakeHandler extends DefaultHandshakeHandler{
+
   /**
     * Handles the websocket handshake when a user connects and returns an Object that identifies the user.
     * This enables us to target users with specific messages
