@@ -13,13 +13,13 @@ class KeyModal extends React.Component {
 
     runProof() {
         this.props.runProof()
-            .then((response) => { 
+            .then((response) => {  
               this.setState({proofLog: response});
             });
     }
 
     closeProofModal(){
-        this.state.proofLog = 'Proving proof obligations...'; 
+        this.setState({proofLog: 'Proving proof obligations...'}); 
     }
 
     render() {
