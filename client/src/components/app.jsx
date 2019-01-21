@@ -9,6 +9,15 @@ import ConfirmationModal from './confirmation-modal.tsx';
 
 import ProjectManagement from '../projectmanagement.ts';
 
+import {Network} from '../network.ts';
+import CollabController from '../collaborative/CollabController.ts'
+
+//import testSource from '../sample-text.js';
+
+/**
+ * Main component of KollaborierbaR. Renders all other components (Editor etc.)
+ * while holding global state.
+
 //import testSource from '../sample-text.js';
 
 /**
@@ -50,6 +59,8 @@ export default class App extends React.Component {
         this.runProof = this.runProof.bind(this);
         this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
+
+        this.editor = React.createRef();
 
         // setup initial state
         this.state = {
@@ -117,6 +128,11 @@ export default class App extends React.Component {
      * and inserted into the DOM tree.
      */
     componentDidMount() {
+        this.collabController = new CollabController(
+            this.projectManagement.getNetwork(),
+            this.editor.current,
+            this.setText.bind(this)
+        );
         this.setState({
             text: '', // load some sample text for testing
             filename: 'Main.java',
@@ -134,6 +150,7 @@ export default class App extends React.Component {
                     filename: response.fileName,
                     openedPath: path
                 });
+                this.collabController.setFile(this.state.project.name+'/'+path.join('/'),response.fileText);
             });
     }
 
@@ -200,6 +217,8 @@ export default class App extends React.Component {
                         setText={this.setText}
                         text={this.state.text}
                         filename={this.state.filename}
+                        collabController={this.collabController}
+                        ref={this.editor}
                     />
                 </div>
                 <ConfirmationModal ref={this.confirmationModal}/>

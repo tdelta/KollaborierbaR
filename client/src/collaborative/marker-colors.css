@@ -1,0 +1,34 @@
+.n1.highlightingMarker {
+  background: #FE7517
+}
+.n2.highlightingMarker {
+  background: #B9C541
+}
+.n3.highlightingMarker {
+  background: #91D5C3
+}
+.n4.highlightingMarker {
+  background: #1A4B71
+}
+.n5.highlightingMarker {
+  background: #E7EF14
+}
+.n6.highlightingMarker {
+  background: #56F58A
+}
+.n7.highlightingMarker {
+  background: #FF7476
+}
+.n8.highlightingMarker {
+  background: #EC9E51
+}
+.n9.highlightingMarker {
+  background: #F0C
+}
+.n10.highlightingMarker {
+  background: #0FC
+}
+.highlightingMarker {
+  background: #0ae;
+  position: absolute
+}

@@ -144,6 +144,10 @@ export default class ProjectManagement {
 
             onConnect: () => undefined
         });
+      }
+    
+    public getNetwork(): Network{
+      return this.network;
     }
 
     private static projectContainsPath(project: Project, path: string[]): boolean {

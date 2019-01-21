@@ -13,13 +13,24 @@ import lint from '../linting.js';
 import './sidebar/sidebar.css';
 import '../index.css';
 
+import CollabController from '../collaborative/CollabController';
+import TextPosition from '../collaborative/TextPosition';
+
+interface AceChangeEvent {
+  action: string;
+  start: TextPosition;
+  end: TextPosition;
+  lines: string[]
+}
+
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
   // The exclamation mark tells typescript not to check if this attribute gets initialized
-  private editor!: any; // ACE editor object
+  public editor!: any; // ACE editor object
   private markers: number[];
   private timeTest: number; // will be used to regulate interval of calling the linter
   private anchoredMarkers: AnchoredMarker[];
+  private anchoredHighlightings: AnchoredMarker[];
   private annotations: number[];
 
   constructor(props: Props) {
@@ -27,6 +38,7 @@ export default class Editor extends React.Component<Props> {
     this.markers = [];
     this.timeTest = 0;
     this.anchoredMarkers = [];
+    this.anchoredHighlightings = [];
     this.annotations = [];
   }
 
@@ -64,8 +76,10 @@ export default class Editor extends React.Component<Props> {
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
+
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
+
   public componentDidUpdate(): void {
     // Called when new properties are passed down from the app component
     // only update the text if it actually changed to prevent infinite loops
@@ -108,6 +122,38 @@ export default class Editor extends React.Component<Props> {
         this.setAnchors();
       }
     );
+  }
+
+  public addBackMarker(start: any, end: any, uid: number){ 
+    let range = new Range(
+      start.row,
+      start.column,
+      end.row,
+      end.column
+    );
+    for (let j = 0; j < this.anchoredHighlightings.length; j = j + 1) {
+      // Dont add the marker if it overlaps with another marker
+      if (
+        range.intersects(
+          this.anchoredHighlightings[j].range
+        )
+      ) {
+        return;
+      }
+    }
+    range.start = this.editor.session.doc.createAnchor(range.start);
+    range.end = this.editor.session.doc.createAnchor(range.end);
+    const type: string = `n${uid} highlighting`;
+    const message: string = '';
+
+    this.anchoredHighlightings.push(
+      {
+        range,
+        type,
+        message,
+      }
+    );
+    this.setMarkers();
   }
 
   /**
@@ -164,27 +210,35 @@ export default class Editor extends React.Component<Props> {
       this.editor.session.removeMarker(marker);
     }
     this.markers = [];
-
+    console.log(this.anchoredMarkers);
     // Add markers for all anchoredMarkers
-    addLoop: for (let i = 0; i < this.anchoredMarkers.length; i = i + 1) {
-      for (let j = i + 1; j < this.anchoredMarkers.length; j = j + 1) {
+    this.processMarkerArray(this.anchoredMarkers,true);
+    this.processMarkerArray(this.anchoredHighlightings,false);
+  }
+
+  /**
+   * Helper function for setMarkers
+   */
+  private processMarkerArray(anchoredMarkers: AnchoredMarker[],front: boolean){
+    addLoop: for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
+      for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
         // Dont add the marker if it overlaps with another marker
         if (
-          this.anchoredMarkers[i].range.intersects(
-            this.anchoredMarkers[j].range
+          anchoredMarkers[i].range.intersects(
+            anchoredMarkers[j].range
           )
         ) {
           continue addLoop;
         }
       }
-
+      console.log(anchoredMarkers[i].range);
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
-          this.anchoredMarkers[i].range,
-          `${this.anchoredMarkers[i].type}Marker`,
+          anchoredMarkers[i].range,
+          `${anchoredMarkers[i].type}Marker`,
           'text',
-          true
+          front
         )
       );
     }
@@ -196,9 +250,7 @@ export default class Editor extends React.Component<Props> {
    * @param marker AnchoredMarker to convert
    * @return Annotation object with the same values
    */
-  private toAnnotation(marker: AnchoredMarker): Annotation {
-    return {
-      row: marker.range.start.row,
+  private toAnnotation(marker: AnchoredMarker): Annotation { return { row: marker.range.start.row,
       column: marker.range.start.column,
       text: marker.message,
       type: marker.type,
@@ -207,6 +259,24 @@ export default class Editor extends React.Component<Props> {
       endRow: marker.range.end.row,
       endCol: marker.range.end.column,
     };
+  }
+
+  public insert(text: string, position: TextPosition) {
+    this.editor.getSession().getDocument().insertMergedLines(
+      position,
+      text.split('\n')
+    );
+  }
+
+  public delete(from: TextPosition, to: TextPosition) {
+    this.editor.getSession().getDocument().remove(
+      new ace.Range(
+        from.row,
+        from.column,
+        to.row,
+        to.column
+      )
+    );
   }
 }
 
@@ -217,6 +287,7 @@ interface Props {
   filename: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
+  collabController: CollabController;
 }
 
 /**
