@@ -9,7 +9,6 @@ import ConfirmationModal from './confirmation-modal.tsx';
 
 import ProjectManagement from '../projectmanagement.ts';
 
-import {Network} from '../network.ts';
 import CollabController from '../collaborative/CollabController.ts'
 
 //import testSource from '../sample-text.js';
@@ -150,6 +149,7 @@ export default class App extends React.Component {
                     filename: response.fileName,
                     openedPath: path
                 });
+                // TODO: Handle rename with collab controller
                 this.collabController.setFile(this.state.project.name+'/'+path.join('/'),response.fileText);
             });
     }
