@@ -10,6 +10,13 @@ interface OpenFileData {
     fileText: string;
 }
 
+// define the structure received KeY results
+interface ProofResults {
+    succeeded: string[];
+    failed: string[];
+    errors: string[];
+}
+
 enum FileFolderEnum {
     file = 'file',
     folder = 'folder'
@@ -434,7 +441,7 @@ export default class ProjectManagement {
 
     }
 
-    public runProof(path: string): Promise<string> {
+    public runProof(path: string): Promise<ProofResults> {
         path = escape(path);
         // API URL of the server we will use for our request
         const url = serverAddress + '/proof/' +path;
@@ -447,7 +454,7 @@ export default class ProjectManagement {
                 //'Content-Type': 'application/json', // we are sending a json object
             },
         })
-      .then((response) => response.text()); // parse the response body as string/text};
+      .then((response) => response.json()); // parse the response body as json};
     }
 
     /*
