@@ -1,21 +1,32 @@
-import { Client, IMessage, IPublishParams, IFrame, StompHeaders } from '@stomp/stompjs';
+import { Client, IMessage, IPublishParams, IFrame, StompHeaders, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 import {serverAddress} from './constants'; 
 
-export enum ProjectEvent {
-  ProjectUpdated = 'ProjectUpdated',
-  ProjectDeleted = 'ProjectDeleted'
+export enum ProjectEventType {
+  UpdatedProject = 'UpdatedProjectEvent',
+  DeletedProject = 'DeletedProjectEvent',
+  DeletedFile = 'DeletedFileEvent'
+}
+
+export interface ProjectEvent {
+    eventType: ProjectEventType;
+    projectName: string;
+}
+
+export interface ProjectFileEvent extends ProjectEvent {
+    filePath: string
 }
 
 interface EventObserver {
-  onProjectEvent(event: ProjectEvent, message: any): void;
+  onProjectEvent(event: ProjectEvent): void;
   onConnect(): void;
 }
 
 export class Network {
   private stompClient: Client;
   private observer: EventObserver;
+  private subscriptions: Map<string, StompSubscription> = new Map();
 
   constructor(observer: EventObserver) {
     this.observer = observer;
@@ -73,14 +84,43 @@ export class Network {
     // TODO: Proper acks of server
 
     if (this.stompClient.connected) {
-      this.stompClient.subscribe(
-        destination,
-        callback,
-        headers
-      );
+      if (!this.subscriptions.has(destination)) { // dont subscribe, if we are already subscribed to that location
+        const sub = this.stompClient.subscribe(
+          destination,
+          callback,
+          headers
+        );
+
+        this.subscriptions.set(destination, sub);
+      }
 
       if (successCB) {
         successCB();
+      }
+    }
+
+    else if (errorCB) {
+      errorCB();
+    }
+  }
+
+  public closeProject(
+    projectName: string,
+    successCB?: () => void,
+    errorCB?: () => void
+  ): void {
+    const topic = `/user/projects/${projectName}`;
+
+    if (
+         this.subscriptions.has(topic)
+      && this.stompClient.connected
+    ) {
+      (<StompSubscription>this.subscriptions.get(topic)).unsubscribe();
+
+      this.subscriptions.delete(topic);
+
+      if (successCB) {
+          successCB();
       }
     }
 
@@ -98,17 +138,20 @@ export class Network {
     this.safeSubscribe(
       `/user/projects/${projectName}`,
       (msg) => {
-        const eventStr: string = msg.body;
-        console.log(`incoming ${eventStr}`);
+        try {
+          const event: ProjectEvent | ProjectFileEvent = JSON.parse(msg.body);
 
-        if (eventStr in ProjectEvent) {
+          console.log(`incoming event`);
+          console.log(event);
+
           this.observer.onProjectEvent(
-            ProjectEvent[eventStr as keyof typeof ProjectEvent], msg.body
+            event
           )
         }
 
-        else {
-          console.log(`Received unknown project event: ${eventStr}`);
+        catch (e) {
+            console.log('Failed to parse server event');
+            console.log(e);
         }
       },
       {},
