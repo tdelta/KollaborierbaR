@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.HandlerMapping;
 
 import de.uka.ilkd.key.control.KeYEnvironment;
@@ -44,12 +45,11 @@ public class ProofController {
     * The program entry point.
     * @param args The start parameters.
     */
-    @RequestMapping(value = "/**", method = RequestMethod.GET)
+    @RequestMapping(value = "/**/{className}.java", method = RequestMethod.GET)
     @ResponseBody
-   public ResponseEntity proveSpec(HttpServletRequest request) {
+   public ResponseEntity proveSpec(@PathVariable String className, HttpServletRequest request) {
       // Get the file path for the request resource
       String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(7);
-      System.out.println("Das ist der Pfad zur Datei: " + path);
       String proofStatus = "";
       File location = new File("projects/" + path); // Path to the source code folder/file or to a *.proof file
       List<File> classPaths = null; // Optionally: Additional specifications for API classes
@@ -70,20 +70,17 @@ public class ProofController {
          // Load source code
          KeYEnvironment<?> env = KeYEnvironment.load(location, classPaths, bootClassPath, includes); // env.getLoadedProof() returns performed proof if a *.proof file is loaded
          try {
-            // List all specifications of all types in the source location (not classPaths and bootClassPath)
+            // List all specifications of the selected type in the source location
             final List<Contract> proofContracts = new LinkedList<Contract>();
-            Set<KeYJavaType> kjts = env.getJavaInfo().getAllKeYJavaTypes();
-            for (KeYJavaType type : kjts) {
-               if (!KeYTypeUtil.isLibraryClass(type)) {
-                  ImmutableSet<IObserverFunction> targets = env.getSpecificationRepository().getContractTargets(type);
-                  for (IObserverFunction target : targets) {
-                     ImmutableSet<Contract> contracts = env.getSpecificationRepository().getContracts(type, target);
-                     for (Contract contract : contracts) {
-                        proofContracts.add(contract);
-                     }
-                  }
+            KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
+            ImmutableSet<IObserverFunction> targets = env.getSpecificationRepository().getContractTargets(keyType);
+            for (IObserverFunction target : targets) {
+               ImmutableSet<Contract> contracts = env.getSpecificationRepository().getContracts(keyType, target);
+               for (Contract contract : contracts) {
+                  proofContracts.add(contract);
                }
             }
+            
             // Perform proofs
             for (Contract contract : proofContracts) {
                Proof proof = null;
@@ -111,6 +108,7 @@ public class ProofController {
                   proofStatus += "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is " + (closed ? "verified" : "still open") + ".\n";
                }
                catch (ProofInputException e) {
+                  proofStatus += "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".\n";
                   System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
                   e.printStackTrace();
                }
@@ -126,6 +124,7 @@ public class ProofController {
          }
       }
       catch (ProblemLoaderException e) {
+         proofStatus += "Exception in '" + location + "'.\n";
          System.out.println("Exception at '" + location + "':");
          e.printStackTrace();
       }

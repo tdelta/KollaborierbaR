@@ -1,4 +1,3 @@
-
 public class IntegerUtil {
    /*@ normal_behavior
      @ ensures \result == x + y;
