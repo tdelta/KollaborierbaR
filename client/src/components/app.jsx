@@ -198,6 +198,7 @@ export default class App extends React.Component {
                     onRunProof={this.runProof}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
                     onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
+                    notificationSystem={this.notificationSystem}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
