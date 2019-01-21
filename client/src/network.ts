@@ -14,6 +14,7 @@ interface EventObserver {
 export default class Network {
   private stompClient: Client;
   private observer: EventObserver;
+  private callbacks: CallbackDef[] = [];
 
   constructor(observer: EventObserver) {
     this.observer = observer;
@@ -48,6 +49,7 @@ export default class Network {
           }
         }
       );
+      this.setCallbacks();
     };
     
     this.stompClient.onStompError = function (frame) {
@@ -56,6 +58,38 @@ export default class Network {
     };
     
     this.stompClient.activate();
+  }
+
+  public on(messageType: string, headers: any, callback: (obj: any) => void) {
+    this.callbacks.push({messageType, headers, callback});
+    this.setCallbacks();
+  }
+
+  public unsubscribe(messageType: string){
+    this.callbacks = this.callbacks.filter((element) => element.messageType != messageType);
+    this.stompClient.unsubscribe(messageType);
+  }
+
+  private setCallbacks(){
+    if(this.stompClient.connected){
+      console.log(this.callbacks);
+      while(this.callbacks.length > 0) {
+        const callbackDef = this.callbacks.pop();
+        if(callbackDef){
+          const {messageType,headers, callback} = callbackDef;
+          console.log(messageType);
+          console.log(callback);
+          this.stompClient.subscribe(
+            // Subscribe to the topic messagetype
+            `/user/${messageType}`,
+            // Execute callback when a message is received
+            (message) => {callback(message.body)},
+            // Send a header containing the filename we are working on
+            headers
+          );
+        }
+      }
+    }
   }
 
   private safePublish(params: IPublishParams, successCB?: () => void, errorCB?: () => void) {
@@ -74,6 +108,15 @@ export default class Network {
     }
   }
 
+  public broadcast(messageType: string,headers: any,message: any){
+    message = JSON.stringify(message);
+    this.safePublish(
+      {destination: messageType, headers: headers, body: message},
+      ()=>{},
+      ()=>{}
+    );
+  }
+
   public openProject(projectPath: string, successCB?: () => void, errorCB?: () => void): void {
     this.safePublish(
       {destination: '/projects/openProject', body: 'lol'},
@@ -81,4 +124,10 @@ export default class Network {
       errorCB
     );
   }
+}
+
+interface CallbackDef {
+  messageType: string,
+  headers: any,
+  callback: (obj: any) => void
 }
