@@ -26,8 +26,10 @@ export default class App extends React.Component {
             this.showProject.bind(this),
             () => this.state.project,
             this.setText.bind(this),
+            () => this.state.filename,
             this.setFileName.bind(this),
             () => this.state.openedPath,
+            (path) => this.state.openedPath = path,
             this.confirmationModal,
             this.notificationSystem,
             this.openFile.bind(this)
@@ -45,6 +47,9 @@ export default class App extends React.Component {
         this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
         this.createProject = this.projectManagement.createProject.bind(this.projectManagement);
         this.openProject = this.projectManagement.openProject.bind(this.projectManagement);
+        this.runProof = this.runProof.bind(this);
+        this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
+        this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
 
         // setup initial state
         this.state = {
@@ -117,6 +122,7 @@ export default class App extends React.Component {
             filename: 'Main.java',
             openedPath: ['Main.java'] // TODO: replace filename with this
         });
+        document.addEventListener("keydown", this.handleCtrlS.bind(this));
     }
 
     openFile(path) {
@@ -129,6 +135,24 @@ export default class App extends React.Component {
                     openedPath: path
                 });
             });
+    }
+
+    // sets the path for the runProof rest method in projectmanagement
+    runProof(){
+        return this.projectManagement.runProof(this.state.project.name + '/' + this.state.openedPath.join('/'));
+    }
+
+    /**
+     * Eventhandler method for keyevent (CTRL + S).
+     * On CTRL + S the opened file will be saved persistent on the server
+     * 
+     */
+    handleCtrlS(event){
+        if(event.keyCode === 83 && event.ctrlKey){
+            // Prevent default save file context menu
+            event.preventDefault();
+            this.updateFileContent(this.state.openedPath, this.state.text);
+        }
     }
 
 
@@ -154,6 +178,9 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
+                    onRunProof={this.runProof}
+                    onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
+                    onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
@@ -165,6 +192,7 @@ export default class App extends React.Component {
                         onDeleteFile={this.deleteFile}
                         onCreateFile={this.createFile}
                         onDeleteProject={this.deleteProject}
+                        onUpdateFileName={this.updateFileName}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}
