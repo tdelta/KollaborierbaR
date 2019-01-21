@@ -20,6 +20,11 @@ apply plugin: "com.diffplug.gradle.spotless"
 // static analysis tools
 apply plugin: 'pmd'
 
+// import KeY ant project
+def keyFolder = "../key/key"
+ant.importBuild "${keyFolder}/scripts/build.xml"
+compileJava.dependsOn jarAll
+
 bootJar {
     baseName = 'gs-rest-service'
     version =  '0.1.0'
@@ -40,6 +45,9 @@ dependencies {
     // adds /actuator/health indicator, this way, other applications can check if the
     // server is ready. Also useful for tests.
     compile("org.springframework.boot:spring-boot-starter-actuator")
+    // include KeYnd KeY dependency libraries
+    compile fileTree(dir: "${keyFolder}/deployment/libs", include: "*.jar")
+    compile fileTree(dir: "${keyFolder}/deployment/components", include: "*.jar")
 }
 
 wrapper {
