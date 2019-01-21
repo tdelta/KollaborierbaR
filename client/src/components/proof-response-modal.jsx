@@ -13,14 +13,19 @@ class KeyModal extends React.Component {
 
     runProof() {
         this.props.runProof()
-            .then((response) => {this.setState({proofLog: response});
+            .then((response) => {  
+              this.setState({proofLog: response});
             });
+    }
+
+    closeProofModal(){
+        this.setState({proofLog: 'Proving proof obligations...'}); 
     }
 
     render() {
         return (
             <div>
-                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={() => this.runProof()} >
+                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={() => this.runProof()} onClosed={() => this.closeProofModal()}>
                     <ModalHeader toggle={this.toggle}>Results</ModalHeader>
                     <ModalBody>
                         {this.state.proofLog}
