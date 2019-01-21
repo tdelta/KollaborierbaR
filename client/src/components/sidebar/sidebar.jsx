@@ -207,6 +207,7 @@ export default class Sidebar extends React.Component {
                                 onDeleteFile={this.props.onDeleteFile}
                                 onCreateFile={this.props.onCreateFile}
                                 onDeleteProject={this.props.onDeleteProject}
+                                onUpdateFileName={this.props.onUpdateFileName}
                                 onNewFile={(p) => {alert(p.join('/'));}}
                                 onNewFolder={(p) => {alert(p.join('/'));}}
                                 onClickProject={(p) => {alert(p);}}

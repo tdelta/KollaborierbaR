@@ -143,11 +143,11 @@ export default class Top extends React.Component<Props, State> {
                 File
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.downloadFileOnClick}>
-                  Download
-                </DropdownItem>
+                <DropdownItem onClick={this.downloadFileOnClick}>Download</DropdownItem>
                 <DropdownItem onClick={this.openFileOnClick}>Upload</DropdownItem>
                 <DropdownItem onClick={this.props.onDeleteFile}>Delete</DropdownItem>
+                <DropdownItem onClick={this.props.onUpdateFileName}>Rename</DropdownItem>
+                <DropdownItem onClick={this.props.onUpdateFileContent}>Save</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>
@@ -197,6 +197,8 @@ interface Props {
   showProject(project: object): void;
   onDeleteFile(): void;
   onDeleteProject(): void;
+  onUpdateFileName(): void;
+  onUpdateFileContent(): void;
   onOpenProject(): void;
   onCreateProject(): void;
   onRunProof(): void;

@@ -8,10 +8,16 @@ import org.springframework.web.servlet.HandlerMapping;
 import projectmanagement.*;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -295,7 +301,66 @@ public class ProjectController {
         //if the current directory is an empty directory or a file, delete it
         file.delete();
     }
-
+    
+    /**
+     * This method handles updates to files and folders. For files/folders it
+     * is possible to rename the filename.
+     * 
+     * For files it is also possible to update the filecontent. But it is not possible to
+     * update fileName and fileContent with one methodcall.
+     * 
+     * Example JSON for updating fileContent:
+     * {
+     * 	fileContent: 'Some Content'
+     * }
+     * 
+     * Example JSON for updating fileName:
+     * {
+     * 	fileName: 'path'
+     * }
+     * 
+     * The incoming JSON is marshalled into a FileUpdateData object.
+     * 
+     */
+    @RequestMapping(value = "/{projectname}/**", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity updateFile(@PathVariable("projectname") String projectname, 
+    								 @RequestBody FileUpdateData updateData,
+    								 HttpServletRequest request) {
+    	
+    	// Get the file path for the request resource
+    	// substring(1) remove the "/..." at the beginning of a path
+    	String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(1);
+    	
+    	// Rename a file or a folder
+    	if(updateData.fileContent == null) {
+        		
+    		File file = new File(path);
+    		// substring(1) remove the "/..." at the beginning of a path
+        	boolean success = file.renameTo(new File (updateData.fileName.substring(1)));
+        		
+        	if(success) {
+        		return new ResponseEntity<>(showProject(projectname, request) ,HttpStatus.OK);
+        	} else {
+        		return new ResponseEntity<>("The file could no be renamed." ,HttpStatus.BAD_REQUEST);
+        	}
+    	}
+    	// If you are in this branch, the fileContent wasn't null. That implies that you do have a file and that the
+    	// caller of that functions wants to update the content, not the name of the file.
+    	else {
+    	    BufferedWriter writer;
+			try {
+				writer = new BufferedWriter(new FileWriter(path));
+	        	writer.write(updateData.fileContent);
+	    		writer.close();
+	    		return new ResponseEntity<>(showProject(projectname, request), HttpStatus.OK);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return new ResponseEntity<>("Something went wrong while updating the file content.", HttpStatus.BAD_REQUEST);
+			}
+    	} 
+    }
+    
 
     // TODO: Proper HTTP error handler
 

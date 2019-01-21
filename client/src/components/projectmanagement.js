@@ -170,7 +170,7 @@ function createOverall(path, type) {
  */
 function createFile(path, type) {
     let file = prompt('Enter Name', '');
-    if (file !== null && !file.includes("/")) {
+    if (file !== null && !file.includes('/')) {
         path.push(file);
         const requestPath = this.state.project.name + '/' + path.join('/');
         createOverall(requestPath, type)
@@ -218,5 +218,77 @@ function runProof(path){
     })
         .then((response) => response.text()); // parse the response body as json};
 }
+/*
+ * updates the filename of the given resource path 
+ *
+ */
+function updateFileName(path){
+    let name = prompt('Enter Name', '');
 
-export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, runProof};
+    if(name !== '..' && name !== '.' && name !== null && !name.includes('/')){
+
+        // Path to the ressource we want to rename
+        var url = serverAddress + '/projects/' + this.state.project.name + '/' +path.join('/');
+
+        // Remove the current filename from the path array
+        // and then create path for the renamed ressource:
+        var oldfilename = path.pop();
+        var renamedRes = '/projects/' + this.state.project.name + '/' + path.join('/') + '/' + name; 
+
+        // Create a new array with the modify openPath
+        var newOpenPath = path.concat([name]);
+        
+        var requestbody = {
+            'fileName' : renamedRes
+        };
+
+        return fetch(url, {
+            method: 'POST',
+            mode: 'cors', 
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestbody) // necessary if you want to send a JSON object in a fetch request
+        })
+            .then((response) =>  
+                response.json()
+                    .then(res => {this.showProject(res);
+                        // If set openedPath isn't set after renaming, the currently openedFile would not math
+                        // to the openedPath.
+                        this.setState({openedPath: newOpenPath});
+                        if(this.state.filename === oldfilename){
+                            this.setFileName(name);
+                        }})
+            );
+
+    } if(name !== null && name.includes('/')){
+        alert('No appropriate filename. Filename includes: /');
+    } if(name === '..' || name === '.'){
+        alert('No appropriate filename. Cannot be .. or .');
+    }
+}
+
+function updateFileContent(path, content){
+
+    // Path to the ressource we want to save
+    var url = serverAddress + '/projects/' + this.state.project.name + '/' +path.join('/');
+
+    var requestbody = {
+        'fileContent' : content
+    };
+
+    return fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Accept' : 'application/json',
+            'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify(requestbody) // necessary if you want to send a JSON object in a fetch request
+    }).then((response) =>  {if(response.status !== 200) 
+        alert('Uups! Something went wrong while saving your filecontent to the server');
+    });
+}
+
+export {deleteFile, deleteProject, createFile, createProject, getProjects, openFile, openProject, runProof, updateFileName, updateFileContent};
