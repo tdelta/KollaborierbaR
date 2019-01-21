@@ -5,7 +5,7 @@ import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 
-import {deleteFile, deleteProject, createFile, createProject, openProject, openFile, runProof} from './projectmanagement.js';
+import {deleteFile, deleteProject, createFile, createProject, openProject, openFile, updateFileName, updateFileContent, runProof} from './projectmanagement.js';
 
 //import testSource from '../sample-text.js';
 
@@ -30,6 +30,8 @@ export default class App extends React.Component {
         this.createProject = createProject.bind(this);
         this.openProject = openProject.bind(this);
         this.runProof = this.runProof.bind(this);
+        this.updateFileName = updateFileName.bind(this);
+        this.updateFileContent = updateFileContent.bind(this);
 
         this.confirmationModal = React.createRef();
 
@@ -104,6 +106,7 @@ export default class App extends React.Component {
             filename: 'Main.java',
             openedPath: ['Main.java'] // TODO: replace filename with this
         });
+        document.addEventListener("keydown", this.handleCtrlS.bind(this));
     }
 
     openFile(path) {
@@ -121,6 +124,19 @@ export default class App extends React.Component {
     // sets the path for the runProof rest method in projectmanagement
     runProof(){
         return runProof(this.state.project.name + '/' + this.state.openedPath.join('/'));
+    }
+
+    /**
+     * Eventhandler method for keyevent (CTRL + S).
+     * On CTRL + S the opened file will be saved persistent on the server
+     * 
+     */
+    handleCtrlS(event){
+        if(event.keyCode === 83 && event.ctrlKey){
+            // Prevent default save file context menu
+            event.preventDefault();
+            this.updateFileContent(this.state.openedPath, this.state.text);
+        }
     }
 
 
@@ -147,6 +163,8 @@ export default class App extends React.Component {
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
                     onRunProof={this.runProof}
+                    onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
+                    onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
@@ -158,6 +176,7 @@ export default class App extends React.Component {
                         onDeleteFile={this.deleteFile}
                         onCreateFile={this.createFile}
                         onDeleteProject={this.deleteProject}
+                        onUpdateFileName={this.updateFileName}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}
