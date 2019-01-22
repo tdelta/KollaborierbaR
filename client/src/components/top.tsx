@@ -1,8 +1,7 @@
 import React, { RefObject, ReactSVG } from 'react';
 import PropTypes from 'prop-types';
-
 import 'bootstrap/dist/css/bootstrap.css';
-
+import NotificationSystem from 'react-notification-system';
 import '../index.css';
 
 import {
@@ -20,7 +19,6 @@ import {
     DeleteModal
 } from './project-modals.jsx';
 
-import KeyModal from './proof-response-modal.jsx'
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -35,14 +33,12 @@ export default class Top extends React.Component<Props, State> {
     this.onFileLoaded = this.onFileLoaded.bind(this);
     this.toggleOpenModal = this.toggleOpenModal.bind(this);
     this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
-    this.toggleKeyModal = this.toggleKeyModal.bind(this);
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
     this.state = {
       showOpenModal: false,
       showDeleteModal: false,
-      showKeyModal: false
     };
   }
 
@@ -56,10 +52,55 @@ export default class Top extends React.Component<Props, State> {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
 
- private toggleKeyModal() {
-    this.setState({ showKeyModal: !this.state.showKeyModal});
+ private proveKeY() {
+        if (this.props.notificationSystem.current) {
+            this.props.notificationSystem.current.clearNotifications();
+            this.props.notificationSystem.current.addNotification({
+                title: 'Please Wait!',
+                message: 'Running proof obliagtions...',
+                level: 'info',
+                position: 'bc',
+                autoDismiss: 0
+            });
+        }
+        this.props.onRunProof()
+            .then((response: ProofResults) => {  
+                // print succeeded proofs as success notifications
+                if (this.props.notificationSystem.current) {
+                this.props.notificationSystem.current.clearNotifications();
+                    for (let i in response.succeeded) {
+                        this.props.notificationSystem.current.addNotification({
+                            title: 'Success!',
+                            message: response.succeeded[i],
+                            level: 'success',
+                            position: 'bc',
+                            autoDismiss: 15
+                        });
+                }
+                // print fails as warnings
+                for (let i in response.failed) {
+                        this.props.notificationSystem.current.addNotification({
+                            title: 'Failure!',
+                            message: response.failed[i],
+                            level: 'warning',
+                            position: 'bc',
+                            autoDismiss: 15
+                        });
+                }
+                // print exception messages as errors
+                for (let i in response.errors) {
+                        this.props.notificationSystem.current.addNotification({
+                            title: 'Error!',
+                            message: response.errors[i],
+                            level: 'error',
+                            position: 'bc',
+                            autoDismiss: 15
+                        });
+                }
+                }});
+    
+    
  }
-
   private onFileChosen(event: HTMLInputEvent): void {
     this.fileReader = new FileReader();
     this.fileReader.onloadend = this.onFileLoaded;
@@ -104,7 +145,7 @@ export default class Top extends React.Component<Props, State> {
                 Key
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.toggleKeyModal}>Run Proof</DropdownItem>
+                <DropdownItem onClick={() => this.proveKeY()}>Run Proof</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
             <UncontrolledDropdown>
@@ -132,11 +173,6 @@ export default class Top extends React.Component<Props, State> {
               isOpen={this.state.showDeleteModal}
               toggle={this.toggleDeleteModal}
               projectOperation={this.props.onDeleteProject}
-            />
-            <KeyModal
-              isOpen={this.state.showKeyModal}
-              toggle={this.toggleKeyModal}
-              runProof={this.props.onRunProof}
             />
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -183,13 +219,18 @@ interface HTMLInputEvent extends React.FormEvent<HTMLInputElement> {
   target: HTMLInputElement & EventTarget;
 }
 
-// defining the strcuture of the state
+// defining the structure of the state
 interface State {
   showOpenModal: boolean;
   showDeleteModal: boolean;
-  showKeyModal: boolean;
 }
 
+// define the structure received KeY results
+interface ProofResults {
+    succeeded: string[];
+    failed: string[];
+    errors: string[];
+}
 // defining the structure of this react components properties
 interface Props {
   text: string;
@@ -201,5 +242,6 @@ interface Props {
   onUpdateFileContent(): void;
   onOpenProject(): void;
   onCreateProject(): void;
-  onRunProof(): void;
+  onRunProof(): Promise<ProofResults>;
+  notificationSystem: React.RefObject<NotificationSystem.System>;
 }
