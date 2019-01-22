@@ -129,7 +129,7 @@ public class ProofController {
            }
         }
         catch (ProblemLoaderException e) {
-           results.addError("Unsupported Java operations were found.");
+           results.addError("Couldn't process all relevant information for verification with KeY.");
            System.out.println("Exception at '" + location + "':");
            e.printStackTrace();
         }
