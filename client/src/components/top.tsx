@@ -57,7 +57,7 @@ export default class Top extends React.Component<Props, State> {
             this.props.notificationSystem.current.clearNotifications();
             this.props.notificationSystem.current.addNotification({
                 title: 'Please Wait!',
-                message: 'Running proof obliagtions...',
+                message: 'Running proof obligations...',
                 level: 'info',
                 position: 'bc',
                 autoDismiss: 0
