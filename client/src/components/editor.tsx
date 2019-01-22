@@ -84,7 +84,9 @@ export default class Editor extends React.Component<Props> {
     // Called when new properties are passed down from the app component
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
-      this.editor.setValue(this.props.text, -1);
+      this.editor.ignoreChanges = true;
+      this.editor.setValue(this.props.text,-1);
+      this.editor.ignoreChanges = false;
     }
   }
 
@@ -210,7 +212,6 @@ export default class Editor extends React.Component<Props> {
       this.editor.session.removeMarker(marker);
     }
     this.markers = [];
-    console.log(this.anchoredMarkers);
     // Add markers for all anchoredMarkers
     this.processMarkerArray(this.anchoredMarkers,true);
     this.processMarkerArray(this.anchoredHighlightings,false);
@@ -231,7 +232,6 @@ export default class Editor extends React.Component<Props> {
           continue addLoop;
         }
       }
-      console.log(anchoredMarkers[i].range);
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
