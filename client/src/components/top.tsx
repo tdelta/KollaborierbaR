@@ -53,6 +53,7 @@ export default class Top extends React.Component<Props, State> {
   }
 
  private proveKeY() {
+        this.props.onUpdateFileContent();
         if (this.props.notificationSystem.current) {
             this.props.notificationSystem.current.clearNotifications();
             this.props.notificationSystem.current.addNotification({
