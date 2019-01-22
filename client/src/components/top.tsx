@@ -53,6 +53,16 @@ export default class Top extends React.Component<Props, State> {
   }
 
  private proveKeY() {
+        if (this.props.notificationSystem.current) {
+            this.props.notificationSystem.current.clearNotifications();
+            this.props.notificationSystem.current.addNotification({
+                title: 'Please Wait!',
+                message: 'Running proof obliagtions...',
+                level: 'info',
+                position: 'bc',
+                autoDismiss: 0
+            });
+        }
         this.props.onRunProof()
             .then((response: ProofResults) => {  
                 // print succeeded proofs as success notifications
