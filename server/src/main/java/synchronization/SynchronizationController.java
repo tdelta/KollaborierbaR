@@ -63,6 +63,18 @@ private SimpMessagingTemplate messagingTemplate;
     }
   }
 
+  @MessageMapping("/reset")
+  public void reset(@Header("file") String file, Principal user, File text){
+    LogootSRopes document = fromText(text.content);
+    documents.put(file,document);
+    document = document.copy();
+    LinkedList<Principal> subscribed = users.get(file);
+    for(int i = 0;i < subscribed.size();i ++){
+      document.setReplicaNumber(i);
+      messagingTemplate.convertAndSendToUser(subscribed.get(i).getName(),"/crdt-doc", document);
+    }
+  }
+
   @MessageMapping("/file")
   public void handleSubscription(@Header("file") String file, Principal user,File text){
     unsubscribe(user);
@@ -81,20 +93,26 @@ private SimpMessagingTemplate messagingTemplate;
       subscribed.add(user);
       users.put(file,subscribed);
 
-      LogootSRopes document = new LogootSRopes();
+      LogootSRopes document = fromText(text.content);
       document.setReplicaNumber(0);
-      // Insert content into the crdt document
-      List<Character> characterList = text.content.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
-      // We have to construct the insert operation ourselfs because the java library doesnt generate the random part of the identifier,
-      // leading to inconsistencies in mute-structs
-      fr.loria.score.logootsplito.LogootSAdd<Character> insertOperation = new fr.loria.score.logootsplito.LogootSAdd<Character>(
-          new fr.loria.score.logootsplito.Identifier(Arrays.asList(new Integer[]{1000,0,0}),0) ,characterList);
-      insertOperation.execute(document);
       documents.put(file, document);
       // Send document to user
       messagingTemplate.convertAndSendToUser(user.getName(),"/crdt-doc", document);
     }
     logger.debug(users.get(file).toString());
+  }
+
+  private LogootSRopes fromText(String text){
+    LogootSRopes document = new LogootSRopes();
+
+    // Insert content into the crdt document
+    List<Character> characterList = text.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
+    // We have to construct the insert operation ourselfs because the java library doesnt generate the random part of the identifier,
+    // leading to inconsistencies in mute-structs
+    fr.loria.score.logootsplito.LogootSAdd<Character> insertOperation = new fr.loria.score.logootsplito.LogootSAdd<Character>(
+        new fr.loria.score.logootsplito.Identifier(Arrays.asList(new Integer[]{1000,0,0}),0) ,characterList);
+    insertOperation.execute(document);
+    return document;
   }
 
   private void unsubscribe(Principal user){
