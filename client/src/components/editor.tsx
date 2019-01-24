@@ -13,15 +13,8 @@ import lint from '../linting.js';
 import './sidebar/sidebar.css';
 import '../index.css';
 
-import CollabController from '../collaborative/CollabController';
 import TextPosition from '../collaborative/TextPosition';
-
-interface AceChangeEvent {
-  action: string;
-  start: TextPosition;
-  end: TextPosition;
-  lines: string[]
-}
+import AnchoredMarker from './AnchoredMarker'
 
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
@@ -60,7 +53,8 @@ export default class Editor extends React.Component<Props> {
     // editor event handlers
     this.editor.on('change', () => {
       // pass the text in the editor up to the app component
-      this.props.setText(this.editor.getValue());
+      //if(!this.editor.ignoreChanges)
+        this.props.setText(this.editor.getValue());
     });
 
     this.editor.on('change', () => {
@@ -84,8 +78,11 @@ export default class Editor extends React.Component<Props> {
     // Called when new properties are passed down from the app component
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
-      this.editor.setValue(this.props.text, -1);
+      this.editor.ignoreChanges = true;
+      this.editor.setValue(this.props.text,-1);
+      this.editor.ignoreChanges = false;
     }
+    //this.setAnnotations();
   }
 
   /**
@@ -135,23 +132,21 @@ export default class Editor extends React.Component<Props> {
       // Dont add the marker if it overlaps with another marker
       if (
         range.intersects(
-          this.anchoredHighlightings[j].range
+          this.anchoredHighlightings[j].getRange(this.editor.session)
         )
       ) {
         return;
       }
     }
-    range.start = this.editor.session.doc.createAnchor(range.start);
-    range.end = this.editor.session.doc.createAnchor(range.end);
     const type: string = `n${uid} highlighting`;
     const message: string = '';
 
-    this.anchoredHighlightings.push(
-      {
+    this.anchoredHighlightings.push(new AnchoredMarker(
         range,
         type,
         message,
-      }
+        this.editor.session
+      )
     );
     this.setMarkers();
   }
@@ -170,31 +165,19 @@ export default class Editor extends React.Component<Props> {
     ) {
       // Process each element of array of diagonistics
       for (const diagnostic of this.props.diagnostics) {
-        const range = new Range(
-          diagnostic.startRow,
-          diagnostic.startCol,
-          diagnostic.endRow,
-          diagnostic.endCol
-        );
-
-        // Create Anchors in the document. These update their position when text is edited
-        range.start = this.editor.session.doc.createAnchor(range.start);
-        range.end = this.editor.session.doc.createAnchor(range.end);
-
-        const message = diagnostic.message;
-        const type = diagnostic.kind.toLowerCase();
 
         // Add the anchors and content for this diagnostic to the anchoredMarkers Array
-        this.anchoredMarkers.push({
-          range,
-          type,
-          message,
-        });
+        this.anchoredMarkers.push(new AnchoredMarker(
+          new Range(diagnostic.startRow,diagnostic.startCol,diagnostic.endRow,diagnostic.endCol),
+          diagnostic.kind.toLowerCase(),
+          diagnostic.message,
+          this.editor.session
+        ));
       }
 
       this.editor.session.clearAnnotations();
       this.editor.session.setAnnotations(
-        this.anchoredMarkers.map(this.toAnnotation)
+        this.anchoredMarkers.map((m) => { m.toAnnotation(this.editor.session)})
       );
       // Display the markers in the ace editor
       this.setMarkers();
@@ -210,7 +193,6 @@ export default class Editor extends React.Component<Props> {
       this.editor.session.removeMarker(marker);
     }
     this.markers = [];
-    console.log(this.anchoredMarkers);
     // Add markers for all anchoredMarkers
     this.processMarkerArray(this.anchoredMarkers,true);
     this.processMarkerArray(this.anchoredHighlightings,false);
@@ -224,59 +206,23 @@ export default class Editor extends React.Component<Props> {
       for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
         // Dont add the marker if it overlaps with another marker
         if (
-          anchoredMarkers[i].range.intersects(
-            anchoredMarkers[j].range
+          anchoredMarkers[i].getRange(this.editor.session).intersects(
+            anchoredMarkers[j].getRange(this.editor.session)
           )
         ) {
           continue addLoop;
         }
       }
-      console.log(anchoredMarkers[i].range);
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
-          anchoredMarkers[i].range,
+          anchoredMarkers[i].getRange(this.editor.session),
           `${anchoredMarkers[i].type}Marker`,
           'text',
           front
         )
       );
     }
-  }
-
-  /**
-   * This function converts AnchoredMarkers to Annotations that can be put passed to ace's setAnnotations method
-   * in order to create icons on the left of the editor
-   * @param marker AnchoredMarker to convert
-   * @return Annotation object with the same values
-   */
-  private toAnnotation(marker: AnchoredMarker): Annotation { return { row: marker.range.start.row,
-      column: marker.range.start.column,
-      text: marker.message,
-      type: marker.type,
-      startRow: marker.range.start.row,
-      startCol: marker.range.start.column,
-      endRow: marker.range.end.row,
-      endCol: marker.range.end.column,
-    };
-  }
-
-  public insert(text: string, position: TextPosition) {
-    this.editor.getSession().getDocument().insertMergedLines(
-      position,
-      text.split('\n')
-    );
-  }
-
-  public delete(from: TextPosition, to: TextPosition) {
-    this.editor.getSession().getDocument().remove(
-      new ace.Range(
-        from.row,
-        from.column,
-        to.row,
-        to.column
-      )
-    );
   }
 }
 
@@ -287,21 +233,4 @@ interface Props {
   filename: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
-  collabController: CollabController;
-}
-
-/**
- * This structure is used to save markers in a document within ACE together with
- * their anchor points
- *
- * This means it can be used to underline sections of a document and display
- * messages with an icon in the gutter.
- *
- * If the document is edited, the marker will be moved with the document's
- * contents.
- */
-interface AnchoredMarker {
-  range: ace_types.Ace.Range; // used to mark a region within the editor: https://ace.c9.io/#nav=api&api=range
-  type: string; // type of the marking, whether its an error, a warning, something else, ...
-  message: string; // displayed message at the marker
 }
