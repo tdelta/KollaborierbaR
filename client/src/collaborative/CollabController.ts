@@ -2,7 +2,7 @@ import Editor from '../components/editor';
 
 import TextPosition from './TextPosition';
 
-import Network from '../network';
+import {Network} from '../network';
 import {LogootSRopes, TextInsert, TextDelete, LogootSOperation, LogootSAdd, LogootSDel, Identifier} from 'mute-structs';
 import {Range} from 'ace-builds';
 
@@ -30,21 +30,23 @@ export default class CollabController {
 
     this.editor.on('change',(delta: any) => {
     if (this.document != null && // We are connected to a collaborative document
-    this.editor.curOp && this.editor.curOp.command.name) { // The edit came from the user
+    !this.editor.ignoreChanges){ // The event came from the user
       const headers: any = {file: this.filename};
       const start: number = this.editor.session.doc.positionToIndex(delta.start);
       let operation: LogootSOperation;
         switch(delta.action){
           case 'insert':
+            console.log(delta.lines);
             operation = this.document.insertLocal(start,delta.lines.join('\n'));
             this.network.broadcast('/insert',headers,operation);
-            console.log(this.document);
             break;
           case 'remove':
             const end: number = start + delta.lines.join(' ').length-1;
             operation = this.document.delLocal(start,end);
             this.network.broadcast('/remove',headers,operation);
-        }
+          }
+        this.editor.curOp = undefined;
+        console.log(this.document.str);
       }
     });
   }
@@ -57,18 +59,18 @@ export default class CollabController {
   public handleRemoteInsert(operation: any){
     if(this.document != null){
       operation = JSON.parse(operation);
-      console.log(operation);
       const operationObj: LogootSAdd | null = LogootSAdd.fromPlain(operation);
       let deltas: TextInsert[] = [];
       if(operationObj != null) deltas = operationObj.execute(this.document);
       for(const delta of deltas){
         const start: TextPosition = this.editor.session.doc.indexToPosition(delta.index);
-        this.editor.session.insert(start,delta.content);
-        const end: TextPosition = this.editor.session.doc.indexToPosition(delta.index + delta.content.length);
-        console.log(operation);
+        this.editor.ignoreChanges = true;
+        const end: TextPosition = this.editor.session.insert(start,delta.content);
+        this.editor.ignoreChanges = false;
         const uid: number = (operation.id.tuples[operation.id.tuples.length - 1].replicaNumber + this.uidBase) % 10;
         this.editorComponent.addBackMarker(start,end,uid);
       }
+    console.log(this.document.str);
     }
   }
 
@@ -81,8 +83,11 @@ export default class CollabController {
       for(const delta of deltas){
         const start: TextPosition = this.editor.session.doc.indexToPosition(delta.index);
         const end: TextPosition = this.editor.session.doc.indexToPosition(delta.index+delta.length);
+        this.editor.ignoreChanges = true;
         this.editor.session.replace(Range.fromPoints(start,end),'');
+        this.editor.ignoreChanges = false;
       }
+    console.log(this.document.str);
     }
   }
 
