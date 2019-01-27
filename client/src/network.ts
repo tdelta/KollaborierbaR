@@ -1,19 +1,39 @@
-import { Client, IMessage, IPublishParams } from '@stomp/stompjs';
+import { Client, IMessage, IPublishParams, IFrame, StompHeaders, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 import {serverAddress} from './constants'; 
 
-enum ProjectEvent {
-  nom
+export enum ProjectEventType {
+  UpdatedProject = 'UpdatedProjectEvent',
+  DeletedProject = 'DeletedProjectEvent',
+  DeletedFile = 'DeletedFileEvent',
+  RenamedFile = 'RenamedFileEvent',
+  UpdatedFile = 'UpdatedFileEvent'
+}
+
+export interface ProjectEvent {
+    eventType: ProjectEventType;
+    projectName: string;
+}
+
+export interface ProjectFileEvent extends ProjectEvent {
+    filePath: string
+}
+
+export interface RenamedFileEvent extends ProjectEvent {
+    originalPath: string;
+    newPath: string;
 }
 
 interface EventObserver {
-  onProjectEvent(event: ProjectEvent, message: any): void;
+  onProjectEvent(event: ProjectEvent | ProjectFileEvent | RenamedFileEvent): void;
+  onConnect(): void;
 }
 
-export default class Network {
+export class Network {
   private stompClient: Client;
   private observer: EventObserver;
+  private subscriptions: Map<string, StompSubscription> = new Map();
   private callbacks: CallbackDef[] = [];
 
   constructor(observer: EventObserver) {
@@ -24,31 +44,17 @@ export default class Network {
       new SockJS(`${serverAddress}/websocket`),
       debug: console.log
     });
+
+    this.stompClient.onUnhandledMessage = (msg: IMessage) => {
+      console.log("WARNING: Did not handle message: " + msg.body);
+    };
+
+    this.stompClient.onUnhandledFrame = (frame: IFrame) => {
+      console.log("WARNING: Did not handle frame: " + frame.body);
+    };
     
     this.stompClient.onConnect = (frame) => {
-      this.stompClient.subscribe(
-        "/projects/events",
-        (msg) => {
-          const eventStr: string = msg.headers.event;
-          let event: ProjectEvent | undefined = undefined;
-
-          switch (eventStr) {
-            case 'nom':
-              event = ProjectEvent.nom;
-              break;
-          }
-
-          if (event) {
-            this.observer.onProjectEvent(
-              event, msg.body
-            )
-          }
-
-          else {
-            console.log(`Received unknown project event: ${eventStr}`);
-          }
-        }
-      );
+      this.observer.onConnect();
       this.setCallbacks();
     };
     
@@ -108,18 +114,97 @@ export default class Network {
     }
   }
 
+  private safeSubscribe(
+    destination: string,
+    callback: (msg: IMessage) => void,
+    headers: StompHeaders,
+    successCB?: () => void,
+    errorCB?: () => void
+  ): void
+  {
+    // TODO: Proper acks of server
+
+    if (this.stompClient.connected) {
+      if (!this.subscriptions.has(destination)) { // dont subscribe, if we are already subscribed to that location
+        const sub = this.stompClient.subscribe(
+          destination,
+          callback,
+          headers
+        );
+
+        this.subscriptions.set(destination, sub);
+      }
+
+      if (successCB) {
+        successCB();
+      }
+    }
+
+    else if (errorCB) {
+      errorCB();
+    }
+  }
+
+  public closeProject(
+    projectName: string,
+    successCB?: () => void,
+    errorCB?: () => void
+  ): void {
+    const topic = `/user/projects/${projectName}`;
+
+    if (
+         this.subscriptions.has(topic)
+      && this.stompClient.connected
+    ) {
+      (<StompSubscription>this.subscriptions.get(topic)).unsubscribe();
+
+      this.subscriptions.delete(topic);
+
+      if (successCB) {
+          successCB();
+      }
+    }
+
+    else if (errorCB) {
+      errorCB();
+    }
+  }
+
+  public openProject(
+    projectName: string,
+    successCB?: () => void,
+    errorCB?: () => void
+  ):void
+  {
+    this.safeSubscribe(
+      `/user/projects/${projectName}`,
+      (msg) => {
+        try {
+          const event: ProjectEvent | ProjectFileEvent | RenamedFileEvent = JSON.parse(msg.body);
+
+          console.log(`incoming event`);
+          console.log(event);
+
+          this.observer.onProjectEvent(
+            event
+          )
+        }
+
+        catch (e) {
+            console.log('Failed to parse server event');
+            console.log(e);
+        }
+      },
+      {},
+      successCB,
+      errorCB
+    );
+  }
+
   public broadcast(messageType: string,headers: any,message: any){
     message = JSON.stringify(message);
     this.stompClient.publish(
       {destination: messageType, headers: headers, body: message}
-    );
-  }
-
-  public openProject(projectPath: string, successCB?: () => void, errorCB?: () => void): void {
-    this.safePublish(
-      {destination: '/projects/openProject', body: 'lol'},
-      successCB,
-      errorCB
     );
   }
 }

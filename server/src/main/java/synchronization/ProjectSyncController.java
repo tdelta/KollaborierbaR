@@ -3,6 +3,10 @@ package synchronization;
 import java.util.concurrent.ConcurrentHashMap;
 import java.security.Principal;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.stereotype.Controller;
@@ -11,34 +15,185 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+
+import org.springframework.web.util.UriUtils;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import server.TestEvent;
+import events.UpdatedProjectEvent;
+import events.DeletedProjectEvent;
+import events.DeletedFileEvent;
+import events.RenamedFileEvent;
+import events.UpdatedFileEvent;
 
 @Controller
 public class ProjectSyncController {
-  // Map the Principal sec objects to project data
-  private ConcurrentHashMap<Principal, Project> sessions = new ConcurrentHashMap<>();
+  // Project -> Editing users
+  private ConcurrentHashMap<String, List<Principal>> sessions = new ConcurrentHashMap<>();
+
+  // SubscriptionId@User -> Project
+  private ConcurrentHashMap<String, String> subscriptions = new ConcurrentHashMap<>();
+
+  private void saveSubscription(final String simpSubscriptionId, final Principal user, final String projectName) {
+        subscriptions.put(simpSubscriptionId + "@" + user.getName(), projectName);
+  }
+
+  private void deleteSubscription(final String simpSubscriptionId, final Principal user) {
+      subscriptions.remove(simpSubscriptionId + "@" + user.getName());
+  }
+
+  private String getProjectNameBySubscription(final String simpSubscriptionId, final Principal user) {
+      return subscriptions.get(simpSubscriptionId + "@" + user.getName());
+  }
 
   @Autowired
   private SimpMessagingTemplate messagingTemplate;
 
-  @MessageMapping("/projects/test")
-  public void greeting(final Principal user) {
-    System.out.println("User " + user.getName() + " tested!");
-  }
+  @SubscribeMapping("/user/projects/{projectName}")
+  public void handleProjectSubscription(
+      final Principal user,
+      @Header final String simpSubscriptionId,
+      @DestinationVariable String projectName
+  ) {
+    projectName = UriUtils.decode(projectName, "UTF-8");
 
-  @SubscribeMapping("/projects/openProject")
-  public void handleEventsSubscription(final Principal user, final String projectPath){
-    sessions.put(
-        user, 
-        new Project(projectPath)
-    );
+    System.out.println(projectName);
+
+    final List<Principal> users = sessions.getOrDefault(
+        projectName,
+        new ArrayList<>(1)
+      );
+
+    if (!users.contains(user)) {
+      System.out.println("Someone registered for " + projectName);
+      users.add(user);
+
+      sessions.put(
+          projectName, 
+          users
+      );
+    }
+
+    saveSubscription(simpSubscriptionId, user, projectName);
   }
 
   @EventListener
-  public void handleContextRefresh(TestEvent event) {
-    System.out.println(event.getMessage());
+  public void handleUnsubscribe(final SessionUnsubscribeEvent event) {
+      final Principal user = event.getUser();
+      final String simpSubscriptionId = event.getMessage().getHeaders().get(
+          "simpSubscriptionId",
+          String.class
+        );
+
+      final String projectName = getProjectNameBySubscription(simpSubscriptionId, user);
+
+      System.out.println("Got unsubscribe from " + event.getUser().getName() + " for project " + projectName);
+
+      deleteSubscription(simpSubscriptionId, user);
+
+      final List<Principal> users = sessions.getOrDefault(
+          projectName,
+          new ArrayList<>(0)
+        );
+
+      System.out.println("Removed user " + user.getName() + " from project " + projectName);
+      users.remove(user);
+      if (users.isEmpty()) {
+          System.out.println("Removed project " + projectName + ", since all users left.");
+          sessions.remove(projectName);
+      }
+  }
+
+  @EventListener
+  public void handleDisconnect(final SessionDisconnectEvent event) {
+    final Principal user = event.getUser();
+    System.out.println("Disconnect of user " + user.getName());
+
+    // remove from all projects, if still present there
+    final Set<String> keys = sessions.keySet();
+    for (final String project : keys) {
+        final List<Principal> users = sessions.getOrDefault(
+            project,
+            new ArrayList<>(0)
+          );
+
+        System.out.println("Removed user " + user.getName() + " from project " + project);
+        users.remove(user);
+
+        if (users.isEmpty()) {
+          System.out.println("Removed project " + project + ", since all users left.");
+          sessions.remove(project);
+        }
+    }
+
+    deleteSubscription(event.getSessionId(), user);
+  }
+
+  @EventListener
+  public void handleUpdatedProject(final UpdatedProjectEvent event) {
+    System.out.println("Project updated: " + event.getProjectName());
+    final List<Principal> users = getUsersOfProject(event.getProjectName());
+
+    for (final Principal user : users) {
+      System.out.println("Sending project update to " + user.getName() + " at " + event.getProjectName());
+      messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
+    }
+  }
+
+  @EventListener
+  public void handleDeletedProject(final DeletedProjectEvent event) {
+    System.out.println("Project deleted: " + event.getProjectName());
+    final List<Principal> users = getUsersOfProject(event.getProjectName());
+    sessions.remove(event.getProjectName());
+
+    for (final Principal user : users) {
+      System.out.println("Sending project deletion to " + user.getName() + " at " + event.getProjectName());
+      messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
+    }
+  }
+
+  @EventListener
+  public void handleDeletedFile(final DeletedFileEvent event) {
+    System.out.println("File deleted: " + event.getFilePath());
+    final List<Principal> users = getUsersOfProject(event.getProjectName());
+
+    for (final Principal user : users) {
+      System.out.println("Sending file deletion to " + user.getName() + " at " + event.getProjectName());
+      messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
+    }
+  }
+
+  @EventListener
+  public void handleRenamedFile(final RenamedFileEvent event) {
+    System.out.println("File renamed from " + event.getOriginalPath() + " to " + event.getNewPath());
+    final List<Principal> users = getUsersOfProject(event.getProjectName());
+
+    for (final Principal user : users) {
+      System.out.println("Sending file rename to " + user.getName() + " at " + event.getProjectName());
+      messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
+    }
+  }
+
+  @EventListener
+  public void handleUpdatedFile(final UpdatedFileEvent event) {
+    System.out.println("Contents updated of file  " + event.getFilePath());
+    final List<Principal> users = getUsersOfProject(event.getProjectName());
+
+    for (final Principal user : users) {
+      System.out.println("Sending file content update to " + user.getName() + " at " + event.getProjectName());
+      messagingTemplate.convertAndSendToUser(user.getName(), "/projects/" + event.getProjectName(), event);
+    }
+  }
+
+  private List<Principal> getUsersOfProject(final String projectName) {
+    final List<Principal> users = sessions.getOrDefault(
+        projectName,
+        new ArrayList<>(0)
+      );
+
+    return users;
   }
 }

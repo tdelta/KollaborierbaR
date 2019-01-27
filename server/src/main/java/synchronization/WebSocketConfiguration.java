@@ -22,6 +22,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.setUserDestinationPrefix("/user");
+        //config.enableSimpleBroker("/projects");
     }
 
     @Override

@@ -30,5 +30,6 @@
 }
 .highlightingMarker {
   background: #0ae;
-  position: absolute
+  position: absolute;
+  pointer-events: auto;
 }

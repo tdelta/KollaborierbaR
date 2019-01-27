@@ -15,7 +15,7 @@ tags:
 schemes:
   - http
 paths:
-  /projects/listProjects:
+  /projects:
     get:
       tags:
         - project
@@ -33,7 +33,7 @@ paths:
             example:
               - My Project
               - KeY
-  /projects/showProject:
+  '/projects/{projectname}':
     get:
       tags:
         - project
@@ -42,12 +42,12 @@ paths:
       produces:
         - application/json;charset=UTF-8
       parameters:
-        - in: query
-          name: name
-          description: name of the project that shall be loaded
+        - name: projectname
+          in: path
+          description: Name of the selected project
           required: true
           type: string
-          x-example: My Project
+          x-example: 'Hello World'
       responses:
         '200':
           description: >-
@@ -55,28 +55,98 @@ paths:
             some project metadata
           schema:
             $ref: '#/definitions/Project'
-  /projects/openFile:
-    post:
+  '/projects/{projectname}/**/{filename}':
+    get:
       tags:
         - project
       summary: Load content and name of specific file on the server
       operationId: project.openFile
-      consumes:
-        - application/json;charset=UTF-8
       produces:
         - application/json;charset=UTF-8
       parameters:
-        - in: body
-          name: RequestedFile
-          description: Json object containing the necessary information for file retrieval
+        #- name: **
+        #  in: path
+        #  description: filepath within project. Can contain / 
+        #  required: true
+        #  type: string
+        - name: projectname
+          in: path
+          description: Name of the selected project containing the wanted file
           required: true
-          schema:
-            $ref: '#/definitions/RequestedFile'
+          type: string
+          x-example: 'Hello World'
+        - name: filename
+          in: path
+          description: Name of the file to be opened
+          required: true
+          type: string
+          x-example: 'LICENSE'
       responses:
         '200':
           description: A json object which contains the filename and the filecontents
           schema:
             $ref: '#/definitions/OpenedFile'
+  '/projects/**':
+    delete:
+      tags:
+        - project
+      summary: Delete a specific resource on the server
+      operationId: project.deleteFile
+      #parameters:
+        #- name: **
+        #  in: path
+        #  description: filepath, starting with project name. Can contain / 
+        #  required: true
+        #  type: string
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+        '400':
+          description: The resourse was found but could not be deleted.
+        '404':
+          description: The resource was not found.
+    put:
+      tags:
+        - project
+      summary: 'Depending on the type, this endpoint creates a file or a folder'
+      operationId: project.createFile
+      parameters:
+        #- name: **
+        #  in: path
+        #  description: filepath, starting with project name. Can contain / 
+        #  required: true
+        #  type: string
+        - name: type
+          in: query
+          description: 'type of file to create: Either file or folder'
+          required: true
+          type: string
+          enum:
+            - file
+            - folder
+      responses:
+        '200':
+          description: The project was created successfully
+        '400':
+          description: The project was not created
+  '/projects/{projectname}/**':
+    put:
+      tags:
+        - project
+      summary: Creates a new project one the server
+      operationId: project.createProject
+      parameters:
+        - name: projectname
+          in: path
+          description: Name of the project about to be created
+          required: true
+          type: string
+          x-example: 'Hello World'
+      responses:
+        '200':
+          description: The project was created successfully
+        '400':
+          description: The project was not created
   /lint:
     post:
       tags:
@@ -179,7 +249,7 @@ definitions:
       path:
         type: string
     example:
-      path: '/My Project/README.md'
+      path: /My Project/README.md
   OpenedFile:
     type: object
     properties:
@@ -188,5 +258,5 @@ definitions:
       filecontent:
         type: string
     example:
-      filename: 'README.md'
-      content: 'Hello!'
+      filename: README.md
+      content: Hello!
