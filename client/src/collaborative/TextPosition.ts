@@ -1,4 +1,4 @@
 export default interface TextPosition {
-  row: number
-  column: number
+  row: number;
+  column: number;
 }
