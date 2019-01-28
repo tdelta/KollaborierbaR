@@ -20,7 +20,7 @@ interface AceChangeEvent {
   action: string;
   start: TextPosition;
   end: TextPosition;
-  lines: string[]
+  lines: string[];
 }
 
 export default class Editor extends React.Component<Props> {
@@ -85,7 +85,7 @@ export default class Editor extends React.Component<Props> {
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
-      this.editor.setValue(this.props.text,-1);
+      this.editor.setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
     }
   }
@@ -126,20 +126,11 @@ export default class Editor extends React.Component<Props> {
     );
   }
 
-  public addBackMarker(start: any, end: any, uid: number){ 
-    let range = new Range(
-      start.row,
-      start.column,
-      end.row,
-      end.column
-    );
-    for (let j = 0; j < this.anchoredHighlightings.length; j = j + 1) {
+  public addBackMarker(start: any, end: any, uid: number) {
+    const range = new Range(start.row, start.column, end.row, end.column);
+    for (const anchoredHighlighting of this.anchoredHighlightings) {
       // Dont add the marker if it overlaps with another marker
-      if (
-        range.intersects(
-          this.anchoredHighlightings[j].range
-        )
-      ) {
+      if (range.intersects(anchoredHighlighting.range)) {
         return;
       }
     }
@@ -148,13 +139,11 @@ export default class Editor extends React.Component<Props> {
     const type: string = `n${uid} highlighting`;
     const message: string = '';
 
-    this.anchoredHighlightings.push(
-      {
-        range,
-        type,
-        message,
-      }
-    );
+    this.anchoredHighlightings.push({
+      range,
+      type,
+      message,
+    });
     this.setMarkers();
   }
 
@@ -213,22 +202,21 @@ export default class Editor extends React.Component<Props> {
     }
     this.markers = [];
     // Add markers for all anchoredMarkers
-    this.processMarkerArray(this.anchoredMarkers,true);
-    this.processMarkerArray(this.anchoredHighlightings,false);
+    this.processMarkerArray(this.anchoredMarkers, true);
+    this.processMarkerArray(this.anchoredHighlightings, false);
   }
 
   /**
    * Helper function for setMarkers
    */
-  private processMarkerArray(anchoredMarkers: AnchoredMarker[],front: boolean){
+  private processMarkerArray(
+    anchoredMarkers: AnchoredMarker[],
+    front: boolean
+  ) {
     addLoop: for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
       for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
         // Dont add the marker if it overlaps with another marker
-        if (
-          anchoredMarkers[i].range.intersects(
-            anchoredMarkers[j].range
-          )
-        ) {
+        if (anchoredMarkers[i].range.intersects(anchoredMarkers[j].range)) {
           continue addLoop;
         }
       }
@@ -250,7 +238,9 @@ export default class Editor extends React.Component<Props> {
    * @param marker AnchoredMarker to convert
    * @return Annotation object with the same values
    */
-  private toAnnotation(marker: AnchoredMarker): Annotation { return { row: marker.range.start.row,
+  private toAnnotation(marker: AnchoredMarker): Annotation {
+    return {
+      row: marker.range.start.row,
       column: marker.range.start.column,
       text: marker.message,
       type: marker.type,
@@ -262,21 +252,17 @@ export default class Editor extends React.Component<Props> {
   }
 
   public insert(text: string, position: TextPosition) {
-    this.editor.getSession().getDocument().insertMergedLines(
-      position,
-      text.split('\n')
-    );
+    this.editor
+      .getSession()
+      .getDocument()
+      .insertMergedLines(position, text.split('\n'));
   }
 
   public delete(from: TextPosition, to: TextPosition) {
-    this.editor.getSession().getDocument().remove(
-      new ace.Range(
-        from.row,
-        from.column,
-        to.row,
-        to.column
-      )
-    );
+    this.editor
+      .getSession()
+      .getDocument()
+      .remove(new ace.Range(from.row, from.column, to.row, to.column));
   }
 }
 
