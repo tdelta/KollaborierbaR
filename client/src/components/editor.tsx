@@ -32,6 +32,7 @@ export default class Editor extends React.Component<Props> {
   private anchoredMarkers: AnchoredMarker[];
   private anchoredHighlightings: AnchoredMarker[];
   private annotations: number[];
+  private obligationAnnotations: Annotation[] = [];
 
   constructor(props: Props) {
     super(props);
@@ -84,7 +85,7 @@ export default class Editor extends React.Component<Props> {
         let row = parseInt(rowString);
         if(row){
           this.editor.session.getSelection().clearSelection();
-          this.editor.session.addGutterDecoration(row-1,'obligation-todo');
+          // TODO
         }
       }
     });
@@ -99,6 +100,25 @@ export default class Editor extends React.Component<Props> {
       this.editor.ignoreChanges = true;
       this.editor.setValue(this.props.text,-1);
       this.editor.ignoreChanges = false;
+    }
+    this.setProofObligations();
+  }
+
+  private setProofObligations(){
+    let obligations = this.props.getObligations(this.editor.session.getLines(0,this.editor.session.getLength()));
+    this.obligationAnnotations = [];
+    // Iterate over the indices of the result, which correspond to the line numbers
+    for(const index in obligations){
+      this.obligationAnnotations.push({
+        row: parseInt(index),
+        column: 0,
+        text: 'Click to prove!',
+        type: 'obligation_todo',
+        startRow: parseInt(index),
+        startCol: 0,
+        endRow: parseInt(index),
+        endCol: 0
+      });
     }
   }
 
@@ -118,6 +138,11 @@ export default class Editor extends React.Component<Props> {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
+        }
+        if (annotation.type === 'obligation_todo') { 
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_todo';
         }
       }
     };
@@ -208,7 +233,7 @@ export default class Editor extends React.Component<Props> {
 
       this.editor.session.clearAnnotations();
       this.editor.session.setAnnotations(
-        this.anchoredMarkers.map(this.toAnnotation)
+        this.anchoredMarkers.map(this.toAnnotation).concat(this.obligationAnnotations)
       );
       // Display the markers in the ace editor
       this.setMarkers();
@@ -300,6 +325,8 @@ interface Props {
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
   collabController: CollabController;
+  getObligations: (lines: string[]) => number[];
+  onProveObligation: (nr: number) => boolean;
 }
 
 /**
