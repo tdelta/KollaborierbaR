@@ -9,7 +9,9 @@ import ConfirmationModal from './confirmation-modal.tsx';
 
 import ProjectManagement from '../projectmanagement.ts';
 
-import CollabController from '../collaborative/CollabController.ts'
+import CollabController from '../collaborative/CollabController.ts';
+
+import Key from '../key';
 
 //import testSource from '../sample-text.js';
 
@@ -55,11 +57,11 @@ export default class App extends React.Component {
         this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
         this.createProject = this.projectManagement.createProject.bind(this.projectManagement);
         this.openProject = this.projectManagement.openProject.bind(this.projectManagement);
-        this.runProof = this.runProof.bind(this);
         this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
 
         this.editor = React.createRef();
+        this.key = new Key();
 
         // setup initial state
         this.state = {
