@@ -154,11 +154,6 @@ export default class App extends React.Component {
             });
     }
 
-    // sets the path for the runProof rest method in projectmanagement
-    runProof(){
-        return this.projectManagement.runProof(this.state.project.name + '/' + this.state.openedPath.join('/'));
-    }
-
     /**
      * Eventhandler method for keyevent (CTRL + S).
      * On CTRL + S the opened file will be saved persistent on the server
@@ -195,7 +190,7 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
-                    onRunProof={this.runProof}
+                    onProveFile={this.key.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
                     onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
                     notificationSystem={this.notificationSystem}
@@ -219,6 +214,8 @@ export default class App extends React.Component {
                         text={this.state.text}
                         filename={this.state.filename}
                         collabController={this.collabController}
+                        getObligations={this.key.getObligations}
+                        onProveObligation={this.key.proveObligation}
                         ref={this.editor}
                     />
                 </div>

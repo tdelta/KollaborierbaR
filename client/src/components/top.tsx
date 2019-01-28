@@ -52,55 +52,6 @@ export default class Top extends React.Component<Props, State> {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
 
- private proveKeY() {
-        if (this.props.notificationSystem.current) {
-            this.props.notificationSystem.current.clearNotifications();
-            this.props.notificationSystem.current.addNotification({
-                title: 'Please Wait!',
-                message: 'Running proof obligations...',
-                level: 'info',
-                position: 'bc',
-                autoDismiss: 0
-            });
-        }
-        this.props.onRunProof()
-            .then((response: ProofResults) => {  
-                // print succeeded proofs as success notifications
-                if (this.props.notificationSystem.current) {
-                this.props.notificationSystem.current.clearNotifications();
-                    for (let i in response.succeeded) {
-                        this.props.notificationSystem.current.addNotification({
-                            title: 'Success!',
-                            message: response.succeeded[i],
-                            level: 'success',
-                            position: 'bc',
-                            autoDismiss: 15
-                        });
-                }
-                // print fails as warnings
-                for (let i in response.failed) {
-                        this.props.notificationSystem.current.addNotification({
-                            title: 'Failure!',
-                            message: response.failed[i],
-                            level: 'warning',
-                            position: 'bc',
-                            autoDismiss: 15
-                        });
-                }
-                // print exception messages as errors
-                for (let i in response.errors) {
-                        this.props.notificationSystem.current.addNotification({
-                            title: 'Error!',
-                            message: response.errors[i],
-                            level: 'error',
-                            position: 'bc',
-                            autoDismiss: 15
-                        });
-                }
-                }});
-    
-    
- }
   private onFileChosen(event: HTMLInputEvent): void {
     this.fileReader = new FileReader();
     this.fileReader.onloadend = this.onFileLoaded;
@@ -145,7 +96,7 @@ export default class Top extends React.Component<Props, State> {
                 Key
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={() => this.proveKeY()}>Run Proof</DropdownItem>
+                <DropdownItem onClick={this.props.onProveFile}>Prove all contracts</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
             <UncontrolledDropdown>
@@ -225,12 +176,6 @@ interface State {
   showDeleteModal: boolean;
 }
 
-// define the structure received KeY results
-interface ProofResults {
-    succeeded: string[];
-    failed: string[];
-    errors: string[];
-}
 // defining the structure of this react components properties
 interface Props {
   text: string;
@@ -242,6 +187,6 @@ interface Props {
   onUpdateFileContent(): void;
   onOpenProject(): void;
   onCreateProject(): void;
-  onRunProof(): Promise<ProofResults>;
+  onProveFile(): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
 }
