@@ -61,7 +61,10 @@ export default class App extends React.Component {
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
 
         this.editor = React.createRef();
-        this.key = new Key();
+        this.key = new Key(
+          this.notificationSystem,
+          () => this.state.project.name + '/' + this.state.filename
+        );
 
         // setup initial state
         this.state = {
