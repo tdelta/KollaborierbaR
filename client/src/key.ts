@@ -14,6 +14,8 @@ export default class Key{
   ){
     this.notificationSystem = notificationSystem;
     this.getFilePath = getFilePath;
+    this.proveFile = this.proveFile.bind(this);
+    this.proveObligation = this.proveObligation.bind(this);
   } 
 
   private proveFile() {

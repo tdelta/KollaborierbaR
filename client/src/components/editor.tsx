@@ -81,6 +81,7 @@ export default class Editor extends React.Component<Props> {
     this.editor.on('gutterclick', (e: any) => {
       console.log(e);
       if(e.domEvent.target.firstChild){
+        console.log(e.domEvent.target.firstChild);
         let rowString = e.domEvent.target.firstChild.data;
         let row = parseInt(rowString);
         if(row){
