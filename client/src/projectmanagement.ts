@@ -485,23 +485,6 @@ export default class ProjectManagement {
         }if(file !== null && file.includes("/")){
             alert('No appropriate filename. Filename includes: / ');
         }
-
-    }
-
-    public runProof(path: string): Promise<ProofResults> {
-        path = escape(path);
-        // API URL of the server we will use for our request
-        const url = serverAddress + '/proof/' +path;
-
-        return fetch(url, {
-            method: 'GET',
-            mode: 'cors', // enable cross origin requests. Server must also allow this!
-            headers: {
-                'Accept' : 'application/json', // we want a json object back
-                //'Content-Type': 'application/json', // we are sending a json object
-            },
-        })
-      .then((response) => response.json()); // parse the response body as json};
     }
 
     /*
