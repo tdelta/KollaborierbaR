@@ -7,6 +7,9 @@ import FontAwesome from 'react-fontawesome';
 
 import ProjectTreeView from './project-tree-view.jsx';
 
+import {Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
+import classnames from 'classnames';
+
 /**
  * Allows to display a project view in a window left from the main content
  * (usually an editor).
@@ -57,7 +60,7 @@ export default class Sidebar extends React.Component {
 
         // Minimum and maximum width of this sidebar.
         // These settings determine, how much the user can control its size.
-        this.minWidth = 100;
+        this.minWidth = 170;
         this.maxWidth = 600;
 
         // determine, whether the initial project property is set and
@@ -67,6 +70,8 @@ export default class Sidebar extends React.Component {
             && Object.keys(this.props.project).length !== 0;
             // ^ the project object must not be empty
 
+        this.enableTab = this.enableTab.bind(this);
+
         this.state = {
             // current width of the sidebar
             'sidebarWidth': 200,
@@ -75,6 +80,7 @@ export default class Sidebar extends React.Component {
                 // only display the sidebar initially, if a project is set
                 false
                 : true,
+              activeTab: '1'
         };
     }
 
@@ -86,6 +92,14 @@ export default class Sidebar extends React.Component {
         this.setState({
             'collapsed': !this.state.collapsed
         });
+    }
+
+    enableTab(tab) {
+      if (this.state.activeTab !== tab) {
+        this.setState({
+          activeTab: tab
+        });
+      }
     }
 
     /**
@@ -201,19 +215,46 @@ export default class Sidebar extends React.Component {
                     </div>
 
                     <div className="sidebarContent">
-                        <div id="projectTree">
-                            <ProjectTreeView
-                                onOpenFile={this.props.onOpenFile}
-                                onDeleteFile={this.props.onDeleteFile}
-                                onCreateFile={this.props.onCreateFile}
-                                onDeleteProject={this.props.onDeleteProject}
-                                onUpdateFileName={this.props.onUpdateFileName}
-                                onNewFile={(p) => {alert(p.join('/'));}}
-                                onNewFolder={(p) => {alert(p.join('/'));}}
-                                onClickProject={(p) => {alert(p);}}
-                                project={this.props.project}
-                                openedPath={this.props.openedPath}
-                            />
+                        <Nav tabs>
+                            <NavItem>
+                                <NavLink
+                                    className={classnames({ active: this.state.activeTab === '1' })}
+                                    onClick={() => { this.enableTab('1'); }}
+                                >
+                                    Project
+                                </NavLink>
+                            </NavItem>
+                            <NavItem>
+                                <NavLink
+                                    className={classnames({ active: this.state.activeTab === '2' })}
+                                    onClick={() => { this.enableTab('2'); }}
+                                >
+                                    Open Goals
+                                </NavLink>
+                            </NavItem>
+                        </Nav>
+                        <div className="tabContents">
+                            <TabContent activeTab={this.state.activeTab}>
+                                <TabPane tabId="1">
+                                    <div id="projectTree">
+                                        <ProjectTreeView
+                                            onOpenFile={this.props.onOpenFile}
+                                            onDeleteFile={this.props.onDeleteFile}
+                                            onCreateFile={this.props.onCreateFile}
+                                            onDeleteProject={this.props.onDeleteProject}
+                                            onUpdateFileName={this.props.onUpdateFileName}
+                                            onNewFile={(p) => {alert(p.join('/'));}}
+                                            onNewFolder={(p) => {alert(p.join('/'));}}
+                                            onClickProject={(p) => {alert(p);}}
+                                            project={this.props.project}
+                                            openedPath={this.props.openedPath}
+                                        />
+                                    </div>
+                                </TabPane>
+                                <TabPane tabId="2">
+                                    No open goals.
+                                </TabPane>
+                            </TabContent>
                         </div>
                     </div>
                 </div>
@@ -231,5 +272,6 @@ Sidebar.propTypes = {
     'onDeleteFile': PropTypes.func,
     'onCreateFile': PropTypes.func,
     'onDeleteProject': PropTypes.func,
+    'onUpdateFileName': PropTypes.func,
     'openedPath': PropTypes.arrayOf(PropTypes.string),
 };
