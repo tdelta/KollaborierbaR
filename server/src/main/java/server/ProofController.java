@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,20 +46,19 @@ import proofutil.KeYWrapper;
 @RequestMapping("/proof")
 public class ProofController {
    /**
-    * The program entry point.
-    * @param args The start parameters.
+    * Prove all Proof Obligations in a .java file or by index if a index is provided
     */
     @RequestMapping(value = "/**/{className}.java", method = RequestMethod.GET)
     @ResponseBody
-   public ResponseEntity<ProofResult> proveSpec(@PathVariable String className, HttpServletRequest request) {
+   public ResponseEntity<ProofResult> proveAll(@PathVariable String className, @RequestParam("idx") Optional<Integer> idx, HttpServletRequest request) {
       // Get the file path for the request resource
       String path = ((String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE )).substring(7);
-      System.out.println("Pimmel");
-
       KeYWrapper key = new KeYWrapper(path);
-      ProofResult result = key.proveAllContracts(className);
+      // prove by index if index is present. ternary operator can be replaced with ifPresentOrElse if Java 9 is used or higher
+      ProofResult result = idx.isPresent() ? key.proveContractByIndex(className, idx.get()) : key.proveAllContracts(className);
       key.dispose();
 
       return new ResponseEntity<ProofResult>(result, HttpStatus.OK);
    }
+    
 }
