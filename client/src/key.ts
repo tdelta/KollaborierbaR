@@ -78,6 +78,9 @@ export default class Key{
             autoDismiss: 0
         });
     }
+    this.keyApi.proveObligation(this.getFilePath(),nr).then((answer: any) => {
+      alert('JAY');
+    });
   }
 
   /**
