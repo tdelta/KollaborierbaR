@@ -79,14 +79,15 @@ export default class Editor extends React.Component<Props> {
     });
 
     this.editor.on('gutterclick', (e: any) => {
-      console.log(e);
-      if(e.domEvent.target.firstChild){
-        console.log(e.domEvent.target.firstChild);
+      if(e.domEvent.target.className.includes('obligation_todo') && e.domEvent.target.firstChild){
         let rowString = e.domEvent.target.firstChild.data;
-        let row = parseInt(rowString);
+        let row = parseInt(rowString) - 1;
         if(row){
           this.editor.session.getSelection().clearSelection();
-          // TODO
+          let obligations = this.props.getObligations(this.editor.session.getLines(0,this.editor.session.getLength()));
+          console.log(obligations);
+          console.log(obligations[row]);
+          this.props.onProveObligation(obligations[row]);
         }
       }
     });
