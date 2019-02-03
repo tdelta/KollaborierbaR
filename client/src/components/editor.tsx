@@ -15,7 +15,6 @@ import lint from '../linting.js';
 import './sidebar/sidebar.css';
 import '../index.css';
 
-
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
   // The exclamation mark tells typescript not to check if this attribute gets initialized
@@ -67,10 +66,6 @@ export default class Editor extends React.Component<Props> {
       }, 1000);
     });
 
-    this.editor.on('gutterclick', (test: any) => {
-      console.log(test.domEvent.explicitOriginalTarget);
-    });
-
     this.editor.on('change',(delta: any) => {
         this.anchoredHighlightings.forEach(h => h.onChange(delta));
         this.anchoredMarkers.forEach(m => m.onChange(delta));
@@ -88,8 +83,11 @@ export default class Editor extends React.Component<Props> {
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
-      this.editor.setValue(this.props.text,-1);
+      this.editor.setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
+      for(const marker of this.dynamicMarkers){
+        this.editor.session.removeMarker(marker);
+      }
     }
     if (this.props.diagnostics !== prevProps.diagnostics){
       this.setAnchors();
@@ -132,28 +130,29 @@ export default class Editor extends React.Component<Props> {
     );
   }
 
+  private dynamicMarkers: number[] = [];
+
   public addBackMarker(start: any, end: any, uid: number){ 
-    let range = new Range(
-      start.row,
-      start.column,
-      end.row,
-      end.column
-    );
+    let range = Range.fromPoints(start,end);
     const type: string = `n${uid} highlighting`;
-    const message: string = '';
 
     this.anchoredHighlightings = addToArray(
         this.anchoredHighlightings,
         range,
-        message,
+        '',
         type,
         this.editor.session
     );
-    for(const anchoredRange of this.anchoredHighlightings){
-      this.editor.session.addDynamicMarker(new PopoverMarker(
+
+    this.dynamicMarkers.keys().forEach(m => this.editor.session.removeMarker(marker));
+    this.dy
+
+    let popoverMarker: PopoverMarker = new PopoverMarker(
         anchoredRange,
-        `${uid}`
-      ));
+        anchoredRange.type,
+    );
+    for(const anchoredRange of this.anchoredHighlightings){
+      this.dynamicMarkers[this.editor.session.addDynamicMarker(popoverMarker).id] = popoverMarker;
     } 
   }
 
@@ -205,24 +204,28 @@ export default class Editor extends React.Component<Props> {
     }
     this.markers = [];
     // Add markers for all anchoredMarkers
-    this.processMarkerArray(this.anchoredMarkers,true);
-    this.processMarkerArray(this.anchoredHighlightings,false);
+    this.processMarkerArray(this.anchoredMarkers, true);
   }
 
   /**
    * Helper function for setMarkers
    */
-  private processMarkerArray(anchoredMarkers: AnchoredMarker[],front: boolean){
-    for (let i = 0; i < anchoredMarkers.length; i = i + 1) { 
-      // Add the marker to the editor
-      this.markers.push(
-        this.editor.session.addMarker(
-          anchoredMarkers[i].getRange(this.editor.session),
-          `${anchoredMarkers[i].type}Marker`,
-          'text',
-          front
-        )
-      );
+  private processMarkerArray(
+    anchoredMarkers: AnchoredMarker[],
+    front: boolean
+  ) {
+  for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
+      for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
+        // Add the marker to the editor
+        this.markers.push(
+          this.editor.session.addMarker(
+            anchoredMarkers[i].getRange(this.editor.session),
+            `${anchoredMarkers[i].type}Marker`,
+            'text',
+            front
+          )
+        );
+      }
     }
   }
 }
