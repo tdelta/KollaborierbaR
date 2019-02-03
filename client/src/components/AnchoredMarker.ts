@@ -30,7 +30,7 @@ export default class AnchoredMarker{
    */
   public getRange(editSession: ace_types.Ace.EditSession){
     const lastLine: number = editSession.getLine(this.end.getPosition().row).length;
-    if(this.end.getPosition().column === lastLine - 1){
+    if(this.end.getPosition().column === lastLine){
       // The end of the range is at the end of a line
       return new Range(
         this.start.getPosition().row,
@@ -114,7 +114,7 @@ export function addToArray(
           const rangeBefore: ace_types.Ace.Range = Range.fromPoints(existingRange.start,range.start);
           markers[i].setRange(rangeBefore,editSession);
           existingRange.start = range.end;
-          markers.push(new AnchoredMarker(existingRange,markers[i].type,markers[i].message,editSession));
+          markers.push(new AnchoredMarker(existingRange,markers[i].message,markers[i].type,editSession));
         } else {
           markers.splice(i,1);
           i--;
@@ -132,7 +132,6 @@ export function addToArray(
         }
       default:    
         if(existingRange.isEnd(range.start.row,range.start.column) && type === markers[i].type){
-          console.log("Continuing..");
           range.start = existingRange.start;
           markers.splice(i,1);
           i--;
