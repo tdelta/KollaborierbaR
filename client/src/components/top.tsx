@@ -14,11 +14,7 @@ import {
   DropdownItem,
 } from 'reactstrap';
 
-import {
-    OpenModal, 
-    DeleteModal
-} from './project-modals.jsx';
-
+import { OpenModal, DeleteModal } from './project-modals.jsx';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -36,13 +32,12 @@ export default class Top extends React.Component<Props, State> {
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
+    this.proveKeY = this.proveKeY.bind(this);
     this.state = {
       showOpenModal: false,
       showDeleteModal: false,
     };
   }
-
-  
 
   private toggleOpenModal(): void {
     this.setState({ showOpenModal: !this.state.showOpenModal });
@@ -50,6 +45,19 @@ export default class Top extends React.Component<Props, State> {
 
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
+  }
+
+  private proveKeY() {
+    if (this.props.notificationSystem.current) {
+      this.props.notificationSystem.current.clearNotifications();
+      this.props.notificationSystem.current.addNotification({
+        title: 'Please Wait!',
+        message: 'Running proof obligations...',
+        level: 'info',
+        position: 'bc',
+        autoDismiss: 0,
+      });
+    }
   }
 
   private onFileChosen(event: HTMLInputEvent): void {
@@ -96,7 +104,9 @@ export default class Top extends React.Component<Props, State> {
                 Key
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.props.onProveFile}>Prove all contracts</DropdownItem>
+                <DropdownItem onClick={this.props.onProveFile}>
+                  Prove all contracts
+                </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
             <UncontrolledDropdown>
@@ -130,11 +140,21 @@ export default class Top extends React.Component<Props, State> {
                 File
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.downloadFileOnClick}>Download</DropdownItem>
-                <DropdownItem onClick={this.openFileOnClick}>Upload</DropdownItem>
-                <DropdownItem onClick={this.props.onDeleteFile}>Delete</DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileName}>Rename</DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileContent}>Save</DropdownItem>
+                <DropdownItem onClick={this.downloadFileOnClick}>
+                  Download
+                </DropdownItem>
+                <DropdownItem onClick={this.openFileOnClick}>
+                  Upload
+                </DropdownItem>
+                <DropdownItem onClick={this.props.onDeleteFile}>
+                  Delete
+                </DropdownItem>
+                <DropdownItem onClick={this.props.onUpdateFileName}>
+                  Rename
+                </DropdownItem>
+                <DropdownItem onClick={this.props.onUpdateFileContent}>
+                  Save
+                </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>
@@ -174,6 +194,13 @@ interface HTMLInputEvent extends React.FormEvent<HTMLInputElement> {
 interface State {
   showOpenModal: boolean;
   showDeleteModal: boolean;
+}
+
+// define the structure received KeY results
+interface ProofResults {
+  succeeded: string[];
+  failed: string[];
+  errors: string[];
 }
 
 // defining the structure of this react components properties

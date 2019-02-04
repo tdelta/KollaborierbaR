@@ -142,7 +142,7 @@ export default class App extends React.Component {
             filename: 'Main.java',
             openedPath: ['Main.java'] // TODO: replace filename with this
         });
-        document.addEventListener("keydown", this.handleCtrlS.bind(this));
+        document.addEventListener('keydown', this.handleCtrlS.bind(this));
     }
 
     openFile(path) {
