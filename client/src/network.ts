@@ -37,7 +37,7 @@ export interface UsersUpdatedEvent extends ProjectEvent {
   users: User[];
 }
 
-interface User {
+export interface User {
   firstName: string;
   lastName: string;
   crdtId: number;

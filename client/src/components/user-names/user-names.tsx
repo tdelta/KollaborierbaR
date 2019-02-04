@@ -1,27 +1,20 @@
 import React, { RefObject, ReactSVG } from 'react';
 import UserIndicator from './user-indicator';
-import { UserIndicatorData } from './user-indicator-data';
 import './animals.css';
 import ProjectManagement from '../../projectmanagement';
+import { UsersUpdatedEvent, User} from '../../network';
 
 export default class Usernames extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.getArray = this.getArray.bind(this);
     this.state = {
-      userindicators: [],
+      userindicators: []
     };
   }
 
-  public componentDidMount() {
-    this.getArray();
-    this.render();
-  }
-
-  private getArray() {
-    return ProjectManagement.getUsernames().then(
-      (userindicators: UserIndicatorData[]) =>
-        this.setState({ userindicators: userindicators })
-    );
+  public getArray(event: UsersUpdatedEvent) {
+    this.setState({ userindicators: event.users })
   }
 
   public render() {
@@ -37,5 +30,5 @@ export default class Usernames extends React.Component<Props, State> {
 interface Props {}
 
 interface State {
-  userindicators: UserIndicatorData[];
+  userindicators: User[];
 }
