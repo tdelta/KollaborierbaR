@@ -34,7 +34,8 @@
     "eslint": "eslint -c .eslintrc.js src/**/*.js*",
     "eslint-pedantic": "eslint -c .eslint-pedantic.js src/**/*.js*",
     "tslint": "tslint -c .tslint.json --project tsconfig.json 'src/**/*.ts*'",
-    "format": "prettier --write 'src/**/*.ts*'"
+    "format": "prettier --write 'src/**/*.ts*'",
+    "tslint-config-check": "tslint-config-prettier-check ./.tslint.json"
   },
   "eslintConfig": {
     "extends": "react-app"
