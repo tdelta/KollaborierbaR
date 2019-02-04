@@ -26,7 +26,7 @@ export interface Annotation {
   endCol: number;
 }
 
-export function toAnnotation(diagnostic: Diagnostic): Annotation{
+export function toAnnotation(diagnostic: Diagnostic): Annotation {
   return {
     row: diagnostic.startRow,
     column: diagnostic.startCol,
@@ -39,7 +39,7 @@ export function toAnnotation(diagnostic: Diagnostic): Annotation{
   };
 }
 
-const order: Kind[] = [Kind.NOTE, Kind.WARNING, Kind.ERROR, Kind.NOT_SUPPORTED]
+const order: Kind[] = [Kind.NOTE, Kind.WARNING, Kind.ERROR, Kind.NOT_SUPPORTED];
 
 export function diagnosticPriority(d1: Diagnostic, d2: Diagnostic): number {
   return order.indexOf(d1.kind) - order.indexOf(d2.kind);
