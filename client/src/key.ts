@@ -5,16 +5,22 @@ import { RefObject } from 'react';
 export default class Key {
   private keyApi: KeyApi = new KeyApi();
   private getFilePath: () => string;
+  private setProvenObligations: (provenObligations: number[]) => void;
   private notificationSystem: RefObject<NotificationSystem.System>;
 
   constructor(
     notificationSystem: RefObject<NotificationSystem.System>,
+    setProvenObligations: (provenObligations: number[]) => void,
     getFilePath: () => string
   ) {
     this.notificationSystem = notificationSystem;
+    this.setProvenObligations = setProvenObligations;
     this.getFilePath = getFilePath;
     this.proveFile = this.proveFile.bind(this);
     this.proveObligation = this.proveObligation.bind(this);
+
+    this.sendNotifications = this.sendNotifications.bind(this);
+    this.handleResults = this.handleResults.bind(this);
   }
 
   private proveFile() {
@@ -28,41 +34,45 @@ export default class Key {
         autoDismiss: 0,
       });
     }
-    this.keyApi.proveFile(this.getFilePath()).then((response: ProofResults) => {
-      // print succeeded proofs as success notifications
-      if (this.notificationSystem.current) {
-        this.notificationSystem.current.clearNotifications();
-        for (const success of response.succeeded) {
-          this.notificationSystem.current.addNotification({
-            title: 'Success!',
-            message: success,
-            level: 'success',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-        }
-        // print fails as warnings
-        for (const fail of response.failed) {
-          this.notificationSystem.current.addNotification({
-            title: 'Failure!',
-            message: fail,
-            level: 'warning',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-        }
-        // print exception messages as errors
-        for (const error of response.errors) {
-          this.notificationSystem.current.addNotification({
-            title: 'Error!',
-            message: error,
-            level: 'error',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-        }
+    this.keyApi
+      .proveFile(this.getFilePath())
+      .then(this.handleResults);
+  }
+
+  private sendNotifications(results: ProofResults): void {
+    // print succeeded proofs as success notifications
+    if (this.notificationSystem.current) {
+      this.notificationSystem.current.clearNotifications();
+      for (const success of results.succeeded) {
+        this.notificationSystem.current.addNotification({
+          title: 'Success!',
+          message: success.resultMsg,
+          level: 'success',
+          position: 'bc',
+          autoDismiss: 15,
+        });
       }
-    });
+      // print fails as warnings
+      for (const fail of results.failed) {
+        this.notificationSystem.current.addNotification({
+          title: 'Failure!',
+          message: fail.resultMsg,
+          level: 'warning',
+          position: 'bc',
+          autoDismiss: 15,
+        });
+      }
+      // print exception messages as errors
+      for (const error of results.errors) {
+        this.notificationSystem.current.addNotification({
+          title: 'Error!',
+          message: error.resultMsg,
+          level: 'error',
+          position: 'bc',
+          autoDismiss: 15,
+        });
+      }
+    }
   }
 
   public proveObligation(nr: number) {
@@ -76,9 +86,19 @@ export default class Key {
         autoDismiss: 0,
       });
     }
-    this.keyApi.proveObligation(this.getFilePath(), nr).then((answer: any) => {
-      alert('JAY');
-    });
+    
+    return this.keyApi.proveObligation(
+      this.getFilePath(), nr
+    ).then(this.handleResults);
+  }
+
+  private handleResults(results: ProofResults): void {
+      const provenObligations: number[] =
+        results.succeeded.map(success => success.obligationIdx);
+
+      this.setProvenObligations(provenObligations);
+
+      this.sendNotifications(results);
   }
 
   /**
@@ -96,7 +116,7 @@ export default class Key {
       const obligations: RegExpMatchArray | null = lines[i].match(regex);
       if (obligations) {
         numObligations += obligations.length;
-        result[i] = numObligations;
+        result[i] = numObligations - 1;
       }
     }
     return result;

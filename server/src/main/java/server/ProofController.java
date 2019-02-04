@@ -44,19 +44,19 @@ public class ProofController {
   @RequestMapping(value = "/**/{className}.java", method = RequestMethod.GET)
   @ResponseBody
   public ResponseEntity<ProofResult> proveAll(
-      @PathVariable String className,
-      @RequestParam("idx") Optional<Integer> idx,
-      HttpServletRequest request) {
+      @PathVariable final String className,
+      @RequestParam("obligationIdx") final Optional<Integer> obligationIdx,
+      final HttpServletRequest request) {
     // Get the file path for the request resource
-    String path =
+    final String path =
         ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
             .substring(7);
-    KeYWrapper key = new KeYWrapper(path);
+    final KeYWrapper key = new KeYWrapper(path);
     // prove by index if index is present. ternary operator can be replaced with ifPresentOrElse if
     // Java 9 is used or higher
-    ProofResult result =
-        idx.isPresent()
-            ? key.proveContractByIndex(className, idx.get())
+    final ProofResult result =
+        obligationIdx.isPresent()
+            ? key.proveContractByIndex(className, obligationIdx.get())
             : key.proveAllContracts(className);
     key.dispose();
 

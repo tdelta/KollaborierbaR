@@ -41,6 +41,8 @@ export default class Editor extends React.Component<Props> {
     this.anchoredMarkers = [];
     this.anchoredHighlightings = [];
     this.annotations = [];
+
+    this.updateAnnotations = this.updateAnnotations.bind(this);
   }
 
   /**
@@ -85,13 +87,31 @@ export default class Editor extends React.Component<Props> {
       ) {
         const rowString = e.domEvent.target.firstChild.data;
         const row = parseInt(rowString, 10) - 1;
+
         if (row) {
           this.editor.session.getSelection().clearSelection();
           const obligations = this.props.getObligations(
             this.editor.session.getLines(0, this.editor.session.getLength())
           );
-          console.log(obligations);
-          console.log(obligations[row]);
+
+          this.props.onProveObligation(obligations[row]);
+        }
+      }
+
+      else if (
+        e.domEvent.target.className.includes('obligation_done') &&
+        e.domEvent.target.firstChild
+      ) {
+        const rowString = e.domEvent.target.firstChild.data;
+        const row = parseInt(rowString, 10) - 1;
+
+        if (row) {
+          this.editor.session.getSelection().clearSelection();
+          const obligations = this.props.getObligations(
+            this.editor.session.getLines(0, this.editor.session.getLength())
+          );
+
+          this.props.resetObligation(obligations[row]);
           this.props.onProveObligation(obligations[row]);
         }
       }
@@ -118,17 +138,50 @@ export default class Editor extends React.Component<Props> {
     this.obligationAnnotations = [];
     // Iterate over the indices of the result, which correspond to the line numbers
     for (const index of Object.keys(obligations)) {
-      this.obligationAnnotations.push({
-        row: parseInt(index, 10),
-        column: 0,
-        text: 'Click to prove!',
-        type: 'obligation_todo',
-        startRow: parseInt(index, 10),
-        startCol: 0,
-        endRow: parseInt(index, 10),
-        endCol: 0,
-      });
+      const obligationIdx: number = obligations[index as any] as number;
+
+      const row = parseInt(index, 10);
+
+      let isProven: boolean = this.props.provenObligations.includes(obligationIdx);
+
+      if (isProven) {
+        console.log(`Row ${row} has been proven!`);
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Proven!',
+          type: 'obligation_done',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      }
+
+      else {
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Click to prove!',
+          type: 'obligation_todo',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      }
     }
+
+    this.updateAnnotations();
+  }
+
+  private updateAnnotations(): void {
+      this.editor.session.clearAnnotations();
+      this.editor.session.setAnnotations(
+        this.anchoredMarkers
+          .map(this.toAnnotation)
+          .concat(this.obligationAnnotations)
+      );
   }
 
   /**
@@ -229,12 +282,7 @@ export default class Editor extends React.Component<Props> {
         });
       }
 
-      this.editor.session.clearAnnotations();
-      this.editor.session.setAnnotations(
-        this.anchoredMarkers
-          .map(this.toAnnotation)
-          .concat(this.obligationAnnotations)
-      );
+      this.updateAnnotations();
       // Display the markers in the ace editor
       this.setMarkers();
     }
@@ -317,10 +365,12 @@ export default class Editor extends React.Component<Props> {
 // defining the structure of this react components properties
 interface Props {
   diagnostics: Diagnostic[];
+  provenObligations: number[];
   text: string;
   filename: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
+  resetObligation(obligationIdx: number): void;
   collabController: CollabController;
   getObligations: (lines: string[]) => number[];
   onProveObligation: (nr: number) => boolean;

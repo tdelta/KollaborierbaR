@@ -50,6 +50,8 @@ export default class App extends React.Component {
         this.setText = this.setText.bind(this);
         this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
+        this.addProvenObligations = this.addProvenObligations.bind(this);
+        this.resetObligation = this.resetObligation.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
         this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.filename, this.state.project.name, path);
@@ -63,6 +65,7 @@ export default class App extends React.Component {
         this.editor = React.createRef();
         this.key = new Key(
           this.notificationSystem,
+          this.addProvenObligations,
           () => this.state.project.name + '/' + this.state.filename
         );
 
@@ -82,7 +85,10 @@ export default class App extends React.Component {
             openedPath: [],
 
             // warnings, errors, etc. within the currently open file
-            diagnostics: []
+            diagnostics: [],
+
+            // indices of obligations, that have been proven
+            provenObligations: []
         };
     }
 
@@ -127,6 +133,21 @@ export default class App extends React.Component {
         });
     }
 
+    addProvenObligations(provenObligations) {
+        this.setState({
+          provenObligations: provenObligations.concat(this.state.provenObligations)
+        });
+    }
+
+    resetObligation(obligationIdx) {
+        const provenObligations = this.state.provenObligations
+          .filter(provenObligationIdx => provenObligationIdx !== obligationIdx);
+
+        this.setState({
+          provenObligations
+        });
+    }
+
     /**
      * React lifecycle method: Called after this component has been initialized
      * and inserted into the DOM tree.
@@ -152,7 +173,8 @@ export default class App extends React.Component {
                 this.setState({
                     text: response.fileText,
                     filename: response.fileName,
-                    openedPath: path
+                    openedPath: path,
+                    provenObligations: []
                 });
                 // TODO: Handle rename with collab controller
                 this.collabController.setFile(this.state.project.name+'/'+path.join('/'),response.fileText);
@@ -215,6 +237,8 @@ export default class App extends React.Component {
                     <Editor
                         setDiagnostics={this.setDiagnostics}
                         diagnostics={this.state.diagnostics}
+                        provenObligations={this.state.provenObligations}
+                        resetObligation={this.resetObligation}
                         setText={this.setText}
                         text={this.state.text}
                         filename={this.state.filename}
