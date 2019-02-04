@@ -22,7 +22,6 @@ export default class Top extends React.Component<Props, State> {
   private downloadSelector: RefObject<HTMLInputElement>;
   private fileReader?: FileReader;
 
-
   constructor(props: Props) {
     super(props);
     this.fileSelector = React.createRef();
@@ -47,7 +46,7 @@ export default class Top extends React.Component<Props, State> {
 
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
-  } 
+  }
 
   private proveKeY() {
     if (this.props.notificationSystem.current) {
@@ -135,9 +134,7 @@ export default class Top extends React.Component<Props, State> {
         <Navbar color="dark" dark expand="md">
           <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
-            
-
-            <Usernames/>    
+            <Usernames />
 
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -147,7 +144,7 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.proveKeY}>Run Proof</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
-            
+
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
                 Project
