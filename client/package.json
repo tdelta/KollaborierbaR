@@ -58,6 +58,7 @@
     "@types/sockjs-client": "^1.1.0",
     "eslint": "^5.6.0",
     "eslint-plugin-react": "^7.11.1",
+    "fast-check": "^1.10.0",
     "prettier": "^1.15.2",
     "react-fontawesome": "^1.6.1",
     "react-test-renderer": "^16.6.3",

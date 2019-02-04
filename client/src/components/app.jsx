@@ -150,7 +150,7 @@ export default class App extends React.Component {
                     openedPath: path
                 });
                 // TODO: Handle rename with collab controller
-                this.collabController.setFile(this.state.project.name+'/'+path.join('/'),response.fileText);
+                this.collabController.setFile(this.state.project.name,path.join('/'),response.fileText);
             });
     }
 

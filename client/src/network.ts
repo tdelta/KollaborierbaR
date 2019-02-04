@@ -16,6 +16,7 @@ export enum ProjectEventType {
   DeletedFile = 'DeletedFileEvent',
   RenamedFile = 'RenamedFileEvent',
   UpdatedFile = 'UpdatedFileEvent',
+  UsersUpdated = 'UsersUpdatedEvent',
 }
 
 export interface ProjectEvent {
@@ -30,6 +31,16 @@ export interface ProjectFileEvent extends ProjectEvent {
 export interface RenamedFileEvent extends ProjectEvent {
   originalPath: string;
   newPath: string;
+}
+
+export interface UsersUpdatedEvent extends ProjectEvent {
+  users: User[];
+}
+
+interface User {
+  firstName: string;
+  lastName: string;
+  crdtId: number;
 }
 
 interface EventObserver {
@@ -185,7 +196,8 @@ export class Network {
           const event:
             | ProjectEvent
             | ProjectFileEvent
-            | RenamedFileEvent = JSON.parse(msg.body);
+            | RenamedFileEvent
+            | UsersUpdatedEvent = JSON.parse(msg.body);
 
           console.log(`incoming event`);
           console.log(event);

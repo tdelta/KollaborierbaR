@@ -10,6 +10,7 @@ import {
   ProjectEvent,
   RenamedFileEvent,
   ProjectFileEvent,
+  UsersUpdatedEvent,
   ProjectEventType,
 } from './network';
 
@@ -79,10 +80,14 @@ export default class ProjectManagement {
 
     this.network = new Network({
       onProjectEvent: (
-        event: ProjectEvent | RenamedFileEvent | ProjectFileEvent
+        event:
+          | ProjectEvent
+          | RenamedFileEvent
+          | ProjectFileEvent
+          | UsersUpdatedEvent
       ) => {
         const currentProject = this.getCurrentProject();
-
+        console.log(event.eventType);
         switch (event.eventType) {
           case ProjectEventType.DeletedFile:
             this.openProject((currentProject as Project).name, false);
@@ -196,6 +201,9 @@ export default class ProjectManagement {
               });
             }
 
+            break;
+          case ProjectEventType.UsersUpdated:
+            console.log(event);
             break;
         }
       },
