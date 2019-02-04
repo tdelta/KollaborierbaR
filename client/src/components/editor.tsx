@@ -32,6 +32,7 @@ export default class Editor extends React.Component<Props> {
   private anchoredMarkers: AnchoredMarker[];
   private anchoredHighlightings: AnchoredMarker[];
   private annotations: number[];
+  private obligationAnnotations: Annotation[] = [];
 
   constructor(props: Props) {
     super(props);
@@ -77,6 +78,25 @@ export default class Editor extends React.Component<Props> {
       this.setMarkers();
     });
 
+    this.editor.on('gutterclick', (e: any) => {
+      if (
+        e.domEvent.target.className.includes('obligation_todo') &&
+        e.domEvent.target.firstChild
+      ) {
+        const rowString = e.domEvent.target.firstChild.data;
+        const row = parseInt(rowString, 10) - 1;
+        if (row) {
+          this.editor.session.getSelection().clearSelection();
+          const obligations = this.props.getObligations(
+            this.editor.session.getLines(0, this.editor.session.getLength())
+          );
+          console.log(obligations);
+          console.log(obligations[row]);
+          this.props.onProveObligation(obligations[row]);
+        }
+      }
+    });
+
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
@@ -87,6 +107,27 @@ export default class Editor extends React.Component<Props> {
       this.editor.ignoreChanges = true;
       this.editor.setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
+    }
+    this.setProofObligations();
+  }
+
+  private setProofObligations() {
+    const obligations = this.props.getObligations(
+      this.editor.session.getLines(0, this.editor.session.getLength())
+    );
+    this.obligationAnnotations = [];
+    // Iterate over the indices of the result, which correspond to the line numbers
+    for (const index of Object.keys(obligations)) {
+      this.obligationAnnotations.push({
+        row: parseInt(index, 10),
+        column: 0,
+        text: 'Click to prove!',
+        type: 'obligation_todo',
+        startRow: parseInt(index, 10),
+        startCol: 0,
+        endRow: parseInt(index, 10),
+        endCol: 0,
+      });
     }
   }
 
@@ -106,6 +147,11 @@ export default class Editor extends React.Component<Props> {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
+        }
+        if (annotation.type === 'obligation_todo') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_todo';
         }
       }
     };
@@ -185,7 +231,9 @@ export default class Editor extends React.Component<Props> {
 
       this.editor.session.clearAnnotations();
       this.editor.session.setAnnotations(
-        this.anchoredMarkers.map(this.toAnnotation)
+        this.anchoredMarkers
+          .map(this.toAnnotation)
+          .concat(this.obligationAnnotations)
       );
       // Display the markers in the ace editor
       this.setMarkers();
@@ -274,6 +322,8 @@ interface Props {
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
   collabController: CollabController;
+  getObligations: (lines: string[]) => number[];
+  onProveObligation: (nr: number) => boolean;
 }
 
 /**
