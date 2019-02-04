@@ -1,38 +1,35 @@
 import React, { RefObject, ReactSVG } from 'react';
+import UserIndicator from './user-indicator'
+import {UserIndicatorData} from './user-indicator-data'
 import './animals.css';
-import { UncontrolledTooltip } from 'reactstrap';
+import ProjectManagement from '../../projectmanagement';
 
 export default class Usernames extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
+      this.state = {
+        userindicators: []
+      };
 
   }
 
-private testArray(){
-    var test = [
-                {"name": "Peter", "color": 0},
-                {"name": "Lustig", "color": 1},
-                {"name": "Mark", "color": 2},
-                {"name": "BigJ", "color": 3},
-                {"name": "Hallo", "color": 4},
-                {"name": "lalalala", "color": 5}
-               ];
-    return test;
+  public componentDidMount(){
+    this.getArray();
+    this.render();
+  }
+
+private getArray(){
+    return ProjectManagement.getUsernames().then((userindicators: UserIndicatorData[]) => 
+      this.setState({userindicators: userindicators})
+    );
   }
 
 public render(){
   return( 
     <>
                 {
-                    this.testArray().map((iterator) => 
-                  <> 
-                  <span className="login-text" id={iterator.name}> 
-                    <div className={"circle" + iterator.color}></div>
-                   </span>
-                    <UncontrolledTooltip delay={{ show: 0, hide: 0 }} placement="bottom" target={iterator.name}>
-                      {iterator.name}
-                    </UncontrolledTooltip>
-                  </>
+                    this.state.userindicators.map((iterator) =>
+                      <UserIndicator name={iterator.name} color={iterator.color}/>
                     )
                 } 
     </>
@@ -44,5 +41,7 @@ interface Props{
 }
 
 interface State{
-
+  userindicators: UserIndicatorData[]
 }
+
+
