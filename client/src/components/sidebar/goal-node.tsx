@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './sidebar.css'
+import './sidebar.css';
 
 import FontAwesome from 'react-fontawesome';
 
@@ -16,22 +16,19 @@ export default class GoalNode extends React.Component<Props, {}> {
   public render() {
     const label = (
       <>
-        <FontAwesome
-            name='flag-checkered'
-            className='goalNodeIcon'
-        /> ({this.props.goal.id}) {this.props.goal.sequent}
+        <FontAwesome name="flag-checkered" className="goalNodeIcon" /> (
+        {this.props.goal.id}) {this.props.goal.sequent}
       </>
     );
 
-    const background =
-      this.props.toggled
-        ? 'activeFileNode'
-        : 'inactiveFileNode';
+    const background = this.props.toggled
+      ? 'activeFileNode'
+      : 'inactiveFileNode';
 
     return (
-        <div onDoubleClick={this.handleDoubleClick} className={background}>
-          {label}
-        </div>
+      <div onDoubleClick={this.handleDoubleClick} className={background}>
+        {label}
+      </div>
     );
   }
 
@@ -41,7 +38,7 @@ export default class GoalNode extends React.Component<Props, {}> {
 }
 
 interface Props {
-  goal: Goal,
-  toggled: boolean,
-  toggleGoal: (goal: Goal) => void
+  goal: Goal;
+  toggled: boolean;
+  toggleGoal: (goal: Goal) => void;
 }

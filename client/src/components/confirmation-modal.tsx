@@ -14,75 +14,81 @@ interface State {
  * TODO: Better documentation
  */
 export default class ConfirmationModal extends React.Component<{}, State> {
-    private onConfirmed: () => void = () => undefined;
-    private onCancelled: () => void = () => undefined;
+  private onConfirmed: () => void = () => undefined;
+  private onCancelled: () => void = () => undefined;
 
-    constructor(props: object) {
-        super(props);
+  constructor(props: object) {
+    super(props);
 
-        this.state = {
-          isOpen: false,
-          question: ""
-        };
+    this.state = {
+      isOpen: false,
+      question: '',
+    };
 
-        this.ask = this.ask.bind(this);
-        this.confirm = this.confirm.bind(this);
-        this.cancel = this.cancel.bind(this);
-    }
+    this.ask = this.ask.bind(this);
+    this.confirm = this.confirm.bind(this);
+    this.cancel = this.cancel.bind(this);
+  }
 
-    private confirm(): void {
-      this.setState({
-        isOpen: false
-      });
+  private confirm(): void {
+    this.setState({
+      isOpen: false,
+    });
 
-      this.onConfirmed();
-    }
+    this.onConfirmed();
+  }
 
-    private cancel(): void {
-      this.setState({
-        isOpen: false
-      });
+  private cancel(): void {
+    this.setState({
+      isOpen: false,
+    });
 
-      this.onCancelled();
-    }
+    this.onCancelled();
+  }
 
-    /**
-     * Call this method to trigger the confirmation dialog.
-     *
-     * @param question Text which informs the user, which question or action shall be confirmed.
-     * @param onConfirmed Will be called, if the user selects the `confirm` button.
-     * @param onCancelled Will be called, if the user selects the `cancel` button.
-     */
-    public ask(
-      question: string,
-      onConfirmed: () => void = () => undefined,
-      onCancelled: () => void = () => undefined
-    ) {
-      this.onConfirmed = onConfirmed;
-      this.onCancelled = onCancelled;
+  /**
+   * Call this method to trigger the confirmation dialog.
+   *
+   * @param question Text which informs the user, which question or action shall be confirmed.
+   * @param onConfirmed Will be called, if the user selects the `confirm` button.
+   * @param onCancelled Will be called, if the user selects the `cancel` button.
+   */
+  public ask(
+    question: string,
+    onConfirmed: () => void = () => undefined,
+    onCancelled: () => void = () => undefined
+  ) {
+    this.onConfirmed = onConfirmed;
+    this.onCancelled = onCancelled;
 
-      this.setState({
-        isOpen: true,
-        question: question
-      });
-    }
+    this.setState({
+      isOpen: true,
+      question: question,
+    });
+  }
 
-    public render() {
-        return (
-          <>
-            <Modal isOpen={this.state.isOpen}>
-                <ModalHeader>Please confirm</ModalHeader>
+  public render() {
+    return (
+      <>
+        <Modal isOpen={this.state.isOpen}>
+          <ModalHeader>Please confirm</ModalHeader>
 
-                <ModalBody style={{'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto'}}>
-                    {this.state.question}
-                </ModalBody>
+          <ModalBody
+            style={{ maxHeight: 'calc(100vh - 210px)', overflowY: 'auto' }}
+          >
+            {this.state.question}
+          </ModalBody>
 
-                <ModalFooter>
-                    <Button color="danger" onClick={this.confirm}>Confirm</Button>
-                    <Button color="secondary" onClick={this.cancel}>Cancel</Button>
-                </ModalFooter>
-            </Modal>
-          </>
-        );
-    }
+          <ModalFooter>
+            <Button color="danger" onClick={this.confirm}>
+              Confirm
+            </Button>
+            <Button color="secondary" onClick={this.cancel}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </Modal>
+      </>
+    );
+  }
 }
