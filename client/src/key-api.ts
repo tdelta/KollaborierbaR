@@ -18,7 +18,7 @@ export default class KeyApi {
 
   public proveObligation(path: string, nr: number): Promise<ProofResults> {
     const escapedPath = escape(path);
-    const url = `${serverAddress}/proof/${escapedPath}/${nr}`;
+    const url = `${serverAddress}/proof/${escapedPath}?obligationIdx=${nr}`;
 
     return fetch(url, {
       method: 'GET',
@@ -33,7 +33,12 @@ export default class KeyApi {
 
 // define the structure received KeY results
 export interface ProofResults {
-  succeeded: string[];
-  failed: string[];
-  errors: string[];
+  succeeded: ObligationResult[];
+  failed: ObligationResult[];
+  errors: ObligationResult[];
+}
+
+interface ObligationResult {
+  obligationIdx: number;
+  resultMsg: string;
 }

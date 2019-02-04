@@ -53,19 +53,21 @@ public class KeYWrapper {
 																						// performed proof if a *.proof
 																						// file is loaded
 		} catch (ProblemLoaderException e) {
-			results.addError("Couldn't process all relevant information for verification with KeY.");
+			results.addError(-1, "Couldn't process all relevant information for verification with KeY.");
 			System.out.println("Exception at '" + location + "':");
 			e.printStackTrace();
 		}
 	}
 
-	public void proveContract(Contract contract) {
+	public void proveContract(final int obligationIdx, final Contract contract) {
 		// Perform proof
 		Proof proof = null;
+
 		if (env != null) {
 			try {
 				// Create proof
 				proof = env.createProof(contract.createProofObl(env.getInitConfig(), contract));
+
 				// Set proof strategy options
 				StrategyProperties sp = proof.getSettings().getStrategySettings().getActiveStrategyProperties();
 				sp.setProperty(StrategyProperties.METHOD_OPTIONS_KEY, StrategyProperties.METHOD_CONTRACT);
@@ -74,30 +76,43 @@ public class KeYWrapper {
 				sp.setProperty(StrategyProperties.NON_LIN_ARITH_OPTIONS_KEY, StrategyProperties.NON_LIN_ARITH_DEF_OPS);
 				sp.setProperty(StrategyProperties.STOPMODE_OPTIONS_KEY, StrategyProperties.STOPMODE_NONCLOSE);
 				proof.getSettings().getStrategySettings().setActiveStrategyProperties(sp);
+
 				// Make sure that the new options are used
 				int maxSteps = 10000;
 				ProofSettings.DEFAULT_SETTINGS.getStrategySettings().setMaxSteps(maxSteps);
 				ProofSettings.DEFAULT_SETTINGS.getStrategySettings().setActiveStrategyProperties(sp);
 				proof.getSettings().getStrategySettings().setMaxSteps(maxSteps);
 				proof.setActiveStrategy(proof.getServices().getProfile().getDefaultStrategyFactory().create(proof, sp));
+
 				// Start auto mode
 				env.getUi().getProofControl().startAndWaitForAutoMode(proof);
+
 				// Show proof result
-				boolean closed = proof.openGoals().isEmpty();
-				if (closed)
-					results.addSuccess("Contract '" + contract.getDisplayName() + "' of " + contract.getTarget()
-							+ " is verified.");
+				final boolean closed = proof.openGoals().isEmpty();
+
+				if (closed) {
+					results.addSuccess(
+              obligationIdx,
+              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is verified."
+          );
+        }
+
 				else {
-					results.addFail("Contract '" + contract.getDisplayName() + "' of " + contract.getTarget()
-							+ " is still open.");
+					results.addFail(
+              obligationIdx,
+              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open."
+          );
 				
-                    for (Goal goal: proof.openGoals()) {
-                    	results.addOpenGoal(new Obligation(goal.getTime(), goal.toString()));
-                    }
+          for (Goal goal: proof.openGoals()) {
+            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString()));
+          }
 				}
 			} catch (ProofInputException e) {
 				results.addError(
-						"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".");
+            obligationIdx,
+						"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + "."
+        );
+
 				System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
 				e.printStackTrace();
 			} finally {
@@ -110,15 +125,40 @@ public class KeYWrapper {
 
 	public ProofResult proveAllContracts(String className) {
 		if (env != null) {
-			KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
-			ImmutableSet<IObserverFunction> targets = env.getSpecificationRepository().getContractTargets(keyType);
-			for (IObserverFunction target : targets) {
-				ImmutableSet<Contract> contracts = env.getSpecificationRepository().getContracts(keyType, target);
+			final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
+			final ImmutableSet<IObserverFunction> targets =
+        env.getSpecificationRepository().getContractTargets(keyType);
+
+      // KeY lists obligations from bottom to top of the file.
+      // We need to take this into account, when counting the
+      // obligations from top to bottom, as the client does.
+
+      // Therefore, we start with the maximum index.
+      int currentObligationIdx = targets
+        .stream()
+        .mapToInt(target -> 
+              env
+                .getSpecificationRepository()
+                .getContracts(keyType, target)
+                .size()
+            )
+        .sum() - 1; // -1, since we start counting at 0
+
+			for (final IObserverFunction target : targets) {
+				final ImmutableSet<Contract> contracts = env.getSpecificationRepository().getContracts(keyType, target);
+
+        int localObligationIdx = contracts.size() - 1;
+
 				for (Contract contract : contracts) {
-					proveContract(contract);
+					proveContract(currentObligationIdx - localObligationIdx, contract);
+
+          localObligationIdx--;
 				}
+
+        currentObligationIdx -= contracts.size();
 			}
 		}
+
 		return results;
 	}
 
@@ -128,15 +168,37 @@ public class KeYWrapper {
       final ImmutableSet<IObserverFunction> targets =
           env.getSpecificationRepository().getContractTargets(keyType);
 
-      int nextIndex = index;
+      // KeY lists obligations from bottom to top of the file.
+      // We need to take this into account, when counting the
+      // obligations from top to bottom, as the client does.
+
+      // Therefore, we start with the maximum index.
+      int currentObligationIdx = targets
+        .stream()
+        .mapToInt(target -> 
+              env
+                .getSpecificationRepository()
+                .getContracts(keyType, target)
+                .size()
+            )
+        .sum() - 1; // -1, since we start counting at 0
 
       for (final IObserverFunction target : targets) {
-        ImmutableSet<Contract> contracts =
+        final ImmutableSet<Contract> contracts =
             env.getSpecificationRepository().getContracts(keyType, target);
-        if (nextIndex < contracts.size()) {
-          proveContract(contracts.toArray(new Contract[0])[nextIndex]);
+
+        if (contracts.size() > 0 && currentObligationIdx + 1 - contracts.size() <= index) {
+          proveContract(index, contracts.toArray(new Contract[0])[
+              contracts.size() - (currentObligationIdx - index) - 1
+              // obligations inside contract sets are sorted top to bottom
+          ]);
+
           return results;
-        } else nextIndex -= contracts.size();
+        }
+
+        else {
+          currentObligationIdx -= contracts.size();
+        }
       }
     }
 

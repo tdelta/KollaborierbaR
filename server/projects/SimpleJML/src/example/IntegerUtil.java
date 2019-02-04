@@ -7,9 +7,15 @@ public class IntegerUtil {
    }
    
    /*@ normal_behavior
+     @ requires (x != y);
      @ ensures \result == x - y;
+     @
+     @ exceptional_behaviour
+     @ requires (x == y);
+     @ signals (RuntimeException) false;
      @*/
    public static int sub(int x, int y) {
+       if (x == y) {throw new RuntimeException();}
       return x + y;
    }
 }
