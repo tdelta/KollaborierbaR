@@ -153,6 +153,10 @@ export default class Editor extends React.Component<Props> {
       this.editor.session
     );
 
+    if(this.anchoredHighlightings.length > 5){
+      this.anchoredHighlightings.splice(0,this.anchoredHighlightings.length - 5);
+    }
+
     for (const anchoredRange of this.anchoredHighlightings) {
       const popoverMarker: PopoverMarker = new PopoverMarker(
         anchoredRange,
