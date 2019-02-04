@@ -30,7 +30,7 @@ export default class Usernames extends React.Component<Props, State> {
     return (
       <>
         {this.state.userindicators.map((iterator, index) => (
-          <UserIndicator key={index} firstName={iterator.firstName} lastName={iterator.lastName} crdtId={iterator.crdtId} />
+          <UserIndicator uid={index} firstName={iterator.firstName} lastName={iterator.lastName} crdtId={iterator.crdtId} />
         ))}
       </>
     );
