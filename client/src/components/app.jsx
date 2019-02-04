@@ -6,6 +6,7 @@ import Editor from './editor.tsx';
 import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 import ConfirmationModal from './confirmation-modal.tsx';
+import Console from './console/console.jsx';
 
 import ProjectManagement from '../projectmanagement.ts';
 
@@ -221,6 +222,8 @@ export default class App extends React.Component {
                         collabController={this.collabController}
                         ref={this.editor}
                     />
+                    <Console/>
+                    
                 </div>
                 <ConfirmationModal ref={this.confirmationModal}/>
                 <NotificationSystem ref={this.notificationSystem}/>
