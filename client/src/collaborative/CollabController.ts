@@ -20,7 +20,8 @@ export default class CollabController {
   private editor: any;
   private editorComponent: Editor;
   private setText: (text: string) => void;
-  private filename!: string;
+  private filepath!: string;
+  private project!: string;
   private uidBase: number;
 
   constructor(net: Network, editor: Editor, setText: (text: string) => void) {
@@ -42,7 +43,7 @@ export default class CollabController {
         !this.editor.ignoreChanges
       ) {
         // The event came from the user
-        const headers: any = { file: this.filename };
+        const headers: any = { file: this.project + '/' + this.filepath };
         const start: number = this.editor.session.doc.positionToIndex(
           delta.start
         );
@@ -67,9 +68,22 @@ export default class CollabController {
     });
   }
 
-  public setFile(filename: string, content: string) {
-    this.filename = filename;
-    this.network.broadcast('/file', { file: filename }, { content: content });
+  public setFile(project: string, filepath: string, content: string) {
+    this.network.unsubscribe('users/' + this.project);
+    this.network.on('users/' + project, {}, this.handleNewUserName.bind(this));
+    this.network.broadcast(
+      '/file',
+      { file: project + '/' + filepath },
+      { content: content }
+    );
+
+    this.filepath = filepath;
+    this.project = project;
+  }
+
+  private handleNewUserName(userList: any) {
+    const parsedUserList = JSON.parse(userList);
+    console.log(parsedUserList);
   }
 
   public handleRemoteInsert(operation: any) {

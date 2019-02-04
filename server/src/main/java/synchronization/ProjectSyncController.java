@@ -2,14 +2,18 @@ package synchronization;
 
 import events.DeletedFileEvent;
 import events.DeletedProjectEvent;
+import events.FileOpenedEvent;
 import events.RenamedFileEvent;
 import events.UpdatedFileEvent;
 import events.UpdatedProjectEvent;
+import events.UsersUpdatedEvent;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -44,6 +48,7 @@ public class ProjectSyncController {
   }
 
   @Autowired private SimpMessagingTemplate messagingTemplate;
+  @Autowired private UserList userList;
 
   @SubscribeMapping("/user/projects/{projectName}")
   public void handleProjectSubscription(
@@ -61,6 +66,14 @@ public class ProjectSyncController {
       users.add(user);
 
       sessions.put(decodedProjectName, users);
+    }
+
+    List<User> subscriberNames = getSubscriberNames(sessions.get(decodedProjectName));
+    for (Principal otherUser : sessions.get(decodedProjectName)) {
+      UsersUpdatedEvent userEvent =
+          new UsersUpdatedEvent(this, decodedProjectName, subscriberNames);
+      messagingTemplate.convertAndSendToUser(
+          otherUser.getName(), "/projects/" + decodedProjectName, userEvent);
     }
 
     saveSubscription(simpSubscriptionId, user, decodedProjectName);
@@ -176,6 +189,37 @@ public class ProjectSyncController {
       messagingTemplate.convertAndSendToUser(
           user.getName(), "/projects/" + event.getProjectName(), event);
     }
+  }
+
+  @EventListener
+  public void handleOpenedFile(final FileOpenedEvent event) {
+    System.out.println("File opened event");
+    Principal user = event.getPrincipal();
+
+    for (ConcurrentHashMap.Entry<String, List<Principal>> projectEntry : sessions.entrySet()) {
+      if (projectEntry.getValue().contains(user)) {
+        System.out.println(
+            "Notifying users of project " + projectEntry.getKey() + " that a file was opened");
+        HashMap<String, Object> headers = new HashMap<String, Object>();
+        headers.put("file", event.getFile());
+        for (Principal otherUser : projectEntry.getValue()) {
+          List<User> subscriberNames = getSubscriberNames(projectEntry.getValue());
+          UsersUpdatedEvent userEvent =
+              new UsersUpdatedEvent(this, projectEntry.getKey(), subscriberNames);
+          messagingTemplate.convertAndSendToUser(
+              otherUser.getName(), "/projects/" + projectEntry.getKey(), userEvent, headers);
+        }
+      }
+    }
+  }
+
+  private List<User> getSubscriberNames(List<Principal> subscriberList) {
+    return userList
+        .entrySet()
+        .stream()
+        .filter(x -> subscriberList.contains(x.getKey()))
+        .map(x -> x.getValue())
+        .collect(Collectors.toList());
   }
 
   private List<Principal> getUsersOfProject(final String projectName) {
