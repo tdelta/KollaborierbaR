@@ -5,148 +5,15 @@ span.login-text {
     margin-bottom: auto;
 }
 
-.circle0 {
+.circle{
   width: 25px;
   height: 25px;
   border-radius: 100%;
-  font-size: 50px;
+  font-size: 15px;
   color: #fff;
-  line-height: 5px;
+  line-height: 25px;
   text-align: center;
-  background: #4CAF50 url(go-away.svg);
-  margin-left: 1px;
+  margin-left: 0.2em;
   margin-top: auto ;
   margin-bottom: auto ;
 }
-
-.circle1 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #FF5722 url(go-away.svg);
-  margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-}
-
-.circle2 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #448AFF url(go-away.svg);
-  margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-}
-
-.circle3 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #00BCD4 url(go-away.svg);
-margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-
-}
-
-.circle4 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #D32F2F url(go-away.svg);
-margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-
-}
-.circle5 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #FF4081 url(go-away.svg);
-margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-
-}
-
-.circle6 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #9E9E9E url(go-away.svg);
-margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-
-}
-
-.circle7 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #FFEB3B url(go-away.svg);
-margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-
-}
-
-.circle8 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #009688 url(go-away.svg);
-margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-
-}
-
-.circle9 {
-  width: 25px;
-  height: 25px;
-  border-radius: 100%;
-  font-size: 50px;
-  color: #fff;
-  line-height: 5px;
-  text-align: center;
-  background: #7C4DFF url(go-away.svg);
-margin-left: 1px;
-  margin-top: auto ;
-  margin-bottom: auto ;
-}
-
