@@ -97,7 +97,7 @@ public class KeYWrapper {
 							+ " is still open.");
 				
                     for (Goal goal: proof.openGoals()) {
-                    	results.addOpenGoal(new Obligation(-1, goal.toString()));
+                    	results.addOpenGoal(new Obligation(goal.getTime(), goal.toString()));
                     }
 				}
 			} catch (ProofInputException e) {
