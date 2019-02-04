@@ -71,7 +71,8 @@ nav{
 }
 
 .ace_gutter-cell.obligation_done {
-  background-image: url(obligation-done.svg);
+  background-image: url(obligation-done.png);
   background-size: 16px;
   background-position: 2px center;
+  cursor: pointer;
 }
