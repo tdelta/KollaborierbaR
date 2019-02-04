@@ -201,10 +201,15 @@ export default class Editor extends React.Component<Props> {
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
         }
-        if (annotation.type === 'obligation_todo') {
+        else if (annotation.type === 'obligation_todo') {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'obligation_todo';
+        }
+        else if (annotation.type === 'obligation_done') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_done';
         }
       }
     };

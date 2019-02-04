@@ -52,6 +52,7 @@ export default class App extends React.Component {
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.addProvenObligations = this.addProvenObligations.bind(this);
         this.resetObligation = this.resetObligation.bind(this);
+        this.proveFile = this.proveFile.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
         this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.filename, this.state.project.name, path);
@@ -148,6 +149,14 @@ export default class App extends React.Component {
         });
     }
 
+    proveFile() {
+        this.setState({
+          provenObligations: []
+        });
+
+        this.key.proveFile();
+    }
+
     /**
      * React lifecycle method: Called after this component has been initialized
      * and inserted into the DOM tree.
@@ -217,7 +226,7 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
-                    onProveFile={this.key.proveFile}
+                    onProveFile={this.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
                     onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
                     notificationSystem={this.notificationSystem}

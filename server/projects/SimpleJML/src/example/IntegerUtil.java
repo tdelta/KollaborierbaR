@@ -12,7 +12,7 @@ public class IntegerUtil {
      @
      @ exceptional_behaviour
      @ requires (x == y);
-     @ signals (RuntimeException) false;
+     @ signals (RuntimeException) true;
      @*/
    public static int sub(int x, int y) {
        if (x == y) {throw new RuntimeException();}
