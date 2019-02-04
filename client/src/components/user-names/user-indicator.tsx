@@ -4,7 +4,6 @@ import './animals.css';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesomeIcon from 'react-fontawesome';
-import stringHash from "string-hash";
 
 export default class UserIndicator extends React.Component<Props, {}> {
 
@@ -33,7 +32,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
             className={'circle'}
           >
                     <FontAwesomeIcon
-                        name={this.userIcons[(stringHash(this.props.name) % this.userIcons.length)]}
+                        name='kiwi-bird'
                         style={{ margin: 'auto' }}
                     />
           </div>
