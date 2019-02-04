@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@stomp/stompjs": "^5.2.0",
+    "@types/react-fontawesome": "^1.6.4",
     "@types/react-notification-system": "^0.2.39",
     "@types/reactstrap": "^6.4.3",
     "@types/socket.io-client": "^1.4.32",
@@ -36,6 +37,7 @@
     "tslint": "tslint -c .tslint.json --project tsconfig.json 'src/**/*.ts*'",
     "tslint-fix": "tslint -c .tslint.json --project tsconfig.json --fix 'src/**/*.ts*'",
     "format": "prettier --write 'src/**/*.ts*'",
+    "tslint-config-check": "tslint-config-prettier-check ./.tslint.json",
     "eslint-config-check": "eslint --print-config . | eslint-config-prettier-check"
   },
   "eslintConfig": {

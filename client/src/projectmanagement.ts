@@ -502,20 +502,16 @@ export default class ProjectManagement {
     if (name !== '..' && name !== '.' && name !== null && !name.includes('/')) {
       // Path to the ressource we want to rename
       // TODO: Handle if project not set
-      const url = `
-        ${serverAddress}
-        /projects
-        /${(this.getCurrentProject() as Project).name}
-        /${path.join('/')}`;
+      const url = `${serverAddress}/projects/${
+        (this.getCurrentProject() as Project).name
+      }/${path.join('/')}`;
 
       // Remove the current filename from the path array
       // and then create path for the renamed ressource:
       const oldfilename = path.pop();
-      const renamedRes = `
-        /projects
-        /${(this.getCurrentProject() as Project).name}
-        /${path.join('/')}
-        /${name}`;
+      const renamedRes = `/projects/${
+        (this.getCurrentProject() as Project).name
+      }/${path.join('/')}/${name}`;
 
       // Create a new array with the modify openPath
       const newOpenPath = path.concat([name]);
@@ -556,11 +552,9 @@ export default class ProjectManagement {
   public updateFileContent(path: string[], content: string): void {
     // Path to the ressource we want to save
     // TODO: Check if project exists
-    const url = `
-      ${serverAddress}
-      /projects
-      /${(this.getCurrentProject() as Project).name}
-      /${path.join('/')}`;
+    const url = `${serverAddress}/projects/${
+      (this.getCurrentProject() as Project).name
+    }/${path.join('/')}`;
 
     const requestbody = {
       fileContent: content,
