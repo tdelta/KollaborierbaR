@@ -156,7 +156,8 @@ export default class App extends React.Component {
                 this.setState({
                     text: response.fileText,
                     filename: response.fileName,
-                    openedPath: path
+                    openedPath: path,
+                    openGoals: []
                 });
                 // TODO: Handle rename with collab controller
                 this.collabController.setFile(this.state.project.name+'/'+path.join('/'),response.fileText);
