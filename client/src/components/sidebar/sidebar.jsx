@@ -6,6 +6,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
 import ProjectTreeView from './project-tree-view.jsx';
+import OpenGoalsView from './open-goals-view.tsx';
 
 import {Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
 import classnames from 'classnames';
@@ -95,11 +96,11 @@ export default class Sidebar extends React.Component {
     }
 
     enableTab(tab) {
-      if (this.state.activeTab !== tab) {
-        this.setState({
-          activeTab: tab
-        });
-      }
+        if (this.state.activeTab !== tab) {
+            this.setState({
+                activeTab: tab
+            });
+        }
     }
 
     /**
@@ -252,7 +253,22 @@ export default class Sidebar extends React.Component {
                                     </div>
                                 </TabPane>
                                 <TabPane tabId="2">
-                                    No open goals.
+                                    <OpenGoalsView
+                                        goals={[
+                                          {
+                                            id: 357,
+                                            sequent: 'wellFormed(heap), self.<created> = TRUE, Quicksort::exactinstance(self) = TRUE, array.<created>'
+                                          },
+                                          {
+                                            id: 302,
+                                            sequent: 'to 20, to < from, wellFormed(heap), self.<created> = TRUE, Quicksort::exactinstance(self) = TRUE'
+                                          },
+                                          {
+                                            id: 335,
+                                            sequent: 'wellFormed(heap), self.<created> = TRUE, Quicksort::exactinstance(self) = TRUE, array.<created>'
+                                          }
+                                        ]}
+                                    />
                                 </TabPane>
                             </TabContent>
                         </div>

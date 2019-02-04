@@ -132,6 +132,10 @@
     color: #caa576;
 }
 
+.goalNodeIcon {
+  margin-right: 0.3rem;
+}
+
 .contextList {
     background-color: #cfd8dc;
     color: #455a64;
