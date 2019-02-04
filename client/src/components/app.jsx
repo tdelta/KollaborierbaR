@@ -63,6 +63,7 @@ export default class App extends React.Component {
         this.editor = React.createRef();
         this.key = new Key(
           this.notificationSystem,
+          (openGoals) => this.setState({openGoals}),
           () => this.state.project.name + '/' + this.state.filename
         );
 
@@ -82,7 +83,10 @@ export default class App extends React.Component {
             openedPath: [],
 
             // warnings, errors, etc. within the currently open file
-            diagnostics: []
+            diagnostics: [],
+
+            // open key goals
+            openGoals: []
         };
     }
 
@@ -204,6 +208,7 @@ export default class App extends React.Component {
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
+                        openGoals={this.state.openGoals}
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}

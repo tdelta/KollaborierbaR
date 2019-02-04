@@ -1,5 +1,7 @@
 import { serverAddress } from './constants';
 
+import OpenGoalInfo from './OpenGoalInfo';
+
 export default class KeyApi {
   public proveFile(path: string): Promise<ProofResults> {
     const escapedPath = escape(path);
@@ -36,4 +38,5 @@ export interface ProofResults {
   succeeded: string[];
   failed: string[];
   errors: string[];
+  openGoals: OpenGoalInfo[];
 }

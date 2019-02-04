@@ -254,20 +254,7 @@ export default class Sidebar extends React.Component {
                                 </TabPane>
                                 <TabPane tabId="2">
                                     <OpenGoalsView
-                                        goals={[
-                                          {
-                                            id: 357,
-                                            sequent: 'wellFormed(heap), self.<created> = TRUE, Quicksort::exactinstance(self) = TRUE, array.<created>'
-                                          },
-                                          {
-                                            id: 302,
-                                            sequent: 'to 20, to < from, wellFormed(heap), self.<created> = TRUE, Quicksort::exactinstance(self) = TRUE'
-                                          },
-                                          {
-                                            id: 335,
-                                            sequent: 'wellFormed(heap), self.<created> = TRUE, Quicksort::exactinstance(self) = TRUE, array.<created>'
-                                          }
-                                        ]}
+                                        goals={this.props.openGoals}
                                     />
                                 </TabPane>
                             </TabContent>
@@ -284,6 +271,12 @@ Sidebar.propTypes = {
         'name': PropTypes.string,
         'contents': PropTypes.arrayOf(PropTypes.object)
     }),
+    'openGoals': PropTypes.arrayOf(
+      PropTypes.shape({
+        'id': PropTypes.number,
+        'sequent': PropTypes.string
+      })
+    ),
     'onOpenFile': PropTypes.func,
     'onDeleteFile': PropTypes.func,
     'onCreateFile': PropTypes.func,
