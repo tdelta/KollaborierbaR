@@ -37,7 +37,7 @@ export interface UsersUpdatedEvent extends ProjectEvent {
   users: User[];
 }
 
-interface User {
+export interface User {
   firstName: string;
   lastName: string;
   crdtId: number;
@@ -110,9 +110,7 @@ export class Network {
             // Subscribe to the topic messagetype
             `/user/${messageType}`,
             // Execute callback when a message is received
-            message => {
-              callback(message.body);
-            },
+            callback,
             // Send a header containing the filename we are working on
             headers
           );
