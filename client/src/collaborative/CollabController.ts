@@ -2,7 +2,11 @@ import Editor from '../components/editor';
 
 import TextPosition from './TextPosition';
 
-import { Network } from '../network';
+import {
+  Network,
+  UsersUpdatedEvent,
+  User,
+} from '../network';
 import {
   LogootSRopes,
   TextInsert,
@@ -23,12 +27,14 @@ export default class CollabController {
   private filepath!: string;
   private project!: string;
   private uidBase: number;
+  private names: string[];
 
   constructor(net: Network, editor: Editor, setText: (text: string) => void) {
     this.network = net;
     this.editorComponent = editor;
     this.editor = editor.editor; // Ace editor
     this.setText = setText;
+    this.names = [];
 
     // this.uidBase = Math.floor(Math.random() * 10);
     this.uidBase = 0;
@@ -69,8 +75,8 @@ export default class CollabController {
   }
 
   public setFile(project: string, filepath: string, content: string) {
-    this.network.unsubscribe('users/' + this.project);
-    this.network.on('users/' + project, {}, this.handleNewUserName.bind(this));
+    this.network.unsubscribe('projects/' + this.project);
+    this.network.on('projects/' + project, {}, this.handleNewUserName.bind(this));
     this.network.broadcast(
       '/file',
       { file: project + '/' + filepath },
@@ -81,14 +87,19 @@ export default class CollabController {
     this.project = project;
   }
 
-  private handleNewUserName(userList: any) {
-    const parsedUserList = JSON.parse(userList);
-    console.log(parsedUserList);
+  private handleNewUserName(event: any) {
+    const parsedEvent: UsersUpdatedEvent = JSON.parse(event.body);
+    if(event.headers.file && event.headers.file == this.project+'/'+this.filepath){
+      this.names = [];
+      for(const user of parsedEvent.users){
+        this.names[user.crdtId] = user.firstName+" "+user.lastName;
+      }
+    }
   }
 
-  public handleRemoteInsert(operation: any) {
+  public handleRemoteInsert(event: any) {
     if (this.document != null) {
-      const parsedOperation = JSON.parse(operation);
+      const parsedOperation = JSON.parse(event.body);
       const operationObj: LogootSAdd | null = LogootSAdd.fromPlain(
         parsedOperation
       );
@@ -106,19 +117,16 @@ export default class CollabController {
         );
         this.editor.ignoreChanges = false;
         const uid: number =
-          (parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1]
-            .replicaNumber +
-            this.uidBase) %
-          10;
-        this.editorComponent.addBackMarker(start, end, uid);
+          parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1].replicaNumber;
+        this.editorComponent.addBackMarker(start, end, uid % 10, this.names[uid]);
       }
       console.log(this.document.str);
     }
   }
 
-  public handleRemoteRemove(operation: any) {
+  public handleRemoteRemove(event: any) {
     if (this.document != null) {
-      const parsedOperation = JSON.parse(operation);
+      const parsedOperation = JSON.parse(event.body);
       const operationObj: LogootSDel | null = LogootSDel.fromPlain(
         parsedOperation
       );
@@ -139,8 +147,8 @@ export default class CollabController {
     }
   }
 
-  public handleDocumentInit(doc: any) {
-    const parsedDoc = JSON.parse(doc);
+  public handleDocumentInit(event: any) {
+    const parsedDoc = JSON.parse(event.body);
     // Try to parse the json into a LogootSRopes (crdt document) object.
     // If this fails, the document variable will remain null and inputs to the editor will be dismissed
     const docObj: LogootSRopes | null = LogootSRopes.fromPlain(

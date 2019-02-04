@@ -94,6 +94,14 @@ public class ProjectSyncController {
 
     final List<Principal> users = sessions.getOrDefault(projectName, new ArrayList<>(0));
 
+    List<User> subscriberNames = getSubscriberNames(users);
+    UsersUpdatedEvent userEvent =
+        new UsersUpdatedEvent(this, projectName, subscriberNames);
+    for(Principal otherUser: users){
+      messagingTemplate.convertAndSendToUser(
+          otherUser.getName(), "/projects/" + projectName, userEvent);
+    }
+
     System.out.println("Removed user " + user.getName() + " from project " + projectName);
     users.remove(user);
     if (users.isEmpty()) {
@@ -193,7 +201,6 @@ public class ProjectSyncController {
 
   @EventListener
   public void handleOpenedFile(final FileOpenedEvent event) {
-    System.out.println("File opened event");
     Principal user = event.getPrincipal();
 
     for (ConcurrentHashMap.Entry<String, List<Principal>> projectEntry : sessions.entrySet()) {

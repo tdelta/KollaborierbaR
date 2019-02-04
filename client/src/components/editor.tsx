@@ -135,24 +135,29 @@ export default class Editor extends React.Component<Props> {
 
   private dynamicMarkers: number[] = [];
 
-  public addBackMarker(start: any, end: any, uid: number) {
+  public addBackMarker(start: any, end: any, uid: number, name: string) {
     const range = Range.fromPoints(start, end);
     const type: string = `n${uid} highlighting`;
+    
+    this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
+    this.anchoredHighlightings
+      .filter(m => m.type === type)
+      .filter(m => parseFloat(m.message.split('|')[1]) > 0.1)
+      .forEach(m => m.message = m.message.split('|')[0]+'|'+(parseFloat(m.message.split('|')[1])-0.02));
 
     this.anchoredHighlightings = addToArray(
       this.anchoredHighlightings,
       range,
-      '',
+      name+'|0.5',
       type,
       this.editor.session
     );
 
-    this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
-
     for (const anchoredRange of this.anchoredHighlightings) {
       const popoverMarker: PopoverMarker = new PopoverMarker(
         anchoredRange,
-        anchoredRange.type
+        anchoredRange.message.split('|')[0],
+        parseFloat(anchoredRange.message.split('|')[1])
       );
       this.dynamicMarkers.push(
         this.editor.session.addDynamicMarker(popoverMarker).id
