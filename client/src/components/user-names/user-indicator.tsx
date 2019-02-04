@@ -10,14 +10,26 @@ export default class UserIndicator extends React.Component<Props, {}> {
 
   constructor(props: Props) {
     super(props);
+      }
+
+  public getColor(crdtId: number): string{
+  const colors = ["#4CAF50","#FF5722","#448AFF",
+   "#00BCD4",
+   "#D32F2F",
+   "#FF4081",
+   "#9E9E9E",
+   "#FFEB3B",
+   "#009688",
+   "#7C4DFF"];
+    return colors[crdtId%10];
   }
 
   public render() {
     return (
       <>
-        <span className="login-text" id={this.props.name}>
+        <span className="login-text" id={this.props.firstName}>
           <div
-            style={{ backgroundColor: this.props.color, color: '#343a40' }}
+            style={{ backgroundColor: this.getColor(this.props.crdtId), color: '#343a40' }}
             className={'circle'}
           >
                     <FontAwesomeIcon
@@ -29,9 +41,9 @@ export default class UserIndicator extends React.Component<Props, {}> {
         <UncontrolledTooltip
           delay={{ show: 0, hide: 0 }}
           placement="bottom"
-          target={this.props.name}
+          target={this.props.firstName}
         >
-          {this.props.name}
+          {this.props.firstName}
         </UncontrolledTooltip>
       </>
     );
@@ -51,6 +63,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
 }
 
 interface Props {
-  name: string;
-  color: string;
+  firstName: string;
+  lastName: string;
+  crdtId: number;
 }
