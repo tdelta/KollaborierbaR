@@ -63,3 +63,8 @@ nav{
   background-image: url(not-supported-annotation.png);
   background-position: 2px center;
 }
+
+.ace_gutter-cell.obligation_todo {
+  background-image: url(obligation-todo.png);
+  background-position: 4px center;
+}

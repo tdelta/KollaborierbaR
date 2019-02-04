@@ -11,6 +11,8 @@ import ProjectManagement from '../projectmanagement.ts';
 
 import CollabController from '../collaborative/CollabController.ts';
 
+import Key from '../key';
+
 //import testSource from '../sample-text.js';
 
 /**
@@ -55,11 +57,14 @@ export default class App extends React.Component {
         this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
         this.createProject = this.projectManagement.createProject.bind(this.projectManagement);
         this.openProject = this.projectManagement.openProject.bind(this.projectManagement);
-        this.runProof = this.runProof.bind(this);
         this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
 
         this.editor = React.createRef();
+        this.key = new Key(
+          this.notificationSystem,
+          () => this.state.project.name + '/' + this.state.filename
+        );
 
         // setup initial state
         this.state = {
@@ -154,11 +159,6 @@ export default class App extends React.Component {
             });
     }
 
-    // sets the path for the runProof rest method in projectmanagement
-    runProof(){
-        return this.projectManagement.runProof(this.state.project.name + '/' + this.state.openedPath.join('/'));
-    }
-
     /**
      * Eventhandler method for keyevent (CTRL + S).
      * On CTRL + S the opened file will be saved persistent on the server
@@ -195,7 +195,7 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
-                    onRunProof={this.runProof}
+                    onProveFile={this.key.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
                     onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
                     notificationSystem={this.notificationSystem}
@@ -219,6 +219,8 @@ export default class App extends React.Component {
                         text={this.state.text}
                         filename={this.state.filename}
                         collabController={this.collabController}
+                        getObligations={this.key.getObligations}
+                        onProveObligation={this.key.proveObligation}
                         ref={this.editor}
                     />
                 </div>

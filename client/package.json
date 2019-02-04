@@ -32,10 +32,12 @@
     "eject": "react-scripts eject",
     "clean": "rm -r build/*",
     "eslint": "eslint -c .eslintrc.js src/**/*.js*",
+    "eslint-fix": "eslint -c .eslintrc.js --fix src/**/*.js*",
     "eslint-pedantic": "eslint -c .eslint-pedantic.js src/**/*.js*",
     "tslint": "tslint -c .tslint.json --project tsconfig.json 'src/**/*.ts*'",
     "format": "prettier --write 'src/**/*.ts*'",
-    "tslint-config-check": "tslint-config-prettier-check ./.tslint.json"
+    "tslint-config-check": "tslint-config-prettier-check ./.tslint.json",
+    "eslint-config-check": "eslint --print-config . | eslint-config-prettier-check"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -55,6 +57,7 @@
     "@types/reactstrap": "^6.4.3",
     "@types/sockjs-client": "^1.1.0",
     "eslint": "^5.6.0",
+    "eslint-config-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.11.1",
     "prettier": "^1.15.2",
     "react-fontawesome": "^1.6.1",

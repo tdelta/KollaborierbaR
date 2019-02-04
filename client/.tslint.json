@@ -23,6 +23,7 @@
         "jsx-boolean-value": false,
         "jsx-no-lambda": false,
 
+        "increment-decrement": [true, "allow-post"],
         "import-name": false,
         "member-ordering": false,
         "no-constant-condition": true,
