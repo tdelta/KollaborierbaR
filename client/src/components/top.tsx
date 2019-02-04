@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import 'bootstrap/dist/css/bootstrap.css';
 import NotificationSystem from 'react-notification-system';
 import '../index.css';
+import Usernames from './user-names/user-names';
 
 import {
   Navbar,
@@ -133,6 +134,8 @@ export default class Top extends React.Component<Props, State> {
         <Navbar color="dark" dark expand="md">
           <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
+            <Usernames />
+
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
                 Key
@@ -141,6 +144,7 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.proveKeY}>Run Proof</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
+
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
                 Project
