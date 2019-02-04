@@ -32,7 +32,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
             className={'circle'}
           >
                     <FontAwesomeIcon
-                        name='kiwi-bird'
+                        name={this.props.lastName}
                         style={{ margin: 'auto' }}
                     />
           </div>

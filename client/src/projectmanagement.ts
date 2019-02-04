@@ -4,6 +4,7 @@ import { UserIndicatorData } from './components/user-names/user-indicator-data';
 import UserIndicator from './components/user-names/user-indicator';
 import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
+import Usernames from './components/user-names/user-names';
 
 import {
   Network,
