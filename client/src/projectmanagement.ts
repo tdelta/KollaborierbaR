@@ -1,7 +1,7 @@
 import NotificationSystem from 'react-notification-system';
 
-import {UserIndicatorData} from './components/user-names/user-indicator-data'
-import UserIndicator from './components/user-names/user-indicator'
+import { UserIndicatorData } from './components/user-names/user-indicator-data';
+import UserIndicator from './components/user-names/user-indicator';
 import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
 
@@ -124,9 +124,6 @@ export default class ProjectManagement {
               }
             }
 
-
-
-   
             if (this.notificationSystem.current) {
               this.notificationSystem.current.clearNotifications();
               this.notificationSystem.current.addNotification({
@@ -588,23 +585,23 @@ export default class ProjectManagement {
     });
   }
 
-  public static getUsernames(): Promise<UserIndicatorData[]>{
-      const url = serverAddress + '/usernames';
-          var test = [
-                {"name": "Peter", "color": "#4CAF50"},
-                {"name": "Lustig", "color": "#FF5722"},
-                {"name": "Mark", "color": "#448AFF"},
-                {"name": "BigJ", "color": "#00BCD4"},
-                {"name": "Hallo", "color": "#D32F2F"},
-                {"name": "lalalala", "color": "#FF4081"}
-               ];
-      /*return test; */
+  public static getUsernames(): Promise<UserIndicatorData[]> {
+    const url = serverAddress + '/usernames';
+    var test = [
+      { name: 'Peter', color: '#4CAF50' },
+      { name: 'Lustig', color: '#FF5722' },
+      { name: 'Mark', color: '#448AFF' },
+      { name: 'BigJ', color: '#00BCD4' },
+      { name: 'Hallo', color: '#D32F2F' },
+      { name: 'lalalala', color: '#FF4081' },
+    ];
+    /*return test; */
 
     var promise1 = new Promise<UserIndicatorData[]>(function(resolve, reject) {
-        setTimeout(function() {
-          resolve(test);
-        }, 300);
-      });
+      setTimeout(function() {
+        resolve(test);
+      }, 300);
+    });
     return promise1;
 
     /* return fetch(url, {
@@ -615,7 +612,5 @@ export default class ProjectManagement {
             },
         })
             .then((response) => response.json());*/
-    }
-
+  }
 }
-
