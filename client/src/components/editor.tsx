@@ -20,7 +20,7 @@ interface AceChangeEvent {
   action: string;
   start: TextPosition;
   end: TextPosition;
-  lines: string[]
+  lines: string[];
 }
 
 export default class Editor extends React.Component<Props> {
@@ -79,12 +79,17 @@ export default class Editor extends React.Component<Props> {
     });
 
     this.editor.on('gutterclick', (e: any) => {
-      if(e.domEvent.target.className.includes('obligation_todo') && e.domEvent.target.firstChild){
-        let rowString = e.domEvent.target.firstChild.data;
-        let row = parseInt(rowString) - 1;
-        if(row){
+      if (
+        e.domEvent.target.className.includes('obligation_todo') &&
+        e.domEvent.target.firstChild
+      ) {
+        const rowString = e.domEvent.target.firstChild.data;
+        const row = parseInt(rowString, 10) - 1;
+        if (row) {
           this.editor.session.getSelection().clearSelection();
-          let obligations = this.props.getObligations(this.editor.session.getLines(0,this.editor.session.getLength()));
+          const obligations = this.props.getObligations(
+            this.editor.session.getLines(0, this.editor.session.getLength())
+          );
           console.log(obligations);
           console.log(obligations[row]);
           this.props.onProveObligation(obligations[row]);
@@ -100,26 +105,28 @@ export default class Editor extends React.Component<Props> {
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
-      this.editor.setValue(this.props.text,-1);
+      this.editor.setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
     }
     this.setProofObligations();
   }
 
-  private setProofObligations(){
-    let obligations = this.props.getObligations(this.editor.session.getLines(0,this.editor.session.getLength()));
+  private setProofObligations() {
+    const obligations = this.props.getObligations(
+      this.editor.session.getLines(0, this.editor.session.getLength())
+    );
     this.obligationAnnotations = [];
     // Iterate over the indices of the result, which correspond to the line numbers
-    for(const index in obligations){
+    for (const index of Object.keys(obligations)) {
       this.obligationAnnotations.push({
-        row: parseInt(index),
+        row: parseInt(index, 10),
         column: 0,
         text: 'Click to prove!',
         type: 'obligation_todo',
-        startRow: parseInt(index),
+        startRow: parseInt(index, 10),
         startCol: 0,
-        endRow: parseInt(index),
-        endCol: 0
+        endRow: parseInt(index, 10),
+        endCol: 0,
       });
     }
   }
@@ -141,7 +148,7 @@ export default class Editor extends React.Component<Props> {
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
         }
-        if (annotation.type === 'obligation_todo') { 
+        if (annotation.type === 'obligation_todo') {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'obligation_todo';
@@ -165,20 +172,11 @@ export default class Editor extends React.Component<Props> {
     );
   }
 
-  public addBackMarker(start: any, end: any, uid: number){ 
-    let range = new Range(
-      start.row,
-      start.column,
-      end.row,
-      end.column
-    );
-    for (let j = 0; j < this.anchoredHighlightings.length; j = j + 1) {
+  public addBackMarker(start: any, end: any, uid: number) {
+    const range = new Range(start.row, start.column, end.row, end.column);
+    for (const anchoredHighlighting of this.anchoredHighlightings) {
       // Dont add the marker if it overlaps with another marker
-      if (
-        range.intersects(
-          this.anchoredHighlightings[j].range
-        )
-      ) {
+      if (range.intersects(anchoredHighlighting.range)) {
         return;
       }
     }
@@ -187,13 +185,11 @@ export default class Editor extends React.Component<Props> {
     const type: string = `n${uid} highlighting`;
     const message: string = '';
 
-    this.anchoredHighlightings.push(
-      {
-        range,
-        type,
-        message,
-      }
-    );
+    this.anchoredHighlightings.push({
+      range,
+      type,
+      message,
+    });
     this.setMarkers();
   }
 
@@ -235,7 +231,9 @@ export default class Editor extends React.Component<Props> {
 
       this.editor.session.clearAnnotations();
       this.editor.session.setAnnotations(
-        this.anchoredMarkers.map(this.toAnnotation).concat(this.obligationAnnotations)
+        this.anchoredMarkers
+          .map(this.toAnnotation)
+          .concat(this.obligationAnnotations)
       );
       // Display the markers in the ace editor
       this.setMarkers();
@@ -252,22 +250,21 @@ export default class Editor extends React.Component<Props> {
     }
     this.markers = [];
     // Add markers for all anchoredMarkers
-    this.processMarkerArray(this.anchoredMarkers,true);
-    this.processMarkerArray(this.anchoredHighlightings,false);
+    this.processMarkerArray(this.anchoredMarkers, true);
+    this.processMarkerArray(this.anchoredHighlightings, false);
   }
 
   /**
    * Helper function for setMarkers
    */
-  private processMarkerArray(anchoredMarkers: AnchoredMarker[],front: boolean){
+  private processMarkerArray(
+    anchoredMarkers: AnchoredMarker[],
+    front: boolean
+  ) {
     addLoop: for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
       for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
         // Dont add the marker if it overlaps with another marker
-        if (
-          anchoredMarkers[i].range.intersects(
-            anchoredMarkers[j].range
-          )
-        ) {
+        if (anchoredMarkers[i].range.intersects(anchoredMarkers[j].range)) {
           continue addLoop;
         }
       }
@@ -289,7 +286,9 @@ export default class Editor extends React.Component<Props> {
    * @param marker AnchoredMarker to convert
    * @return Annotation object with the same values
    */
-  private toAnnotation(marker: AnchoredMarker): Annotation { return { row: marker.range.start.row,
+  private toAnnotation(marker: AnchoredMarker): Annotation {
+    return {
+      row: marker.range.start.row,
       column: marker.range.start.column,
       text: marker.message,
       type: marker.type,
@@ -301,21 +300,17 @@ export default class Editor extends React.Component<Props> {
   }
 
   public insert(text: string, position: TextPosition) {
-    this.editor.getSession().getDocument().insertMergedLines(
-      position,
-      text.split('\n')
-    );
+    this.editor
+      .getSession()
+      .getDocument()
+      .insertMergedLines(position, text.split('\n'));
   }
 
   public delete(from: TextPosition, to: TextPosition) {
-    this.editor.getSession().getDocument().remove(
-      new ace.Range(
-        from.row,
-        from.column,
-        to.row,
-        to.column
-      )
-    );
+    this.editor
+      .getSession()
+      .getDocument()
+      .remove(new ace.Range(from.row, from.column, to.row, to.column));
   }
 }
 

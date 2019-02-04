@@ -12,6 +12,8 @@
     "rules": {
         "prettier": true,
 
+        "comment-format": false,
+        "object-literal-shorthand": false,
         "quotemark": [true, "single", "jsx-double"],
         "object-literal-key-quotes": [true, "as-needed"],
         "object-literal-sort-keys": false,
@@ -21,7 +23,9 @@
 
         "member-ordering": [false],
         "jsx-boolean-value": false,
+        "jsx-no-lambda": false,
 
+        "increment-decrement": [true, "allow-post"],
         "import-name": false,
         "member-ordering": false,
         "no-constant-condition": true,
@@ -50,7 +54,10 @@
         "ter-func-call-spacing": true,
         "ter-no-mixed-spaces-and-tabs": true,
         "sort-imports": false,
-        "ter-arrow-spacing": true
+        "ter-arrow-spacing": true,
+        "max-line-length": false,
+
+        "no-console": false
     },
     "rulesDirectory": []
 }
