@@ -1,4 +1,5 @@
 export interface UserIndicatorData {
-  name: string;
-  color: string;
+  firstName: string;
+  lastName: string;
+  crdtId: number;
 }

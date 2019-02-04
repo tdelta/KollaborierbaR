@@ -587,17 +587,20 @@ export default class ProjectManagement {
 
   public static getUsernames(): Promise<UserIndicatorData[]> {
     const url = serverAddress + '/usernames';
-    let test = [
-      { name: 'Peter', color: '#4CAF50' },
-      { name: 'Lustig', color: '#FF5722' },
-      { name: 'Mark', color: '#448AFF' },
-      { name: 'BigJ', color: '#00BCD4' },
-      { name: 'Hallo', color: '#D32F2F' },
-      { name: 'lalalala', color: '#FF4081' },
+    const test = [
+      { firstName: 'Peter', lastName: 'lalala', crdtId: 0 },
+      { firstName: 'Lustig', lastName: 'lalala', crdtId: 1 },
+      { firstName: 'Mark', lastName: 'lalala', crdtId: 2 },
+      { firstName: 'BigJ', lastName: 'lalala', crdtId: 3 },
+      { firstName: 'Hallo', lastName: 'lalala', crdtId: 4 },
+      { firstName: 'lalalala', lastName: 'lalala', crdtId: 5 }
     ];
     /*return test; */
 
-    let promise1 = new Promise<UserIndicatorData[]>(function(resolve, reject) {
+    const promise1 = new Promise<UserIndicatorData[]>(function(
+      resolve,
+      reject
+    ) {
       setTimeout(function() {
         resolve(test);
       }, 300);
