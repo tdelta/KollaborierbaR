@@ -30,7 +30,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
   public render() {
     return (
       <>
-        <span className='login-text' id={this.props.firstName}>
+        <span className='login-text' id={`user-circle-${this.props.uid}`}>
           <div
             style={{ backgroundColor: this.getColor(this.props.crdtId), color: '#343a40' }}
             className={'circle'}
@@ -44,7 +44,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
         <UncontrolledTooltip
           delay={{ show: 0, hide: 0 }}
           placement='bottom'
-          target={this.props.firstName}
+          target={`user-circle-${this.props.uid}`}
         >
           {this.props.firstName + ' ' + this.capitalize(this.props.lastName)}
         </UncontrolledTooltip>
@@ -66,6 +66,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
 }
 
 interface Props {
+  uid: number;
   firstName: string;
   lastName: string;
   crdtId: number;
