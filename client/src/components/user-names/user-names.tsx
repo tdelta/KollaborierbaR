@@ -28,7 +28,7 @@ export default class Usernames extends React.Component<Props, State> {
     return (
       <>
         {this.state.userindicators.map(iterator => (
-          <UserIndicator name={iterator.name} color={iterator.color} />
+          <UserIndicator firstName={iterator.firstName} lastName={iterator.lastName} crdtId={iterator.crdtId} />
         ))}
       </>
     );
