@@ -67,4 +67,11 @@ nav{
 .ace_gutter-cell.obligation_todo {
   background-image: url(obligation-todo.png);
   background-position: 4px center;
+  cursor: pointer;
+}
+
+.ace_gutter-cell.obligation_done {
+  background-image: url(obligation-done.svg);
+  background-size: 16px;
+  background-position: 2px center;
 }
