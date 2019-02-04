@@ -99,9 +99,7 @@ export default class Editor extends React.Component<Props> {
 
           this.props.onProveObligation(obligations[row]);
         }
-      }
-
-      else if (
+      } else if (
         e.domEvent.target.className.includes('obligation_done') &&
         e.domEvent.target.firstChild
       ) {
@@ -152,10 +150,11 @@ export default class Editor extends React.Component<Props> {
 
       const row = parseInt(index, 10);
 
-      let isProven: boolean = this.props.provenObligations.includes(obligationIdx);
+      let isProven: boolean = this.props.provenObligations.includes(
+        obligationIdx
+      );
 
       if (isProven) {
-        console.log(`Row ${row} has been proven!`);
         this.obligationAnnotations.push({
           row: row,
           column: 0,
@@ -166,9 +165,7 @@ export default class Editor extends React.Component<Props> {
           endRow: row,
           endCol: 0,
         });
-      }
-
-      else {
+      } else {
         this.obligationAnnotations.push({
           row: row,
           column: 0,
@@ -186,12 +183,12 @@ export default class Editor extends React.Component<Props> {
   }
 
   private updateAnnotations(): void {
-      this.editor.session.clearAnnotations();
-      this.editor.session.setAnnotations(
-        this.props.diagnostics
-          .map(toAnnotation)
-          .concat(this.obligationAnnotations)
-      );
+    this.editor.session.clearAnnotations();
+    this.editor.session.setAnnotations(
+      this.props.diagnostics
+        .map(toAnnotation)
+        .concat(this.obligationAnnotations)
+    );
   }
 
   /**
@@ -210,13 +207,11 @@ export default class Editor extends React.Component<Props> {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
-        }
-        else if (annotation.type === 'obligation_todo') {
+        } else if (annotation.type === 'obligation_todo') {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'obligation_todo';
-        }
-        else if (annotation.type === 'obligation_done') {
+        } else if (annotation.type === 'obligation_done') {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'obligation_done';
@@ -245,23 +240,32 @@ export default class Editor extends React.Component<Props> {
   public addBackMarker(start: any, end: any, uid: number, name: string) {
     const range = Range.fromPoints(start, end);
     const type: string = `n${uid} highlighting`;
-    
+
     this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
     this.anchoredHighlightings
       .filter(m => m.type === type)
       .filter(m => parseFloat(m.message.split('|')[1]) > 0.1)
-      .forEach(m => m.message = m.message.split('|')[0]+'|'+(parseFloat(m.message.split('|')[1])-0.02));
+      .forEach(
+        m =>
+          (m.message =
+            m.message.split('|')[0] +
+            '|' +
+            (parseFloat(m.message.split('|')[1]) - 0.02))
+      );
 
     this.anchoredHighlightings = addToArray(
       this.anchoredHighlightings,
       range,
-      name+'|0.5',
+      name + '|0.5',
       type,
       this.editor.session
     );
 
-    if(this.anchoredHighlightings.length > 5){
-      this.anchoredHighlightings.splice(0,this.anchoredHighlightings.length - 5);
+    if (this.anchoredHighlightings.length > 5) {
+      this.anchoredHighlightings.splice(
+        0,
+        this.anchoredHighlightings.length - 5
+      );
     }
 
     for (const anchoredRange of this.anchoredHighlightings) {

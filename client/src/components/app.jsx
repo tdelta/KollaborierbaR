@@ -67,6 +67,7 @@ export default class App extends React.Component {
         this.key = new Key(
           this.notificationSystem,
           this.addProvenObligations,
+          (openGoals) => this.setState({openGoals}),
           () => this.state.project.name + '/' + this.state.filename
         );
 
@@ -89,7 +90,10 @@ export default class App extends React.Component {
             diagnostics: [],
 
             // indices of obligations, that have been proven
-            provenObligations: []
+            provenObligations: [],
+
+            // open key goals
+            openGoals: []
         };
     }
 
@@ -183,7 +187,8 @@ export default class App extends React.Component {
                     text: response.fileText,
                     filename: response.fileName,
                     openedPath: path,
-                    provenObligations: []
+                    provenObligations: [],
+                    openGoals: []
                 });
                 // TODO: Handle rename with collab controller
                 this.collabController.setFile(this.state.project.name,path.join('/'),response.fileText);
@@ -235,6 +240,7 @@ export default class App extends React.Component {
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
+                        openGoals={this.state.openGoals}
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}

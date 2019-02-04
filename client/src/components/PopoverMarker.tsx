@@ -64,9 +64,12 @@ export default class PopoverMarker {
     // Executed when the mouse enters the highlighted area
     htmlElement.addEventListener('mouseenter', () => {
       // If the ref is referring to a present element in the dom, set it to be visible
-      if (this.popover.current != null){
+      if (this.popover.current != null) {
         this.popover.current.setState({ isOpen: true });
-        window.setTimeout(this.popover.current.hide.bind(this.popover.current),4000);
+        window.setTimeout(
+          this.popover.current.hide.bind(this.popover.current),
+          4000
+        );
       }
     });
 
@@ -108,8 +111,8 @@ class MarkerPopover extends React.Component<Props, State> {
     );
   }
 
-  public hide(){
-    this.setState({isOpen: false});
+  public hide() {
+    this.setState({ isOpen: false });
   }
 }
 

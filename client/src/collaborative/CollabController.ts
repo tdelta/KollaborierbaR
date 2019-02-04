@@ -2,11 +2,7 @@ import Editor from '../components/editor';
 
 import TextPosition from './TextPosition';
 
-import {
-  Network,
-  UsersUpdatedEvent,
-  User,
-} from '../network';
+import { Network, UsersUpdatedEvent, User } from '../network';
 import {
   LogootSRopes,
   TextInsert,
@@ -76,7 +72,11 @@ export default class CollabController {
 
   public setFile(project: string, filepath: string, content: string) {
     this.network.unsubscribe('projects/' + this.project);
-    this.network.on('projects/' + project, {}, this.handleNewUserName.bind(this));
+    this.network.on(
+      'projects/' + project,
+      {},
+      this.handleNewUserName.bind(this)
+    );
     this.network.broadcast(
       '/file',
       { file: project + '/' + filepath },
@@ -89,10 +89,13 @@ export default class CollabController {
 
   private handleNewUserName(event: any) {
     const parsedEvent: UsersUpdatedEvent = JSON.parse(event.body);
-    if(event.headers.file && event.headers.file == this.project+'/'+this.filepath){
+    if (
+      event.headers.file &&
+      event.headers.file == this.project + '/' + this.filepath
+    ) {
       this.names = [];
-      for(const user of parsedEvent.users){
-        this.names[user.crdtId] = user.firstName+" "+user.lastName;
+      for (const user of parsedEvent.users) {
+        this.names[user.crdtId] = user.firstName + ' ' + user.lastName;
       }
     }
   }
@@ -117,8 +120,14 @@ export default class CollabController {
         );
         this.editor.ignoreChanges = false;
         const uid: number =
-          parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1].replicaNumber;
-        this.editorComponent.addBackMarker(start, end, uid % 10, this.names[uid]);
+          parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1]
+            .replicaNumber;
+        this.editorComponent.addBackMarker(
+          start,
+          end,
+          uid % 10,
+          this.names[uid]
+        );
       }
       console.log(this.document.str);
     }

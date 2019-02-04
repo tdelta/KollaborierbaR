@@ -2,15 +2,19 @@ import KeyApi, { ProofResults } from './key-api';
 import NotificationSystem from 'react-notification-system';
 import { RefObject } from 'react';
 
+import OpenGoalInfo from './OpenGoalInfo';
+
 export default class Key {
   private keyApi: KeyApi = new KeyApi();
   private getFilePath: () => string;
   private setProvenObligations: (provenObligations: number[]) => void;
   private notificationSystem: RefObject<NotificationSystem.System>;
+  private setOpenGoals: (openGoals: OpenGoalInfo[]) => void;
 
   constructor(
     notificationSystem: RefObject<NotificationSystem.System>,
     setProvenObligations: (provenObligations: number[]) => void,
+    setOpenGoals: (openGoals: OpenGoalInfo[]) => void,
     getFilePath: () => string
   ) {
     this.notificationSystem = notificationSystem;
@@ -18,6 +22,7 @@ export default class Key {
     this.getFilePath = getFilePath;
     this.proveFile = this.proveFile.bind(this);
     this.proveObligation = this.proveObligation.bind(this);
+    this.setOpenGoals = setOpenGoals;
 
     this.sendNotifications = this.sendNotifications.bind(this);
     this.handleResults = this.handleResults.bind(this);
@@ -34,9 +39,8 @@ export default class Key {
         autoDismiss: 0,
       });
     }
-    this.keyApi
-      .proveFile(this.getFilePath())
-      .then(this.handleResults);
+
+    this.keyApi.proveFile(this.getFilePath()).then(this.handleResults);
   }
 
   private sendNotifications(results: ProofResults): void {
@@ -86,19 +90,22 @@ export default class Key {
         autoDismiss: 0,
       });
     }
-    
-    return this.keyApi.proveObligation(
-      this.getFilePath(), nr
-    ).then(this.handleResults);
+
+    return this.keyApi
+      .proveObligation(this.getFilePath(), nr)
+      .then(this.handleResults);
   }
 
   private handleResults(results: ProofResults): void {
-      const provenObligations: number[] =
-        results.succeeded.map(success => success.obligationIdx);
+    const provenObligations: number[] = results.succeeded.map(
+      success => success.obligationIdx
+    );
 
-      this.setProvenObligations(provenObligations);
+    this.setProvenObligations(provenObligations);
 
-      this.sendNotifications(results);
+    this.setOpenGoals(results.openGoals);
+
+    this.sendNotifications(results);
   }
 
   /**
