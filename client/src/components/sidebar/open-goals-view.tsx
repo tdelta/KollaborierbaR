@@ -59,6 +59,7 @@ export default class OpenGoalsView extends React.Component<Props, State> {
 
 // defining the structure of this react components properties
 interface Props {
+  project: any;
   goals: Goal[];
 }
 

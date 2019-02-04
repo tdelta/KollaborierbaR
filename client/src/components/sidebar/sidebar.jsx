@@ -164,8 +164,14 @@ export default class Sidebar extends React.Component {
         if (prevProps.project !== this.props.project) {
             // if so, the sidebar should definitely be visible
             this.setState({
-                'collapsed': false
+                collapsed: false
             });
+        }
+
+        else if (
+          prevProps.openGoals.length === 0 && this.props.openGoals.length > 0
+        ) {
+          this.enableTab('2');
         }
     }
 
