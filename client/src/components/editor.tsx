@@ -5,8 +5,13 @@ import 'ace-builds/src-noconflict/theme-pastel_on_dark';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Annotation, Diagnostic, toAnnotation, diagnosticPriority } from '../diagnostics';
-import AnchoredMarker ,{addToArray} from './AnchoredMarker';
+import {
+  Annotation,
+  Diagnostic,
+  toAnnotation,
+  diagnosticPriority,
+} from '../diagnostics';
+import AnchoredMarker, { addToArray } from './AnchoredMarker';
 import PopoverMarker from './PopoverMarker';
 
 import '../highlighting/jml.js';
@@ -54,7 +59,7 @@ export default class Editor extends React.Component<Props> {
     this.editor.on('change', () => {
       // pass the text in the editor up to the app component
       //if(!this.editor.ignoreChanges)
-        this.props.setText(this.editor.getValue());
+      this.props.setText(this.editor.getValue());
     });
 
     this.editor.on('change', () => {
@@ -66,15 +71,13 @@ export default class Editor extends React.Component<Props> {
       }, 1000);
     });
 
-    this.editor.on('change',(delta: any) => {
-        this.anchoredHighlightings.forEach(h => h.onChange(delta));
-        this.anchoredMarkers.forEach(m => m.onChange(delta));
-        if(this.testMarker)
-        this.testMarker.onChange(delta);
-        // Update the position of the existing error markers in the editor
-        this.setMarkers();
-      }
-    );
+    this.editor.on('change', (delta: any) => {
+      this.anchoredHighlightings.forEach(h => h.onChange(delta));
+      this.anchoredMarkers.forEach(m => m.onChange(delta));
+      if (this.testMarker) this.testMarker.onChange(delta);
+      // Update the position of the existing error markers in the editor
+      this.setMarkers();
+    });
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
@@ -85,11 +88,11 @@ export default class Editor extends React.Component<Props> {
       this.editor.ignoreChanges = true;
       this.editor.setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
-      for(const marker of this.dynamicMarkers){
+      for (const marker of this.dynamicMarkers) {
         this.editor.session.removeMarker(marker);
       }
     }
-    if (this.props.diagnostics !== prevProps.diagnostics){
+    if (this.props.diagnostics !== prevProps.diagnostics) {
       this.setAnchors();
     }
   }
@@ -132,28 +135,29 @@ export default class Editor extends React.Component<Props> {
 
   private dynamicMarkers: number[] = [];
 
-  public addBackMarker(start: any, end: any, uid: number){ 
-    let range = Range.fromPoints(start,end);
+  public addBackMarker(start: any, end: any, uid: number) {
+    const range = Range.fromPoints(start, end);
     const type: string = `n${uid} highlighting`;
 
     this.anchoredHighlightings = addToArray(
-        this.anchoredHighlightings,
-        range,
-        '',
-        type,
-        this.editor.session
+      this.anchoredHighlightings,
+      range,
+      '',
+      type,
+      this.editor.session
     );
 
-    this.dynamicMarkers.keys().forEach(m => this.editor.session.removeMarker(marker));
-    this.dy
+    this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
 
-    let popoverMarker: PopoverMarker = new PopoverMarker(
+    for (const anchoredRange of this.anchoredHighlightings) {
+      const popoverMarker: PopoverMarker = new PopoverMarker(
         anchoredRange,
-        anchoredRange.type,
-    );
-    for(const anchoredRange of this.anchoredHighlightings){
-      this.dynamicMarkers[this.editor.session.addDynamicMarker(popoverMarker).id] = popoverMarker;
-    } 
+        anchoredRange.type
+      );
+      this.dynamicMarkers.push(
+        this.editor.session.addDynamicMarker(popoverMarker).id
+      );
+    }
   }
 
   /**
@@ -173,11 +177,15 @@ export default class Editor extends React.Component<Props> {
       this.anchoredMarkers = [];
       // Process each element of array of diagonistics
       for (const diagnostic of this.props.diagnostics) {
-
         // Add the anchors and content for this diagnostic to the anchoredMarkers Array
         this.anchoredMarkers = addToArray(
           this.anchoredMarkers,
-          new Range(diagnostic.startRow,diagnostic.startCol,diagnostic.endRow,diagnostic.endCol),
+          new Range(
+            diagnostic.startRow,
+            diagnostic.startCol,
+            diagnostic.endRow,
+            diagnostic.endCol
+          ),
           diagnostic.kind.toLowerCase(),
           diagnostic.message,
           this.editor.session
@@ -214,7 +222,7 @@ export default class Editor extends React.Component<Props> {
     anchoredMarkers: AnchoredMarker[],
     front: boolean
   ) {
-  for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
+    for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
       for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
         // Add the marker to the editor
         this.markers.push(
