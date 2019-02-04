@@ -5,6 +5,8 @@ import 'ace-builds/src-noconflict/theme-pastel_on_dark';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import CollabController from '../collaborative/CollabController';
+
 import {
   Annotation,
   Diagnostic,
@@ -76,7 +78,7 @@ export default class Editor extends React.Component<Props> {
     this.editor.on('change', (delta: any) => {
       this.anchoredHighlightings.forEach(h => h.onChange(delta));
       this.anchoredMarkers.forEach(m => m.onChange(delta));
-      if (this.testMarker) this.testMarker.onChange(delta);
+
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
@@ -135,6 +137,7 @@ export default class Editor extends React.Component<Props> {
     if (this.props.diagnostics !== prevProps.diagnostics) {
       this.setAnchors();
     }
+
     this.setProofObligations();
   }
 
@@ -185,8 +188,8 @@ export default class Editor extends React.Component<Props> {
   private updateAnnotations(): void {
       this.editor.session.clearAnnotations();
       this.editor.session.setAnnotations(
-        this.anchoredMarkers
-          .map(this.toAnnotation)
+        this.props.diagnostics
+          .map(toAnnotation)
           .concat(this.obligationAnnotations)
       );
   }
@@ -360,20 +363,4 @@ interface Props {
   collabController: CollabController;
   getObligations: (lines: string[]) => number[];
   onProveObligation: (nr: number) => boolean;
-}
-
-/**
- * This structure is used to save markers in a document within ACE together with
- * their anchor points
- *
- * This means it can be used to underline sections of a document and display
- * messages with an icon in the gutter.
- *
- * If the document is edited, the marker will be moved with the document's
- * contents.
- */
-interface AnchoredMarker {
-  range: ace_types.Ace.Range; // used to mark a region within the editor: https://ace.c9.io/#nav=api&api=range
-  type: string; // type of the marking, whether its an error, a warning, something else, ...
-  message: string; // displayed message at the marker
 }
