@@ -29,7 +29,7 @@ export default class Editor extends React.Component<Props> {
   private anchoredMarkers: AnchoredMarker[];
   private anchoredHighlightings: AnchoredMarker[];
   private annotations: number[];
-  private testMarker!: AnchoredMarker;
+  private obligationAnnotations: Annotation[] = [];
 
   constructor(props: Props) {
     super(props);
@@ -38,6 +38,8 @@ export default class Editor extends React.Component<Props> {
     this.anchoredMarkers = [];
     this.anchoredHighlightings = [];
     this.annotations = [];
+
+    this.updateAnnotations = this.updateAnnotations.bind(this);
   }
 
   /**
@@ -78,6 +80,44 @@ export default class Editor extends React.Component<Props> {
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
+
+    this.editor.on('gutterclick', (e: any) => {
+      if (
+        e.domEvent.target.className.includes('obligation_todo') &&
+        e.domEvent.target.firstChild
+      ) {
+        const rowString = e.domEvent.target.firstChild.data;
+        const row = parseInt(rowString, 10) - 1;
+
+        if (row) {
+          this.editor.session.getSelection().clearSelection();
+          const obligations = this.props.getObligations(
+            this.editor.session.getLines(0, this.editor.session.getLength())
+          );
+
+          this.props.onProveObligation(obligations[row]);
+        }
+      }
+
+      else if (
+        e.domEvent.target.className.includes('obligation_done') &&
+        e.domEvent.target.firstChild
+      ) {
+        const rowString = e.domEvent.target.firstChild.data;
+        const row = parseInt(rowString, 10) - 1;
+
+        if (row) {
+          this.editor.session.getSelection().clearSelection();
+          const obligations = this.props.getObligations(
+            this.editor.session.getLines(0, this.editor.session.getLength())
+          );
+
+          this.props.resetObligation(obligations[row]);
+          this.props.onProveObligation(obligations[row]);
+        }
+      }
+    });
+
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
@@ -95,6 +135,60 @@ export default class Editor extends React.Component<Props> {
     if (this.props.diagnostics !== prevProps.diagnostics) {
       this.setAnchors();
     }
+    this.setProofObligations();
+  }
+
+  private setProofObligations() {
+    const obligations = this.props.getObligations(
+      this.editor.session.getLines(0, this.editor.session.getLength())
+    );
+    this.obligationAnnotations = [];
+    // Iterate over the indices of the result, which correspond to the line numbers
+    for (const index of Object.keys(obligations)) {
+      const obligationIdx: number = obligations[index as any] as number;
+
+      const row = parseInt(index, 10);
+
+      let isProven: boolean = this.props.provenObligations.includes(obligationIdx);
+
+      if (isProven) {
+        console.log(`Row ${row} has been proven!`);
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Proven!',
+          type: 'obligation_done',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      }
+
+      else {
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Click to prove!',
+          type: 'obligation_todo',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      }
+    }
+
+    this.updateAnnotations();
+  }
+
+  private updateAnnotations(): void {
+      this.editor.session.clearAnnotations();
+      this.editor.session.setAnnotations(
+        this.anchoredMarkers
+          .map(this.toAnnotation)
+          .concat(this.obligationAnnotations)
+      );
   }
 
   /**
@@ -113,6 +207,16 @@ export default class Editor extends React.Component<Props> {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
+        }
+        else if (annotation.type === 'obligation_todo') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_todo';
+        }
+        else if (annotation.type === 'obligation_done') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_done';
         }
       }
     };
@@ -201,10 +305,7 @@ export default class Editor extends React.Component<Props> {
         );
       }
 
-      this.editor.session.clearAnnotations();
-      this.editor.session.setAnnotations(
-        this.props.diagnostics.map(toAnnotation)
-      );
+      this.updateAnnotations();
 
       // Display the markers in the ace editor
       this.setMarkers();
@@ -250,8 +351,29 @@ export default class Editor extends React.Component<Props> {
 // defining the structure of this react components properties
 interface Props {
   diagnostics: Diagnostic[];
+  provenObligations: number[];
   text: string;
   filename: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
+  resetObligation(obligationIdx: number): void;
+  collabController: CollabController;
+  getObligations: (lines: string[]) => number[];
+  onProveObligation: (nr: number) => boolean;
+}
+
+/**
+ * This structure is used to save markers in a document within ACE together with
+ * their anchor points
+ *
+ * This means it can be used to underline sections of a document and display
+ * messages with an icon in the gutter.
+ *
+ * If the document is edited, the marker will be moved with the document's
+ * contents.
+ */
+interface AnchoredMarker {
+  range: ace_types.Ace.Range; // used to mark a region within the editor: https://ace.c9.io/#nav=api&api=range
+  type: string; // type of the marking, whether its an error, a warning, something else, ...
+  message: string; // displayed message at the marker
 }

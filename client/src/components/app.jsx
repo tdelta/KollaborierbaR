@@ -11,6 +11,8 @@ import ProjectManagement from '../projectmanagement.ts';
 
 import CollabController from '../collaborative/CollabController.ts';
 
+import Key from '../key';
+
 //import testSource from '../sample-text.js';
 
 /**
@@ -48,6 +50,9 @@ export default class App extends React.Component {
         this.setText = this.setText.bind(this);
         this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
+        this.addProvenObligations = this.addProvenObligations.bind(this);
+        this.resetObligation = this.resetObligation.bind(this);
+        this.proveFile = this.proveFile.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
         this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.filename, this.state.project.name, path);
@@ -55,11 +60,15 @@ export default class App extends React.Component {
         this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
         this.createProject = this.projectManagement.createProject.bind(this.projectManagement);
         this.openProject = this.projectManagement.openProject.bind(this.projectManagement);
-        this.runProof = this.runProof.bind(this);
         this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
 
         this.editor = React.createRef();
+        this.key = new Key(
+          this.notificationSystem,
+          this.addProvenObligations,
+          () => this.state.project.name + '/' + this.state.filename
+        );
 
         // setup initial state
         this.state = {
@@ -77,7 +86,10 @@ export default class App extends React.Component {
             openedPath: [],
 
             // warnings, errors, etc. within the currently open file
-            diagnostics: []
+            diagnostics: [],
+
+            // indices of obligations, that have been proven
+            provenObligations: []
         };
     }
 
@@ -122,6 +134,29 @@ export default class App extends React.Component {
         });
     }
 
+    addProvenObligations(provenObligations) {
+        this.setState({
+          provenObligations: provenObligations.concat(this.state.provenObligations)
+        });
+    }
+
+    resetObligation(obligationIdx) {
+        const provenObligations = this.state.provenObligations
+          .filter(provenObligationIdx => provenObligationIdx !== obligationIdx);
+
+        this.setState({
+          provenObligations
+        });
+    }
+
+    proveFile() {
+        this.setState({
+          provenObligations: []
+        });
+
+        this.key.proveFile();
+    }
+
     /**
      * React lifecycle method: Called after this component has been initialized
      * and inserted into the DOM tree.
@@ -147,16 +182,12 @@ export default class App extends React.Component {
                 this.setState({
                     text: response.fileText,
                     filename: response.fileName,
-                    openedPath: path
+                    openedPath: path,
+                    provenObligations: []
                 });
                 // TODO: Handle rename with collab controller
                 this.collabController.setFile(this.state.project.name,path.join('/'),response.fileText);
             });
-    }
-
-    // sets the path for the runProof rest method in projectmanagement
-    runProof(){
-        return this.projectManagement.runProof(this.state.project.name + '/' + this.state.openedPath.join('/'));
     }
 
     /**
@@ -195,7 +226,7 @@ export default class App extends React.Component {
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
-                    onRunProof={this.runProof}
+                    onProveFile={this.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
                     onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
                     notificationSystem={this.notificationSystem}
@@ -215,10 +246,14 @@ export default class App extends React.Component {
                     <Editor
                         setDiagnostics={this.setDiagnostics}
                         diagnostics={this.state.diagnostics}
+                        provenObligations={this.state.provenObligations}
+                        resetObligation={this.resetObligation}
                         setText={this.setText}
                         text={this.state.text}
                         filename={this.state.filename}
                         collabController={this.collabController}
+                        getObligations={this.key.getObligations}
+                        onProveObligation={this.key.proveObligation}
                         ref={this.editor}
                     />
                 </div>
