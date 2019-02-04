@@ -9,6 +9,7 @@ import org.key_project.util.collection.ImmutableSet;
 import de.uka.ilkd.key.control.KeYEnvironment;
 import de.uka.ilkd.key.java.abstraction.KeYJavaType;
 import de.uka.ilkd.key.logic.op.IObserverFunction;
+import de.uka.ilkd.key.proof.Goal;
 import de.uka.ilkd.key.proof.Proof;
 import de.uka.ilkd.key.proof.init.ProofInputException;
 import de.uka.ilkd.key.proof.io.ProblemLoaderException;
@@ -91,9 +92,14 @@ public class KeYWrapper {
 				if (closed)
 					results.addSuccess("Contract '" + contract.getDisplayName() + "' of " + contract.getTarget()
 							+ " is verified.");
-				else
+				else {
 					results.addFail("Contract '" + contract.getDisplayName() + "' of " + contract.getTarget()
 							+ " is still open.");
+				
+                    for (Goal goal: proof.openGoals()) {
+                    	results.addOpenGoal(new Obligation(-1, goal.toString()));
+                    }
+				}
 			} catch (ProofInputException e) {
 				results.addError(
 						"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".");
