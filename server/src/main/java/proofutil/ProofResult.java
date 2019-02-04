@@ -9,61 +9,73 @@ import java.util.List;
  * @author Jonas Belouadi
  */
 public class ProofResult {
-  private List<String> succeeded = new ArrayList<String>();
-  private List<String> failed = new ArrayList<String>();
-  private List<String> errors = new ArrayList<String>();
+    private List<ObligationResult> succeeded = new ArrayList<>();
+    private List<ObligationResult> failed = new ArrayList<>();
+    private List<ObligationResult> errors = new ArrayList<>();
+    private List<Obligation> openGoals = new ArrayList<Obligation>();
+    
+    /**
+     * Add a succeded proof to the list
+     * @param msg the result message to be displayed
+     */
+    public void addSuccess(final int obligationIdx, final String msg) {
+        succeeded.add(new ObligationResult(obligationIdx, msg));
+    }
 
-  /**
-   * Add a succeded proof to the list
-   *
-   * @param msg the result message to be displayed
-   */
-  public void addSuccess(String msg) {
-    succeeded.add(msg);
-  }
+    /**
+     * Add a failed proof to the list, used for proofs that couldn't be closed
+     * @param msg the result message to be displayed
+     */
+    public void addFail(final int obligationIdx, final String msg) {
+        failed.add(new ObligationResult(obligationIdx, msg));
+    }
 
-  /**
-   * Add a failed proof to the list, used for proofs that couldn't be closed
-   *
-   * @param msg the result message to be displayed
-   */
-  public void addFail(String msg) {
-    failed.add(msg);
-  }
+    /**
+     * Add an error message to the list, used whenever an exception occures
+     * @param msg the result message to be displayed
+     */
+    public void addError(final int obligationIdx, final String msg) {
+        errors.add(new ObligationResult(obligationIdx, msg));
+    }
 
-  /**
-   * Add an error message to the list, used whenever an exception occures
-   *
-   * @param msg the result message to be displayed
-   */
-  public void addError(String msg) {
-    errors.add(msg);
-  }
+    /**
+     * Add an open Goal to the list of open goals
+     * (why am i even commenting on this?)
+     * @param msg the goal to be added
+     */
+    public void addOpenGoal(final Obligation goal) {
+        openGoals.add(goal);
+    }
 
-  /**
-   * Basic getter for contents
-   *
-   * @return succeded proofs
-   */
-  public List<String> getSucceeded() {
-    return succeeded;
-  }
+    /**
+     * Basic getter for contents
+     * @return succeded proofs
+     */
+    public List<ObligationResult> getSucceeded() {
+        return succeeded;
+    }
 
-  /**
-   * Basic getter for contents
-   *
-   * @return failed proofs
-   */
-  public List<String> getFailed() {
-    return failed;
-  }
+    /**
+     * Basic getter for contents
+     * @return failed proofs
+     */
+    public List<ObligationResult> getFailed() {
+        return failed;
+    }
 
-  /**
-   * Basic getter for contents
-   *
-   * @return exception messages
-   */
-  public List<String> getErrors() {
-    return errors;
-  }
+    /**
+     * Basic getter for contents
+     * @return exception messages
+     */
+    public List<ObligationResult> getErrors() {
+        return errors;
+    }
+
+    /**
+     * Basic getter for open goals
+     * @return open goals
+     */
+    public List<Obligation> getOpenGoals() {
+        return openGoals;
+    }
 }
