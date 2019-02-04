@@ -2,19 +2,24 @@ import KeyApi, { ProofResults } from './key-api';
 import NotificationSystem from 'react-notification-system';
 import { RefObject } from 'react';
 
+import OpenGoalInfo from './OpenGoalInfo';
+
 export default class Key {
   private keyApi: KeyApi = new KeyApi();
   private getFilePath: () => string;
   private notificationSystem: RefObject<NotificationSystem.System>;
+  private setOpenGoals: (openGoals: OpenGoalInfo[]) => void;
 
   constructor(
     notificationSystem: RefObject<NotificationSystem.System>,
+    setOpenGoals: (openGoals: OpenGoalInfo[]) => void,
     getFilePath: () => string
   ) {
     this.notificationSystem = notificationSystem;
     this.getFilePath = getFilePath;
     this.proveFile = this.proveFile.bind(this);
     this.proveObligation = this.proveObligation.bind(this);
+    this.setOpenGoals = setOpenGoals;
   }
 
   private proveFile() {
@@ -61,6 +66,8 @@ export default class Key {
             autoDismiss: 15,
           });
         }
+
+        this.setOpenGoals(response.openGoals);
       }
     });
   }
