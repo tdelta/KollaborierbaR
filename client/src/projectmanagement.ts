@@ -205,7 +205,7 @@ export default class ProjectManagement {
             break;
           case ProjectEventType.UsersUpdated:
             console.log(event);
-                Usernames.updateAllUsers((<UsersUpdatedEvent>event).users);
+            Usernames.updateAllUsers((<UsersUpdatedEvent>event).users);
             break;
         }
       },
@@ -603,7 +603,7 @@ export default class ProjectManagement {
       { firstName: 'Mark', lastName: 'lalala', crdtId: 2 },
       { firstName: 'BigJ', lastName: 'lalala', crdtId: 3 },
       { firstName: 'Hallo', lastName: 'lalala', crdtId: 4 },
-      { firstName: 'lalalala', lastName: 'lalala', crdtId: 5 }
+      { firstName: 'lalalala', lastName: 'lalala', crdtId: 5 },
     ];
     /*return test; */
 

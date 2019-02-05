@@ -11,13 +11,13 @@ export default class Usernames extends React.Component<Props, State> {
     super(props);
     this.updateUsers = this.updateUsers.bind(this);
     this.state = {
-      userindicators: []
+      userindicators: [],
     };
     Usernames.instances.push(this);
   }
 
   public updateUsers(users: User[]) {
-    this.setState({ userindicators: users })
+    this.setState({ userindicators: users });
   }
 
   public static updateAllUsers(users: User[]) {
@@ -30,7 +30,13 @@ export default class Usernames extends React.Component<Props, State> {
     return (
       <>
         {this.state.userindicators.map((iterator, index) => (
-          <UserIndicator key={index} uid={index} firstName={iterator.firstName} lastName={iterator.lastName} crdtId={iterator.crdtId} />
+          <UserIndicator
+            key={index}
+            uid={index}
+            firstName={iterator.firstName}
+            lastName={iterator.lastName}
+            crdtId={iterator.crdtId}
+          />
         ))}
       </>
     );
