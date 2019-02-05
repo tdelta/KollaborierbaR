@@ -195,8 +195,8 @@ export default class Editor extends React.Component<Props> {
             diagnostic.endRow,
             diagnostic.endCol
           ),
-          diagnostic.kind.toLowerCase(),
           diagnostic.message,
+          diagnostic.kind.toLowerCase(),
           this.editor.session
         );
       }
