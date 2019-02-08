@@ -318,12 +318,12 @@ export default class Editor extends React.Component<Props> {
       this.setMarkers();
     }
   }
-
   /**
    * This function displays markers in the editor for all members of anchoredMarkers
    */
   private setMarkers(): void {
     // Remove all current markers displayed in the editor
+    console.log(this.markers);
     for (const marker of this.markers) {
       this.editor.session.removeMarker(marker);
     }
@@ -340,17 +340,15 @@ export default class Editor extends React.Component<Props> {
     front: boolean
   ) {
     for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
-      for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
-        // Add the marker to the editor
-        this.markers.push(
-          this.editor.session.addMarker(
-            anchoredMarkers[i].getRange(this.editor.session),
-            `${anchoredMarkers[i].type}Marker`,
-            'text',
-            front
-          )
-        );
-      }
+      // Add the marker to the editor
+      this.markers.push(
+        this.editor.session.addMarker(
+          anchoredMarkers[i].getRange(this.editor.session),
+          `${anchoredMarkers[i].type}Marker`,
+          'text',
+          front
+        )
+      );
     }
   }
 }
