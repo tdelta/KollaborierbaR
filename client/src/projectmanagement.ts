@@ -44,7 +44,6 @@ export default class ProjectManagement {
   private showProject: (p: Project | {}) => void;
   private getCurrentProject: () => Project | {};
   private setText: (s: string) => void;
-  private getFileName: () => string | undefined;
   private setFileName: (name: string | undefined) => void;
   private getOpenedPath: () => string[];
   private setOpenedPath: (path: string[]) => void;
@@ -57,7 +56,6 @@ export default class ProjectManagement {
     showProject: (p: Project | {}) => void,
     getCurrentProject: () => Project | {},
     setText: (s: string) => void,
-    getFileName: () => string | undefined,
     setFileName: (name: string | undefined) => void,
     getOpenedPath: () => string[],
     setOpenedPath: (path: string[]) => void,
@@ -68,7 +66,6 @@ export default class ProjectManagement {
     this.showProject = showProject;
     this.getCurrentProject = getCurrentProject;
     this.setText = setText;
-    this.getFileName = getFileName;
     this.setFileName = setFileName;
     this.getOpenedPath = getOpenedPath;
     this.setOpenedPath = setOpenedPath;
@@ -97,7 +94,7 @@ export default class ProjectManagement {
               )
             ) {
               this.setText('');
-              this.setFileName(undefined);
+              this.setOpenedPath([]);
             }
 
             if (this.notificationSystem.current) {
@@ -157,7 +154,7 @@ export default class ProjectManagement {
           case ProjectEventType.DeletedProject:
             this.showProject({});
             this.setText('');
-            this.setFileName(undefined);
+            this.setOpenedPath([]);
 
             if (this.notificationSystem.current) {
               this.notificationSystem.current.clearNotifications();
@@ -185,7 +182,7 @@ export default class ProjectManagement {
                 )
               ) {
                 this.setText('');
-                this.setFileName(undefined);
+                this.setOpenedPath([]);
               }
             }
 
@@ -287,7 +284,7 @@ export default class ProjectManagement {
    * load the related files for the project with name 'name' from the server
    * the handler displays the returned project in the editor
    */
-  public openProject(name: string, resetFile: boolean | undefined): void {
+  public openProject(name: string, resetFile: boolean = true): void {
     const escapedName = escape(name);
 
     const url = `${serverAddress}/projects/${escapedName}`;
@@ -303,9 +300,9 @@ export default class ProjectManagement {
             response.json().then((json: Project) => {
               this.showProject(json);
 
-              if (resetFile == null || resetFile) {
+              if (resetFile) {
                 this.setText('');
-                this.setFileName(undefined);
+                this.setOpenedPath([]);
               }
             });
             //return {'status': response.status,
@@ -354,7 +351,7 @@ export default class ProjectManagement {
    * Deletes a file from the loaded project on the server
    */
   public deleteFile(
-    currentlyOpenFile: string,
+    currentlyOpenFile: string[],
     projectName: string,
     path: string[]
   ): void {
@@ -375,11 +372,10 @@ export default class ProjectManagement {
             ).then(response => {
               // The response contains the new file structure, where the choosen file it deleted.
               this.showProject(response);
-
               // if the deleted file is the opened one, empty the editor
-              if (path[path.length - 1] === currentlyOpenFile) {
+              if (path.join('/') === currentlyOpenFile.join('/')) {
                 this.setText('');
-                this.setFileName(undefined);
+                this.setOpenedPath([]);
               }
             });
           }
@@ -405,7 +401,7 @@ export default class ProjectManagement {
           if (path === projectName) {
             this.showProject({});
             this.setText('');
-            this.setFileName(undefined);
+            this.setOpenedPath([]);
           }
         }
         // Nothing happens when the dialog was canceled
@@ -469,7 +465,7 @@ export default class ProjectManagement {
             () => {
               this.showProject(response);
               this.setText('');
-              this.setFileName(undefined);
+              this.setOpenedPath([]);
             },
             () => {
               console.log(
@@ -543,7 +539,7 @@ export default class ProjectManagement {
           // to the openedPath.
           this.setOpenedPath(newOpenPath);
 
-          if (this.getFileName() === oldfilename) {
+          if (path[path.length - 1] === oldfilename) {
             this.setFileName(name);
           }
         })

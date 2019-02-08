@@ -29,7 +29,6 @@ export default class Editor extends React.Component<Props> {
   private anchoredMarkers: AnchoredMarker[];
   private anchoredHighlightings: AnchoredMarker[];
   private annotations: number[];
-  private testMarker!: AnchoredMarker;
 
   constructor(props: Props) {
     super(props);
@@ -74,7 +73,6 @@ export default class Editor extends React.Component<Props> {
     this.editor.on('change', (delta: any) => {
       this.anchoredHighlightings.forEach(h => h.onChange(delta));
       this.anchoredMarkers.forEach(m => m.onChange(delta));
-      if (this.testMarker) this.testMarker.onChange(delta);
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
@@ -88,9 +86,17 @@ export default class Editor extends React.Component<Props> {
       this.editor.ignoreChanges = true;
       this.editor.setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
+      this.editor.sess
       for (const marker of this.dynamicMarkers) {
         this.editor.session.removeMarker(marker);
       }
+      for (const marker of this.markers){
+        this.editor.session.removeMarker(marker);
+      }
+      this.anchoredMarkers = [];
+      this.anchoredHighlightings = [];
+      this.markers = [];
+      this.dynamicMarkers = [];
     }
     if (this.props.diagnostics !== prevProps.diagnostics) {
       this.setAnchors();
@@ -125,7 +131,8 @@ export default class Editor extends React.Component<Props> {
    * Function that calls lint, sending a request to the server, and passes the result to the app
    */
   private callLinter(): void {
-    lint(this.props.filename, this.editor.getValue()).then(
+    let filename: string = this.props.filepath[this.props.filepath.length - 1];
+    lint(filename, this.editor.getValue()).then(
       (diagnostics: Diagnostic[]) => {
         this.props.setDiagnostics(diagnostics);
         this.setAnchors();
@@ -138,8 +145,8 @@ export default class Editor extends React.Component<Props> {
   public addBackMarker(start: any, end: any, uid: number, name: string) {
     const range = Range.fromPoints(start, end);
     const type: string = `n${uid} highlighting`;
-    
     this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
+    this.anchoredHighlightings = this.anchoredHighlightings.filter(m => !m.deleted);
     this.anchoredHighlightings
       .filter(m => m.type === type)
       .filter(m => parseFloat(m.message.split('|')[1]) > 0.1)
@@ -182,7 +189,6 @@ export default class Editor extends React.Component<Props> {
       this.props.diagnostics.constructor === Array
     ) {
       this.props.diagnostics.sort(diagnosticPriority);
-      console.log(this.props.diagnostics);
       this.anchoredMarkers = [];
       // Process each element of array of diagonistics
       for (const diagnostic of this.props.diagnostics) {
@@ -200,7 +206,6 @@ export default class Editor extends React.Component<Props> {
           this.editor.session
         );
       }
-      console.log(this.anchoredMarkers);
       this.editor.session.clearAnnotations();
       this.editor.session.setAnnotations(
         this.props.diagnostics.map(toAnnotation)
@@ -215,7 +220,6 @@ export default class Editor extends React.Component<Props> {
    */
   private setMarkers(): void {
     // Remove all current markers displayed in the editor
-    console.log(this.markers);
     for (const marker of this.markers) {
       this.editor.session.removeMarker(marker);
     }
@@ -249,7 +253,7 @@ export default class Editor extends React.Component<Props> {
 interface Props {
   diagnostics: Diagnostic[];
   text: string;
-  filename: string;
+  filepath: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
 }

@@ -16,6 +16,7 @@ export default class AnchoredMarker {
   private end!: any;
   type: string; // type of the marking, whether its an error, a warning, something else, ...
   message: string; // displayed message at the marker
+  public deleted: boolean = false;
 
   constructor(
     range: ace_types.Ace.Range,
@@ -84,6 +85,13 @@ export default class AnchoredMarker {
   public onChange(delta: any) {
     this.start.onChange(delta);
     this.end.onChange(delta);
+    if(delta.action === 'remove' && delta.start.column !== 0
+        && delta.start.row === this.end.row && delta.start.column === this.end.column){
+      this.end.column = this.end.column - 1;
+      if(this.start.row === this.end.row && this.start.column === this.end.column){
+        this.deleted = true;
+      }
+    }
   }
 }
 
@@ -104,7 +112,7 @@ export function addToArray(
   editSession: ace_types.Ace.EditSession
 ) {
   for (let i = 0; i < markers.length; i++) {
-    const existingRange: ace_types.Ace.Range = markers[i].getRange(editSession);
+  const existingRange: ace_types.Ace.Range = markers[i].getRange(editSession);
     switch (existingRange.compareRange(range)) {
       case 1:
         // Existing range ends in the new range
@@ -115,7 +123,6 @@ export function addToArray(
           i--;
         } else {
           // Cut off the part of the marker that would overlap
-          console.log(range);
           existingRange.end = range.start;
           markers[i].setRange(existingRange, editSession);
         }
@@ -152,6 +159,7 @@ export function addToArray(
           existingRange.start = range.end;
           markers[i].setRange(existingRange, editSession);
         }
+        break;
       default:
         if (
           existingRange.isEnd(range.start.row, range.start.column) &&

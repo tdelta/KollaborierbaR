@@ -238,7 +238,6 @@ interface ProofResults {
 interface Props {
   text: string;
   setText(text: string): void;
-  showProject(project: object): void;
   onDeleteFile(): void;
   onDeleteProject(): void;
   onUpdateFileName(): void;
