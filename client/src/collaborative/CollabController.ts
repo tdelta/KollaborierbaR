@@ -56,7 +56,6 @@ export default class CollabController {
         let operation: LogootSOperation;
         switch (delta.action) {
           case 'insert':
-            console.log(delta.lines);
             operation = this.document.insertLocal(
               start,
               delta.lines.join('\n')
@@ -69,12 +68,12 @@ export default class CollabController {
             this.network.broadcast('/remove', headers, operation);
         }
         this.editor.curOp = undefined;
-        console.log(this.document.str);
       }
     });
   }
 
   public setFile(project: string, filepath: string, content: string) {
+    console.log("Set file");
     this.network.unsubscribe('projects/' + this.project);
     this.network.on('projects/' + project, {}, this.handleNewUserName.bind(this));
     this.network.broadcast(
@@ -120,7 +119,6 @@ export default class CollabController {
           parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1].replicaNumber;
         this.editorComponent.addBackMarker(start, end, uid % 10, this.names[uid]);
       }
-      console.log(this.document.str);
     }
   }
 
@@ -143,7 +141,6 @@ export default class CollabController {
         this.editor.session.replace(Range.fromPoints(start, end), '');
         this.editor.ignoreChanges = false;
       }
-      console.log(this.document.str);
     }
   }
 
@@ -151,6 +148,8 @@ export default class CollabController {
     const parsedDoc = JSON.parse(event.body);
     // Try to parse the json into a LogootSRopes (crdt document) object.
     // If this fails, the document variable will remain null and inputs to the editor will be dismissed
+    console.log("Received crdt doc");
+    debugger;
     const docObj: LogootSRopes | null = LogootSRopes.fromPlain(
       parsedDoc.replicaNumber,
       parsedDoc.clock,
@@ -159,6 +158,7 @@ export default class CollabController {
         root: parsedDoc.root,
       }
     );
+    console.log(docObj);
     if (docObj != null) {
       this.document = docObj;
       // Replace the content of the editor with the current collaborative state of the file

@@ -19,6 +19,8 @@ import org.springframework.stereotype.Controller;
 import synchronization.data.File;
 import synchronization.data.LogootSAdd;
 import synchronization.data.LogootSDel;
+import org.springframework.context.event.EventListener;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 @Controller
 public class SynchronizationController {
@@ -74,8 +76,15 @@ public class SynchronizationController {
     }
   }
 
+  @EventListener
+  public void handleDisconnect(final SessionDisconnectEvent event) {
+    final Principal user = event.getUser();
+    unsubscribe(user);
+  }
+
   @MessageMapping("/file")
   public void handleSubscription(@Header("file") String file, Principal user, File text) {
+    System.out.println("Adding user to crdt doc "+file);
     unsubscribe(user);
     int replicaNumber;
     if (users.containsKey(file)) {
@@ -88,6 +97,7 @@ public class SynchronizationController {
       // Send document to user
       messagingTemplate.convertAndSendToUser(user.getName(), "/crdt-doc", document);
     } else {
+      System.out.println("New crdt document, creating");
       // Noone is working on this document yet
       LinkedList<Principal> subscribed = new LinkedList<Principal>();
       subscribed.add(user);
@@ -109,18 +119,20 @@ public class SynchronizationController {
   private LogootSRopes fromText(String text) {
     LogootSRopes document = new LogootSRopes();
 
-    // Insert content into the crdt document
-    List<Character> characterList =
-        text.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
-    // We have to construct the insert operation ourselfs because the java library doesnt generate
-    // the random part of the identifier,
-    // leading to inconsistencies in mute-structs
-    fr.loria.score.logootsplito.LogootSAdd<Character> insertOperation =
-        new fr.loria.score.logootsplito.LogootSAdd<Character>(
-            new fr.loria.score.logootsplito.Identifier(
-                Arrays.asList(new Integer[] {1000, 0, 0}), 0),
-            characterList);
-    insertOperation.execute(document);
+    if(text.length() > 0) {
+      // Insert content into the crdt document
+      List<Character> characterList =
+          text.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
+      // We have to construct the insert operation ourselfs because the java library doesnt generate
+      // the random part of the identifier,
+      // leading to inconsistencies in mute-structs
+      fr.loria.score.logootsplito.LogootSAdd<Character> insertOperation =
+          new fr.loria.score.logootsplito.LogootSAdd<Character>(
+              new fr.loria.score.logootsplito.Identifier(
+                  Arrays.asList(new Integer[] {1000, 0, 0}), -1),
+              characterList);
+      insertOperation.execute(document);
+    }
     return document;
   }
 
@@ -128,8 +140,13 @@ public class SynchronizationController {
     // Iterate over all names of files and lists of users working on them
     for (ConcurrentHashMap.Entry<String, LinkedList<Principal>> entry : users.entrySet()) {
       if (entry.getValue().contains(user)) {
+        System.out.println("Removed user "+user.getName()+" from crdt doc "+entry.getKey());
         if (entry.getValue().size() == 1) {
+          for(Principal otherUser: entry.getValue()){
+            System.out.println(user.getName());
+          }
           // There are no other users working on the file, remove it entirely
+          System.out.println("Removed crdt doc "+entry.getKey());
           users.remove(entry.getKey());
           documents.remove(entry.getKey());
         } else {
