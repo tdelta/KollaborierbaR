@@ -40,56 +40,60 @@ export default class PopoverMarker {
   ) {
     let range: ace_types.Ace.Range = this.anchor.getRange(session);
     range = range.toScreenRange(session);
-    markerLayer.drawSingleLineMarker(
-      null,
-      range,
-      this.anchor.type + 'Marker',
-      config
-    );
-
-    let child = markerLayer.element.lastChild;
-    console.log(markerLayer.element.children);
-    for (let i: number = markerLayer.element.children.length - 1; i >= 0; i--) {
-      if (
-        child.className === `${this.anchor.type}Marker` &&
-        !child.style.opacity
-      ) {
-        break;
-      }
-      child = markerLayer.element.children[i];
+    if (range.isMultiLine()) {
+      markerLayer.drawTextMarker(
+        null,
+        range,
+        this.anchor.type + 'Marker',
+        config
+      );
+    } else {
+      markerLayer.drawSingleLineMarker(
+        null,
+        range,
+        this.anchor.type + 'Marker',
+        config
+      );
     }
 
-    const htmlElement = child.cloneNode(true) as HTMLElement;
+    for (let i: number = markerLayer.element.children.length - 1; i >= 0; i--) {
+      let child = markerLayer.element.children[i];
+      if (
+        child.className.includes(`${this.anchor.type}Marker`) &&
+        !child.style.opacity
+      ) {
+        const htmlElement = child.cloneNode(true) as HTMLElement;
+        // Executed when the mouse enters the highlighted area
+        htmlElement.addEventListener('mouseenter', () => {
+          // If the ref is referring to a present element in the dom, set it to be visible
+          if (this.popover.current != null) {
+            this.popover.current.setState({ isOpen: true });
+            window.setTimeout(
+              this.popover.current.hide.bind(this.popover.current),
+              4000
+            );
+          }
+        });
 
-    // Executed when the mouse enters the highlighted area
-    htmlElement.addEventListener('mouseenter', () => {
-      // If the ref is referring to a present element in the dom, set it to be visible
-      if (this.popover.current != null) {
-        this.popover.current.setState({ isOpen: true });
-        window.setTimeout(
-          this.popover.current.hide.bind(this.popover.current),
-          4000
+        // Executed when the mouse leaves the highlighted area
+        htmlElement.addEventListener('mouseout', () => {
+          // If the ref is referring to a present element in the dom, set it to be invisible
+          if (this.popover.current)
+            this.popover.current.setState({ isOpen: false });
+        });
+
+        htmlElement.style.opacity = this.opacity + '';
+
+        ReactDom.render(
+          <MarkerPopover ref={this.popover} target={htmlElement}>
+            {this.name}
+          </MarkerPopover>,
+          htmlElement
         );
+
+        markerLayer.element.replaceChild(htmlElement, child);
       }
-    });
-
-    // Executed when the mouse leaves the highlighted area
-    htmlElement.addEventListener('mouseout', () => {
-      // If the ref is referring to a present element in the dom, set it to be invisible
-      if (this.popover.current)
-        this.popover.current.setState({ isOpen: false });
-    });
-
-    htmlElement.style.opacity = this.opacity + '';
-
-    ReactDom.render(
-      <MarkerPopover ref={this.popover} target={htmlElement}>
-        {this.name}
-      </MarkerPopover>,
-      htmlElement
-    );
-
-    markerLayer.element.replaceChild(htmlElement, child);
+    }
   }
 }
 
