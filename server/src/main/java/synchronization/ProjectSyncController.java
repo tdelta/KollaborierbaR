@@ -57,7 +57,7 @@ public class ProjectSyncController {
       @DestinationVariable String projectName) {
     final String decodedProjectName = UriUtils.decode(projectName, "UTF-8");
 
-    System.out.println(decodedProjectName);
+    System.out.println("Decoded project name"+decodedProjectName);
 
     final List<Principal> users = sessions.getOrDefault(decodedProjectName, new ArrayList<>(1));
 
@@ -79,21 +79,21 @@ public class ProjectSyncController {
         event.getMessage().getHeaders().get("simpSubscriptionId", String.class);
 
     final String projectName = getProjectNameBySubscription(simpSubscriptionId, user);
+    if(projectName != null){
+      System.out.println(
+          "Got unsubscribe from " + event.getUser().getName() + " for project " + projectName);
 
-    System.out.println(
-        "Got unsubscribe from " + event.getUser().getName() + " for project " + projectName);
+      final List<Principal> users = sessions.getOrDefault(projectName, new ArrayList<>(0));
 
-    deleteSubscription(simpSubscriptionId, user);
-
-    final List<Principal> users = sessions.getOrDefault(projectName, new ArrayList<>(0));
-
-    System.out.println("Removed user " + user.getName() + " from project " + projectName);
-    users.remove(user);
-    if (users.isEmpty()) {
-      System.out.println("Removed project " + projectName + ", since all users left.");
-      sessions.remove(projectName);
+      System.out.println("Removed user " + user.getName() + " from project " + projectName);
+      users.remove(user);
+      broadcastUsernames(users,projectName);
+      if (users.isEmpty()) {
+        System.out.println("Removed project " + projectName + ", since all users left.");
+        sessions.remove(projectName);
+      }
     }
-    broadcastUsernames(users,projectName);
+    deleteSubscription(simpSubscriptionId, user);
   }
 
   @EventListener
