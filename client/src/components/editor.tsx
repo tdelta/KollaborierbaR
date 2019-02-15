@@ -79,8 +79,11 @@ export default class Editor extends React.Component<Props> {
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
+  /**
+   * Called when new properties are passed down from the app component
+   * @param prevProps Properties before the update, used to detect changes
+   */
   public componentDidUpdate(prevProps: Props): void {
-    // Called when new properties are passed down from the app component
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
@@ -123,6 +126,10 @@ export default class Editor extends React.Component<Props> {
       }
     };
   }
+
+  /**
+   * Called by react to display html of the component
+   */
   public render() {
     return <div id="editor" />;
   }
@@ -142,11 +149,20 @@ export default class Editor extends React.Component<Props> {
 
   private dynamicMarkers: number[] = [];
 
+  /**
+   * Adds a marker to the array that will be displayed as a highlighted color behind the text.
+   * @param start The start position of the marker
+   * @param end The end position of the marker
+   * @param uid The id of the color to display (defined in marker-colors.css)
+   * @param name Displayed in a tooltip on hovering over the marker
+   */
   public addBackMarker(start: any, end: any, uid: number, name: string) {
     const range = Range.fromPoints(start, end);
     const type: string = `n${uid} highlighting`;
     this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
+    // The deleted field is set, when the range of a marker is empty
     this.anchoredHighlightings = this.anchoredHighlightings.filter(m => !m.deleted);
+    // Make old markers less opaque
     this.anchoredHighlightings
       .filter(m => m.type === type)
       .filter(m => parseFloat(m.message.split('|')[1]) > 0.1)
@@ -215,6 +231,7 @@ export default class Editor extends React.Component<Props> {
       this.setMarkers();
     }
   }
+
   /**
    * This function displays markers in the editor for all members of anchoredMarkers
    */
@@ -225,24 +242,14 @@ export default class Editor extends React.Component<Props> {
     }
     this.markers = [];
     // Add markers for all anchoredMarkers
-    this.processMarkerArray(this.anchoredMarkers, true);
-  }
-
-  /**
-   * Helper function for setMarkers
-   */
-  private processMarkerArray(
-    anchoredMarkers: AnchoredMarker[],
-    front: boolean
-  ) {
-    for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
+    for (let i = 0; i < this.anchoredMarkers.length; i = i + 1) {
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
           anchoredMarkers[i].getRange(this.editor.session),
           `${anchoredMarkers[i].type}Marker`,
           'text',
-          front
+          false
         )
       );
     }

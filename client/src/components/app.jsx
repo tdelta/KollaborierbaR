@@ -113,7 +113,7 @@ export default class App extends React.Component {
         this.setState({
             openedPath: path
         });
-      if(this.collabController && path.length > 0)
+      if(this.collabController)
       this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
     }
 

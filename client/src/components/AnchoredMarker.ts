@@ -74,12 +74,12 @@ export default class AnchoredMarker {
     } else {
       column = range.end.column - 1;
     }
-    this.start = editSession
-      .getDocument()
-      .createAnchor(range.start.row, range.start.column);
-    this.end = editSession.getDocument().createAnchor(row, column);
-    this.start.detach();
-    this.end.detach();
+     this.start = editSession
+       .getDocument()
+       .createAnchor(range.start.row, range.start.column);
+     this.end = editSession.getDocument().createAnchor(row, column);
+     this.start.detach();
+     this.end.detach();
   }
 
   public onChange(delta: any) {
