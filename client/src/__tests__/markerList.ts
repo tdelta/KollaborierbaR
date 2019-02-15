@@ -45,7 +45,7 @@ test('No range from the inputs gets left empty in the result and no ranges overl
                   anchoredMarkers,
                   editSession
                 )
-              ).toBeLessThanOrEqual(2);
+              ).toBeLessThanOrEqual(1);
             }
           }
           let x: number = 0;
@@ -56,7 +56,7 @@ test('No range from the inputs gets left empty in the result and no ranges overl
                 anchoredMarkers,
                 editSession
               )
-            ).toBeLessThanOrEqual(2);
+            ).toBeLessThanOrEqual(1);
           }
         }
       }
@@ -71,9 +71,10 @@ const numContainingMarkers = function(
 ) {
   let containedIn: number = 0;
   for (const marker of anchoredMarkers) {
-    if (marker.getRange(editSession).contains(position)) containedIn++;
+    if (marker.getRange(editSession).contains(position.row,position.column)) {
+      containedIn++;
+    }
   }
-  if (containedIn > 1) console.log(position);
   return containedIn;
 };
 
