@@ -1,12 +1,6 @@
 import Editor from '../components/editor';
 
-import TextPosition from './TextPosition';
-
-import {
-  Network,
-  UsersUpdatedEvent,
-  User,
-} from '../network';
+import { Network, UsersUpdatedEvent } from '../network';
 import {
   LogootSRopes,
   TextInsert,
@@ -17,8 +11,9 @@ import {
   Identifier,
 } from 'mute-structs';
 import { Range } from 'ace-builds';
+import * as ace_types from 'ace-builds';
 
-import {Message} from 'stompjs';
+import { IMessage } from '@stomp/stompjs';
 
 export default class CollabController {
   private document: LogootSRopes | null = null;
@@ -29,6 +24,7 @@ export default class CollabController {
   private filepath!: string;
   private project!: string;
   private names: string[];
+  private connected: boolean;
 
   constructor(net: Network, editor: Editor, setText: (text: string) => void) {
     this.network = net;
@@ -36,6 +32,7 @@ export default class CollabController {
     this.editor = editor.editor; // Ace editor
     this.setText = setText;
     this.names = [];
+    this.connected = false;
 
     this.network.on('insert', {}, this.handleRemoteInsert.bind(this));
     this.network.on('remove', {}, this.handleRemoteRemove.bind(this));
@@ -46,12 +43,13 @@ export default class CollabController {
      * ATTENTION: ignoreChanges has to be set manually, when the text is modified programatically
      * @param delta Information about what change occured
      */
-    this.editor.on('change', (delta: any) => {
+    this.editor.on('change', (delta: ace_types.Ace.Delta) => {
       if (
         this.document != null && // We are connected to a collaborative document
-        !this.editor.ignoreChanges // The event came from the user
+        !this.editor.ignoreChanges && // The event came from the user
+        this.connected // A file is opened
       ) {
-        const headers: any = { file: this.project + '/' + this.filepath };
+        const headers: any = { file: `${this.project}/${this.filepath}` };
         const start: number = this.editor.session.doc.positionToIndex(
           delta.start
         );
@@ -80,18 +78,19 @@ export default class CollabController {
    * @param content the content of the opened file
    */
   public setFile(project: string, filepath: string, content: string) {
-    this.network.unsubscribe('projects/' + this.project);
-    this.network.on('projects/' + project, {}, this.handleNewUserName.bind(this));
-    let file = project + '/' + filepath;
-    if(filepath === ''){
-      file = '';
-    }
-
-    this.network.broadcast(
-      '/file',
-      { file: file },
-      { content: content }
+    this.network.unsubscribe(`projects/${this.project}`);
+    this.network.on(
+      `projects/${project}`,
+      {},
+      this.handleNewUserName.bind(this)
     );
+    if (filepath === '') {
+      this.connected = false;
+    } else {
+      const file = `${project}/${filepath}`;
+      this.network.broadcast('/file', { file: file }, { content: content });
+      this.connected = true;
+    }
 
     this.filepath = filepath;
     this.project = project;
@@ -104,12 +103,17 @@ export default class CollabController {
    * @param event
    * @param event.body a string that defines a UsersUpdatedEvent, containing the new list of usernames.
    */
-  private handleNewUserName(event: Message) {
+  private handleNewUserName(event: IMessage) {
     const parsedEvent: UsersUpdatedEvent = JSON.parse(event.body);
-    if(event.headers.file && event.headers.file == this.project+'/'+this.filepath){
+    if (
+      event.headers.file &&
+      event.headers.file === `${this.project}/${this.filepath}`
+    ) {
       this.names = [];
-      for(const user of parsedEvent.users){
-        this.names[user.crdtId] = user.firstName+" "+user.lastName;
+      for (const user of parsedEvent.users) {
+        let lastName = user.lastName;
+        lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+        this.names[user.crdtId] = `${user.firstName} ${lastName}`;
       }
     }
   }
@@ -121,7 +125,7 @@ export default class CollabController {
    *              It also has to pass some logic checks by the mute-struct library (in fromPlain).
    *              Otherwise the event will be dismissed.
    */
-  public handleRemoteInsert(event: Message) {
+  public handleRemoteInsert(event: IMessage) {
     if (this.document != null) {
       const parsedOperation = JSON.parse(event.body);
       const operationObj: LogootSAdd | null = LogootSAdd.fromPlain(
@@ -132,19 +136,25 @@ export default class CollabController {
       let deltas: TextInsert[] = [];
       if (operationObj != null) deltas = operationObj.execute(this.document);
       for (const delta of deltas) {
-        const start: TextPosition = this.editor.session.doc.indexToPosition(
+        const start: ace_types.Ace.Point = this.editor.session.doc.indexToPosition(
           delta.index
         );
         this.editor.ignoreChanges = true;
         // The variable ignoreChanges makes sure our on change listener does not process the insert
-        const end: TextPosition = this.editor.session.insert(
+        const end: ace_types.Ace.Point = this.editor.session.insert(
           start,
           delta.content
         );
         this.editor.ignoreChanges = false;
         const uid: number =
-          parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1].replicaNumber;
-        this.editorComponent.addBackMarker(start, end, uid % 10, this.names[uid]);
+          parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1]
+            .replicaNumber;
+        this.editorComponent.addBackMarker(
+          start,
+          end,
+          uid % 10,
+          this.names[uid]
+        );
       }
     }
   }
@@ -156,7 +166,7 @@ export default class CollabController {
    *              It also has to pass some logic checks by the mute-struct library (in fromPlain).
    *              Otherwise the event will be dismissed.
    */
-  public handleRemoteRemove(event: Message) {
+  public handleRemoteRemove(event: IMessage) {
     if (this.document != null) {
       const parsedOperation = JSON.parse(event.body);
       const operationObj: LogootSDel | null = LogootSDel.fromPlain(
@@ -167,10 +177,10 @@ export default class CollabController {
       let deltas: TextDelete[] = [];
       if (operationObj != null) deltas = operationObj.execute(this.document);
       for (const delta of deltas) {
-        const start: TextPosition = this.editor.session.doc.indexToPosition(
+        const start: ace_types.Ace.Point = this.editor.session.doc.indexToPosition(
           delta.index
         );
-        const end: TextPosition = this.editor.session.doc.indexToPosition(
+        const end: ace_types.Ace.Point = this.editor.session.doc.indexToPosition(
           delta.index + delta.length
         );
         this.editor.ignoreChanges = true;
@@ -188,11 +198,10 @@ export default class CollabController {
    *              It also has to pass some logic checks by the mute-struct library (in fromPlain).
    *              Otherwise the event will be dismissed.
    */
-  public handleDocumentInit(event: Message) {
+  public handleDocumentInit(event: IMessage) {
     const parsedDoc = JSON.parse(event.body);
     // Try to parse the json into a LogootSRopes (crdt document) object.
     // If this fails, the document variable will remain null and inputs to the editor will be dismissed
-    debugger;
     const docObj: LogootSRopes | null = LogootSRopes.fromPlain(
       parsedDoc.replicaNumber,
       parsedDoc.clock,
