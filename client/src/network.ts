@@ -6,7 +6,7 @@ import {
   StompHeaders,
   StompSubscription,
 } from '@stomp/stompjs';
-import SockJS, {Message} from 'sockjs-client';
+import SockJS from 'sockjs-client';
 
 import { serverAddress } from './constants';
 
@@ -85,7 +85,11 @@ export class Network {
     this.stompClient.activate();
   }
 
-  public on(messageType: string, headers: any, callback: (obj: Message) => void) {
+  public on(
+    messageType: string,
+    headers: any,
+    callback: (obj: IMessage) => void
+  ) {
     this.callbacks.push({ messageType, headers, callback });
     this.setCallbacks();
   }
@@ -226,5 +230,5 @@ export class Network {
 interface CallbackDef {
   messageType: string;
   headers: any;
-  callback: (obj: Message) => void;
+  callback: (obj: IMessage) => void;
 }
