@@ -66,7 +66,7 @@ export default class App extends React.Component {
           this.notificationSystem,
           this.addProvenObligations,
           (openGoals) => this.setState({openGoals}),
-          () => this.state.project.name + '/' + this.state.filename
+          () => this.state.project.name + '/' + this.state.openedPath.join('/')
         );
 
         // setup initial state
