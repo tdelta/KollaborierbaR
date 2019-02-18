@@ -113,10 +113,10 @@ export default class FileNode extends React.Component<Props, State> {
                     {label}
                 </div>
                 <ContextMenu>
-                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
-                    <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename Folder</ContextAction>
                     <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</ContextAction>
                     <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</ContextAction>
+                    <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename Folder</ContextAction>
+                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
                 </ContextMenu>
             </Context>
           {/* display the children as unordered list */}
@@ -160,8 +160,8 @@ export default class FileNode extends React.Component<Props, State> {
               {label}
             </div>
             <ContextMenu>
-                <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
                 <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename File</ContextAction>
+                <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
             </ContextMenu>
         </Context>
       );
