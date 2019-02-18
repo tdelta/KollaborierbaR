@@ -105,6 +105,8 @@
 }
 
 .activeFileNode {
+    position: relative;
+    left: -0.5em;
     background-color: #374c55;
     border-radius: 5px;
     padding-left: 0.5em;
@@ -113,6 +115,10 @@
 
 .inactiveFileNode {
     background-color: inherit;
+}
+
+.tableFileNode {
+    display: table
 }
 
 #projectTree hr {
@@ -148,8 +154,4 @@
 .contextAction {
     margin-left: .5em;
     margin-right: .5em;
-}
-
-ul > li{
-    display: table;
 }
