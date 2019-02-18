@@ -77,6 +77,7 @@ export default class ProjectTreeView extends React.Component {
         // (...and a little icon on the left)
         const header = (
             <>
+          <div className='tableFileNode'>
                 <Context tree={() => this.state.file}>
                     {projectTitle}
                     <ContextMenu>
@@ -86,6 +87,7 @@ export default class ProjectTreeView extends React.Component {
                         <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
                     </ContextMenu>
                 </Context>
+            </div>
                 <hr />
             </>
         );
@@ -96,7 +98,6 @@ export default class ProjectTreeView extends React.Component {
                 <>
                     <div>
                         {header /* display the header (contains project name) */}
-
                         {
                             // render each element within the root folder of the
                             // project as FileNode
