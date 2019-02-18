@@ -1,5 +1,3 @@
-import java.util.function.Consumer;
-
 public class LimitedIntegerSet {
 
   //@ public invariant (\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);
@@ -9,8 +7,6 @@ public class LimitedIntegerSet {
   private /*@ spec_public @*/ int size;
 
   private void provokeWarning() {
-    Consumer<Integer> noLambdaSupport = x -> {};
-
     switch (1) {
       case 1:
         System.out.println("Hello World");

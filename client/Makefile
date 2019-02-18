@@ -12,6 +12,11 @@ check:
 	npm run-script eslint
 	npm run-script tslint
 
+# fix linter errors automatically, if possible
+fix:
+	npm run-script eslint-fix
+	npm run-script tslint-fix
+
 # run static analysis tools in aggressive mode
 pedantic:
 	npm run-script eslint-pedantic

@@ -1,52 +1,43 @@
 package projectmanagement;
 
 /**
- * This class is a data container for Java Springs Marshalling. There are 
- * two types of Items: folder and files. For both there are additional classes
- * which extend this one.
- * 
- * @author David Heck, Marc Arnold
+ * This class is a data container for Java Springs Marshalling. There are two types of Items: folder
+ * and files. For both there are additional classes which extend this one.
  *
+ * @author David Heck, Marc Arnold
  */
-public class Item{
+public class Item {
 
-    private String name;
-    protected String type;
+  private String name;
+  protected String type;
 
-    
-    /**
-     * This is the default constructor for the class
-     * 
-     * @param name of the item
-     */
-    public Item(String name){
+  /**
+   * This is the default constructor for the class
+   *
+   * @param name of the item
+   */
+  public Item(String name) {
 
-        this.name = name;
+    this.name = name;
+  }
 
-    }
+  /**
+   * Basic getter of the name.
+   *
+   * @return name of the item
+   */
+  public String getName() {
 
-    /**
-     * 
-     * Basic getter of the name.
-     * 
-     * @return name of the item
-     */
-    public String getName(){
+    return this.name;
+  }
 
-        return this.name;
+  /**
+   * Basic getter of the type
+   *
+   * @return the type of the item (folder/file)
+   */
+  public String gettype() {
 
-    }
-
-    /**
-     * 
-     * Basic getter of the type
-     * 
-     * @return the type of the item (folder/file) 
-     */
-    public String gettype(){
-
-        return this.type;
-
-    }
-
+    return this.type;
+  }
 }
