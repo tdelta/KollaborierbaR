@@ -8,6 +8,8 @@ module.exports = {
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended",
+      "prettier",
+      "prettier/react"
     ],
     "parserOptions": {
         "ecmaFeatures": {
@@ -22,14 +24,6 @@ module.exports = {
         },
     },
     "rules": {
-        "indent": [
-            "error",
-            4,
-            {
-                // switch bodies shall be indented
-                "SwitchCase": 1,
-            }
-        ],
         "linebreak-style": [
             "error",
             "unix"
@@ -37,10 +31,6 @@ module.exports = {
         "quotes": [
             "error",
             "single"
-        ],
-        "semi": [
-            "error",
-            "always"
         ],
         // unused function arguments shall be no error
         "no-unused-vars": ["error", { "args": "none" }],
