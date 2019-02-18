@@ -1,6 +1,7 @@
 import ace, { Range } from 'ace-builds';
 import * as ace_types from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-pastel_on_dark';
+import 'ace-builds/src-noconflict/ext-language_tools';
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -51,6 +52,9 @@ export default class Editor extends React.Component<Props> {
     // Initialize ace in the div with the id 'editor'
     this.editor = ace.edit('editor');
     this.editor.setOptions({
+      enableBasicAutocompletion: true,
+      enableSnippets: true,
+      enableLiveAutocompletion: true,
       autoScrollEditorIntoView: true,
       fontSize: 20,
       firstLineNumber: 1,
