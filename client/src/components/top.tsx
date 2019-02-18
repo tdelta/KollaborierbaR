@@ -153,14 +153,14 @@ export default class Top extends React.Component<Props, State> {
                 Project
               </DropdownToggle>
               <DropdownMenu right>
+                <DropdownItem onClick={this.props.onCreateProject}>
+                  Create project
+                </DropdownItem>
                 <DropdownItem onClick={this.toggleOpenModal}>
                   Open project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleDeleteModal}>
                   Delete project
-                </DropdownItem>
-                <DropdownItem onClick={this.props.onCreateProject}>
-                  Create project
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
