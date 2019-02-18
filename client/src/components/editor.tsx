@@ -89,7 +89,7 @@ export default class Editor extends React.Component<Props> {
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
-      this.editor.setValue(this.props.text, -1);
+      this.editor.getSession().setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
 
       for (const marker of this.popoverMarkerIds) {
