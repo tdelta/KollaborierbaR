@@ -109,36 +109,15 @@ export default class FileNode extends React.Component<Props, State> {
                           Double clicks are to be interpreted as opening files
                       */}
             <Context>
-              <div
-                onClick={this.toggle}
-                onDoubleClick={this.handleItemDoubleClick}
-              >
-                {label}
-              </div>
-              <ContextMenu>
-                <ContextAction
-                  onClick={() => this.props.onDeleteFile(this.props.path)}
-                >
-                  Delete Folder
-                </ContextAction>
-                <ContextAction
-                  onClick={() => this.props.onUpdateFileName(this.props.path)}
-                >
-                  Rename Folder
-                </ContextAction>
-                <ContextAction
-                  onClick={() =>
-                    this.props.onCreateFile(this.props.path, 'folder')
-                  }
-                >
-                  Create Folder
-                </ContextAction>
-                <ContextAction
-                  onClick={() => this.props.onCreateFile(this.props.path, 'file')}
-                >
-                  Create File
-                </ContextAction>
-              </ContextMenu>
+                <div onClick={this.toggle} onDoubleClick={this.handleItemDoubleClick}>
+                    {label}
+                </div>
+                <ContextMenu>
+                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</ContextAction>
+                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</ContextAction>
+                    <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename Folder</ContextAction>
+                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
+                </ContextMenu>
             </Context>
             {/* display the children as unordered list */}
             <ul className="projectTreeList" style={display}>
@@ -179,24 +158,13 @@ export default class FileNode extends React.Component<Props, State> {
         /* double clicks are to be interpreted as opening files */
         <div className='tableFileNode'>
             <Context>
-              <div
-                onDoubleClick={this.handleItemDoubleClick}
-                className={background}
-              >
-                {label}
-              </div>
-              <ContextMenu>
-                <ContextAction
-                  onClick={() => this.props.onDeleteFile(this.props.path)}
-                >
-                  Delete File
-                </ContextAction>
-                <ContextAction
-                  onClick={() => this.props.onUpdateFileName(this.props.path)}
-                >
-                  Rename File
-                </ContextAction>
-              </ContextMenu>
+                <div onDoubleClick={this.handleItemDoubleClick} className={background}>
+                  {label}
+                </div>
+                <ContextMenu>
+                    <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename File</ContextAction>
+                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
+                </ContextMenu>
             </Context>
         </div>
       );
