@@ -62,7 +62,6 @@ export default class Sidebar extends React.Component {
         // Minimum and maximum width of this sidebar.
         // These settings determine, how much the user can control its size.
         this.minWidth = 170;
-        this.maxWidth = 600;
 
         // determine, whether the initial project property is set and
         // contains anything. If not, the sidebar will be collapsed initially.
@@ -130,7 +129,7 @@ export default class Sidebar extends React.Component {
             // check, that the new width does not violate the minimum and
             // maximum width restrictions. Also check, that the mouse is still
             // within the window.
-            if (newWidth > this.minWidth && newWidth < this.maxWidth && e.pageX < window.innerWidth) {  
+            if (newWidth > this.minWidth && e.pageX < window.innerWidth) {  
                 this.setState({
                     'sidebarWidth': newWidth
                 });
@@ -240,30 +239,32 @@ export default class Sidebar extends React.Component {
                                 </NavLink>
                             </NavItem>
                         </Nav>
-                        <div className="tabContents">
-                            <TabContent activeTab={this.state.activeTab}>
-                                <TabPane tabId="1">
-                                    <div id="projectTree">
-                                        <ProjectTreeView
-                                            onOpenFile={this.props.onOpenFile}
-                                            onDeleteFile={this.props.onDeleteFile}
-                                            onCreateFile={this.props.onCreateFile}
-                                            onDeleteProject={this.props.onDeleteProject}
-                                            onUpdateFileName={this.props.onUpdateFileName}
-                                            onNewFile={(p) => {alert(p.join('/'));}}
-                                            onNewFolder={(p) => {alert(p.join('/'));}}
-                                            onClickProject={(p) => {alert(p);}}
-                                            project={this.props.project}
-                                            openedPath={this.props.openedPath}
+                        <div className='test'>
+                            <div className="tabContents">
+                                <TabContent activeTab={this.state.activeTab}>
+                                    <TabPane tabId="1">
+                                        <div id="projectTree">
+                                            <ProjectTreeView
+                                                onOpenFile={this.props.onOpenFile}
+                                                onDeleteFile={this.props.onDeleteFile}
+                                                onCreateFile={this.props.onCreateFile}
+                                                onDeleteProject={this.props.onDeleteProject}
+                                                onUpdateFileName={this.props.onUpdateFileName}
+                                                onNewFile={(p) => {alert(p.join('/'));}}
+                                                onNewFolder={(p) => {alert(p.join('/'));}}
+                                                onClickProject={(p) => {alert(p);}}
+                                                project={this.props.project}
+                                                openedPath={this.props.openedPath}
+                                            />
+                                        </div>
+                                    </TabPane>
+                                    <TabPane tabId="2">
+                                        <OpenGoalsView
+                                            goals={this.props.openGoals}
                                         />
-                                    </div>
-                                </TabPane>
-                                <TabPane tabId="2">
-                                    <OpenGoalsView
-                                        goals={this.props.openGoals}
-                                    />
-                                </TabPane>
-                            </TabContent>
+                                    </TabPane>
+                                </TabContent>
+                            </div>
                         </div>
                     </div>
                 </div>
