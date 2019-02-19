@@ -29,20 +29,20 @@ export default class Editor extends React.Component<Props> {
   public editor!: any; // ACE editor object
   private markers: number[];
   private timeTest: number; // will be used to regulate interval of calling the linter
-  private anchoredMarkers: AnchoredMarker[];
-  private anchoredHighlightings: AnchoredMarker[];
-  private annotations: number[];
+  private errorMarkers: AnchoredMarker[];
+  private popoverMarkers: AnchoredMarker[];
+  private errorMarkerIds: number[];
+  private popoverMarkerIds: number[];
   private obligationAnnotations: Annotation[] = [];
 
   constructor(props: Props) {
     super(props);
     this.markers = [];
     this.timeTest = 0;
-    this.anchoredMarkers = [];
-    this.anchoredHighlightings = [];
-    this.annotations = [];
-
-    this.updateAnnotations = this.updateAnnotations.bind(this);
+    this.errorMarkers = [];
+    this.popoverMarkers = [];
+    this.errorMarkerIds = [];
+    this.popoverMarkerIds = [];
   }
 
   /**
@@ -79,9 +79,9 @@ export default class Editor extends React.Component<Props> {
       }, 1000);
     });
 
-    this.editor.on('change', (delta: any) => {
-      this.anchoredHighlightings.forEach(h => h.onChange(delta));
-      this.anchoredMarkers.forEach(m => m.onChange(delta));
+    this.editor.on('change', (delta: ace_types.Ace.Delta) => {
+      this.popoverMarkers.forEach(h => h.onChange(delta));
+      this.errorMarkers.forEach(m => m.onChange(delta));
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
@@ -124,24 +124,27 @@ export default class Editor extends React.Component<Props> {
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
+  /**
+   * Called when new properties are passed down from the app component
+   * @param prevProps Properties before the update, used to detect changes
+   */
   public componentDidUpdate(prevProps: Props): void {
-    // Called when new properties are passed down from the app component
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
-      this.editor.setValue(this.props.text, -1);
+      this.editor.getSession().setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
-      this.editor.sess;
-      for (const marker of this.dynamicMarkers) {
+
+      for (const marker of this.popoverMarkerIds) {
         this.editor.session.removeMarker(marker);
       }
       for (const marker of this.markers) {
         this.editor.session.removeMarker(marker);
       }
-      this.anchoredMarkers = [];
-      this.anchoredHighlightings = [];
+      this.errorMarkers = [];
+      this.popoverMarkers = [];
       this.markers = [];
-      this.dynamicMarkers = [];
+      this.popoverMarkerIds = [];
     }
     if (this.props.diagnostics !== prevProps.diagnostics) {
       this.setAnchors();
@@ -230,6 +233,10 @@ export default class Editor extends React.Component<Props> {
       }
     };
   }
+
+  /**
+   * Called by react to display html of the component
+   */
   public render() {
     return <div id="editor" />;
   }
@@ -238,55 +245,58 @@ export default class Editor extends React.Component<Props> {
    * Function that calls lint, sending a request to the server, and passes the result to the app
    */
   private callLinter(): void {
-    let filename: string = this.props.filepath[this.props.filepath.length - 1];
+    const filename: string = this.props.filepath[
+      this.props.filepath.length - 1
+    ];
     lint(filename, this.editor.getValue()).then((diagnostics: Diagnostic[]) => {
       this.props.setDiagnostics(diagnostics);
       this.setAnchors();
     });
   }
 
-  private dynamicMarkers: number[] = [];
-
+  /**
+   * Adds a marker to the array that will be displayed as a highlighted color behind the text.
+   * @param start The start position of the marker
+   * @param end The end position of the marker
+   * @param uid The id of the color to display (defined in marker-colors.css)
+   * @param name Displayed in a tooltip on hovering over the marker
+   */
   public addBackMarker(start: any, end: any, uid: number, name: string) {
     const range = Range.fromPoints(start, end);
     const type: string = `n${uid} highlighting`;
-    this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
-    this.anchoredHighlightings = this.anchoredHighlightings.filter(
-      m => !m.deleted
-    );
-    this.anchoredHighlightings
+    this.popoverMarkerIds.forEach(m => this.editor.session.removeMarker(m));
+    // The deleted field is set, when the range of a marker is empty
+    this.popoverMarkers = this.popoverMarkers.filter(m => !m.deleted);
+    // Make old markers less opaque
+    this.popoverMarkers
       .filter(m => m.type === type)
-      .filter(m => parseFloat(m.message.split('|')[1]) > 0.1)
-      .forEach(
-        m =>
-          (m.message =
-            m.message.split('|')[0] +
-            '|' +
-            (parseFloat(m.message.split('|')[1]) - 0.02))
-      );
+      .filter(m => m.opacity > 0.1)
+      .forEach(m => (m.opacity -= 0.01));
 
-    this.anchoredHighlightings = addToArray(
-      this.anchoredHighlightings,
+    this.popoverMarkers = addToArray(
+      this.popoverMarkers,
       range,
-      name + '|0.5',
+      name,
       type,
-      this.editor.session
+      this.editor.session,
+      10
     );
 
-    if (this.anchoredHighlightings.length > 5) {
-      this.anchoredHighlightings.splice(
-        0,
-        this.anchoredHighlightings.length - 5
-      );
+    // Set the opacity of the newly added anchored marker
+    this.popoverMarkers[this.popoverMarkers.length - 1].opacity = 0.5;
+
+    // Remove old markers
+    if (this.popoverMarkers.length > 5) {
+      this.popoverMarkers.splice(0, this.popoverMarkers.length - 5);
     }
 
-    for (const anchoredRange of this.anchoredHighlightings) {
+    for (const anchoredRange of this.popoverMarkers) {
       const popoverMarker: PopoverMarker = new PopoverMarker(
         anchoredRange,
-        anchoredRange.message.split('|')[0],
-        parseFloat(anchoredRange.message.split('|')[1])
+        anchoredRange.message,
+        anchoredRange.opacity
       );
-      this.dynamicMarkers.push(
+      this.popoverMarkerIds.push(
         this.editor.session.addDynamicMarker(popoverMarker).id
       );
     }
@@ -297,7 +307,7 @@ export default class Editor extends React.Component<Props> {
    * so that their markers and annotations can automatically move, when the text changes
    */
   private setAnchors(): void {
-    this.anchoredMarkers = [];
+    this.errorMarkers = [];
 
     // only show annotations, if there are any (valid) diagnostics
     if (
@@ -305,12 +315,12 @@ export default class Editor extends React.Component<Props> {
       this.props.diagnostics.constructor === Array
     ) {
       this.props.diagnostics.sort(diagnosticPriority);
-      this.anchoredMarkers = [];
+      this.errorMarkers = [];
       // Process each element of array of diagonistics
       for (const diagnostic of this.props.diagnostics) {
-        // Add the anchors and content for this diagnostic to the anchoredMarkers Array
-        this.anchoredMarkers = addToArray(
-          this.anchoredMarkers,
+        // Add the anchors and content for this diagnostic to the errorMarkers Array
+        this.errorMarkers = addToArray(
+          this.errorMarkers,
           new Range(
             diagnostic.startRow,
             diagnostic.startCol,
@@ -329,8 +339,9 @@ export default class Editor extends React.Component<Props> {
       this.setMarkers();
     }
   }
+
   /**
-   * This function displays markers in the editor for all members of anchoredMarkers
+   * This function displays markers in the editor for all members of errorMarkers
    */
   private setMarkers(): void {
     // Remove all current markers displayed in the editor
@@ -338,25 +349,15 @@ export default class Editor extends React.Component<Props> {
       this.editor.session.removeMarker(marker);
     }
     this.markers = [];
-    // Add markers for all anchoredMarkers
-    this.processMarkerArray(this.anchoredMarkers, true);
-  }
-
-  /**
-   * Helper function for setMarkers
-   */
-  private processMarkerArray(
-    anchoredMarkers: AnchoredMarker[],
-    front: boolean
-  ) {
-    for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
+    // Add markers for all errorMarkers
+    for (const errorMarker of this.errorMarkers) {
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
-          anchoredMarkers[i].getRange(this.editor.session),
-          `${anchoredMarkers[i].type}Marker`,
+          errorMarker.getRange(this.editor.session),
+          `${errorMarker.type}Marker`,
           'text',
-          front
+          false
         )
       );
     }
