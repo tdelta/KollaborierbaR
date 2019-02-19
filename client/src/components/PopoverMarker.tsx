@@ -44,20 +44,24 @@ export default class PopoverMarker {
       markerLayer.drawTextMarker(
         null,
         range,
-        this.anchor.type + 'Marker',
+        `${this.anchor.type}Marker`,
         config
       );
     } else {
       markerLayer.drawSingleLineMarker(
         null,
         range,
-        this.anchor.type + 'Marker',
+        `${this.anchor.type}Marker`,
         config
       );
     }
 
-    for (let i: number = markerLayer.element.children.length - 1; i >= 0; i--) {
-      let child = markerLayer.element.children[i];
+    for (
+      let i: number = markerLayer.element.children.length - 1;
+      i >= 0;
+      i = i - 1
+    ) {
+      const child = markerLayer.element.children[i];
       if (
         child.className.includes(`${this.anchor.type}Marker`) &&
         !child.style.opacity
@@ -78,11 +82,12 @@ export default class PopoverMarker {
         // Executed when the mouse leaves the highlighted area
         htmlElement.addEventListener('mouseout', () => {
           // If the ref is referring to a present element in the dom, set it to be invisible
-          if (this.popover.current)
+          if (this.popover.current) {
             this.popover.current.setState({ isOpen: false });
+          }
         });
 
-        htmlElement.style.opacity = this.opacity + '';
+        htmlElement.style.opacity = `${this.opacity}`;
 
         ReactDom.render(
           <MarkerPopover ref={this.popover} target={htmlElement}>

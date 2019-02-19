@@ -38,8 +38,15 @@ public class SynchronizationController {
   @Autowired private UserList userList;
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
+  /**
+   * Called when a client calls the insert route. An insert operation is applied to the crdt document
+   * and broadcasted to all subscribers on the document.
+   * @param file File attribute of the header, specifies what file to edit
+   * @param user The client that sent the insert
+   * @param message The insert operation
+   */
   @MessageMapping("/insert")
-  public void greeting(@Header("file") String file, Principal user, LogootSAdd message)
+  public void handleInsert(@Header("file") String file, Principal user, LogootSAdd message)
       throws Exception {
     // Apply crdt operation on the document saved on the server
     message.execute(documents.get(file));
@@ -51,8 +58,15 @@ public class SynchronizationController {
     }
   }
 
+  /**
+   * Called when a client calls the insert route. A remove operation is applied to the crdt document
+   * and broadcasted to all subscribers on the document.
+   * @param file File attribute of the header, specifies what file to edit
+   * @param user The client that sent the remove
+   * @param message The remove operation
+   */
   @MessageMapping("/remove")
-  public void greeting(@Header("file") String file, Principal user, LogootSDel message)
+  public void handleRemove(@Header("file") String file, Principal user, LogootSDel message)
       throws Exception {
     // Apply crdt operation on the document saved on the server
     message.execute(documents.get(file));
@@ -64,24 +78,22 @@ public class SynchronizationController {
     }
   }
 
-  @MessageMapping("/reset")
-  public void reset(@Header("file") String file, Principal user, File text) {
-    LogootSRopes document = fromText(text.content);
-    documents.put(file, document);
-    document = document.copy();
-    LinkedList<Principal> subscribed = users.get(file);
-    for (int i = 0; i < subscribed.size(); i++) {
-      document.setReplicaNumber(i);
-      messagingTemplate.convertAndSendToUser(subscribed.get(i).getName(), "/crdt-doc", document);
-    }
-  }
-
+  /**
+   * Called when a client disconnects from the socket. Removes the client from all crdt documents.
+   * @param event Information about the disconnect
+   */
   @EventListener
   public void handleDisconnect(final SessionDisconnectEvent event) {
     final Principal user = event.getUser();
     unsubscribe(user);
   }
 
+  /**
+   * Called when a client opens a file. Initialized a crdt document with a unique id and sends it to the client.
+   * @param file The file that the client opened
+   * @param user The client that called the route
+   * @param text The text to initialize the document with if it doesnt exist yet
+   */
   @MessageMapping("/file")
   public void handleSubscription(@Header("file") String file, Principal user, File text) {
     System.out.println("Adding user to crdt doc "+file);
@@ -116,6 +128,10 @@ public class SynchronizationController {
     applicationEventPublisher.publishEvent(event);
   }
 
+  /**
+   * Creates a crdt document containing some text
+   * @param text The content of the document
+   */
   private LogootSRopes fromText(String text) {
     LogootSRopes document = new LogootSRopes();
 
@@ -136,6 +152,10 @@ public class SynchronizationController {
     return document;
   }
 
+  /**
+   * Removes a client from all crdt documents that it is connected to
+   * @param user The client
+   */
   private void unsubscribe(Principal user) {
     // Iterate over all names of files and lists of users working on them
     for (ConcurrentHashMap.Entry<String, LinkedList<Principal>> entry : users.entrySet()) {
