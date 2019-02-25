@@ -239,7 +239,7 @@ export default class Sidebar extends React.Component {
                                 </NavLink>
                             </NavItem>
                         </Nav>
-                        <div className='test'>
+                        <div className='tabWrapper'>
                             <div className="tabContents">
                                 <TabContent activeTab={this.state.activeTab}>
                                     <TabPane tabId="1">
