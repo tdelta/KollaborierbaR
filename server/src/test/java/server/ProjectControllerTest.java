@@ -31,6 +31,7 @@ public class ProjectControllerTest {
         testProjects.add("HelloWorld");
         testProjects.add("My Project");
         testProjects.add("JMLProject");
+        testProjects.add("SimpleJML");
     }
 
     /**
