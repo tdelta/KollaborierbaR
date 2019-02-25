@@ -2,6 +2,9 @@ package synchronization;
 
 public class User {
 
+  /**
+   * User Model holding Information that we assign to users of the Websocket.
+   */
   private String firstName;
   private String lastName;
   private int crdtId;
