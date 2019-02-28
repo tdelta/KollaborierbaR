@@ -87,38 +87,40 @@ export default class Editor extends React.Component<Props> {
     });
 
     this.editor.on('gutterclick', (e: any) => {
-      if (
-        e.domEvent.target.className.includes('obligation_todo') &&
-        e.domEvent.target.firstChild
-      ) {
-        const rowString = e.domEvent.target.firstChild.data;
-        const row = parseInt(rowString, 10) - 1;
+      this.props.onUpdateFileContent().then(() => {
+        if (
+          e.domEvent.target.className.includes('obligation_todo') &&
+          e.domEvent.target.firstChild
+        ) {
+          const rowString = e.domEvent.target.firstChild.data;
+          const row = parseInt(rowString, 10) - 1;
 
-        if (row) {
-          this.editor.session.getSelection().clearSelection();
-          const obligations = this.props.getObligations(
-            this.editor.session.getLines(0, this.editor.session.getLength())
-          );
+          if (row) {
+            this.editor.session.getSelection().clearSelection();
+            const obligations = this.props.getObligations(
+              this.editor.session.getLines(0, this.editor.session.getLength())
+            );
 
-          this.props.onProveObligation(obligations[row]);
+            this.props.onProveObligation(obligations[row]);
+          }
+        } else if (
+          e.domEvent.target.className.includes('obligation_done') &&
+          e.domEvent.target.firstChild
+        ) {
+          const rowString = e.domEvent.target.firstChild.data;
+          const row = parseInt(rowString, 10) - 1;
+
+          if (row) {
+            this.editor.session.getSelection().clearSelection();
+            const obligations = this.props.getObligations(
+              this.editor.session.getLines(0, this.editor.session.getLength())
+            );
+
+            this.props.resetObligation(obligations[row]);
+            this.props.onProveObligation(obligations[row]);
+          }
         }
-      } else if (
-        e.domEvent.target.className.includes('obligation_done') &&
-        e.domEvent.target.firstChild
-      ) {
-        const rowString = e.domEvent.target.firstChild.data;
-        const row = parseInt(rowString, 10) - 1;
-
-        if (row) {
-          this.editor.session.getSelection().clearSelection();
-          const obligations = this.props.getObligations(
-            this.editor.session.getLines(0, this.editor.session.getLength())
-          );
-
-          this.props.resetObligation(obligations[row]);
-          this.props.onProveObligation(obligations[row]);
-        }
-      }
+      });
     });
 
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
@@ -379,6 +381,7 @@ export default class Editor extends React.Component<Props> {
 
 // defining the structure of this react components properties
 interface Props {
+  onUpdateFileContent(): Promise<void>;
   diagnostics: Diagnostic[];
   provenObligations: number[];
   text: string;

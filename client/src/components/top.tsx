@@ -107,7 +107,13 @@ export default class Top extends React.Component<Props, State> {
                 Key
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.props.onProveFile}>
+                <DropdownItem
+                  onClick={() => {
+                    this.props
+                      .onUpdateFileContent()
+                      .then(() => this.props.onProveFile());
+                  }}
+                >
                   Prove all contracts
                 </DropdownItem>
               </DropdownMenu>
@@ -214,7 +220,7 @@ interface Props {
   onDeleteFile(): void;
   onDeleteProject(): void;
   onUpdateFileName(): void;
-  onUpdateFileContent(): void;
+  onUpdateFileContent(): Promise<void>;
   onOpenProject(): void;
   onCreateProject(): void;
   onProveFile(): void;

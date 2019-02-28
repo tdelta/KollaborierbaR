@@ -254,7 +254,7 @@ export default class App extends React.Component {
                     onCreateProject={this.createProject}
                     onProveFile={this.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
-                    onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
+                    onUpdateFileContent={() => this.updateFileContent(this.state.openedPath, this.state.text)}
                     notificationSystem={this.notificationSystem}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
@@ -272,6 +272,7 @@ export default class App extends React.Component {
                         displayFormula={this.displaySequent}
                     />
                     <Editor
+                        onUpdateFileContent={() => this.updateFileContent(this.state.openedPath, this.state.text)}
                         setDiagnostics={this.setDiagnostics}
                         diagnostics={this.state.diagnostics}
                         provenObligations={this.state.provenObligations}
