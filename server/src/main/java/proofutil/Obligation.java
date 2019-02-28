@@ -7,10 +7,12 @@ package proofutil;
 public class Obligation{
     private long id;
     private String sequent;
+    private String formula;
     
-    public Obligation(long id, String sequent) {
+    public Obligation(long id, String sequent, String formula) {
     	this.id = id;
     	this.sequent = sequent;
+      this.formula = formula;
     }
 
     public long getId(){
@@ -19,5 +21,9 @@ public class Obligation{
 
     public String getSequent(){
         return sequent;
+    }
+
+    public String getFormula(){
+      return formula;
     }
 }
