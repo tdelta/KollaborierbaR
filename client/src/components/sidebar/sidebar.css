@@ -32,7 +32,7 @@
   float: left;
 
   height: 100%;
-  width: 300px;
+  width: 350px;
 }
 
 /* a slim bar between sidebar and main content. It will allow the user to
@@ -86,6 +86,8 @@
     white-space: nowrap;
     overflow: hidden;
 
+    height: 100%;
+
     /* disallow text selections */
     user-select: none;
 }
@@ -100,8 +102,10 @@
 }
 
 .sidebarContent .tabContents {
-    margin-top: 0.5rem;
-    margin-left: 0.5rem;
+    padding-top: 0.3rem;
+    padding-left: 0.5rem;
+    overflow-y: auto;
+    height: 100%;
 }
 
 .activeFileNode {

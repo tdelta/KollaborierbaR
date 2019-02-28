@@ -66,6 +66,7 @@ export default class App extends React.Component {
           this.notificationSystem,
           this.addProvenObligations,
           (openGoals) => this.setState({openGoals}),
+          (obligationResult) => this.setState({proofTree: obligationResult.proofTree}),
           () => this.state.project.name + '/' + this.state.openedPath.join('/')
         );
 
@@ -89,7 +90,9 @@ export default class App extends React.Component {
             provenObligations: [],
 
             // open key goals
-            openGoals: []
+            openGoals: [],
+
+            proofTree: undefined
         };
     }
 
@@ -243,6 +246,7 @@ export default class App extends React.Component {
                     <Sidebar
                         project={this.state.project}
                         openGoals={this.state.openGoals}
+                        proofNodes={this.state.proofTree != null ? [this.state.proofTree] : []}
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}

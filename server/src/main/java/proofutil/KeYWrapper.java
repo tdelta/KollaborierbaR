@@ -5,6 +5,7 @@ import de.uka.ilkd.key.java.abstraction.KeYJavaType;
 import de.uka.ilkd.key.logic.op.IObserverFunction;
 import de.uka.ilkd.key.proof.Goal;
 import de.uka.ilkd.key.proof.Proof;
+import de.uka.ilkd.key.proof.Node;
 import de.uka.ilkd.key.proof.init.ProofInputException;
 import de.uka.ilkd.key.proof.io.ProblemLoaderException;
 import de.uka.ilkd.key.settings.ChoiceSettings;
@@ -12,10 +13,19 @@ import de.uka.ilkd.key.settings.ProofSettings;
 import de.uka.ilkd.key.speclang.Contract;
 import de.uka.ilkd.key.strategy.StrategyProperties;
 import de.uka.ilkd.key.util.MiscTools;
+import de.uka.ilkd.key.java.Services;
+import de.uka.ilkd.key.pp.LogicPrinter;
+import de.uka.ilkd.key.rule.RuleApp;
+import de.uka.ilkd.key.rule.OneStepSimplifier.Protocol;
+import de.uka.ilkd.key.rule.OneStepSimplifierRuleApp;
+
+import org.key_project.util.collection.ImmutableSet;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import org.key_project.util.collection.ImmutableSet;
+import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * Basic KeY stub, that tries to prove all contracts in a file
@@ -53,7 +63,7 @@ public class KeYWrapper {
 																						// performed proof if a *.proof
 																						// file is loaded
 		} catch (ProblemLoaderException e) {
-			results.addError(-1, "Couldn't process all relevant information for verification with KeY.");
+			results.addError(-1, "Couldn't process all relevant information for verification with KeY.", null);
 			System.out.println("Exception at '" + location + "':");
 			e.printStackTrace();
 		}
@@ -90,17 +100,21 @@ public class KeYWrapper {
 				// Show proof result
 				final boolean closed = proof.openGoals().isEmpty();
 
+        final ProofNode proofTree = generateProofTree(proof);
+
 				if (closed) {
 					results.addSuccess(
               obligationIdx,
-              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is verified."
+              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is verified.",
+              proofTree
           );
         }
 
 				else {
 					results.addFail(
               obligationIdx,
-              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open."
+              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open.",
+              proofTree
           );
 				
           for (Goal goal: proof.openGoals()) {
@@ -110,7 +124,8 @@ public class KeYWrapper {
 			} catch (ProofInputException e) {
 				results.addError(
             obligationIdx,
-						"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + "."
+						"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".",
+            null
         );
 
 				System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
@@ -209,4 +224,109 @@ public class KeYWrapper {
 		if (env != null)
 			env.dispose();
 	}
+
+  private ProofNode generateProofTree(final Proof proof) {
+    return generateBranchNode(proof.root(), "Proof Tree");
+  }
+
+  private Node findChild (Node n) {
+      if ( n.childrenCount () == 1 ) return n.child ( 0 );
+      
+      Node nextN = null;
+      for ( int i = 0; i != n.childrenCount (); ++i ) {
+          if ( ! n.child ( i ).isClosed() ) {
+              if ( nextN != null ) return null;
+              nextN = n.child ( i );
+          }
+      }
+  
+      return nextN;
+  }
+
+  private ProofNode generateBranchNode(final Node node, final String forcedLabel) {
+    final String label;
+    {
+      if (forcedLabel != null) {
+        label = forcedLabel;
+      }
+
+      else if(node.getNodeInfo().getBranchLabel() != null) {
+        label = node.getNodeInfo().getBranchLabel();
+      }
+
+      else {
+        label = "(Unlabelled node)";
+      }
+    }
+
+    final List<ProofNode> children = new LinkedList<>();
+    {
+      Node currentNode = node;
+
+      while (true) {
+          children.add(generateDefaultNode(currentNode));
+
+          final Node nextN = findChild(currentNode);
+          if (nextN == null) {
+            break;
+          }
+
+          currentNode = nextN;
+      }
+
+      for (int i = 0; i != currentNode.childrenCount(); ++i) {
+          if (!currentNode.child(i).isClosed()) {
+              children.add(generateBranchNode(currentNode.child(i), null));
+          }
+      }
+    }
+
+    return new ProofNode(
+        label,
+        children
+    );
+  }
+
+  private ProofNode generateOneStepNode(final Services services, final RuleApp app) {
+    final String prettySubTerm =
+      LogicPrinter.quickPrintTerm(app.posInOccurrence().subTerm(), services);
+
+    return new ProofNode(
+        app.rule().name() + " ON " + prettySubTerm,
+        new ArrayList<ProofNode>(0)
+    );
+  }
+
+  private ProofNode generateDefaultNode(final Node node) {
+    final List<ProofNode> children;
+
+    if (node == null || !(node.getAppliedRuleApp() instanceof OneStepSimplifierRuleApp)) {
+      children = new ArrayList<>(0);
+    }
+
+    else {
+      final Protocol protocol =
+        ((OneStepSimplifierRuleApp)node.getAppliedRuleApp()).getProtocol();
+
+      if(protocol != null) {
+          final int numChildren = protocol.size();
+          children = new ArrayList<>(numChildren);
+
+          for (int i = 0; i < numChildren; ++i) {
+            children.add(
+                generateOneStepNode(node.proof().getServices(), protocol.get(i))
+            );
+          }
+      }
+
+      else {
+        children = new ArrayList<>(0);
+      }
+    }
+
+    return new ProofNode(
+        node.serialNr() + ":" + node.name(),
+        children
+    );
+  }
 }
