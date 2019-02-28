@@ -32,6 +32,7 @@
   float: left;
   height: 100%;
   width: 500px;
+  overflow:hidden;
 }
 
 /* a slim bar between sidebar and main content. It will allow the user to
@@ -104,7 +105,7 @@
     margin-left: 0.5rem;
 }
 
-.test {
+.tabWrapper {
     height: 97%;
     overflow: auto;
 }

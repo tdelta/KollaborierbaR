@@ -172,6 +172,8 @@ export default class Sidebar extends React.Component {
         ) {
           this.enableTab('2');
         }
+        // This fixes the bug, where the height of the ace isn't correct until you resize the sidebar
+        window.dispatchEvent(new Event('resize')); 
     }
 
     render() {
@@ -239,7 +241,7 @@ export default class Sidebar extends React.Component {
                                 </NavLink>
                             </NavItem>
                         </Nav>
-                        <div className='test'>
+                        <div className='tabWrapper'>
                             <div className="tabContents">
                                 <TabContent activeTab={this.state.activeTab}>
                                     <TabPane tabId="1">
