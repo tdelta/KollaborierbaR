@@ -261,6 +261,7 @@ export default class Sidebar extends React.Component {
                                 <TabPane tabId="2">
                                     <OpenGoalsView
                                         goals={this.props.openGoals}
+                                        displayFormula={this.props.displayFormula}
                                     />
                                 </TabPane>
                             </TabContent>
@@ -289,4 +290,5 @@ Sidebar.propTypes = {
     'onDeleteProject': PropTypes.func,
     'onUpdateFileName': PropTypes.func,
     'openedPath': PropTypes.arrayOf(PropTypes.string),
+    'displayFormula': PropTypes.func,
 };

@@ -20,6 +20,7 @@ export default class OpenGoalsView extends React.Component<Props, State> {
     this.setState({
       toggledGoal: goal.id,
     });
+    this.props.displayFormula(goal.formula);
   }
 
   public render() {
@@ -61,6 +62,7 @@ export default class OpenGoalsView extends React.Component<Props, State> {
 interface Props {
   project: any;
   goals: Goal[];
+  displayFormula: (formula: string) => void;
 }
 
 interface State {

@@ -12,6 +12,8 @@ import de.uka.ilkd.key.settings.ProofSettings;
 import de.uka.ilkd.key.speclang.Contract;
 import de.uka.ilkd.key.strategy.StrategyProperties;
 import de.uka.ilkd.key.util.MiscTools;
+import de.uka.ilkd.key.pp.LogicPrinter;
+import de.uka.ilkd.key.control.KeYEnvironment;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import org.key_project.util.collection.ImmutableSet;
  */
 public class KeYWrapper {
 	KeYEnvironment<?> env;
+  private final LogicPrinter printer;
 	ProofResult results;
 
 	public KeYWrapper(String path) {
@@ -52,7 +55,16 @@ public class KeYWrapper {
 			env = KeYEnvironment.load(location, classPaths, bootClassPath, includes); // env.getLoadedProof() returns
 																						// performed proof if a *.proof
 																						// file is loaded
-		} catch (ProblemLoaderException e) {
+		  
+      // Build a LogicPrinter from the environment to print sequents
+      final NotationInfo ni = new NotationInfo();
+      ni.refresh(env.getServices());
+      printer = new LogicPrinter(
+          new ProgramPrinter(),
+          ni,
+          env.getServices());
+
+    } catch (ProblemLoaderException e) {
 			results.addError(-1, "Couldn't process all relevant information for verification with KeY.");
 			System.out.println("Exception at '" + location + "':");
 			e.printStackTrace();
@@ -104,7 +116,8 @@ public class KeYWrapper {
           );
 				
           for (Goal goal: proof.openGoals()) {
-            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString()));
+            printer.printSequent(goal.sequent());
+            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString(),printer.result().toString()));
           }
 				}
 			} catch (ProofInputException e) {

@@ -53,6 +53,7 @@ export default class App extends React.Component {
         this.proveFile = this.proveFile.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
+        this.displaySequent = this.displaySequent.bind(this);
         this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.openedPath,this.state.project.name, path);
         this.deleteProject = (path) => this.projectManagement.deleteProject(this.state.project.name, path);
         this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
@@ -80,7 +81,11 @@ export default class App extends React.Component {
             // content of the current file. Displayed within the editor.
             text: '',
 
+            // currently opened file in the editor
             openedPath: [],
+
+            // type of the currently opened file in the editor
+            filetype: '',
 
             // warnings, errors, etc. within the currently open file
             diagnostics: [],
@@ -117,20 +122,26 @@ export default class App extends React.Component {
     setFileName(filename){
         let path = this.state.openedPath;
         path[path.length - 1] = filename;
-        this.setState({
-            openedPath: path
-        });
+        this.setOpenedPath(path);
     }
     
     /**
      * Sets the path of the currently opened file, which is passed down to the components
      */
     setOpenedPath(path){
+        let filetype = '';
+        console.log(path);
+        if(path && path[path.length-1]){
+            const filename = path[path.length-1]
+            filetype = filename.split('.')[filename.split('.').length-1];
+        }  
+        if(this.collabController){
+            this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
+        }
         this.setState({
-            openedPath: path
+            openedPath: path,
+            filetype: filetype
         });
-      if(this.collabController)
-      this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
     }
 
     /**
@@ -177,8 +188,8 @@ export default class App extends React.Component {
             this.setText.bind(this)
         );
         this.setState({
-            text: '', // load some sample text for testing
-            openedPath: ['Main.java'] // TODO: replace filename with this
+            text: '',
+            openedPath: []
         });
         document.addEventListener('keydown', this.handleCtrlS.bind(this));
     }
@@ -196,6 +207,14 @@ export default class App extends React.Component {
                 // TODO: Handle rename with collab controller
                 this.collabController.setFile(this.state.project.name,path.join('/'),response.fileText);
             });
+    }
+
+    displaySequent(formula){
+      this.setOpenedPath([]);
+      this.setState({
+        text: formula,
+        filetype: 'sequent'
+      });
     }
 
     /**
@@ -250,6 +269,7 @@ export default class App extends React.Component {
                         onCreateFile={this.createFile}
                         onDeleteProject={this.deleteProject}
                         onUpdateFileName={this.updateFileName}
+                        displayFormula={this.displaySequent}
                     />
                     <Editor
                         setDiagnostics={this.setDiagnostics}
@@ -259,6 +279,7 @@ export default class App extends React.Component {
                         setText={this.setText}
                         text={this.state.text}
                         filepath={this.state.openedPath}
+                        filetype={this.state.filetype}
                         collabController={this.collabController}
                         getObligations={this.key.getObligations}
                         onProveObligation={this.key.proveObligation}

@@ -54,8 +54,8 @@ export default class Editor extends React.Component<Props> {
       autoScrollEditorIntoView: true,
       fontSize: 20,
       firstLineNumber: 1,
-    });
-    this.editor.getSession().setMode('ace/mode/jml');
+    }); 
+
     this.editor.setTheme('ace/theme/pastel_on_dark');
     this.editor.$blockScrolling = Infinity;
 
@@ -142,6 +142,17 @@ export default class Editor extends React.Component<Props> {
     if (this.props.diagnostics !== prevProps.diagnostics) {
       this.setAnchors();
     }
+
+    let mode = '';
+    switch(this.props.filetype){
+      case 'java':
+        mode = 'ace/mode/jml';
+        break;
+      case 'sequent':
+        mode = 'ace/mode/sequent';
+        break;
+    }
+    this.editor.getSession().setMode(mode);
 
     this.setProofObligations();
   }
@@ -234,11 +245,13 @@ export default class Editor extends React.Component<Props> {
    * Function that calls lint, sending a request to the server, and passes the result to the app
    */
   private callLinter(): void {
-    let filename: string = this.props.filepath[this.props.filepath.length - 1];
-    lint(filename, this.editor.getValue()).then((diagnostics: Diagnostic[]) => {
-      this.props.setDiagnostics(diagnostics);
-      this.setAnchors();
-    });
+    if(this.props.filetype==='java'){
+      let filename: string = this.props.filepath[this.props.filepath.length - 1];
+      lint(filename, this.editor.getValue()).then((diagnostics: Diagnostic[]) => {
+        this.props.setDiagnostics(diagnostics);
+        this.setAnchors();
+      });
+    }
   }
 
   private dynamicMarkers: number[] = [];
@@ -365,6 +378,7 @@ interface Props {
   provenObligations: number[];
   text: string;
   filepath: string;
+  filetype: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
   resetObligation(obligationIdx: number): void;
