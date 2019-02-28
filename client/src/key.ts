@@ -1,4 +1,4 @@
-import KeyApi, { ProofResults } from './key-api';
+import KeyApi, { ProofResults, ObligationResult } from './key-api';
 import NotificationSystem from 'react-notification-system';
 import { RefObject } from 'react';
 
@@ -10,11 +10,13 @@ export default class Key {
   private setProvenObligations: (provenObligations: number[]) => void;
   private notificationSystem: RefObject<NotificationSystem.System>;
   private setOpenGoals: (openGoals: OpenGoalInfo[]) => void;
+  private setObligationResult: (ObligationResult: ObligationResult) => void;
 
   constructor(
     notificationSystem: RefObject<NotificationSystem.System>,
     setProvenObligations: (provenObligations: number[]) => void,
     setOpenGoals: (openGoals: OpenGoalInfo[]) => void,
+    setObligationResult: (ObligationResult: ObligationResult) => void,
     getFilePath: () => string
   ) {
     this.notificationSystem = notificationSystem;
@@ -23,6 +25,7 @@ export default class Key {
     this.proveFile = this.proveFile.bind(this);
     this.proveObligation = this.proveObligation.bind(this);
     this.setOpenGoals = setOpenGoals;
+    this.setObligationResult = setObligationResult;
 
     this.sendNotifications = this.sendNotifications.bind(this);
     this.handleResults = this.handleResults.bind(this);
@@ -102,6 +105,8 @@ export default class Key {
     );
 
     this.setProvenObligations(provenObligations);
+
+    this.setObligationResult(results.succeeded[0]);
 
     this.setOpenGoals(results.openGoals);
 

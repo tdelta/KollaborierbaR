@@ -7,6 +7,7 @@ import FontAwesome from 'react-fontawesome';
 
 import ProjectTreeView from './project-tree-view.jsx';
 import OpenGoalsView from './open-goals-view.tsx';
+import ProofTreeView from './proof-tree-view.tsx';
 
 import {Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
 import classnames from 'classnames';
@@ -61,7 +62,7 @@ export default class Sidebar extends React.Component {
 
         // Minimum and maximum width of this sidebar.
         // These settings determine, how much the user can control its size.
-        this.minWidth = 170;
+        this.minWidth = 220;
         this.maxWidth = 600;
 
         // determine, whether the initial project property is set and
@@ -75,7 +76,7 @@ export default class Sidebar extends React.Component {
 
         this.state = {
             // current width of the sidebar
-            'sidebarWidth': 200,
+            'sidebarWidth': 220,
             // whether the sidebar is currently hidden, or not
             'collapsed': isProjectValid ? 
                 // only display the sidebar initially, if a project is set
@@ -239,6 +240,14 @@ export default class Sidebar extends React.Component {
                                     Open Goals
                                 </NavLink>
                             </NavItem>
+                            <NavItem>
+                                <NavLink
+                                    className={classnames({ active: this.state.activeTab === '3' })}
+                                    onClick={() => { this.enableTab('3'); }}
+                                >
+                                    Proof
+                                </NavLink>
+                            </NavItem>
                         </Nav>
                         <div className="tabContents">
                             <TabContent activeTab={this.state.activeTab}>
@@ -263,6 +272,11 @@ export default class Sidebar extends React.Component {
                                         goals={this.props.openGoals}
                                     />
                                 </TabPane>
+                                <TabPane tabId="3">
+                                    <ProofTreeView
+                                        nodes={this.props.proofNodes}
+                                    />
+                                </TabPane>
                             </TabContent>
                         </div>
                     </div>
@@ -281,6 +295,12 @@ Sidebar.propTypes = {
       PropTypes.shape({
         'id': PropTypes.number,
         'sequent': PropTypes.string
+      })
+    ),
+    'proofNodes': PropTypes.arrayOf(
+      PropTypes.shape({
+        'text': PropTypes.string,
+        'children': PropTypes.arrayOf(PropTypes.object)
       })
     ),
     'onOpenFile': PropTypes.func,

@@ -1,6 +1,7 @@
 import { serverAddress } from './constants';
 
 import OpenGoalInfo from './OpenGoalInfo';
+import Node from './key/webui/prooftree/Node';
 
 export default class KeyApi {
   public proveFile(path: string): Promise<ProofResults> {
@@ -41,7 +42,8 @@ export interface ProofResults {
   openGoals: OpenGoalInfo[];
 }
 
-interface ObligationResult {
+export interface ObligationResult {
   obligationIdx: number;
   resultMsg: string;
+  proofTree: Node;
 }
