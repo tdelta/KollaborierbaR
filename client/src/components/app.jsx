@@ -61,13 +61,15 @@ export default class App extends React.Component {
         this.openProject = this.projectManagement.openProject.bind(this.projectManagement);
         this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
+        this.addNewConsoleMessage = this.addNewConsoleMessage.bind(this);
 
         this.editor = React.createRef();
         this.key = new Key(
           this.notificationSystem,
           this.addProvenObligations,
           (openGoals) => this.setState({openGoals}),
-          () => this.state.project.name + '/' + this.state.openedPath.join('/')
+          () => this.state.project.name + '/' + this.state.openedPath.join('/'),
+          this.addNewConsoleMessage
         );
 
         // setup initial state
@@ -90,7 +92,10 @@ export default class App extends React.Component {
             provenObligations: [],
 
             // open key goals
-            openGoals: []
+            openGoals: [],
+
+            // the console log
+            consolelog: ''
         };
     }
 
@@ -165,6 +170,12 @@ export default class App extends React.Component {
         });
 
         this.key.proveFile();
+    }
+
+    addNewConsoleMessage(message) {
+        this.setState({
+            consolelog: this.state.consolelog+ message + "\n"
+        });
     }
 
     /**
@@ -252,22 +263,25 @@ export default class App extends React.Component {
                         onDeleteProject={this.deleteProject}
                         onUpdateFileName={this.updateFileName}
                     />
-                    <Editor
-                        onUpdateFileContent={() => this.updateFileContent(this.state.openedPath, this.state.text)}
-                        setDiagnostics={this.setDiagnostics}
-                        diagnostics={this.state.diagnostics}
-                        provenObligations={this.state.provenObligations}
-                        resetObligation={this.resetObligation}
-                        setText={this.setText}
-                        text={this.state.text}
-                        filepath={this.state.openedPath}
-                        collabController={this.collabController}
-                        getObligations={this.key.getObligations}
-                        onProveObligation={this.key.proveObligation}
-                        ref={this.editor}
-                    />
-                    <Console/>
-                    
+                    <div class="rightSide">
+                        <Editor
+                            onUpdateFileContent={() => this.updateFileContent(this.state.openedPath, this.state.text)}
+                            setDiagnostics={this.setDiagnostics}
+                            diagnostics={this.state.diagnostics}
+                            provenObligations={this.state.provenObligations}
+                            resetObligation={this.resetObligation}
+                            setText={this.setText}
+                            text={this.state.text}
+                            filepath={this.state.openedPath}
+                            collabController={this.collabController}
+                            getObligations={this.key.getObligations}
+                            onProveObligation={this.key.proveObligation}
+                            ref={this.editor}
+                        />
+                        <Console
+                            consolelog = {this.state.consolelog}
+                        />
+                    </div>
                 </div>
                 <ConfirmationModal ref={this.confirmationModal}/>
                 <NotificationSystem ref={this.notificationSystem}/>
