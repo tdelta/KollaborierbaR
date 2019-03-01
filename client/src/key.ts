@@ -106,7 +106,7 @@ export default class Key {
 
     this.setProvenObligations(provenObligations);
 
-    this.setObligationResult(results.succeeded[0]);
+    this.setObligationResult(results.succeeded[0] ? results.succeeded[0] : results.failed[0]);
 
     this.setOpenGoals(results.openGoals);
 

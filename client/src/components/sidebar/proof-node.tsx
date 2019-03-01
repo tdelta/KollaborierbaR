@@ -5,9 +5,11 @@ import PropTypes from 'prop-types';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import './sidebar.css';
 
-import Node from '../../key/webui/prooftree/Node';
+import Node, {Kind} from '../../key/webui/prooftree/Node';
 
-export default class FileNode extends React.Component<Props, State> {
+import ProofIcon from './proof-icon';
+
+export default class ProofNode extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -16,7 +18,8 @@ export default class FileNode extends React.Component<Props, State> {
        * indicates, whether child nodes shall be visible or not
        */
       selected: false,
-      collapsed: false,
+      collapsed: this.props.node.kind !== Kind.ClosedProofTree &&
+                 this.props.node.kind !== Kind.OpenProofTree
     };
 
     this.handleItemDoubleClick = this.handleItemDoubleClick.bind(this);
@@ -52,6 +55,10 @@ export default class FileNode extends React.Component<Props, State> {
             onClick={this.toggle}
             onDoubleClick={this.handleItemDoubleClick}
           >
+            <ProofIcon
+              node={this.props.node}
+              collapsed={this.state.collapsed}
+            />
             {label}
           </div>
           {/* display the children as unordered list */}
@@ -64,7 +71,7 @@ export default class FileNode extends React.Component<Props, State> {
               <li key={child.text}>
                 {/* use recursion to display children.
                 */}
-                <FileNode
+                <ProofNode
                   node={child}
                 />
               </li>
