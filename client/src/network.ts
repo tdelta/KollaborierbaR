@@ -85,7 +85,11 @@ export class Network {
     this.stompClient.activate();
   }
 
-  public on(messageType: string, headers: any, callback: (obj: any) => void) {
+  public on(
+    messageType: string,
+    headers: any,
+    callback: (obj: IMessage) => void
+  ) {
     this.callbacks.push({ messageType, headers, callback });
     this.setCallbacks();
   }
@@ -226,5 +230,5 @@ export class Network {
 interface CallbackDef {
   messageType: string;
   headers: any;
-  callback: (obj: any) => void;
+  callback: (obj: IMessage) => void;
 }
