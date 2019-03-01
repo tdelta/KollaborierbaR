@@ -77,15 +77,17 @@ export default class ProjectTreeView extends React.Component {
         // (...and a little icon on the left)
         const header = (
             <>
-                <Context tree={() => this.state.file}>
-                    {projectTitle}
-                    <ContextMenu>
-                        <ContextAction onClick={() => this.props.onDeleteProject(this.props.project.name)}>Delete Project</ContextAction>
-                        {/*<ContextAction>Rename Project</ContextAction>*/}
-                        <ContextAction onClick={() => this.props.onCreateFile([], 'folder')}>Create Folder</ContextAction>
-                        <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
-                    </ContextMenu>
-                </Context>
+                <div className='tableFileNode'>
+                        <Context tree={() => this.state.file}>
+                            {projectTitle}
+                            <ContextMenu>
+                                <ContextAction onClick={() => this.props.onCreateFile([], 'folder')}>Create Folder</ContextAction>
+                                <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
+                                {/*<ContextAction>Rename Project</ContextAction>*/}
+                                <ContextAction onClick={() => this.props.onDeleteProject(this.props.project.name)}>Delete Project</ContextAction>
+                            </ContextMenu>
+                        </Context>
+                </div>
                 <hr />
             </>
         );
@@ -96,7 +98,6 @@ export default class ProjectTreeView extends React.Component {
                 <>
                     <div>
                         {header /* display the header (contains project name) */}
-
                         {
                             // render each element within the root folder of the
                             // project as FileNode
