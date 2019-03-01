@@ -77,15 +77,15 @@ export default class ProjectTreeView extends React.Component {
         // (...and a little icon on the left)
         const header = (
             <>
-                        <Context tree={() => this.state.file}>
-                            {projectTitle}
-                            <ContextMenu>
-                                <ContextAction onClick={() => this.props.onDeleteProject(this.props.project.name)}>Delete Project</ContextAction>
-                                {/*<ContextAction>Rename Project</ContextAction>*/}
-                                <ContextAction onClick={() => this.props.onCreateFile([], 'folder')}>Create Folder</ContextAction>
-                                <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
-                            </ContextMenu>
-                        </Context>
+                <Context tree={() => this.state.file}>
+                    {projectTitle}
+                    <ContextMenu>
+                        <ContextAction onClick={() => this.props.onDeleteProject(this.props.project.name)}>Delete Project</ContextAction>
+                        {/*<ContextAction>Rename Project</ContextAction>*/}
+                        <ContextAction onClick={() => this.props.onCreateFile([], 'folder')}>Create Folder</ContextAction>
+                        <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
+                    </ContextMenu>
+                </Context>
                 <hr />
             </>
         );

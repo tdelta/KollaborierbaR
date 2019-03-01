@@ -1,5 +1,7 @@
+import {serverAddress} from './constants.ts';
+
 function lint(name, sourceCode) {
-    var url = new URL('http://localhost:9000/lint');
+    var url = new URL(serverAddress+'/lint');
 
     const params = {'name': name};
 

@@ -10,7 +10,9 @@ import Console from './console/console.jsx';
 
 import ProjectManagement from '../projectmanagement.ts';
 
-import CollabController from '../collaborative/CollabController.ts'
+import CollabController from '../collaborative/CollabController.ts';
+
+import Key from '../key';
 
 //import testSource from '../sample-text.js';
 
@@ -35,10 +37,9 @@ export default class App extends React.Component {
             this.showProject.bind(this),
             () => this.state.project,
             this.setText.bind(this),
-            () => this.state.filename,
             this.setFileName.bind(this),
             () => this.state.openedPath,
-            (path) => this.state.openedPath = path,
+            this.setOpenedPath.bind(this),
             this.confirmationModal,
             this.notificationSystem,
             this.openFile.bind(this)
@@ -47,20 +48,27 @@ export default class App extends React.Component {
         // all methods should always refer to this instance of App, when
         // using the `this` variable.
         this.setText = this.setText.bind(this);
-        this.setFileName = this.setFileName.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
+        this.addProvenObligations = this.addProvenObligations.bind(this);
+        this.resetObligation = this.resetObligation.bind(this);
+        this.proveFile = this.proveFile.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
-        this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.filename, this.state.project.name, path);
+        this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.openedPath,this.state.project.name, path);
         this.deleteProject = (path) => this.projectManagement.deleteProject(this.state.project.name, path);
         this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
         this.createProject = this.projectManagement.createProject.bind(this.projectManagement);
         this.openProject = this.projectManagement.openProject.bind(this.projectManagement);
-        this.runProof = this.runProof.bind(this);
         this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
 
         this.editor = React.createRef();
+        this.key = new Key(
+          this.notificationSystem,
+          this.addProvenObligations,
+          (openGoals) => this.setState({openGoals}),
+          () => this.state.project.name + '/' + this.state.openedPath.join('/')
+        );
 
         // setup initial state
         this.state = {
@@ -73,12 +81,16 @@ export default class App extends React.Component {
             // content of the current file. Displayed within the editor.
             text: '',
 
-            filename: undefined,
-
             openedPath: [],
 
             // warnings, errors, etc. within the currently open file
-            diagnostics: []
+            diagnostics: [],
+
+            // indices of obligations, that have been proven
+            provenObligations: [],
+
+            // open key goals
+            openGoals: []
         };
     }
 
@@ -103,14 +115,23 @@ export default class App extends React.Component {
         });
     }
 
-    /**
-     * Set the file name of the currently open file.
-     * Passed down to the sub components, since linters / compilers may need it.
-     */
     setFileName(filename){
+        let path = this.state.openedPath;
+        path[path.length - 1] = filename;
         this.setState({
-            filename: filename
+            openedPath: path
         });
+    }
+    
+    /**
+     * Sets the path of the currently opened file, which is passed down to the components
+     */
+    setOpenedPath(path){
+        this.setState({
+            openedPath: path
+        });
+      if(this.collabController)
+      this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
     }
 
     /**
@@ -121,6 +142,29 @@ export default class App extends React.Component {
         this.setState({
             'diagnostics': diagnostics
         });
+    }
+
+    addProvenObligations(provenObligations) {
+        this.setState({
+          provenObligations: provenObligations.concat(this.state.provenObligations)
+        });
+    }
+
+    resetObligation(obligationIdx) {
+        const provenObligations = this.state.provenObligations
+          .filter(provenObligationIdx => provenObligationIdx !== obligationIdx);
+
+        this.setState({
+          provenObligations
+        });
+    }
+
+    proveFile() {
+        this.setState({
+          provenObligations: []
+        });
+
+        this.key.proveFile();
     }
 
     /**
@@ -135,10 +179,9 @@ export default class App extends React.Component {
         );
         this.setState({
             text: '', // load some sample text for testing
-            filename: 'Main.java',
             openedPath: ['Main.java'] // TODO: replace filename with this
         });
-        document.addEventListener("keydown", this.handleCtrlS.bind(this));
+        document.addEventListener('keydown', this.handleCtrlS.bind(this));
     }
 
     openFile(path) {
@@ -147,17 +190,13 @@ export default class App extends React.Component {
             .then((response) => {
                 this.setState({
                     text: response.fileText,
-                    filename: response.fileName,
-                    openedPath: path
+                    openedPath: path,
+                    provenObligations: [],
+                    openGoals: []
                 });
                 // TODO: Handle rename with collab controller
-                this.collabController.setFile(this.state.project.name+'/'+path.join('/'),response.fileText);
+                this.collabController.setFile(this.state.project.name,path.join('/'),response.fileText);
             });
-    }
-
-    // sets the path for the runProof rest method in projectmanagement
-    runProof(){
-        return this.projectManagement.runProof(this.state.project.name + '/' + this.state.openedPath.join('/'));
     }
 
     /**
@@ -189,14 +228,13 @@ export default class App extends React.Component {
                   * to operate.
                   */}
                 <Top
-                    showProject={this.showProject}
                     setText={this.setText}
                     text={this.state.text}
                     onDeleteFile={() => this.deleteFile(this.state.openedPath)}
                     onDeleteProject={this.deleteProject}
                     onOpenProject={this.openProject}
                     onCreateProject={this.createProject}
-                    onRunProof={this.runProof}
+                    onProveFile={this.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
                     onUpdateFileContent={() => {this.updateFileContent(this.state.openedPath, this.state.text); }}
                     notificationSystem={this.notificationSystem}
@@ -205,6 +243,7 @@ export default class App extends React.Component {
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
+                        openGoals={this.state.openGoals}
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}
@@ -216,10 +255,14 @@ export default class App extends React.Component {
                     <Editor
                         setDiagnostics={this.setDiagnostics}
                         diagnostics={this.state.diagnostics}
+                        provenObligations={this.state.provenObligations}
+                        resetObligation={this.resetObligation}
                         setText={this.setText}
                         text={this.state.text}
-                        filename={this.state.filename}
+                        filepath={this.state.openedPath}
                         collabController={this.collabController}
+                        getObligations={this.key.getObligations}
+                        onProveObligation={this.key.proveObligation}
                         ref={this.editor}
                     />
                     <Console/>
