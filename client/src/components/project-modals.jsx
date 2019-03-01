@@ -49,8 +49,10 @@ class ModalSelect extends React.Component {
      * performs the esired operation for the selected project when the select button is pressed
      * through the setStructure props method the structure starts its long journey to the sidebar
      */
-    projectAction() {
-        let name = this.state.selected.name;
+    projectAction(name) {
+        if(!name){
+          name = this.state.selected.name;
+        }
         if (name) {
             this.props.projectOperation(this.state.selected.name);
             this.props.toggle();
@@ -71,6 +73,7 @@ class ModalSelect extends React.Component {
                             <ListGroupItem
                                 key={id}
                                 onClick={() => {this.select(name, id);}}
+                                onDoubleClick={() => this.projectAction(name)}
                                 active={this.state.selected.id === id}
                             >
                                 {name}

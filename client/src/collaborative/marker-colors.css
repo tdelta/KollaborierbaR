@@ -1,34 +1,35 @@
+.n0.highlightingMarker {
+  background: #4CAF50
+}
 .n1.highlightingMarker {
-  background: #FE7517
+  background: #FF5722
 }
 .n2.highlightingMarker {
-  background: #B9C541
+  background: #448AFF
 }
 .n3.highlightingMarker {
-  background: #91D5C3
+  background: #00BCD4
 }
 .n4.highlightingMarker {
-  background: #1A4B71
+  background: #D32F2F
 }
 .n5.highlightingMarker {
-  background: #E7EF14
+  background: #FF4081
 }
 .n6.highlightingMarker {
-  background: #56F58A
+  background: #9E9E9E
 }
 .n7.highlightingMarker {
-  background: #FF7476
+  background: #FFEB3B
 }
 .n8.highlightingMarker {
-  background: #EC9E51
+  background: #009688
 }
 .n9.highlightingMarker {
-  background: #F0C
-}
-.n10.highlightingMarker {
-  background: #0FC
+  background: #7C4DFF
 }
 .highlightingMarker {
   background: #0ae;
-  position: absolute
+  position: absolute;
+  pointer-events: auto;
 }

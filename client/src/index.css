@@ -15,6 +15,12 @@ nav{
   bottom: 0px;
 }
 
+.modal-content {
+  /* Disable selecting text inside the modal */
+  -webkit-user-select: none;  /* Chrome, Safari */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* IE 10+ */
+}
 
 .ace_jml_comment{
   color:#009955
@@ -64,6 +70,18 @@ nav{
   background-position: 2px center;
 }
 
-
 /*TODO: NOCH MIT ANTON ABSPRECHEN! */
 html, body {margin: 0; height: 100%; overflow: hidden}
+
+.ace_gutter-cell.obligation_todo {
+  background-image: url(obligation-todo.png);
+  background-position: 4px center;
+  cursor: pointer;
+}
+
+.ace_gutter-cell.obligation_done {
+  background-image: url(obligation-done.png);
+  background-size: 16px;
+  background-position: 2px center;
+  cursor: pointer;
+}

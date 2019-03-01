@@ -5,23 +5,22 @@ import 'ace-builds/src-noconflict/theme-pastel_on_dark';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Annotation, Diagnostic } from '../diagnostics';
+import CollabController from '../collaborative/CollabController';
+
+import {
+  Annotation,
+  Diagnostic,
+  toAnnotation,
+  diagnosticPriority,
+} from '../diagnostics';
+import AnchoredMarker, { addToArray } from './AnchoredMarker';
+import PopoverMarker from './PopoverMarker';
 
 import '../highlighting/jml.js';
 import lint from '../linting.js';
 
 import './sidebar/sidebar.css';
 import '../index.css';
-
-import CollabController from '../collaborative/CollabController';
-import TextPosition from '../collaborative/TextPosition';
-
-interface AceChangeEvent {
-  action: string;
-  start: TextPosition;
-  end: TextPosition;
-  lines: string[]
-}
 
 export default class Editor extends React.Component<Props> {
   // Defining the types of the attributes for this class
@@ -32,6 +31,7 @@ export default class Editor extends React.Component<Props> {
   private anchoredMarkers: AnchoredMarker[];
   private anchoredHighlightings: AnchoredMarker[];
   private annotations: number[];
+  private obligationAnnotations: Annotation[] = [];
 
   constructor(props: Props) {
     super(props);
@@ -40,6 +40,8 @@ export default class Editor extends React.Component<Props> {
     this.anchoredMarkers = [];
     this.anchoredHighlightings = [];
     this.annotations = [];
+
+    this.updateAnnotations = this.updateAnnotations.bind(this);
   }
 
   /**
@@ -60,6 +62,7 @@ export default class Editor extends React.Component<Props> {
     // editor event handlers
     this.editor.on('change', () => {
       // pass the text in the editor up to the app component
+      //if(!this.editor.ignoreChanges)
       this.props.setText(this.editor.getValue());
     });
 
@@ -72,22 +75,127 @@ export default class Editor extends React.Component<Props> {
       }, 1000);
     });
 
-    this.editor.on('change', () => {
+    this.editor.on('change', (delta: any) => {
+      this.anchoredHighlightings.forEach(h => h.onChange(delta));
+      this.anchoredMarkers.forEach(m => m.onChange(delta));
       // Update the position of the existing error markers in the editor
       this.setMarkers();
+    });
+
+    this.editor.on('gutterclick', (e: any) => {
+      if (
+        e.domEvent.target.className.includes('obligation_todo') &&
+        e.domEvent.target.firstChild
+      ) {
+        const rowString = e.domEvent.target.firstChild.data;
+        const row = parseInt(rowString, 10) - 1;
+
+        if (row) {
+          this.editor.session.getSelection().clearSelection();
+          const obligations = this.props.getObligations(
+            this.editor.session.getLines(0, this.editor.session.getLength())
+          );
+
+          this.props.onProveObligation(obligations[row]);
+        }
+      } else if (
+        e.domEvent.target.className.includes('obligation_done') &&
+        e.domEvent.target.firstChild
+      ) {
+        const rowString = e.domEvent.target.firstChild.data;
+        const row = parseInt(rowString, 10) - 1;
+
+        if (row) {
+          this.editor.session.getSelection().clearSelection();
+          const obligations = this.props.getObligations(
+            this.editor.session.getLines(0, this.editor.session.getLength())
+          );
+
+          this.props.resetObligation(obligations[row]);
+          this.props.onProveObligation(obligations[row]);
+        }
+      }
     });
 
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
-  public componentDidUpdate(): void {
+  public componentDidUpdate(prevProps: Props): void {
     // Called when new properties are passed down from the app component
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
-      this.editor.setValue(this.props.text,-1);
+      this.editor.setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
+      this.editor.sess;
+      for (const marker of this.dynamicMarkers) {
+        this.editor.session.removeMarker(marker);
+      }
+      for (const marker of this.markers) {
+        this.editor.session.removeMarker(marker);
+      }
+      this.anchoredMarkers = [];
+      this.anchoredHighlightings = [];
+      this.markers = [];
+      this.dynamicMarkers = [];
     }
+    if (this.props.diagnostics !== prevProps.diagnostics) {
+      this.setAnchors();
+    }
+
+    this.setProofObligations();
+  }
+
+  private setProofObligations() {
+    const obligations = this.props.getObligations(
+      this.editor.session.getLines(0, this.editor.session.getLength())
+    );
+    this.obligationAnnotations = [];
+    // Iterate over the indices of the result, which correspond to the line numbers
+    for (const index of Object.keys(obligations)) {
+      const obligationIdx: number = obligations[index as any] as number;
+
+      const row = parseInt(index, 10);
+
+      let isProven: boolean = this.props.provenObligations.includes(
+        obligationIdx
+      );
+
+      if (isProven) {
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Proven!',
+          type: 'obligation_done',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      } else {
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Click to prove!',
+          type: 'obligation_todo',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      }
+    }
+
+    this.updateAnnotations();
+  }
+
+  private updateAnnotations(): void {
+    this.editor.session.clearAnnotations();
+    this.editor.session.setAnnotations(
+      this.props.diagnostics
+        .map(toAnnotation)
+        .concat(this.obligationAnnotations)
+    );
   }
 
   /**
@@ -106,6 +214,14 @@ export default class Editor extends React.Component<Props> {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
+        } else if (annotation.type === 'obligation_todo') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_todo';
+        } else if (annotation.type === 'obligation_done') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_done';
         }
       }
     };
@@ -118,44 +234,58 @@ export default class Editor extends React.Component<Props> {
    * Function that calls lint, sending a request to the server, and passes the result to the app
    */
   private callLinter(): void {
-    lint(this.props.filename, this.editor.getValue()).then(
-      (diagnostics: Diagnostic[]) => {
-        this.props.setDiagnostics(diagnostics);
-        this.setAnchors();
-      }
-    );
+    let filename: string = this.props.filepath[this.props.filepath.length - 1];
+    lint(filename, this.editor.getValue()).then((diagnostics: Diagnostic[]) => {
+      this.props.setDiagnostics(diagnostics);
+      this.setAnchors();
+    });
   }
 
-  public addBackMarker(start: any, end: any, uid: number){ 
-    let range = new Range(
-      start.row,
-      start.column,
-      end.row,
-      end.column
-    );
-    for (let j = 0; j < this.anchoredHighlightings.length; j = j + 1) {
-      // Dont add the marker if it overlaps with another marker
-      if (
-        range.intersects(
-          this.anchoredHighlightings[j].range
-        )
-      ) {
-        return;
-      }
-    }
-    range.start = this.editor.session.doc.createAnchor(range.start);
-    range.end = this.editor.session.doc.createAnchor(range.end);
-    const type: string = `n${uid} highlighting`;
-    const message: string = '';
+  private dynamicMarkers: number[] = [];
 
-    this.anchoredHighlightings.push(
-      {
-        range,
-        type,
-        message,
-      }
+  public addBackMarker(start: any, end: any, uid: number, name: string) {
+    const range = Range.fromPoints(start, end);
+    const type: string = `n${uid} highlighting`;
+    this.dynamicMarkers.forEach(m => this.editor.session.removeMarker(m));
+    this.anchoredHighlightings = this.anchoredHighlightings.filter(
+      m => !m.deleted
     );
-    this.setMarkers();
+    this.anchoredHighlightings
+      .filter(m => m.type === type)
+      .filter(m => parseFloat(m.message.split('|')[1]) > 0.1)
+      .forEach(
+        m =>
+          (m.message =
+            m.message.split('|')[0] +
+            '|' +
+            (parseFloat(m.message.split('|')[1]) - 0.02))
+      );
+
+    this.anchoredHighlightings = addToArray(
+      this.anchoredHighlightings,
+      range,
+      name + '|0.5',
+      type,
+      this.editor.session
+    );
+
+    if (this.anchoredHighlightings.length > 5) {
+      this.anchoredHighlightings.splice(
+        0,
+        this.anchoredHighlightings.length - 5
+      );
+    }
+
+    for (const anchoredRange of this.anchoredHighlightings) {
+      const popoverMarker: PopoverMarker = new PopoverMarker(
+        anchoredRange,
+        anchoredRange.message.split('|')[0],
+        parseFloat(anchoredRange.message.split('|')[1])
+      );
+      this.dynamicMarkers.push(
+        this.editor.session.addDynamicMarker(popoverMarker).id
+      );
+    }
   }
 
   /**
@@ -170,39 +300,31 @@ export default class Editor extends React.Component<Props> {
       this.props.diagnostics &&
       this.props.diagnostics.constructor === Array
     ) {
+      this.props.diagnostics.sort(diagnosticPriority);
+      this.anchoredMarkers = [];
       // Process each element of array of diagonistics
       for (const diagnostic of this.props.diagnostics) {
-        const range = new Range(
-          diagnostic.startRow,
-          diagnostic.startCol,
-          diagnostic.endRow,
-          diagnostic.endCol
-        );
-
-        // Create Anchors in the document. These update their position when text is edited
-        range.start = this.editor.session.doc.createAnchor(range.start);
-        range.end = this.editor.session.doc.createAnchor(range.end);
-
-        const message = diagnostic.message;
-        const type = diagnostic.kind.toLowerCase();
-
         // Add the anchors and content for this diagnostic to the anchoredMarkers Array
-        this.anchoredMarkers.push({
-          range,
-          type,
-          message,
-        });
+        this.anchoredMarkers = addToArray(
+          this.anchoredMarkers,
+          new Range(
+            diagnostic.startRow,
+            diagnostic.startCol,
+            diagnostic.endRow,
+            diagnostic.endCol
+          ),
+          diagnostic.message,
+          diagnostic.kind.toLowerCase(),
+          this.editor.session
+        );
       }
 
-      this.editor.session.clearAnnotations();
-      this.editor.session.setAnnotations(
-        this.anchoredMarkers.map(this.toAnnotation)
-      );
+      this.updateAnnotations();
+
       // Display the markers in the ace editor
       this.setMarkers();
     }
   }
-
   /**
    * This function displays markers in the editor for all members of anchoredMarkers
    */
@@ -213,29 +335,21 @@ export default class Editor extends React.Component<Props> {
     }
     this.markers = [];
     // Add markers for all anchoredMarkers
-    this.processMarkerArray(this.anchoredMarkers,true);
-    this.processMarkerArray(this.anchoredHighlightings,false);
+    this.processMarkerArray(this.anchoredMarkers, true);
   }
 
   /**
    * Helper function for setMarkers
    */
-  private processMarkerArray(anchoredMarkers: AnchoredMarker[],front: boolean){
-    addLoop: for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
-      for (let j = i + 1; j < anchoredMarkers.length; j = j + 1) {
-        // Dont add the marker if it overlaps with another marker
-        if (
-          anchoredMarkers[i].range.intersects(
-            anchoredMarkers[j].range
-          )
-        ) {
-          continue addLoop;
-        }
-      }
+  private processMarkerArray(
+    anchoredMarkers: AnchoredMarker[],
+    front: boolean
+  ) {
+    for (let i = 0; i < anchoredMarkers.length; i = i + 1) {
       // Add the marker to the editor
       this.markers.push(
         this.editor.session.addMarker(
-          anchoredMarkers[i].range,
+          anchoredMarkers[i].getRange(this.editor.session),
           `${anchoredMarkers[i].type}Marker`,
           'text',
           front
@@ -243,65 +357,18 @@ export default class Editor extends React.Component<Props> {
       );
     }
   }
-
-  /**
-   * This function converts AnchoredMarkers to Annotations that can be put passed to ace's setAnnotations method
-   * in order to create icons on the left of the editor
-   * @param marker AnchoredMarker to convert
-   * @return Annotation object with the same values
-   */
-  private toAnnotation(marker: AnchoredMarker): Annotation { return { row: marker.range.start.row,
-      column: marker.range.start.column,
-      text: marker.message,
-      type: marker.type,
-      startRow: marker.range.start.row,
-      startCol: marker.range.start.column,
-      endRow: marker.range.end.row,
-      endCol: marker.range.end.column,
-    };
-  }
-
-  public insert(text: string, position: TextPosition) {
-    this.editor.getSession().getDocument().insertMergedLines(
-      position,
-      text.split('\n')
-    );
-  }
-
-  public delete(from: TextPosition, to: TextPosition) {
-    this.editor.getSession().getDocument().remove(
-      new ace.Range(
-        from.row,
-        from.column,
-        to.row,
-        to.column
-      )
-    );
-  }
 }
 
 // defining the structure of this react components properties
 interface Props {
   diagnostics: Diagnostic[];
+  provenObligations: number[];
   text: string;
-  filename: string;
+  filepath: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
+  resetObligation(obligationIdx: number): void;
   collabController: CollabController;
-}
-
-/**
- * This structure is used to save markers in a document within ACE together with
- * their anchor points
- *
- * This means it can be used to underline sections of a document and display
- * messages with an icon in the gutter.
- *
- * If the document is edited, the marker will be moved with the document's
- * contents.
- */
-interface AnchoredMarker {
-  range: ace_types.Ace.Range; // used to mark a region within the editor: https://ace.c9.io/#nav=api&api=range
-  type: string; // type of the marking, whether its an error, a warning, something else, ...
-  message: string; // displayed message at the marker
+  getObligations: (lines: string[]) => number[];
+  onProveObligation: (nr: number) => boolean;
 }

@@ -1,4 +1,4 @@
-.PHONY: setup check pedantic run test clean
+.PHONY: setup check pedantic run test clean format
 
 all:
 	./gradlew build
@@ -22,6 +22,10 @@ pedantic:
 	# run Spotless coding style checker
 	./gradlew -b pedantic.gradle spotlessCheck
 
+# auto format java code
+format:
+	./gradlew spotlessApply
+
 # run project
 run:
 	./gradlew bootRun
@@ -29,7 +33,7 @@ run:
 # run unit and api tests
 test:
 	./gradlew test
-	make -C specification test
+	#make -C specification test
 
 clean:
 	./gradlew clean
