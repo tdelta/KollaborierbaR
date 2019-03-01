@@ -34,13 +34,18 @@ nav{
   color:#2ff
 }
 
-#editor {
+.rightSide {
   position : relative;
   top : 0px;
   left: 0px;
-  height: 98%;
+  height: 100%;
   width: auto;
   overflow:hidden;
+}
+
+#editor {
+  width: 100%;
+  height: 98%;
 }
 
 .errorMarker {

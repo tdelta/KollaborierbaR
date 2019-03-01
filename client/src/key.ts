@@ -11,11 +11,14 @@ export default class Key {
   private notificationSystem: RefObject<NotificationSystem.System>;
   private setOpenGoals: (openGoals: OpenGoalInfo[]) => void;
 
+  private addNewConsoleMessage: (message: String) => void;
+
   constructor(
     notificationSystem: RefObject<NotificationSystem.System>,
     setProvenObligations: (provenObligations: number[]) => void,
     setOpenGoals: (openGoals: OpenGoalInfo[]) => void,
-    getFilePath: () => string
+    getFilePath: () => string,
+    addNewConsoleMessage: (message: String) => void
   ) {
     this.notificationSystem = notificationSystem;
     this.setProvenObligations = setProvenObligations;
@@ -26,6 +29,8 @@ export default class Key {
 
     this.sendNotifications = this.sendNotifications.bind(this);
     this.handleResults = this.handleResults.bind(this);
+
+    this.addNewConsoleMessage = addNewConsoleMessage;
   }
 
   private proveFile() {
@@ -75,6 +80,10 @@ export default class Key {
           position: 'bc',
           autoDismiss: 15,
         });
+      }
+
+      for(const stackTrace of results.stackTraces){
+        this.addNewConsoleMessage(stackTrace.resultMsg);
       }
     }
   }

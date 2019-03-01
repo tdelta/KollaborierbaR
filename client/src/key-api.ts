@@ -39,6 +39,7 @@ export interface ProofResults {
   failed: ObligationResult[];
   errors: ObligationResult[];
   openGoals: OpenGoalInfo[];
+  stackTraces: ObligationResult[];
 }
 
 interface ObligationResult {

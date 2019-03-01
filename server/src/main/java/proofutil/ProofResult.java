@@ -12,9 +12,18 @@ public class ProofResult {
     private List<ObligationResult> succeeded = new ArrayList<>();
     private List<ObligationResult> failed = new ArrayList<>();
     private List<ObligationResult> errors = new ArrayList<>();
-    private List<Obligation> openGoals = new ArrayList<Obligation>();
+    private List<Obligation> openGoals = new ArrayList<>();
+    private List<ObligationResult> stackTraces = new ArrayList<>();
     
-    /**
+    public List<ObligationResult> getStackTraces() {
+		return stackTraces;
+	}
+
+	public void addStackTrace(final int obligationIdx, final String msg) {
+		stackTraces.add(new ObligationResult(obligationIdx, msg));
+	}
+
+	/**
      * Add a succeded proof to the list
      * @param msg the result message to be displayed
      */

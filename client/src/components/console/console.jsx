@@ -34,29 +34,17 @@ export default class Sidebar extends React.Component {
         // is collapsed or not
         if(this.state.collapsed){
             var editor = document.getElementById("editor");
-            editor.style.height = "68%";
+            editor.style.height = "66%";
         } else{
             var editor = document.getElementById("editor");
             editor.style.height = "98%";
         }
-
-        //this.setConsoleTextAreaToCorrectSize();
 
         // Make other components recalculate their width (Im looking at you ace)
         window.dispatchEvent(new Event('resize'));
     }
 
     componentDidMount(){
-        console.log("HI");
-        this.setState({
-            'textheight': document.getElementById("console").offsetHeight,
-            'textwidth' :  document.getElementById("console").offsetWidth,
-        });
-        let textarea = document.getElementById("consoletext");
-        console.log(this.state.textheight);
-        console.log(this.state.textwidth);
-        textarea.style.height = this.state.textheight;
-        textarea.style.width = this.state.textwidth;
         
     }
     
@@ -83,7 +71,8 @@ export default class Sidebar extends React.Component {
                 
             >
                 <FontAwesome
-                    name= "angle-up" 
+                    name= "angle-up"
+                    className="consoleRestoreHandleIcon"
                 /> 
             </div>
 
@@ -95,6 +84,7 @@ export default class Sidebar extends React.Component {
             >
                 <FontAwesome
                     name= "angle-down" 
+                    className="consoleRestoreHandleIcon"
                 /> 
             </div>
 
@@ -102,10 +92,9 @@ export default class Sidebar extends React.Component {
                 id = "console"
                 style = {consoleStyleModForCollapse}
             >
-            
-            <textarea 
-                id="consoletext"
-            ></textarea>
+                <div id="consoletext">
+                    {this.props.consolelog}
+                </div>
             </div>
             </>
         );

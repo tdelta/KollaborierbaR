@@ -13,6 +13,8 @@ import de.uka.ilkd.key.speclang.Contract;
 import de.uka.ilkd.key.strategy.StrategyProperties;
 import de.uka.ilkd.key.util.MiscTools;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import org.key_project.util.collection.ImmutableSet;
@@ -53,7 +55,8 @@ public class KeYWrapper {
 																						// performed proof if a *.proof
 																						// file is loaded
 		} catch (ProblemLoaderException e) {
-			results.addError(-1, "Couldn't process all relevant information for verification with KeY.");
+			results.addError(-1, "Couldn't process all relevant information for verification with KeY.");			
+			results.addStackTrace(-1, "Exception at '" + location + "':\n" + stackToString(e));
 			System.out.println("Exception at '" + location + "':");
 			e.printStackTrace();
 		}
@@ -109,8 +112,10 @@ public class KeYWrapper {
 				}
 			} catch (ProofInputException e) {
 				results.addError(
+			             obligationIdx,"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".");
+				results.addStackTrace(
             obligationIdx,
-						"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + "."
+            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + stackToString(e)
         );
 
 				System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
@@ -122,6 +127,16 @@ public class KeYWrapper {
 			}
 		}
 	}
+	
+	public String stackToString(Throwable e) {
+
+		//https://stackoverflow.com/questions/1149703/how-can-i-convert-a-stack-trace-to-a-string
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		return sw.toString();
+	}
+	
 
 	public ProofResult proveAllContracts(String className) {
 		if (env != null) {

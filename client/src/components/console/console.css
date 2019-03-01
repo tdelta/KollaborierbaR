@@ -5,6 +5,8 @@
     /* it should be barely visible */
     width: 100%;
     height: 2%;
+    line-height: 1%;
+    vertical-align: middle;
 
     text-align: right; 
 
@@ -13,15 +15,28 @@
     cursor: pointer;
   }
 
+.consoleRestoreHandleIcon {
+   margin-right: 0.5em;
+}
+
 #console {
 
    background-color: #455a64;
    color: #cfd8dc;
 
-   height: 30%;
+   height: 33%;
    width: 100%;
 }
 
 #consoletext{
-
+   overflow: auto;
+   width:100%;
+   height:97%; 
+   background-color: #455a64;
+   border: none;
+   color: #ffff;
+   padding: 0.5em;
+   margin-right: 10px;
+   font-family: monospace;
+   white-space: pre;
 }
