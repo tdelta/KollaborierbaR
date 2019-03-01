@@ -226,7 +226,17 @@ public class KeYWrapper {
 	}
 
   private ProofNode generateProofTree(final Proof proof) {
-    return generateBranchNode(proof.root(), "Proof Tree");
+    final ProofNode.Kind kind;
+
+    if (proof.closed()) {
+      kind = ProofNode.Kind.ClosedProofTree;
+    }
+
+    else {
+      kind = ProofNode.Kind.OpenProofTree;
+    }
+
+    return generateBranchNode(proof.root(), "Proof Tree", kind);
   }
 
   private Node findChild (Node n) {
@@ -243,7 +253,7 @@ public class KeYWrapper {
       return nextN;
   }
 
-  private ProofNode generateBranchNode(final Node node, final String forcedLabel) {
+  private ProofNode generateBranchNode(final Node node, final String forcedLabel, final ProofNode.Kind forcedKind) {
     final String label;
     {
       if (forcedLabel != null) {
@@ -257,6 +267,15 @@ public class KeYWrapper {
       else {
         label = "(Unlabelled node)";
       }
+    }
+
+    final ProofNode.Kind kind;
+    if (forcedKind == null) {
+      kind = ProofNode.Kind.BranchNode;
+    }
+
+    else {
+      kind = forcedKind;
     }
 
     final List<ProofNode> children = new LinkedList<>();
@@ -276,14 +295,15 @@ public class KeYWrapper {
 
       for (int i = 0; i != currentNode.childrenCount(); ++i) {
           if (!currentNode.child(i).isClosed()) {
-              children.add(generateBranchNode(currentNode.child(i), null));
+              children.add(generateBranchNode(currentNode.child(i), null, null));
           }
       }
     }
 
     return new ProofNode(
         label,
-        children
+        children,
+        kind
     );
   }
 
@@ -293,7 +313,8 @@ public class KeYWrapper {
 
     return new ProofNode(
         app.rule().name() + " ON " + prettySubTerm,
-        new ArrayList<ProofNode>(0)
+        new ArrayList<ProofNode>(0),
+        ProofNode.Kind.OneStepSimplification
     );
   }
 
@@ -324,9 +345,31 @@ public class KeYWrapper {
       }
     }
 
+    final ProofNode.Kind kind;
+    if (node.leaf()) {
+      final Goal goal = node.proof().getGoal(node);
+
+      if ( goal == null || node.isClosed() ) {
+        kind = ProofNode.Kind.ClosedGoal;
+      } else {
+        if ( goal.isLinked() ) {
+          kind = ProofNode.Kind.LinkedGoal;
+        } else if ( !goal.isAutomatic() ) {
+          kind = ProofNode.Kind.InteractiveGoal;
+        } else {
+          kind = ProofNode.Kind.OpenGoal;
+        }
+      }
+    }
+
+    else {
+      kind = ProofNode.Kind.DefaultNode;
+    }
+
     return new ProofNode(
         node.serialNr() + ":" + node.name(),
-        children
+        children,
+        kind
     );
   }
 }
