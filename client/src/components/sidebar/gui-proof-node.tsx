@@ -5,11 +5,16 @@ import PropTypes from 'prop-types';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import './sidebar.css';
 
-import Node, {Kind} from '../../key/webui/prooftree/Node';
+import ProofNode, {Kind} from '../../key/prooftree/ProofNode';
+
 
 import ProofIcon from './proof-icon';
 
-export default class ProofNode extends React.Component<Props, State> {
+export default class GuiProofNode extends React.Component<Props, State> {
+  public static defaultProps = {
+    initiallyCollapsed: false
+  };
+
   constructor(props: Props) {
     super(props);
 
@@ -20,6 +25,7 @@ export default class ProofNode extends React.Component<Props, State> {
       selected: false,
       collapsed: this.props.node.kind !== Kind.ClosedProofTree &&
                  this.props.node.kind !== Kind.OpenProofTree
+              || this.props.initiallyCollapsed
     };
 
     this.handleItemDoubleClick = this.handleItemDoubleClick.bind(this);
@@ -71,7 +77,7 @@ export default class ProofNode extends React.Component<Props, State> {
               <li key={child.text}>
                 {/* use recursion to display children.
                 */}
-                <ProofNode
+                <GuiProofNode
                   node={child}
                 />
               </li>
@@ -107,7 +113,8 @@ export default class ProofNode extends React.Component<Props, State> {
 }
 
 interface Props {
-  node: Node;
+  node: ProofNode;
+  initiallyCollapsed: boolean;
 }
 
 interface State {

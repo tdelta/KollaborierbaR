@@ -1,7 +1,9 @@
-import { serverAddress } from './constants';
+import { serverAddress } from '../constants';
 
-import OpenGoalInfo from './OpenGoalInfo';
-import Node from './key/webui/prooftree/Node';
+import OpenGoalInfo from './netdata/OpenGoalInfo';
+
+import ProofResults from './netdata/ProofResults';
+import ObligationResult from './netdata/ObligationResult';
 
 export default class KeyApi {
   public proveFile(path: string): Promise<ProofResults> {
@@ -32,18 +34,4 @@ export default class KeyApi {
       },
     }).then(response => response.json()); // parse the response body as json};
   }
-}
-
-// define the structure received KeY results
-export interface ProofResults {
-  succeeded: ObligationResult[];
-  failed: ObligationResult[];
-  errors: ObligationResult[];
-  openGoals: OpenGoalInfo[];
-}
-
-export interface ObligationResult {
-  obligationIdx: number;
-  resultMsg: string;
-  proofTree: Node;
 }

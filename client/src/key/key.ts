@@ -1,20 +1,24 @@
-import KeyApi, { ProofResults, ObligationResult } from './key-api';
+import KeyApi from './key-api';
+import ProofResults from './netdata/ProofResults';
+import ObligationResult from './netdata/ObligationResult';
 import NotificationSystem from 'react-notification-system';
 import { RefObject } from 'react';
 
-import OpenGoalInfo from './OpenGoalInfo';
+import OpenGoalInfo from './netdata/OpenGoalInfo';
 
 export default class Key {
   private keyApi: KeyApi = new KeyApi();
   private getFilePath: () => string;
   private setProvenObligations: (provenObligations: number[]) => void;
   private notificationSystem: RefObject<NotificationSystem.System>;
+  private setProofResults: (proofResults: ProofResults) => void;
   private setOpenGoals: (openGoals: OpenGoalInfo[]) => void;
   private setObligationResult: (ObligationResult: ObligationResult) => void;
 
   constructor(
     notificationSystem: RefObject<NotificationSystem.System>,
     setProvenObligations: (provenObligations: number[]) => void,
+    setProofResults: (proofResults: ProofResults) => void,
     setOpenGoals: (openGoals: OpenGoalInfo[]) => void,
     setObligationResult: (ObligationResult: ObligationResult) => void,
     getFilePath: () => string
@@ -24,6 +28,7 @@ export default class Key {
     this.getFilePath = getFilePath;
     this.proveFile = this.proveFile.bind(this);
     this.proveObligation = this.proveObligation.bind(this);
+    this.setProofResults = setProofResults;
     this.setOpenGoals = setOpenGoals;
     this.setObligationResult = setObligationResult;
 
@@ -103,6 +108,8 @@ export default class Key {
     const provenObligations: number[] = results.succeeded.map(
       success => success.obligationIdx
     );
+
+    this.setProofResults(results);
 
     this.setProvenObligations(provenObligations);
 

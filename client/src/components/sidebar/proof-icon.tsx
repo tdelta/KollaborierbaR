@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Node, {Kind} from '../../key/webui/prooftree/Node';
+import ProofNode, {Kind} from '../../key/prooftree/ProofNode';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquare as faSquareSolid, faVectorSquare, faSitemap, faPlusSquare, faDoorOpen, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
@@ -83,6 +83,6 @@ export default class ProofIcon extends React.Component<Props, {}> {
 }
 
 interface Props {
-  node: Node;
+  node: ProofNode;
   collapsed: boolean;
 }

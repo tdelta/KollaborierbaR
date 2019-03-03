@@ -1,7 +1,8 @@
 import React from 'react';
 
-import ProofNode from './proof-node';
-import Node from '../../key/webui/prooftree/Node';
+import GuiProofNode from './gui-proof-node';
+import ProofNode from '../../key/prooftree/ProofNode';
+import ProofResults from '../../key/netdata/ProofResults';
 
 export default class ProofTreeView extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -9,21 +10,34 @@ export default class ProofTreeView extends React.Component<Props, State> {
   }
 
   public render() {
-    const areNodesValid = this.props.nodes && this.props.nodes.length > 0;
-
+    let nodes: ProofNode[] = [];
+    
+    const results = this.props.proofResults;
+    if (results != null) {
+      nodes =
+        results.succeeded
+          .concat(results.failed)
+          .concat(results.errors)
+          .map(result => result.proofTree)
+          .filter(proofTree => proofTree != null);
+    }
+      
     // TODO better keys
 
-    if (areNodesValid) {
+    if (nodes.length > 0) {
       return (
         <div>
           {
-          this.props.nodes.map(node => (
-            <ProofNode
-              key={node.text}
-              // TODO better keys
-              node={node}
-            />
-          ))}
+            nodes.map(node => (
+                <GuiProofNode
+                  key={node.text}
+                  // TODO better keys
+                  node={node}
+                  initiallyCollapsed={nodes.length > 1}
+                />
+                )
+            )
+          }
         </div>
       );
     } else {
@@ -34,7 +48,8 @@ export default class ProofTreeView extends React.Component<Props, State> {
 
 // defining the structure of this react components properties
 interface Props {
-  nodes: Node[];
+  nodes: ProofNode[];
+  proofResults: ProofResults;
 }
 
 interface State {
