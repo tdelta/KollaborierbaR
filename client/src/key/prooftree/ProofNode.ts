@@ -1,7 +1,7 @@
 
-export default interface Node {
+export default interface ProofNode {
   text: string,
-  children: Node[],
+  children: ProofNode[],
   kind: Kind
 }
 

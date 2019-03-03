@@ -275,6 +275,7 @@ export default class Sidebar extends React.Component {
                                 <TabPane tabId="3">
                                     <ProofTreeView
                                         nodes={this.props.proofNodes}
+                                        proofResults={this.props.proofResults}
                                     />
                                 </TabPane>
                             </TabContent>
@@ -303,6 +304,7 @@ Sidebar.propTypes = {
         'children': PropTypes.arrayOf(PropTypes.object)
       })
     ),
+    'proofResults': PropTypes.object,
     'onOpenFile': PropTypes.func,
     'onDeleteFile': PropTypes.func,
     'onCreateFile': PropTypes.func,
