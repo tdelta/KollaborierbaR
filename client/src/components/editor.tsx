@@ -162,6 +162,11 @@ export default class Editor extends React.Component<Props> {
         break;
     }
     this.editor.getSession().setMode(mode);
+    if(this.props.filetype==='sequent'){
+      this.editor.setReadOnly(true);
+    } else {
+      this.editor.setReadOnly(false);
+    }
 
     this.setProofObligations();
   }
