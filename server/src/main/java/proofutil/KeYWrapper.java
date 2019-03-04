@@ -26,7 +26,6 @@ import org.key_project.util.collection.ImmutableSet;
  */
 public class KeYWrapper {
 	KeYEnvironment<?> env;
-  private final LogicPrinter printer;
 	ProofResult results;
 
 	public KeYWrapper(String path) {
@@ -56,14 +55,6 @@ public class KeYWrapper {
 																						// performed proof if a *.proof
 																						// file is loaded
 		  
-      // Build a LogicPrinter from the environment to print sequents
-      final NotationInfo ni = new NotationInfo();
-      ni.refresh(env.getServices());
-      printer = new LogicPrinter(
-          new ProgramPrinter(),
-          ni,
-          env.getServices());
-
     } catch (ProblemLoaderException e) {
 			results.addError(-1, "Couldn't process all relevant information for verification with KeY.");
 			System.out.println("Exception at '" + location + "':");
@@ -116,8 +107,8 @@ public class KeYWrapper {
           );
 				
           for (Goal goal: proof.openGoals()) {
-            printer.printSequent(goal.sequent());
-            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString(),printer.result().toString()));
+            String sequent = LogicPrinter.quickPrintSequent(goal.sequent(),env.getServices());
+            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString(),sequent));
           }
 				}
 			} catch (ProofInputException e) {

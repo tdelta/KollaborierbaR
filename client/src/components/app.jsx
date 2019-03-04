@@ -13,7 +13,6 @@ import CollabController from '../collaborative/CollabController.ts';
 
 import Key from '../key';
 
-// TODO: REMOVE
 import {Button} from 'reactstrap';
 
 //import testSource from '../sample-text.js';
@@ -147,6 +146,7 @@ export default class App extends React.Component {
         if(this.collabController){
             this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
         }
+        this.displayCloseButton=false;
     }
 
     /**
@@ -282,7 +282,9 @@ export default class App extends React.Component {
                         onUpdateFileName={this.updateFileName}
                         displayFormula={this.displaySequent}
                     />
-                    {this.displayCloseButton &&
+                    {
+                    // Only display the button if this variable is true
+                    this.displayCloseButton &&
                     <Button 
                         color='danger'
                         onClick={this.closeSequent}
