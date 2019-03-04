@@ -20,7 +20,7 @@ public class ProofResult {
     }
 
     public void addStackTrace(final int obligationIdx, final String msg) {
-      stackTraces.add(new ObligationResult(obligationIdx, msg));
+      stackTraces.add(new ObligationResult(obligationIdx, msg, null));
     }
 
     /**
