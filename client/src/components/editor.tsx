@@ -18,6 +18,7 @@ import AnchoredMarker, { addToArray } from './AnchoredMarker';
 import PopoverMarker from './PopoverMarker';
 
 import '../highlighting/jml.js';
+import '../highlighting/sequent.js';
 import lint from '../linting.js';
 
 import './sidebar/sidebar.css';
