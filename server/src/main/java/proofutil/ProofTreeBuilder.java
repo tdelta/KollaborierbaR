@@ -91,10 +91,13 @@ class ProofTreeBuilder {
       }
     }
 
+    String sequent = LogicPrinter.quickPrintSequent(node.sequent(),node.proof().getServices());
+
     return new ProofNode(
         label,
         children,
-        kind
+        kind,
+        sequent
     );
   }
 
@@ -105,7 +108,8 @@ class ProofTreeBuilder {
     return new ProofNode(
         app.rule().name() + " ON " + prettySubTerm,
         new ArrayList<ProofNode>(0),
-        ProofNode.Kind.OneStepSimplification
+        ProofNode.Kind.OneStepSimplification,
+        ""
     );
   }
 
@@ -157,10 +161,13 @@ class ProofTreeBuilder {
       kind = ProofNode.Kind.DefaultNode;
     }
 
+    String sequent = LogicPrinter.quickPrintSequent(node.sequent(),node.proof().getServices());
+
     return new ProofNode(
         node.serialNr() + ":" + node.name(),
         children,
-        kind
+        kind,
+        sequent
     );
   }
 }

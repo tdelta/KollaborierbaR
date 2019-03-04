@@ -7,6 +7,16 @@ import ProofResults from '../../key/netdata/ProofResults';
 export default class ProofTreeView extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.selectNode = this.selectNode.bind(this);
+    this.state = {
+      selectedNode: []
+    };
+  }
+
+  public selectNode(node: ProofNode[]){
+    this.setState({
+      selectedNode: node
+    });
   }
 
   public render() {
@@ -34,6 +44,10 @@ export default class ProofTreeView extends React.Component<Props, State> {
                   // TODO better keys
                   node={node}
                   initiallyCollapsed={nodes.length > 1}
+                  displaySequent={this.props.displaySequent}
+                  selectNode={this.selectNode}
+                  selectedNode={this.state.selectedNode}
+                  path={[node]}
                 />
                 )
             )
@@ -49,7 +63,9 @@ export default class ProofTreeView extends React.Component<Props, State> {
 // defining the structure of this react components properties
 interface Props {
   proofResults: ProofResults;
+  displaySequent: (sequent: string) => void;
 }
 
 interface State {
+ selectedNode: ProofNode[];
 }

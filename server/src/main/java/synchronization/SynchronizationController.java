@@ -12,15 +12,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import synchronization.data.File;
 import synchronization.data.LogootSAdd;
 import synchronization.data.LogootSDel;
-import org.springframework.context.event.EventListener;
-import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 @Controller
 public class SynchronizationController {
@@ -39,8 +39,9 @@ public class SynchronizationController {
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
   /**
-   * Called when a client calls the insert route. An insert operation is applied to the crdt document
-   * and broadcasted to all subscribers on the document.
+   * Called when a client calls the insert route. An insert operation is applied to the crdt
+   * document and broadcasted to all subscribers on the document.
+   *
    * @param file File attribute of the header, specifies what file to edit
    * @param user The client that sent the insert
    * @param message The insert operation
@@ -61,6 +62,7 @@ public class SynchronizationController {
   /**
    * Called when a client calls the insert route. A remove operation is applied to the crdt document
    * and broadcasted to all subscribers on the document.
+   *
    * @param file File attribute of the header, specifies what file to edit
    * @param user The client that sent the remove
    * @param message The remove operation
@@ -80,6 +82,7 @@ public class SynchronizationController {
 
   /**
    * Called when a client disconnects from the socket. Removes the client from all crdt documents.
+   *
    * @param event Information about the disconnect
    */
   @EventListener
@@ -89,21 +92,25 @@ public class SynchronizationController {
   }
 
   /**
-   * Called when a client opens a file. Initialized a crdt document with a unique id and sends it to the client.
+   * Called when a client opens a file. Initialized a crdt document with a unique id and sends it to
+   * the client.
+   *
    * @param file The file that the client opened
    * @param user The client that called the route
    * @param text The text to initialize the document with if it doesnt exist yet
    */
   @MessageMapping("/file")
   public void handleSubscription(@Header("file") String file, Principal user, File text) {
-    System.out.println("Adding user to crdt doc "+file);
+    System.out.println("Adding user to crdt doc " + file);
     unsubscribe(user);
+    if (file.equals("")) return;
     int replicaNumber;
     if (users.containsKey(file)) {
       // There are already people working on this document
       LogootSRopes document = documents.get(file).copy();
       // Send the document to the user with a unique id (replicaNumber)
-      replicaNumber = users.get(file).size();
+      List<Principal> connectedUsers = users.get(file);
+      replicaNumber = userList.get(connectedUsers.get(connectedUsers.size() - 1)).getCrdtId() + 1;
       document.setReplicaNumber(replicaNumber);
       users.get(file).add(user);
       // Send document to user
@@ -130,12 +137,13 @@ public class SynchronizationController {
 
   /**
    * Creates a crdt document containing some text
+   *
    * @param text The content of the document
    */
   private LogootSRopes fromText(String text) {
     LogootSRopes document = new LogootSRopes();
 
-    if(text.length() > 0) {
+    if (text.length() > 0) {
       // Insert content into the crdt document
       List<Character> characterList =
           text.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
@@ -154,19 +162,20 @@ public class SynchronizationController {
 
   /**
    * Removes a client from all crdt documents that it is connected to
+   *
    * @param user The client
    */
   private void unsubscribe(Principal user) {
     // Iterate over all names of files and lists of users working on them
     for (ConcurrentHashMap.Entry<String, LinkedList<Principal>> entry : users.entrySet()) {
       if (entry.getValue().contains(user)) {
-        System.out.println("Removed user "+user.getName()+" from crdt doc "+entry.getKey());
+        System.out.println("Removed user " + user.getName() + " from crdt doc " + entry.getKey());
         if (entry.getValue().size() == 1) {
-          for(Principal otherUser: entry.getValue()){
+          for (Principal otherUser : entry.getValue()) {
             System.out.println(user.getName());
           }
           // There are no other users working on the file, remove it entirely
-          System.out.println("Removed crdt doc "+entry.getKey());
+          System.out.println("Removed crdt doc " + entry.getKey());
           users.remove(entry.getKey());
           documents.remove(entry.getKey());
         } else {

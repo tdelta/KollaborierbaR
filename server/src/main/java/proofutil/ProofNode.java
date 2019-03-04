@@ -28,11 +28,13 @@ public class ProofNode {
   private final String text;
   private final List<ProofNode> children;
   private final Kind kind;
+  private final String sequent;
 
-  public ProofNode(final String text, final List<ProofNode> children, final Kind kind) {
+  public ProofNode(final String text, final List<ProofNode> children, final Kind kind, final String sequent) {
     this.text = text;
     this.children = children;
     this.kind = kind;
+    this.sequent = sequent;
   }
 
   public String getText() {
@@ -45,5 +47,9 @@ public class ProofNode {
 
   public Kind getKind() {
     return this.kind;
+  }
+
+  public String getSequent() {
+    return this.sequent;
   }
 }

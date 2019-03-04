@@ -57,7 +57,7 @@ public class ProjectSyncController {
       @DestinationVariable String projectName) {
     final String decodedProjectName = UriUtils.decode(projectName, "UTF-8");
 
-    System.out.println("Decoded project name"+decodedProjectName);
+    System.out.println("Decoded project name" + decodedProjectName);
 
     final List<Principal> users = sessions.getOrDefault(decodedProjectName, new ArrayList<>(1));
 
@@ -69,7 +69,7 @@ public class ProjectSyncController {
     }
 
     saveSubscription(simpSubscriptionId, user, decodedProjectName);
-    broadcastUsernames(users,decodedProjectName);
+    broadcastUsernames(users, decodedProjectName);
   }
 
   @EventListener
@@ -79,7 +79,7 @@ public class ProjectSyncController {
         event.getMessage().getHeaders().get("simpSubscriptionId", String.class);
 
     final String projectName = getProjectNameBySubscription(simpSubscriptionId, user);
-    if(projectName != null){
+    if (projectName != null) {
       System.out.println(
           "Got unsubscribe from " + event.getUser().getName() + " for project " + projectName);
 
@@ -87,7 +87,7 @@ public class ProjectSyncController {
 
       System.out.println("Removed user " + user.getName() + " from project " + projectName);
       users.remove(user);
-      broadcastUsernames(users,projectName);
+      broadcastUsernames(users, projectName);
       if (users.isEmpty()) {
         System.out.println("Removed project " + projectName + ", since all users left.");
         sessions.remove(projectName);
@@ -105,7 +105,7 @@ public class ProjectSyncController {
     final Set<String> keys = sessions.keySet();
     for (final String project : keys) {
       final List<Principal> users = sessions.getOrDefault(project, new ArrayList<>(0));
-      if(users.contains(user)){
+      if (users.contains(user)) {
         System.out.println("Removed user " + user.getName() + " from project " + project);
         users.remove(user);
 
@@ -113,7 +113,7 @@ public class ProjectSyncController {
           System.out.println("Removed project " + project + ", since all users left.");
           sessions.remove(project);
         }
-        broadcastUsernames(users,project);
+        broadcastUsernames(users, project);
       }
     }
     deleteSubscription(event.getSessionId(), user);
@@ -208,11 +208,10 @@ public class ProjectSyncController {
     }
   }
 
-  private void broadcastUsernames(List<Principal> users, String projectName){
+  private void broadcastUsernames(List<Principal> users, String projectName) {
     List<User> subscriberNames = getSubscriberNames(users);
-    UsersUpdatedEvent userEvent =
-        new UsersUpdatedEvent(this, projectName, subscriberNames);
-    for(Principal otherUser: users){
+    UsersUpdatedEvent userEvent = new UsersUpdatedEvent(this, projectName, subscriberNames);
+    for (Principal otherUser : users) {
       messagingTemplate.convertAndSendToUser(
           otherUser.getName(), "/projects/" + projectName, userEvent);
     }

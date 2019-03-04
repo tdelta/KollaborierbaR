@@ -50,6 +50,16 @@ export default class GuiProofNode extends React.Component<Props, State> {
         display: this.state.collapsed ? 'none' : '',
       };
 
+      let background: string = 'inacticeFileNode';
+      if(this.props.selectedNode.length === this.props.path.length){
+        background = 'activeFileNode';
+        for(let i: number = 0;i < this.props.path.length;i++){
+          if(this.props.selectedNode[i].text !== this.props.path[i].text){
+            background = 'inactiveFileNode';
+          }
+        }
+      }
+
       return (
         <>
           {/* allow toggling the visibility of the node's children
@@ -60,6 +70,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
           <div
             onClick={this.toggle}
             onDoubleClick={this.handleItemDoubleClick}
+            className={background}            
           >
             <ProofIcon
               node={this.props.node}
@@ -79,6 +90,10 @@ export default class GuiProofNode extends React.Component<Props, State> {
                 */}
                 <GuiProofNode
                   node={child}
+                  displaySequent={this.props.displaySequent}
+                  selectNode={this.props.selectNode}
+                  selectedNode={this.props.selectedNode}
+                  path={this.props.path.concat(child)}
                 />
               </li>
             ))}
@@ -108,13 +123,21 @@ export default class GuiProofNode extends React.Component<Props, State> {
   /**
    * Called, whenever the node is double clicked. */
   private handleItemDoubleClick() {
-    // TODO
+    let node = this.props.node;
+    if(node.kind !== Kind.OneStepSimplification){
+      this.props.selectNode(this.props.path);
+      this.props.displaySequent(node.sequent);
+    }
   }
 }
 
 interface Props {
   node: ProofNode;
   initiallyCollapsed: boolean;
+  displaySequent: (sequent: string) => void;
+  selectNode: (path: ProofNode[]) => void;
+  selectedNode: ProofNode[];
+  path: ProofNode[];
 }
 
 interface State {
