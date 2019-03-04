@@ -137,7 +137,7 @@ public class KeYWrapper {
 
 				results.addStackTrace(
             obligationIdx,
-            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + stackToString(e),
+            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + stackToString(e)
         );
 
 				System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
