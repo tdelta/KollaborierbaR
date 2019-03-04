@@ -12,6 +12,7 @@ public class Identifier extends fr.loria.score.logootsplito.Identifier {
 
   /**
    * Constructor used by Jackson to parse the object from the corresponding mute-structs object
+   *
    * @param tuples A structure used in mute-structs
    */
   @JsonCreator
@@ -25,7 +26,8 @@ public class Identifier extends fr.loria.score.logootsplito.Identifier {
   }
 
   /**
-   * Parses this Object into a mute-structs Identifier. (Used by Jackson to fill the JSON key 'tuples')
+   * Parses this Object into a mute-structs Identifier. (Used by Jackson to fill the JSON key
+   * 'tuples')
    */
   public IdentifierTuple[] getTuples() {
     // Assume that the size of the base + 1 % 4. Otherwise the object cannot be parsed

@@ -59,7 +59,7 @@ export default class Editor extends React.Component<Props> {
       autoScrollEditorIntoView: true,
       fontSize: 20,
       firstLineNumber: 1,
-    }); 
+    });
 
     this.editor.setTheme('ace/theme/pastel_on_dark');
     this.editor.$blockScrolling = Infinity;
@@ -154,7 +154,7 @@ export default class Editor extends React.Component<Props> {
     }
 
     let mode = '';
-    switch(this.props.filetype){
+    switch (this.props.filetype) {
       case 'java':
         mode = 'ace/mode/jml';
         break;
@@ -163,7 +163,7 @@ export default class Editor extends React.Component<Props> {
         break;
     }
     this.editor.getSession().setMode(mode);
-    if(this.props.filetype==='sequent'){
+    if (this.props.filetype === 'sequent') {
       this.editor.setReadOnly(true);
     } else {
       this.editor.setReadOnly(false);
@@ -264,14 +264,16 @@ export default class Editor extends React.Component<Props> {
    * Function that calls lint, sending a request to the server, and passes the result to the app
    */
   private callLinter(): void {
-    if(this.props.filetype==='java'){
+    if (this.props.filetype === 'java') {
       const filename: string = this.props.filepath[
         this.props.filepath.length - 1
       ];
-      lint(filename, this.editor.getValue()).then((diagnostics: Diagnostic[]) => {
-        this.props.setDiagnostics(diagnostics);
-        this.setAnchors();
-      });
+      lint(filename, this.editor.getValue()).then(
+        (diagnostics: Diagnostic[]) => {
+          this.props.setDiagnostics(diagnostics);
+          this.setAnchors();
+        }
+      );
     }
   }
 
