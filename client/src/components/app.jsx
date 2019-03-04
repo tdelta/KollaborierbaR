@@ -12,7 +12,7 @@ import ProjectManagement from '../projectmanagement.ts';
 
 import CollabController from '../collaborative/CollabController.ts';
 
-import Key from '../key';
+import Key from '../key/key';
 
 //import testSource from '../sample-text.js';
 
@@ -68,6 +68,7 @@ export default class App extends React.Component {
         this.key = new Key(
           this.notificationSystem,
           this.addProvenObligations,
+          (proofResults) => this.setState({proofResults}),
           (openGoals) => this.setState({openGoals}),
           () => this.state.project.name + '/' + this.state.openedPath.join('/'),
           this.addNewConsoleMessage
@@ -99,7 +100,9 @@ export default class App extends React.Component {
             consolelog: '',
 
             // console visibilty
-            consoleIsVisible: false
+            consoleIsVisible: false,
+
+            proofResult: undefined
         };
     }
 
@@ -275,6 +278,7 @@ export default class App extends React.Component {
                     <Sidebar
                         project={this.state.project}
                         openGoals={this.state.openGoals}
+                        proofResults={this.state.proofResults}
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}

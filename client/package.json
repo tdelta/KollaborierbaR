@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.15",
+    "@fortawesome/free-regular-svg-icons": "^5.7.2",
+    "@fortawesome/free-solid-svg-icons": "^5.7.2",
+    "@fortawesome/react-fontawesome": "^0.1.4",
     "@stomp/stompjs": "^5.2.0",
     "@types/react-fontawesome": "^1.6.4",
     "@types/react-notification-system": "^0.2.39",
@@ -61,6 +65,7 @@
     "eslint-config-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.11.1",
     "fast-check": "^1.10.0",
+    "neovim": "^4.2.1",
     "prettier": "^1.15.2",
     "react-fontawesome": "^1.6.1",
     "react-test-renderer": "^16.6.3",
@@ -70,6 +75,6 @@
     "tslint-eslint-rules": "^5.4.0",
     "tslint-plugin-prettier": "^2.0.1",
     "tslint-react": "^3.6.0",
-    "typescript": "^3.1.6"
+    "typescript": "^3.3.3333"
   }
 }
