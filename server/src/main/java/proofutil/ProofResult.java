@@ -16,35 +16,35 @@ public class ProofResult {
     private List<ObligationResult> stackTraces = new ArrayList<>();
     
     public List<ObligationResult> getStackTraces() {
-		return stackTraces;
-	}
+      return stackTraces;
+    }
 
-	public void addStackTrace(final int obligationIdx, final String msg) {
-		stackTraces.add(new ObligationResult(obligationIdx, msg));
-	}
+    public void addStackTrace(final int obligationIdx, final String msg) {
+      stackTraces.add(new ObligationResult(obligationIdx, msg));
+    }
 
-	/**
-     * Add a succeded proof to the list
+    /**
+     * Add a succeeded proof to the list
      * @param msg the result message to be displayed
      */
-    public void addSuccess(final int obligationIdx, final String msg) {
-        succeeded.add(new ObligationResult(obligationIdx, msg));
+    public void addSuccess(final int obligationIdx, final String msg, final ProofNode proofTree) {
+        succeeded.add(new ObligationResult(obligationIdx, msg, proofTree));
     }
 
     /**
      * Add a failed proof to the list, used for proofs that couldn't be closed
      * @param msg the result message to be displayed
      */
-    public void addFail(final int obligationIdx, final String msg) {
-        failed.add(new ObligationResult(obligationIdx, msg));
+    public void addFail(final int obligationIdx, final String msg, final ProofNode proofTree) {
+        failed.add(new ObligationResult(obligationIdx, msg, proofTree));
     }
 
     /**
      * Add an error message to the list, used whenever an exception occures
      * @param msg the result message to be displayed
      */
-    public void addError(final int obligationIdx, final String msg) {
-        errors.add(new ObligationResult(obligationIdx, msg));
+    public void addError(final int obligationIdx, final String msg, final ProofNode proofTree) {
+        errors.add(new ObligationResult(obligationIdx, msg, proofTree));
     }
 
     /**
@@ -58,7 +58,7 @@ public class ProofResult {
 
     /**
      * Basic getter for contents
-     * @return succeded proofs
+     * @return succeeded proofs
      */
     public List<ObligationResult> getSucceeded() {
         return succeeded;

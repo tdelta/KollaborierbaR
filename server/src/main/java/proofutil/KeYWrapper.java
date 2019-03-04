@@ -5,6 +5,7 @@ import de.uka.ilkd.key.java.abstraction.KeYJavaType;
 import de.uka.ilkd.key.logic.op.IObserverFunction;
 import de.uka.ilkd.key.proof.Goal;
 import de.uka.ilkd.key.proof.Proof;
+import de.uka.ilkd.key.proof.Node;
 import de.uka.ilkd.key.proof.init.ProofInputException;
 import de.uka.ilkd.key.proof.io.ProblemLoaderException;
 import de.uka.ilkd.key.settings.ChoiceSettings;
@@ -12,12 +13,21 @@ import de.uka.ilkd.key.settings.ProofSettings;
 import de.uka.ilkd.key.speclang.Contract;
 import de.uka.ilkd.key.strategy.StrategyProperties;
 import de.uka.ilkd.key.util.MiscTools;
+import de.uka.ilkd.key.java.Services;
+import de.uka.ilkd.key.pp.LogicPrinter;
+import de.uka.ilkd.key.rule.RuleApp;
+import de.uka.ilkd.key.rule.OneStepSimplifier.Protocol;
+import de.uka.ilkd.key.rule.OneStepSimplifierRuleApp;
+
+import org.key_project.util.collection.ImmutableSet;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
-import org.key_project.util.collection.ImmutableSet;
+import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * Basic KeY stub, that tries to prove all contracts in a file
@@ -55,8 +65,9 @@ public class KeYWrapper {
 																						// performed proof if a *.proof
 																						// file is loaded
 		} catch (ProblemLoaderException e) {
-			results.addError(-1, "Couldn't process all relevant information for verification with KeY.");			
+			results.addError(-1, "Couldn't process all relevant information for verification with KeY.", null);			
 			results.addStackTrace(-1, "Exception at '" + location + "':\n" + stackToString(e));
+
 			System.out.println("Exception at '" + location + "':");
 			e.printStackTrace();
 		}
@@ -93,17 +104,25 @@ public class KeYWrapper {
 				// Show proof result
 				final boolean closed = proof.openGoals().isEmpty();
 
+        final ProofNode proofTree;
+        {
+          final ProofTreeBuilder proofTreeBuilder = new ProofTreeBuilder();
+          proofTree = proofTreeBuilder.generateProofTree(proof);
+        }
+
 				if (closed) {
 					results.addSuccess(
               obligationIdx,
-              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is verified."
+              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is verified.",
+              proofTree
           );
         }
 
 				else {
 					results.addFail(
               obligationIdx,
-              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open."
+              "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open.",
+              proofTree
           );
 				
           for (Goal goal: proof.openGoals()) {
@@ -112,10 +131,13 @@ public class KeYWrapper {
 				}
 			} catch (ProofInputException e) {
 				results.addError(
-			             obligationIdx,"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".");
+			             obligationIdx,"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".",
+                   null
+        );
+
 				results.addStackTrace(
             obligationIdx,
-            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + stackToString(e)
+            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + stackToString(e),
         );
 
 				System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
