@@ -62,6 +62,7 @@ export default class App extends React.Component {
         this.updateFileName = this.projectManagement.updateFileName.bind(this.projectManagement);
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
         this.addNewConsoleMessage = this.addNewConsoleMessage.bind(this);
+        this.invertConsoleVisibility = this.invertConsoleVisibility.bind(this);
 
         this.editor = React.createRef();
         this.key = new Key(
@@ -95,7 +96,10 @@ export default class App extends React.Component {
             openGoals: [],
 
             // the console log
-            consolelog: ''
+            consolelog: '',
+
+            // console visibilty
+            consoleIsVisible: false
         };
     }
 
@@ -173,8 +177,24 @@ export default class App extends React.Component {
     }
 
     addNewConsoleMessage(message) {
+        
+        //Create time string
+        let date = new Date();
+        let h = date.getHours();
+        let m = date.getMinutes();
+        let s = date.getSeconds();
+
+        let timeString = h + ":" + m + ":" + s;
+
         this.setState({
-            consolelog: this.state.consolelog+ message + "\n"
+            consolelog: this.state.consolelog+ timeString + " " + message + "\n",
+            consoleIsVisible: true
+        });
+    }
+
+    invertConsoleVisibility(){
+        this.setState({
+            consoleIsVisible: ! this.state.consoleIsVisible
         });
     }
 
@@ -277,9 +297,12 @@ export default class App extends React.Component {
                             getObligations={this.key.getObligations}
                             onProveObligation={this.key.proveObligation}
                             ref={this.editor}
+                            consoleIsVisible = {this.state.consoleIsVisible}
                         />
                         <Console
                             consolelog = {this.state.consolelog}
+                            consoleIsVisible = {this.state.consoleIsVisible}
+                            invertConsoleVisibility = {this.invertConsoleVisibility}
                         />
                     </div>
                 </div>

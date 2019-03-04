@@ -240,7 +240,20 @@ export default class Editor extends React.Component<Props> {
    * Called by react to display html of the component
    */
   public render() {
-    return <div id="editor" />;
+
+    let editorstyle;
+    // Resize the editor depening whether or not the console is visible
+    if(this.props.consoleIsVisible){
+      editorstyle = {
+        'height': "66%",
+        }
+    } else{
+      editorstyle = {
+        'height': "98%",
+        }
+    }    
+
+    return <div id="editor" style = {editorstyle} />;
   }
 
   /**
@@ -379,4 +392,5 @@ interface Props {
   collabController: CollabController;
   getObligations: (lines: string[]) => number[];
   onProveObligation: (nr: number) => boolean;
+  consoleIsVisible: boolean;
 }
