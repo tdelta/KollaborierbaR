@@ -98,12 +98,14 @@ public class SynchronizationController {
   public void handleSubscription(@Header("file") String file, Principal user, File text) {
     System.out.println("Adding user to crdt doc "+file);
     unsubscribe(user);
+    if(file.equals("")) return;
     int replicaNumber;
     if (users.containsKey(file)) {
       // There are already people working on this document
       LogootSRopes document = documents.get(file).copy();
       // Send the document to the user with a unique id (replicaNumber)
-      replicaNumber = users.get(file).size();
+      List<Principal> connectedUsers = users.get(file);
+      replicaNumber = userList.get(connectedUsers.get(connectedUsers.size()-1)).getCrdtId()+1;
       document.setReplicaNumber(replicaNumber);
       users.get(file).add(user);
       // Send document to user

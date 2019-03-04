@@ -31,4 +31,8 @@ public class UserList {
   public Set<ConcurrentHashMap.Entry<Principal, User>> entrySet() {
     return map.entrySet();
   }
+
+  public User get(Principal user){
+    return map.get(user);
+  }
 }
