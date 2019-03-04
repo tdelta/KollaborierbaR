@@ -102,22 +102,45 @@ export default class FileNode extends React.Component<Props, State> {
 
       return (
         <>
-          <div style={{display: 'table'}}>
+          <div style={{ display: 'table' }}>
             {/* allow toggling the visibility of the node's children
                           by a single click.
 
                           Double clicks are to be interpreted as opening files
                       */}
             <Context>
-                <div onClick={this.toggle} onDoubleClick={this.handleItemDoubleClick}>
-                    {label}
-                </div>
-                <ContextMenu>
-                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'folder')}>Create Folder</ContextAction>
-                    <ContextAction onClick={() => this.props.onCreateFile(this.props.path, 'file')}>Create File</ContextAction>
-                    <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename Folder</ContextAction>
-                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete Folder</ContextAction>
-                </ContextMenu>
+              <div
+                onClick={this.toggle}
+                onDoubleClick={this.handleItemDoubleClick}
+              >
+                {label}
+              </div>
+              <ContextMenu>
+                <ContextAction
+                  onClick={() =>
+                    this.props.onCreateFile(this.props.path, 'folder')
+                  }
+                >
+                  Create Folder
+                </ContextAction>
+                <ContextAction
+                  onClick={() =>
+                    this.props.onCreateFile(this.props.path, 'file')
+                  }
+                >
+                  Create File
+                </ContextAction>
+                <ContextAction
+                  onClick={() => this.props.onUpdateFileName(this.props.path)}
+                >
+                  Rename Folder
+                </ContextAction>
+                <ContextAction
+                  onClick={() => this.props.onDeleteFile(this.props.path)}
+                >
+                  Delete Folder
+                </ContextAction>
+              </ContextMenu>
             </Context>
             {/* display the children as unordered list */}
             <ul className="projectTreeList" style={display}>
@@ -156,16 +179,27 @@ export default class FileNode extends React.Component<Props, State> {
           : 'inactiveFileNode';
       return (
         /* double clicks are to be interpreted as opening files */
-        <div className='tableFileNode'>
-            <Context>
-                <div onDoubleClick={this.handleItemDoubleClick} className={background}>
-                  {label}
-                </div>
-                <ContextMenu>
-                    <ContextAction onClick={() => this.props.onUpdateFileName(this.props.path)}>Rename File</ContextAction>
-                    <ContextAction onClick={() => this.props.onDeleteFile(this.props.path)}>Delete File</ContextAction>
-                </ContextMenu>
-            </Context>
+        <div className="tableFileNode">
+          <Context>
+            <div
+              onDoubleClick={this.handleItemDoubleClick}
+              className={background}
+            >
+              {label}
+            </div>
+            <ContextMenu>
+              <ContextAction
+                onClick={() => this.props.onUpdateFileName(this.props.path)}
+              >
+                Rename File
+              </ContextAction>
+              <ContextAction
+                onClick={() => this.props.onDeleteFile(this.props.path)}
+              >
+                Delete File
+              </ContextAction>
+            </ContextMenu>
+          </Context>
         </div>
       );
     }

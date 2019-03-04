@@ -97,7 +97,7 @@ export default class CollabController {
     this.project = project;
   }
 
-  public disconnect(){
+  public disconnect() {
     this.connected = false;
     this.network.broadcast('/file', { file: '' }, { content: '' });
   }

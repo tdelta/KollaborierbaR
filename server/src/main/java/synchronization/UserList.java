@@ -8,7 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserList {
 
-  private String[] animals = new String[] {"cat", "crow", "dog", "dove", "dragon", "fish", "frog", "hippo", "horse", "kiwi", "otter", "spider"};
+  private String[] animals =
+      new String[] {
+        "cat", "crow", "dog", "dove", "dragon", "fish", "frog", "hippo", "horse", "kiwi", "otter",
+        "spider"
+      };
 
   private String[] adjectives = new String[] {"Wild", "Wise", "Drunk", "Fat"};
 
@@ -32,7 +36,7 @@ public class UserList {
     return map.entrySet();
   }
 
-  public User get(Principal user){
+  public User get(Principal user) {
     return map.get(user);
   }
 }
