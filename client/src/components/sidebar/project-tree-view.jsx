@@ -91,17 +91,45 @@ export default class ProjectTreeView extends React.Component {
                 <hr />
             </>
         );
+        
 
+     
         // if the project is not empty, display its contents
         if (isProjectValid && this.props.project.hasOwnProperty('contents')) {
+            let folder = [];
+            let files = []; 
+            for (let f of this.props.project.contents){
+                if(f.type === "folder"){
+                  folder.push(f); 
+                }
+                if(f.type === "file"){
+                  files.push(f);
+                }
+            } 
+            folder.sort(function(a, b){
+              if(a.name.toLowerCase() < b.name.toLowerCase()) {
+                return -1; }
+              if(a.name.toLowerCase() > b.name.toLowerCase()) {
+                return 1; }
+              return 0;}
+            );
+            files.sort(function(a, b){
+              if(a.name.toLowerCase() < b.name.toLowerCase()) {
+                return -1; }
+              if(a.name.toLowerCase() > b.name.toLowerCase()) {
+                return 1; }
+              return 0;}
+            );
+            let sorted = folder.concat(files);
             return (
                 <>
                     <div>
                         {header /* display the header (contains project name) */}
                         {
+                              
                             // render each element within the root folder of the
                             // project as FileNode
-                            this.props.project.contents.map((item) =>
+                            sorted.map((item) =>
                                 <FileNode
                                     key={item.name}
                                     // ^when rendering a list of elements, react
