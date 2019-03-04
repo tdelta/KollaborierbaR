@@ -84,16 +84,22 @@ export default class CollabController {
       {},
       this.handleNewUserName.bind(this)
     );
+    let file = `${project}/${filepath}`;
     if (filepath === '') {
+      file = '';
       this.connected = false;
     } else {
-      const file = `${project}/${filepath}`;
-      this.network.broadcast('/file', { file: file }, { content: content });
       this.connected = true;
     }
+    this.network.broadcast('/file', { file: file }, { content: content });
 
     this.filepath = filepath;
     this.project = project;
+  }
+
+  public disconnect() {
+    this.connected = false;
+    this.network.broadcast('/file', { file: '' }, { content: '' });
   }
 
   /**

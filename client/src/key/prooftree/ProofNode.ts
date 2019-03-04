@@ -2,7 +2,8 @@
 export default interface ProofNode {
   text: string,
   children: ProofNode[],
-  kind: Kind
+  kind: Kind,
+  sequent: string
 }
 
 export enum Kind {

@@ -126,7 +126,8 @@ public class KeYWrapper {
           );
 				
           for (Goal goal: proof.openGoals()) {
-            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString()));
+            String sequent = LogicPrinter.quickPrintSequent(goal.sequent(),env.getServices());
+            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString(),sequent));
           }
 				}
 			} catch (ProofInputException e) {

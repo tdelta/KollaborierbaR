@@ -14,6 +14,8 @@ import CollabController from '../collaborative/CollabController.ts';
 
 import Key from '../key/key';
 
+import {Button} from 'reactstrap';
+
 //import testSource from '../sample-text.js';
 
 /**
@@ -32,6 +34,7 @@ export default class App extends React.Component {
 
         this.confirmationModal = React.createRef();
         this.notificationSystem = React.createRef();
+        this.displayCloseButton = false;
 
         this.projectManagement = new ProjectManagement(
             this.showProject.bind(this),
@@ -54,6 +57,8 @@ export default class App extends React.Component {
         this.proveFile = this.proveFile.bind(this);
         this.showProject = this.showProject.bind(this);
         this.openFile = this.openFile.bind(this);
+        this.displaySequent = this.displaySequent.bind(this);
+        this.closeSequent = this.closeSequent.bind(this);
         this.deleteFile = (path) => this.projectManagement.deleteFile(this.state.openedPath,this.state.project.name, path);
         this.deleteProject = (path) => this.projectManagement.deleteProject(this.state.project.name, path);
         this.createFile = (path, type) => this.projectManagement.createFile(this.state.project.name, path, type);
@@ -85,7 +90,11 @@ export default class App extends React.Component {
             // content of the current file. Displayed within the editor.
             text: '',
 
+            // currently opened file in the editor
             openedPath: [],
+
+            // type of the currently opened file in the editor
+            filetype: '',
 
             // warnings, errors, etc. within the currently open file
             diagnostics: [],
@@ -130,20 +139,27 @@ export default class App extends React.Component {
     setFileName(filename){
         let path = this.state.openedPath;
         path[path.length - 1] = filename;
-        this.setState({
-            openedPath: path
-        });
+        this.setOpenedPath(path);
     }
     
     /**
      * Sets the path of the currently opened file, which is passed down to the components
      */
     setOpenedPath(path){
+        let filetype = '';
+        console.log(path);
+        if(path && path[path.length-1]){
+            const filename = path[path.length-1]
+            filetype = filename.split('.')[filename.split('.').length-1];
+        }  
         this.setState({
-            openedPath: path
+            openedPath: path,
+            filetype: filetype
         });
-      if(this.collabController)
-      this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
+        if(this.collabController){
+            this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
+        }
+        this.displayCloseButton=false;
     }
 
     /**
@@ -212,26 +228,40 @@ export default class App extends React.Component {
             this.setText.bind(this)
         );
         this.setState({
-            text: '', // load some sample text for testing
-            openedPath: ['Main.java'] // TODO: replace filename with this
+            text: '',
+            openedPath: []
         });
         document.addEventListener('keydown', this.handleCtrlS.bind(this));
     }
 
     openFile(path) {
         // This string composition is necessary because path contains only the path within a project.
-        ProjectManagement.openFile('/' + this.state.project.name + '/' + path.join('/'))
+        ProjectManagement.openFile(this.state.project.name + '/' + path.join('/'))
             .then((response) => {
                 this.setState({
                     text: response.fileText,
-                    openedPath: path,
                     provenObligations: [],
                     openGoals: []
                 });
                 // TODO: Handle rename with collab controller
-                this.collabController.setFile(this.state.project.name,path.join('/'),response.fileText);
+                this.setOpenedPath(path);
             });
     }
+
+    displaySequent(formula){
+      this.collabController.disconnect();
+      this.setState({
+        text: formula,
+        filetype: 'sequent'
+      });
+      this.displayCloseButton=true;
+    }
+
+    closeSequent(){
+      this.openFile(this.state.openedPath);
+      this.displayCloseButton=false;
+    }
+
 
     /**
      * Eventhandler method for keyevent (CTRL + S).
@@ -286,8 +316,25 @@ export default class App extends React.Component {
                         onCreateFile={this.createFile}
                         onDeleteProject={this.deleteProject}
                         onUpdateFileName={this.updateFileName}
+                        displayFormula={this.displaySequent}
                     />
                     <div class="rightSide">
+                        {
+                        // Only display the button if this variable is true
+                        this.displayCloseButton &&
+                        <Button 
+                            color='danger'
+                            onClick={this.closeSequent}
+                            style={{
+                                position:'absolute', 
+                                zIndex:10, 
+                                right:'10px', 
+                                top:'10px', 
+                                borderRadius:'100px'
+                            }}>
+                            <i class="fa fa-times"></i>
+                        </Button>
+                        }
                         <Editor
                             onUpdateFileContent={() => this.updateFileContent(this.state.openedPath, this.state.text)}
                             setDiagnostics={this.setDiagnostics}
@@ -297,6 +344,7 @@ export default class App extends React.Component {
                             setText={this.setText}
                             text={this.state.text}
                             filepath={this.state.openedPath}
+                            filetype={this.state.filetype}
                             collabController={this.collabController}
                             getObligations={this.key.getObligations}
                             onProveObligation={this.key.proveObligation}
