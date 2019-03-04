@@ -63,6 +63,13 @@ class ModalSelect extends React.Component {
      * generates  JSX items for each project name
      */
     listProjects() {
+       //sort projects list 
+        this.state.projects.sort(function(a, b){
+              if(a.toLowerCase() < b.toLowerCase()) {
+                return -1; }
+              if(a.toLowerCase() > b.toLowerCase()) {
+                return 1; }
+              return 0;});
         // check, whether there are any projects in list
         if (this.state.projects && this.state.projects.length > 0) {
             return (

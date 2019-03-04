@@ -557,7 +557,7 @@ export default class ProjectManagement {
     }
   }
 
-  public updateFileContent(path: string[], content: string): void {
+  public updateFileContent(path: string[], content: string): Promise<void> {
     // Path to the ressource we want to save
     // TODO: Check if project exists
     const url = `${serverAddress}/projects/${
@@ -568,7 +568,7 @@ export default class ProjectManagement {
       fileContent: content,
     };
 
-    fetch(url, {
+    return fetch(url, {
       method: 'POST',
       mode: 'cors',
       headers: {
