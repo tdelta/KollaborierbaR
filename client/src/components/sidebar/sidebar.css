@@ -30,9 +30,9 @@
   color: #cfd8dc;
 
   float: left;
-
   height: 100%;
-  width: 350px;
+  width: 500px;
+  overflow:hidden;
 }
 
 /* a slim bar between sidebar and main content. It will allow the user to
@@ -78,13 +78,14 @@
 
 /* contains the project view etc. */
 .sidebarContent {
+    height: 100%;
+    /* ^this is needed to fill the vertical space */
     margin-top: -1.5em;
     /* ^this is needed to fill the space left by the toggle button */
 
-    /* dont wrap content of the sidebar, it should just be invisible,
+    /* dont wrap content of the sidebar, it should just be scrollable,
       when the sidebar gets too small */
     white-space: nowrap;
-    overflow: hidden;
 
     height: 100%;
 
@@ -108,15 +109,27 @@
     height: 100%;
 }
 
+.tabWrapper {
+    height: 97%;
+    overflow: auto;
+}
+
 .activeFileNode {
+    position: relative;
+    left: -0.5em;
     background-color: #374c55;
     border-radius: 5px;
     padding-left: 0.5em;
     padding-right: 0.5em;
+    display: table
 }
 
 .inactiveFileNode {
     background-color: inherit;
+}
+
+.tableFileNode {
+    display: table
 }
 
 #projectTree hr {
@@ -152,8 +165,4 @@
 .contextAction {
     margin-left: .5em;
     margin-right: .5em;
-}
-
-ul > li{
-    display: table;
 }
