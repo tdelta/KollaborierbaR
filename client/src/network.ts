@@ -95,6 +95,7 @@ export class Network {
   }
 
   public unsubscribe(messageType: string) {
+    messageType = `/user/${messageType}`;
     this.callbacks = this.callbacks.filter(
       element => element.messageType !== messageType
     );
