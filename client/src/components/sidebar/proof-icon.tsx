@@ -8,7 +8,6 @@ import { faSquare, faCaretSquareDown, faMinusSquare } from '@fortawesome/free-re
 
 export default class ProofIcon extends React.Component<Props, {}> {
     render() {
-        console.log(this.props.node);
         // if no specific icon can be determined, use a question mark as
         // default symbol
         let icon = faSquare;

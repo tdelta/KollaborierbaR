@@ -29,12 +29,16 @@ public class ProofNode {
   private final List<ProofNode> children;
   private final Kind kind;
   private final String sequent;
+  private final int serialNr;
+  private final int oneStepId;
 
-  public ProofNode(final String text, final List<ProofNode> children, final Kind kind, final String sequent) {
+  public ProofNode(final String text, final List<ProofNode> children, final Kind kind, final String sequent, final int serialNr, final int oneStepId) {
     this.text = text;
     this.children = children;
     this.kind = kind;
     this.sequent = sequent;
+    this.serialNr = serialNr;
+    this.oneStepId = oneStepId;
   }
 
   public String getText() {
@@ -51,5 +55,13 @@ public class ProofNode {
 
   public String getSequent() {
     return this.sequent;
+  }
+
+  public int getSerialNr() {
+    return this.serialNr;
+  }
+
+  public int getOneStepId() {
+    return this.oneStepId;
   }
 }
