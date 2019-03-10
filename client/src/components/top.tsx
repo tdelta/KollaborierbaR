@@ -5,6 +5,9 @@ import NotificationSystem from 'react-notification-system';
 import '../index.css';
 import Usernames from './user-names/user-names';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faForward, faBoxOpen, faStarOfLife, faDownload, faCloudUploadAlt, faSave, faBomb, faTrashAlt, faTag } from '@fortawesome/free-solid-svg-icons';
+
 import {
   Navbar,
   NavbarBrand,
@@ -53,7 +56,7 @@ export default class Top extends React.Component<Props, State> {
       this.props.notificationSystem.current.clearNotifications();
       this.props.notificationSystem.current.addNotification({
         title: 'Please Wait!',
-        message: 'Running all proof obligations...',
+        message: 'Proving all obligations...',
         level: 'info',
         position: 'bc',
         autoDismiss: 0,
@@ -98,22 +101,26 @@ export default class Top extends React.Component<Props, State> {
     return (
       <div>
         <Navbar color="dark" dark expand="md">
-          <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
+          <NavbarBrand style={{color: 'white'}}>KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <Usernames />
 
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
-                Key
+                KeY
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem
                   onClick={() => {
                     this.props
-                      .onUpdateFileContent()
+                      .saveFile()
                       .then(() => this.props.onProveFile());
                   }}
                 >
+                  <FontAwesomeIcon
+                    icon={faForward}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Prove all contracts
                 </DropdownItem>
               </DropdownMenu>
@@ -125,12 +132,24 @@ export default class Top extends React.Component<Props, State> {
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem onClick={this.props.onCreateProject}>
+                  <FontAwesomeIcon
+                    icon={faStarOfLife}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Create project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleOpenModal}>
+                  <FontAwesomeIcon
+                    icon={faBoxOpen}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Open project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleDeleteModal}>
+                  <FontAwesomeIcon
+                    icon={faBomb}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Delete project
                 </DropdownItem>
               </DropdownMenu>
@@ -151,18 +170,38 @@ export default class Top extends React.Component<Props, State> {
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem onClick={this.downloadFileOnClick}>
+                  <FontAwesomeIcon
+                    icon={faDownload}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Download
                 </DropdownItem>
                 <DropdownItem onClick={this.openFileOnClick}>
+                  <FontAwesomeIcon
+                    icon={faCloudUploadAlt}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Upload
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onDeleteFile}>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Delete
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onUpdateFileName}>
+                  <FontAwesomeIcon
+                    icon={faTag}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Rename
                 </DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileContent}>
+                <DropdownItem onClick={this.props.saveFile}>
+                  <FontAwesomeIcon
+                    icon={faSave}
+                    style={{marginRight: '0.5em'}}
+                  />
                   Save
                 </DropdownItem>
               </DropdownMenu>
@@ -220,7 +259,7 @@ interface Props {
   onDeleteFile(): void;
   onDeleteProject(): void;
   onUpdateFileName(): void;
-  onUpdateFileContent(): Promise<void>;
+  saveFile(): Promise<void>;
   onOpenProject(): void;
   onCreateProject(): void;
   onProveFile(): void;

@@ -88,7 +88,7 @@ export default class Editor extends React.Component<Props> {
     });
 
     this.editor.on('gutterclick', (e: any) => {
-      this.props.onUpdateFileContent().then(() => {
+      this.props.saveFile().then(() => {
         if (
           e.domEvent.target.className.includes('obligation_todo') &&
           e.domEvent.target.firstChild
@@ -403,7 +403,7 @@ export default class Editor extends React.Component<Props> {
 
 // defining the structure of this react components properties
 interface Props {
-  onUpdateFileContent(): Promise<void>;
+  saveFile(): Promise<void>;
   diagnostics: Diagnostic[];
   provenObligations: number[];
   text: string;

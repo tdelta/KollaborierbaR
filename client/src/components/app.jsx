@@ -50,6 +50,7 @@ export default class App extends React.Component {
 
         // all methods should always refer to this instance of App, when
         // using the `this` variable.
+        this.saveFile = this.saveFile.bind(this);
         this.setText = this.setText.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.addProvenObligations = this.addProvenObligations.bind(this);
@@ -272,10 +273,20 @@ export default class App extends React.Component {
         if(event.keyCode === 83 && event.ctrlKey){
             // Prevent default save file context menu
             event.preventDefault();
-            this.updateFileContent(this.state.openedPath, this.state.text);
+
+            this.saveFile();
         }
     }
 
+    saveFile() {
+      if (this.state.filetype !== 'sequent') {
+          return this.updateFileContent(this.state.openedPath, this.state.text);
+      }
+
+      else {
+          return Promise.reject();
+      }
+    }
 
     /**
      * Creates the displayed HTML for this component.
@@ -300,7 +311,7 @@ export default class App extends React.Component {
                     onCreateProject={this.createProject}
                     onProveFile={this.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
-                    onUpdateFileContent={() => this.updateFileContent(this.state.openedPath, this.state.text)}
+                    saveFile={this.saveFile}
                     notificationSystem={this.notificationSystem}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
@@ -336,7 +347,7 @@ export default class App extends React.Component {
                         </Button>
                         }
                         <Editor
-                            onUpdateFileContent={() => this.updateFileContent(this.state.openedPath, this.state.text)}
+                            saveFile={this.saveFile}
                             setDiagnostics={this.setDiagnostics}
                             diagnostics={this.state.diagnostics}
                             provenObligations={this.state.provenObligations}

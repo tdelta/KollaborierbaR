@@ -43,7 +43,7 @@ export default class Key {
       this.notificationSystem.current.clearNotifications();
       this.notificationSystem.current.addNotification({
         title: 'Please Wait!',
-        message: 'Running proof obligations...',
+        message: 'Proving obligations...',
         level: 'info',
         position: 'bc',
         autoDismiss: 0,

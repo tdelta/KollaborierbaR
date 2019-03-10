@@ -3,6 +3,7 @@ import {Collapse, ListGroup} from 'reactstrap';
 import './sidebar.css';
 import PropTypes from 'prop-types';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default class Context extends React.Component{
     constructor(props) {
@@ -97,7 +98,18 @@ ContextMenu.propTypes = {
 
 export class ContextAction extends React.Component {
     render() {
-        return <li className='contextAction' onClick={this.props.onClick}>{this.props.children}</li>;
+        let iconTag = <></>;
+        if (this.props.icon != null) {
+            iconTag = <FontAwesomeIcon
+                icon={this.props.icon}
+                style={{marginRight: '0.5em'}}
+            />
+        }
+
+        return <li className='contextAction' onClick={this.props.onClick}>
+          {iconTag}
+          {this.props.children}
+        </li>;
     }
 }
 
@@ -105,6 +117,7 @@ export class ContextAction extends React.Component {
 ContextAction.propTypes = {
     children: PropTypes.node,
     onClick: PropTypes.func,
+    icon: PropTypes.string
 };
 
 export {Context, ContextMenu};
