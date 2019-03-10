@@ -3,7 +3,9 @@ export default interface ProofNode {
   text: string,
   children: ProofNode[],
   kind: Kind,
-  sequent: string
+  sequent: string,
+  serialNr: number,
+  oneStepId: number
 }
 
 export enum Kind {

@@ -97,11 +97,13 @@ class ProofTreeBuilder {
         label,
         children,
         kind,
-        sequent
+        sequent,
+        node.serialNr(),
+        0
     );
   }
 
-  private ProofNode generateOneStepNode(final Services services, final RuleApp app) {
+  private ProofNode generateOneStepNode(final Services services, final RuleApp app, final int parentSerialNr, final int oneStepId) {
     final String prettySubTerm =
       LogicPrinter.quickPrintTerm(app.posInOccurrence().subTerm(), services);
 
@@ -109,7 +111,9 @@ class ProofTreeBuilder {
         app.rule().name() + " ON " + prettySubTerm,
         new ArrayList<ProofNode>(0),
         ProofNode.Kind.OneStepSimplification,
-        ""
+        "",
+        parentSerialNr,
+        oneStepId
     );
   }
 
@@ -130,7 +134,7 @@ class ProofTreeBuilder {
 
           for (int i = 0; i < numChildren; ++i) {
             children.add(
-                generateOneStepNode(node.proof().getServices(), protocol.get(i))
+                generateOneStepNode(node.proof().getServices(), protocol.get(i), node.serialNr(), i)
             );
           }
       }
@@ -167,7 +171,9 @@ class ProofTreeBuilder {
         node.serialNr() + ":" + node.name(),
         children,
         kind,
-        sequent
+        sequent,
+        node.serialNr(),
+        0
     );
   }
 }

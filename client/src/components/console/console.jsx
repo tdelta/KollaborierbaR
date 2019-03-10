@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';

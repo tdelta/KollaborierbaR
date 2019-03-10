@@ -85,7 +85,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
               // react needs a unique key for each sub
               // component
               // TODO: Use better, unique key
-              <li key={child.text}>
+              <li key={`${child.serialNr},${child.oneStepId}`}>
                 {/* use recursion to display children.
                 */}
                 <GuiProofNode
