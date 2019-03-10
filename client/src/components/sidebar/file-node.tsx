@@ -2,6 +2,8 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 
+import { faBomb, faFolderPlus, faFileMedical, faTrashAlt, faTag } from '@fortawesome/free-solid-svg-icons';
+
 import FileIcon from './file-icon.jsx';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import { Context, ContextMenu, ContextAction } from './context.jsx';
@@ -117,6 +119,7 @@ export default class FileNode extends React.Component<Props, State> {
               </div>
               <ContextMenu>
                 <ContextAction
+                  icon={faFolderPlus}
                   onClick={() =>
                     this.props.onCreateFile(this.props.path, 'folder')
                   }
@@ -124,6 +127,7 @@ export default class FileNode extends React.Component<Props, State> {
                   Create Folder
                 </ContextAction>
                 <ContextAction
+                  icon={faFileMedical}
                   onClick={() =>
                     this.props.onCreateFile(this.props.path, 'file')
                   }
@@ -131,11 +135,13 @@ export default class FileNode extends React.Component<Props, State> {
                   Create File
                 </ContextAction>
                 <ContextAction
+                  icon={faTag}
                   onClick={() => this.props.onUpdateFileName(this.props.path)}
                 >
                   Rename Folder
                 </ContextAction>
                 <ContextAction
+                  icon={faTrashAlt}
                   onClick={() => this.props.onDeleteFile(this.props.path)}
                 >
                   Delete Folder
@@ -189,11 +195,13 @@ export default class FileNode extends React.Component<Props, State> {
             </div>
             <ContextMenu>
               <ContextAction
+                icon={faTag}
                 onClick={() => this.props.onUpdateFileName(this.props.path)}
               >
                 Rename File
               </ContextAction>
               <ContextAction
+                icon={faTrashAlt}
                 onClick={() => this.props.onDeleteFile(this.props.path)}
               >
                 Delete File

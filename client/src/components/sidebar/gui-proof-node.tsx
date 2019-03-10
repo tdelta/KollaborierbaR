@@ -123,7 +123,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
   /**
    * Called, whenever the node is double clicked. */
   private handleItemDoubleClick() {
-    let node = this.props.node;
+    const node = this.props.node;
     if(node.kind !== Kind.OneStepSimplification){
       this.props.selectNode(this.props.path);
       this.props.displaySequent(node.sequent);

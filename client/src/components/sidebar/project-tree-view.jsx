@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
+import { faBomb, faFolderPlus, faFileMedical } from '@fortawesome/free-solid-svg-icons';
+
 import FileNode from './file-node.tsx';
 import {Context, ContextMenu, ContextAction} from './context.jsx';
 
@@ -81,10 +83,25 @@ export default class ProjectTreeView extends React.Component {
                         <Context tree={() => this.state.file}>
                             {projectTitle}
                             <ContextMenu>
-                                <ContextAction onClick={() => this.props.onCreateFile([], 'folder')}>Create Folder</ContextAction>
-                                <ContextAction onClick={() => this.props.onCreateFile([], 'file')}>Create File</ContextAction>
+                                <ContextAction
+                                  icon={faFolderPlus}
+                                  onClick={() => this.props.onCreateFile([], 'folder')}
+                                >
+                                  Create Folder
+                                </ContextAction>
+                                <ContextAction
+                                  icon={faFileMedical}
+                                  onClick={() => this.props.onCreateFile([], 'file')}
+                                >
+                                  Create File
+                                </ContextAction>
                                 {/*<ContextAction>Rename Project</ContextAction>*/}
-                                <ContextAction onClick={() => this.props.onDeleteProject(this.props.project.name)}>Delete Project</ContextAction>
+                                <ContextAction
+                                  icon={faBomb}
+                                  onClick={() => this.props.onDeleteProject(this.props.project.name)}
+                                >
+                                    Delete Project
+                                </ContextAction>
                             </ContextMenu>
                         </Context>
                 </div>
