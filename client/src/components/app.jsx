@@ -253,7 +253,8 @@ export default class App extends React.Component {
       this.collabController.disconnect();
       this.setState({
         text: formula,
-        filetype: 'sequent'
+        filetype: 'sequent',
+        diagnostics: []
       });
       this.displayCloseButton=true;
     }
