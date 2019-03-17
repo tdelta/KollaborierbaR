@@ -8,9 +8,12 @@ import FontAwesome from 'react-fontawesome';
 import ProjectTreeView from './project-tree-view.jsx';
 import OpenGoalsView from './open-goals-view.tsx';
 import ProofTreeView from './proof-tree-view.tsx';
+import ProofTabView from './proof-tab-view.jsx';
 
 import {Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
 import classnames from 'classnames';
+
+import Select from 'react-select';
 
 /**
  * Allows to display a project view in a window left from the main content
@@ -82,9 +85,17 @@ export default class Sidebar extends React.Component {
                 // only display the sidebar initially, if a project is set
                 false
                 : true,
-              activeTab: '1'
+              activeTab: '1',
+              selectedOption: null
         };
     }
+
+    handleChange = (selectedOption) => {
+        this.setState({ selectedOption });
+        alert("Eine neue Option wurde gesetzt:" + selectedOption);
+        console.log(`Option selected:`, selectedOption);
+      }
+
 
     /**
      * invert visibility of the sidebar by collapsing it, or
@@ -196,6 +207,14 @@ export default class Sidebar extends React.Component {
             'display': genVisibilityString(!this.state.collapsed)
         };
 
+        // Some methodnames for testing purposes
+        const options = [
+            { value: 'methodA-contract1', label: 'methodA-contract1' },
+            { value: 'methodB-contract1', label: 'methodB-contract1' },
+            { value: 'methodC-contract1', label: 'methodC-contract1' }
+          ];
+        //const defaultOption = options[0];
+
         return(
             <>
                 {/* this bar will be used to restore the sidebar,
@@ -277,7 +296,10 @@ export default class Sidebar extends React.Component {
                                         />
                                     </TabPane>
                                     <TabPane tabId="3">
-                                        <ProofTreeView
+
+                                        <ProofTabView
+                                            methods={options}
+                                            //onMethodSelect={alert}
                                             proofResults={this.props.proofResults}
                                             displaySequent={this.props.displayFormula}
                                         />
