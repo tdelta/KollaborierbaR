@@ -31,14 +31,20 @@ export default class ProofTreeView extends React.Component<Props, State> {
   }
 
   public handleKeydown(event: any){
+        let serialNr = this.state.selectedNode[this.state.selectedNode.length - 1].serialNr;
         switch(event.keyCode){
           case 38:
               console.log("Up");
               console.log(this.state.selectedNode[this.state.selectedNode.length - 1].serialNr);
               if(this.state.selectedNode.length > 1){
-                  if(this.state.selectedNode[this.state.selectedNode.length - 1].children.length > 0
-                  && this.state.selectedNode[this.state.selectedNode.length - 1].serialNr < this.state.selectedNode[this.state.selectedNode.length - 1].children.length){
-                  
+                  if(this.state.selectedNode[this.state.selectedNode.length - 2].children.length > 0
+                  && serialNr < this.state.selectedNode[this.state.selectedNode.length - 2].children.length){
+                      if(serialNr === 0){
+                        this.state.selectedNode.pop();
+                      }else{
+                        this.state.selectedNode.pop(); 
+                        this.state.selectedNode.push(this.state.selectedNode.length - 2].children[serialNr - 1]);
+                      } 
                   }
               }
               break;
