@@ -31,40 +31,65 @@ export default class ProofTreeView extends React.Component<Props, State> {
   }
 
   public handleKeydown(event: any){
-        let serialNr = this.state.selectedNode[this.state.selectedNode.length - 1].serialNr;
+        let events = this.state.selectedNode;
+        
         switch(event.keyCode){
           case 38:
               console.log("Up");
-              console.log(this.state.selectedNode[this.state.selectedNode.length - 1].serialNr);
-              if(this.state.selectedNode.length > 1){
-                  if(this.state.selectedNode[this.state.selectedNode.length - 2].children.length > 0
-                  && serialNr < this.state.selectedNode[this.state.selectedNode.length - 2].children.length){
-                      if(serialNr === 0){
-                        this.state.selectedNode.pop();
+              console.log(events[events.length - 1].serialNr);
+              if(events.length > 1){
+                  let found = events[events.length - 2].children.findIndex((element) => {
+                     return element.serialNr === events[events.length - 1].serialNr;
+                  });
+                  console.log(found);
+                  if(events[events.length - 2].children.length > 0
+                  && found < events[events.length - 2].children.length){
+                      if(found === 0){
+                        events.pop();
                       }else{
-                        this.state.selectedNode.pop(); 
-                        this.state.selectedNode.push(this.state.selectedNode.length - 2].children[serialNr - 1]);
+                        events.pop(); 
+                        events.push(events[events.length - 1].children[found - 1]);
                       } 
                   }
               }
               break;
           case 40:
               console.log("Down");
+              if(events.length > 1){
+                  let found = events[events.length - 2].children.findIndex((element) => {
+                    return element.serialNr === events[events.length - 1].serialNr;
+                  });
+                  console.log(found);
+                  if(events[events.length - 2].children.length > 0
+                  && found < events[events.length - 2].children.length){
+                      if(found === events[events.length - 2].children.length){
+                        events.pop();
+
+                      }else{
+                        events.pop(); 
+                        events.push(events[events.length - 1].children[found + 1]);
+                      } 
+                  }
+
+              }else{
+                
+              } 
               break;
           case 39:
               console.log("Right");
-              if(this.state.selectedNode[this.state.selectedNode.length - 1].children.length !== 0){
-                  this.state.selectedNode.push(this.state.selectedNode[this.state.selectedNode.length - 1].children[0]);
+              if(events[events.length - 1].children.length !== 0){
+                  events.push(events[events.length - 1].children[0]);
               }
               break;
           case 37:
               console.log("Left");
-              if(this.state.selectedNode.length !== 1){
-                  this.state.selectedNode.pop();
+              if(events.length !== 1){
+                  events.pop();
               }
               break;
         } 
-        console.log(this.state.selectedNode[this.state.selectedNode.length - 1]);        
+        console.log(events[events.length - 1]);        
+        this.selectNode(events);
     } 
 
   componentDidMount() {
