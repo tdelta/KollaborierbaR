@@ -209,7 +209,7 @@ export default class Sidebar extends React.Component {
 
         // Some methodnames for testing purposes
         const options = [
-            { value: 'methodA-contract1', label: 'methodA-contract1' },
+            { value: 'methodA-contract1', label: 'methodA-contract1'},
             { value: 'methodB-contract1', label: 'methodB-contract1' },
             { value: 'methodC-contract1', label: 'methodC-contract1' }
           ];
@@ -296,7 +296,6 @@ export default class Sidebar extends React.Component {
                                         />
                                     </TabPane>
                                     <TabPane tabId="3">
-
                                         <ProofTabView
                                             methods={options}
                                             //onMethodSelect={alert}
