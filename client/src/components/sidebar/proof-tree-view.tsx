@@ -12,7 +12,8 @@ export default class ProofTreeView extends React.Component<Props, State> {
     this.selectNode = this.selectNode.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
     this.state = {
-      selectedNode: []
+      selectedNode: [],
+      changed: false,
     };
   }
 
@@ -25,14 +26,25 @@ export default class ProofTreeView extends React.Component<Props, State> {
   public shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
     // only do a shallow comparison, so that the proof tree view is not constantly updated.
 
-    return this.props.displaySequent !== nextProps.displaySequent
-        || this.props.proofResults !== nextProps.proofResults
-        || this.state.selectedNode !== nextState.selectedNode;
+    if(this.state.changed){
+      this.setState({
+        changed: false,
+      })
+      return true;
+    } else{
+      return this.props.displaySequent !== nextProps.displaySequent
+      || this.props.proofResults !== nextProps.proofResults
+      || this.state.selectedNode !== nextState.selectedNode;
+    }
   }
 
   public handleKeydown(event: any){
         let events = this.state.selectedNode;
-        
+
+        this.setState({
+          changed: true,
+        })
+
         switch(event.keyCode){
           case 38:
               console.log("Up");
@@ -41,7 +53,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
                   let found = events[events.length - 2].children.findIndex((element) => {
                      return element.serialNr === events[events.length - 1].serialNr;
                   });
-                  console.log(found);
+                  console.log('Index within the children array of the parent before update:' + found);
                   if(events[events.length - 2].children.length > 0
                   && found < events[events.length - 2].children.length){
                       if(found === 0){
@@ -151,4 +163,5 @@ interface Props {
 
 interface State {
   selectedNode: ProofNode[];
+  changed: boolean;
 }
