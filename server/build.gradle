@@ -44,6 +44,11 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-websocket")
     compile("org.javatuples:javatuples:1.2")
     compile files('libs/logootsplit.jar')
+    compile('javax.xml.bind:jaxb-api')
+
+    // Database
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("com.h2database:h2")
 
     // adds /actuator/health indicator, this way, other applications can check if the
     // server is ready. Also useful for tests.

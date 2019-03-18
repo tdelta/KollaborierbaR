@@ -1,7 +1,15 @@
 package proofutil;
 
 import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.FetchType;
+import javax.persistence.CascadeType;
 
+@Entity
 public class ProofNode {
   public enum Kind {
     OpenProofTree("OpenProofTree"),
@@ -25,7 +33,13 @@ public class ProofNode {
     }
   }
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Integer id;
+
   private final String text;
+
+  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private final List<ProofNode> children;
   private final Kind kind;
   private final String sequent;
