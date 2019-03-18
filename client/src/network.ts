@@ -10,53 +10,17 @@ import SockJS from 'sockjs-client';
 
 import { serverAddress } from './constants';
 
-export enum ProjectEventType {
-  UpdatedProject = 'UpdatedProjectEvent',
-  DeletedProject = 'DeletedProjectEvent',
-  DeletedFile = 'DeletedFileEvent',
-  RenamedFile = 'RenamedFileEvent',
-  UpdatedFile = 'UpdatedFileEvent',
-  UsersUpdated = 'UsersUpdatedEvent',
-}
-
-export interface ProjectEvent {
-  eventType: ProjectEventType;
-  projectName: string;
-}
-
-export interface ProjectFileEvent extends ProjectEvent {
-  filePath: string;
-}
-
-export interface RenamedFileEvent extends ProjectEvent {
-  originalPath: string;
-  newPath: string;
-}
-
-export interface UsersUpdatedEvent extends ProjectEvent {
-  users: User[];
-}
-
-export interface User {
-  firstName: string;
-  lastName: string;
-  crdtId: number;
-}
-
-interface EventObserver {
-  onProjectEvent(
-    event: ProjectEvent | ProjectFileEvent | RenamedFileEvent
-  ): void;
+interface NetworkObserver {
   onConnect(): void;
 }
 
 export class Network {
   private stompClient: Client;
-  private observer: EventObserver;
+  private observer: NetworkObserver;
   private subscriptions: Map<string, StompSubscription> = new Map();
   private callbacks: CallbackDef[] = [];
 
-  constructor(observer: EventObserver) {
+  constructor(observer: NetworkObserver) {
     this.observer = observer;
 
     this.stompClient = new Client({
@@ -142,79 +106,47 @@ export class Network {
     }
   }
 
-  private safeSubscribe(
+  public safeSubscribe(
     destination: string,
     callback: (msg: IMessage) => void,
-    headers: StompHeaders,
-    successCB?: () => void,
-    errorCB?: () => void
-  ): void {
-    // TODO: Proper acks of server
+    headers: StompHeaders
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // TODO: Proper acks of server
 
-    if (this.stompClient.connected) {
-      if (!this.subscriptions.has(destination)) {
-        // dont subscribe, if we are already subscribed to that location
-        const sub = this.stompClient.subscribe(destination, callback, headers);
+      if (this.stompClient.connected) {
+        if (!this.subscriptions.has(destination)) {
+          // dont subscribe, if we are already subscribed to that location
+          const sub = this.stompClient.subscribe(destination, callback, headers);
 
-        this.subscriptions.set(destination, sub);
-      }
-
-      if (successCB) {
-        successCB();
-      }
-    } else if (errorCB) {
-      errorCB();
-    }
-  }
-
-  public closeProject(
-    projectName: string,
-    successCB?: () => void,
-    errorCB?: () => void
-  ): void {
-    const topic = `/user/projects/${projectName}`;
-
-    if (this.subscriptions.has(topic) && this.stompClient.connected) {
-      (this.subscriptions.get(topic) as StompSubscription).unsubscribe();
-
-      this.subscriptions.delete(topic);
-
-      if (successCB) {
-        successCB();
-      }
-    } else if (errorCB) {
-      errorCB();
-    }
-  }
-
-  public openProject(
-    projectName: string,
-    successCB?: () => void,
-    errorCB?: () => void
-  ): void {
-    this.safeSubscribe(
-      `/user/projects/${projectName}`,
-      msg => {
-        try {
-          const event:
-            | ProjectEvent
-            | ProjectFileEvent
-            | RenamedFileEvent
-            | UsersUpdatedEvent = JSON.parse(msg.body);
-
-          console.log(`incoming event`);
-          console.log(event);
-
-          this.observer.onProjectEvent(event);
-        } catch (e) {
-          console.log('Failed to parse server event');
-          console.log(e);
+          this.subscriptions.set(destination, sub);
         }
-      },
-      {},
-      successCB,
-      errorCB
-    );
+
+        resolve();
+      }
+      
+      else {
+        reject('Could not subscribe, since we are not connected.');
+      }
+    });
+  }
+
+  public safeUnsubscribe(
+    topic: string
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.subscriptions.has(topic) && this.stompClient.connected) {
+        (this.subscriptions.get(topic) as StompSubscription).unsubscribe();
+
+        this.subscriptions.delete(topic);
+
+        resolve();
+      }
+      
+      else {
+        reject(`Could not unsubscribe from ${topic}, because we are not subscribed, or not connected`);
+      }
+    });
   }
 
   public broadcast(messageType: string, headers: any, message: any) {

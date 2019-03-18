@@ -7,6 +7,9 @@ import Top from './top.tsx';
 import Sidebar from './sidebar/sidebar.jsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 import Console from './console/console.jsx';
+import {Network} from '../network';
+
+import ProofsState from '../key/ProofsState';
 
 import ProjectManagement from '../projectmanagement.ts';
 
@@ -36,7 +39,12 @@ export default class App extends React.Component {
         this.notificationSystem = React.createRef();
         this.displayCloseButton = false;
 
+        this.network = new Network({
+          onConnect: () => console.log("Connected websocket.")
+        });
+
         this.projectManagement = new ProjectManagement(
+            this.network,
             this.showProject.bind(this),
             () => this.state.project,
             this.setText.bind(this),
@@ -53,7 +61,7 @@ export default class App extends React.Component {
         this.saveFile = this.saveFile.bind(this);
         this.setText = this.setText.bind(this);
         this.setDiagnostics = this.setDiagnostics.bind(this);
-        this.addProvenObligations = this.addProvenObligations.bind(this);
+        this.setProvenObligations = this.setProvenObligations.bind(this);
         this.resetObligation = this.resetObligation.bind(this);
         this.proveFile = this.proveFile.bind(this);
         this.showProject = this.showProject.bind(this);
@@ -70,15 +78,17 @@ export default class App extends React.Component {
         this.addNewConsoleMessage = this.addNewConsoleMessage.bind(this);
         this.invertConsoleVisibility = this.invertConsoleVisibility.bind(this);
 
-        this.editor = React.createRef();
         this.key = new Key(
+          this.network,
           this.notificationSystem,
-          this.addProvenObligations,
-          (proofResults) => this.setState({proofResults}),
-          (openGoals) => this.setState({openGoals}),
+          this.setProvenObligations,
+          () => this.state.proofsState,
+          (proofsState) => this.setState({proofsState}),
           () => this.state.project.name + '/' + this.state.openedPath.join('/'),
           this.addNewConsoleMessage
         );
+
+        this.editor = React.createRef();
 
         // setup initial state
         this.state = {
@@ -103,16 +113,13 @@ export default class App extends React.Component {
             // indices of obligations, that have been proven
             provenObligations: [],
 
-            // open key goals
-            openGoals: [],
-
             // the console log
             consolelog: '',
 
             // console visibilty
             consoleIsVisible: false,
 
-            proofResult: undefined
+            proofsState: ProofsState.create()
         };
     }
 
@@ -159,6 +166,7 @@ export default class App extends React.Component {
         });
         if(this.collabController){
             this.collabController.setFile(this.state.project.name,path.join('/'),this.state.text);
+            this.key.setCurrentFile(this.state.project.name, path);
         }
         this.displayCloseButton=false;
     }
@@ -173,9 +181,9 @@ export default class App extends React.Component {
         });
     }
 
-    addProvenObligations(provenObligations) {
+    setProvenObligations(provenObligations) {
         this.setState({
-          provenObligations: provenObligations.concat(this.state.provenObligations)
+          provenObligations: provenObligations
         });
     }
 
@@ -224,7 +232,7 @@ export default class App extends React.Component {
      */
     componentDidMount() {
         this.collabController = new CollabController(
-            this.projectManagement.getNetwork(),
+            this.network,
             this.editor.current,
             this.setText.bind(this)
         );
@@ -235,6 +243,9 @@ export default class App extends React.Component {
         document.addEventListener('keydown', this.handleCtrlS.bind(this));
     }
 
+    componentDidUpdate(prevProps, prevsState) {
+    }
+
     openFile(path) {
         // This string composition is necessary because path contains only the path within a project.
         ProjectManagement.openFile(this.state.project.name + '/' + path.join('/'))
@@ -242,7 +253,7 @@ export default class App extends React.Component {
                 this.setState({
                     text: response.fileText,
                     provenObligations: [],
-                    openGoals: []
+                    proofsState: ProofsState.create()
                 });
                 // TODO: Handle rename with collab controller
                 this.setOpenedPath(path);
@@ -319,8 +330,7 @@ export default class App extends React.Component {
                 <div id="mainContainer">
                     <Sidebar
                         project={this.state.project}
-                        openGoals={this.state.openGoals}
-                        proofResults={this.state.proofResults}
+                        proofsState={this.state.proofsState}
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}

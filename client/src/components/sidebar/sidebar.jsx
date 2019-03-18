@@ -82,7 +82,7 @@ export default class Sidebar extends React.Component {
                 // only display the sidebar initially, if a project is set
                 false
                 : true,
-              activeTab: '1'
+            activeTab: '1'
         };
     }
 
@@ -170,10 +170,11 @@ export default class Sidebar extends React.Component {
         }
 
         else if (
-          prevProps.openGoals.length === 0 && this.props.openGoals.length > 0
+          prevProps.proofsState !== this.props.proofsState && !this.props.proofsState.allGoalsAreClosed()
         ) {
           this.enableTab('2');
         }
+
         // This fixes the bug, where the height of the ace isn't correct until you resize the sidebar
         window.dispatchEvent(new Event('resize')); 
     }
@@ -272,13 +273,13 @@ export default class Sidebar extends React.Component {
                                     </TabPane>
                                     <TabPane tabId="2">
                                         <OpenGoalsView
-                                            goals={this.props.openGoals}
+                                            proofsState={this.props.proofsState}
                                             displayFormula={this.props.displayFormula}
                                         />
                                     </TabPane>
                                     <TabPane tabId="3">
                                         <ProofTreeView
-                                            proofResults={this.props.proofResults}
+                                            proofsState={this.props.proofsState}
                                             displaySequent={this.props.displayFormula}
                                         />
                                     </TabPane>
@@ -297,13 +298,7 @@ Sidebar.propTypes = {
         'name': PropTypes.string,
         'contents': PropTypes.arrayOf(PropTypes.object)
     }),
-    'openGoals': PropTypes.arrayOf(
-      PropTypes.shape({
-        'id': PropTypes.number,
-        'sequent': PropTypes.string
-      })
-    ),
-    'proofResults': PropTypes.object,
+    'proofsState': PropTypes.object,
     'onOpenFile': PropTypes.func,
     'onDeleteFile': PropTypes.func,
     'onCreateFile': PropTypes.func,

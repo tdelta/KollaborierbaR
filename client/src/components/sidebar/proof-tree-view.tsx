@@ -2,7 +2,7 @@ import React from 'react';
 
 import GuiProofNode from './gui-proof-node';
 import ProofNode from '../../key/prooftree/ProofNode';
-import ProofResults from '../../key/netdata/ProofResults';
+import ProofsState from '../../key/ProofsState';
 
 import ObligationResult from '../../key/netdata/ObligationResult';
 
@@ -25,23 +25,19 @@ export default class ProofTreeView extends React.Component<Props, State> {
     // only do a shallow comparison, so that the proof tree view is not constantly updated.
 
     return this.props.displaySequent !== nextProps.displaySequent
-        || this.props.proofResults !== nextProps.proofResults
+        || this.props.proofsState !== nextProps.proofsState
         || this.state.selectedNode !== nextState.selectedNode;
   }
 
   public render() {
     let nodes: ProofNode[] = [];
     
-    const results = this.props.proofResults;
-    console.log("RESULTS");
-    console.log(results);
-    if (results != null) {
-      nodes =
-        results.succeeded
-          .concat(results.failed)
-          .concat(results.errors)
-          .map((result: ObligationResult) => result.proofTree)
-          .filter((proofTree: ProofNode) => proofTree != null);
+    const proofsState = this.props.proofsState;
+
+    console.log("Rendering state of proofs: ", proofsState);
+
+    if (proofsState != null) {
+      nodes = proofsState.getAllRecentTrees()
     }
       
     // TODO better keys
@@ -74,7 +70,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
 
 // defining the structure of this react components properties
 interface Props {
-  proofResults: ProofResults;
+  proofsState: ProofsState;
   displaySequent: (sequent: string) => void;
 }
 
