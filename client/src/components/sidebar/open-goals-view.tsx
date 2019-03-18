@@ -3,7 +3,9 @@ import React from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import GoalNode from './goal-node';
-import Goal from '../../goal';
+import OpenGoalInfo from '../../key/netdata/OpenGoalInfo';
+
+import ProofsState from '../../key/ProofsState';
 
 export default class OpenGoalsView extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -16,7 +18,7 @@ export default class OpenGoalsView extends React.Component<Props, State> {
     this.toggleGoal = this.toggleGoal.bind(this);
   }
 
-  private toggleGoal(goal: Goal): void {
+  private toggleGoal(goal: OpenGoalInfo): void {
     this.setState({
       toggledGoal: goal.id,
     });
@@ -24,9 +26,13 @@ export default class OpenGoalsView extends React.Component<Props, State> {
   }
 
   public render() {
+    const goals: OpenGoalInfo[] = this.props.proofsState
+      .getAllRecentObligationResults()
+      .flatMap(obligationResult => obligationResult.openGoals);
+
     // determine, whether the goals property is set and
     // contains at least one open goal. If not, the view will show an appropriate message.
-    const areGoalsValid = this.props.goals && this.props.goals.length > 0; // the project property is set to something
+    const areGoalsValid = goals.length > 0;
     // ^ the project object must at least one goal
 
     // if there are goals, display them
@@ -35,7 +41,7 @@ export default class OpenGoalsView extends React.Component<Props, State> {
         <div>
           {// render each element within the root folder of the
           // project as FileNode
-          this.props.goals.map(goal => (
+          goals.map(goal => (
             <GoalNode
               key={goal.id}
               // ^when rendering a list of elements, react
@@ -61,9 +67,8 @@ export default class OpenGoalsView extends React.Component<Props, State> {
 // defining the structure of this react components properties
 interface Props {
   project: any;
-  goals: Goal[];
+  proofsState: ProofsState;
   displayFormula: (formula: string) => void;
-  
 }
 
 interface State {
