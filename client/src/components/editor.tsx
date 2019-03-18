@@ -324,7 +324,7 @@ export default class Editor extends React.Component<Props, State> {
                             this.props.resetObligation(contract);
                             this.props.onProveObligation(contract);
                           }}>
-                          Contract {id + 1}
+                          Prove Contract {id + 1}
                       </MenuItem>
                   )
               }
