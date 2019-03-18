@@ -359,6 +359,7 @@ export default class App extends React.Component {
                             filetype={this.state.filetype}
                             collabController={this.collabController}
                             getObligations={this.key.getObligations}
+                            getContractsForMethod={this.key.getContractsForMethod}
                             onProveObligation={this.key.proveObligation}
                             ref={this.editor}
                             consoleIsVisible = {this.state.consoleIsVisible}
