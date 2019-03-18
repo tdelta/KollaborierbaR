@@ -50,37 +50,39 @@ export default class ProofTreeView extends React.Component<Props, State> {
               console.log("Up");
               console.log(newSelectedNode[newSelectedNode.length - 1].serialNr);
               if(newSelectedNode.length > 1){
-                  let found = newSelectedNode[newSelectedNode.length - 2].children.findIndex((element) => {
+                  let foundUp = newSelectedNode[newSelectedNode.length - 2].children.findIndex((element) => {
                      return element.serialNr === newSelectedNode[newSelectedNode.length - 1].serialNr;
                   });
-                  if(newSelectedNode[newSelectedNode.length - 2].children.length > 0
-                  && found < newSelectedNode[newSelectedNode.length - 2].children.length){
-                  console.log('Index within the children array of the parent before update:' + found);
-                      if(found === 0){
+                  
+                  console.log('Index within the children array of the parent before update:' + foundUp);
+                      if(foundUp === 0){
                         newSelectedNode.pop();
                       }else{
                         newSelectedNode.pop(); 
-                        newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[found - 1]);
+                        if(false){//open?
+                          newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[foundUp - 1].children[newSelectedNode[newSelectedNode.length - 1].children[foundUp - 1].children.length - 1]);
+                        }else{
+                          newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[foundUp - 1]);
+                        } 
                       } 
-                  }
               }
               break;
           case 40:
               console.log("Down");
               if(newSelectedNode.length > 1){
-                  let found = newSelectedNode[newSelectedNode.length - 2].children.findIndex((element) => {
+                  let foundDown = newSelectedNode[newSelectedNode.length - 2].children.findIndex((element) => {
                     return element.serialNr === newSelectedNode[newSelectedNode.length - 1].serialNr;
                   });
-                  console.log(found);
+                  console.log(foundDown);
                   if(newSelectedNode[newSelectedNode.length - 2].children.length > 0
-                  && found < newSelectedNode[newSelectedNode.length - 2].children.length){
-                      if(found === newSelectedNode[newSelectedNode.length - 2].children.length){
+                  && foundDown < newSelectedNode[newSelectedNode.length - 2].children.length){
+                      if(foundDown === newSelectedNode[newSelectedNode.length - 2].children.length){
                         newSelectedNode.pop();
                         //TODO next
                         
                       }else{
                         newSelectedNode.pop(); 
-                        newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[found + 1]);
+                        newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[foundDown + 1]);
                       } 
                   }
 
@@ -90,6 +92,15 @@ export default class ProofTreeView extends React.Component<Props, State> {
                   newSelectedNode.push(newSelectedNode[0].children[0])
                 }
               } 
+
+              // hier nochmal neu
+              if(newSelectedNode.length > 1){
+                  if(true){//open?
+                      
+                  }else{
+                      
+                  }
+              }
               break;
           case 39:
               console.log("Right");
