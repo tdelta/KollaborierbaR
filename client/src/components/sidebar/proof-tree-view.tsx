@@ -9,6 +9,7 @@ import ObligationResult from '../../key/netdata/ObligationResult';
 export default class ProofTreeView extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    
     this.selectNode = this.selectNode.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
     this.state = {
@@ -31,65 +32,71 @@ export default class ProofTreeView extends React.Component<Props, State> {
   }
 
   public handleKeydown(event: any){
-        let events = this.state.selectedNode;
+        let newSelectedNode = this.state.selectedNode;
         
         switch(event.keyCode){
           case 38:
               console.log("Up");
-              console.log(events[events.length - 1].serialNr);
-              if(events.length > 1){
-                  let found = events[events.length - 2].children.findIndex((element) => {
-                     return element.serialNr === events[events.length - 1].serialNr;
+              console.log(newSelectedNode[newSelectedNode.length - 1].serialNr);
+              if(newSelectedNode.length > 1){
+                  let found = newSelectedNode[newSelectedNode.length - 2].children.findIndex((element) => {
+                     return element.serialNr === newSelectedNode[newSelectedNode.length - 1].serialNr;
                   });
                   console.log(found);
-                  if(events[events.length - 2].children.length > 0
-                  && found < events[events.length - 2].children.length){
+                  if(newSelectedNode[newSelectedNode.length - 2].children.length > 0
+                  && found < newSelectedNode[newSelectedNode.length - 2].children.length){
                       if(found === 0){
-                        events.pop();
+                        newSelectedNode.pop();
                       }else{
-                        events.pop(); 
-                        events.push(events[events.length - 1].children[found - 1]);
+                        newSelectedNode.pop(); 
+                        newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[found - 1]);
                       } 
                   }
               }
               break;
           case 40:
               console.log("Down");
-              if(events.length > 1){
-                  let found = events[events.length - 2].children.findIndex((element) => {
-                    return element.serialNr === events[events.length - 1].serialNr;
+              if(newSelectedNode.length > 1){
+                  let found = newSelectedNode[newSelectedNode.length - 2].children.findIndex((element) => {
+                    return element.serialNr === newSelectedNode[newSelectedNode.length - 1].serialNr;
                   });
                   console.log(found);
-                  if(events[events.length - 2].children.length > 0
-                  && found < events[events.length - 2].children.length){
-                      if(found === events[events.length - 2].children.length){
-                        events.pop();
-
+                  if(newSelectedNode[newSelectedNode.length - 2].children.length > 0
+                  && found < newSelectedNode[newSelectedNode.length - 2].children.length){
+                      if(found === newSelectedNode[newSelectedNode.length - 2].children.length){
+                        newSelectedNode.pop();
+                        //TODO next
+                        
                       }else{
-                        events.pop(); 
-                        events.push(events[events.length - 1].children[found + 1]);
+                        newSelectedNode.pop(); 
+                        newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[found + 1]);
                       } 
                   }
 
               }else{
-                
+                if(newSelectedNode[0].children.length > 0){
+                  //TODO if(closed){nothing also auch kein push} if(open){nothing}
+                  newSelectedNode.push(newSelectedNode[0].children[0])
+                }
               } 
               break;
           case 39:
               console.log("Right");
-              if(events[events.length - 1].children.length !== 0){
-                  events.push(events[events.length - 1].children[0]);
+              if(newSelectedNode[newSelectedNode.length - 1].children.length !== 0){
+                  //TODO if(open){nothing} if(closed){open} 
+                  newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[0]);
               }
               break;
           case 37:
               console.log("Left");
-              if(events.length !== 1){
-                  events.pop();
+              if(newSelectedNode.length !== 1){
+                  //TODO if(open){close}
+                  newSelectedNode.pop();
               }
               break;
         } 
-        console.log(events[events.length - 1]);        
-        this.selectNode(events);
+        console.log(newSelectedNode[newSelectedNode.length - 1]);        
+        this.selectNode(newSelectedNode);
     } 
 
   componentDidMount() {
@@ -151,4 +158,5 @@ interface Props {
 
 interface State {
   selectedNode: ProofNode[];
+  
 }
