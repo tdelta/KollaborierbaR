@@ -1,26 +1,34 @@
 import KeyApi from './key-api';
 import ProofResults from './netdata/ProofResults';
-import ObligationResult from './netdata/ObligationResult';
+import ObligationResult, {ObligationResultKind} from './netdata/ObligationResult';
 import NotificationSystem from 'react-notification-system';
 import { RefObject } from 'react';
 
-import OpenGoalInfo from './netdata/OpenGoalInfo';
+import { serverAddress } from '../constants';
+
+import {Network} from '../network';
+import ProofsState from '../key/ProofsState';
+
+import ProofCollabController, { ProofEvent } from '../collaborative/ProofCollabController';
 
 export default class Key {
   private keyApi: KeyApi = new KeyApi();
+  private proofController: ProofCollabController;
+
   private getFilePath: () => string;
   private setProvenObligations: (provenObligations: number[]) => void;
   private notificationSystem: RefObject<NotificationSystem.System>;
-  private setProofResults: (proofResults: ProofResults) => void;
-  private setOpenGoals: (openGoals: OpenGoalInfo[]) => void;
+  private getProofsState: () => ProofsState;
+  private setProofsState: (proofsState: ProofsState) => void;
 
   private addNewConsoleMessage: (message: String) => void;
 
   constructor(
+    network: Network,
     notificationSystem: RefObject<NotificationSystem.System>,
     setProvenObligations: (provenObligations: number[]) => void,
-    setProofResults: (proofResults: ProofResults) => void,
-    setOpenGoals: (openGoals: OpenGoalInfo[]) => void,
+    getProofsState: () => ProofsState,
+    setProofsState: (proofsState: ProofsState) => void,
     getFilePath: () => string,
     addNewConsoleMessage: (message: String) => void
   ) {
@@ -29,13 +37,150 @@ export default class Key {
     this.getFilePath = getFilePath;
     this.proveFile = this.proveFile.bind(this);
     this.proveObligation = this.proveObligation.bind(this);
-    this.setProofResults = setProofResults;
-    this.setOpenGoals = setOpenGoals;
-
-    this.sendNotifications = this.sendNotifications.bind(this);
+    this.getProofsState = getProofsState;
+    this.setProofsState = setProofsState;
+    this.sendLastProofNotifications = this.sendLastProofNotifications.bind(this);
+    this.sendHistoryUpdateNotification = this.sendHistoryUpdateNotification.bind(this);
     this.handleResults = this.handleResults.bind(this);
-
     this.addNewConsoleMessage = addNewConsoleMessage;
+    this.refreshLastProof = this.refreshLastProof.bind(this);
+    this.saveObligationResult = this.saveObligationResult.bind(this);
+
+    this.proofController = new ProofCollabController(network,
+      {
+        onUpdatedProof: (event: ProofEvent) => {
+          console.log('Key: Proof event: ', event);
+
+          this.refreshLastProof(event.projectName, event.filePath, event.obligationIdx);
+        },
+        onUpdatedHistory: (event: ProofEvent) => {
+          console.log('Key: Proof history event: ', event);
+
+          this.refreshProofHistory(event.projectName, event.filePath, event.obligationIdx);
+        }
+      }
+    );
+  }
+
+  private refreshLastProof(projectName: string, filePath: string, obligationIdx: number): void {
+    fetch(`${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/last`, {
+      method: 'GET',
+      mode: 'cors', // enable cross origin requests. Server must also allow this!
+      headers: {
+        Accept: 'application/json', // we want a json object back
+        //'Content-Type': 'application/json', // we are sending a json object
+      },
+    })
+      .then(response => response.json())
+      .then(obligationResult => {
+        console.log('Key: Obligation result: ', obligationResult);
+
+        this.setProofsState(
+          this
+            .getProofsState()
+            .updateLastResultByObligationIdx(
+              obligationResult.obligationIdx,
+              obligationResult
+            )
+        );
+
+        this.setProvenObligations(this.getProofsState().getProvenObligationIdxs());
+        this.sendLastProofNotifications(obligationResult);
+      });
+  }
+
+
+  private refreshProofHistory(projectName: string, filePath: string, obligationIdx: number): void {
+    fetch(`${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history`, {
+      method: 'GET',
+      mode: 'cors', // enable cross origin requests. Server must also allow this!
+      headers: {
+        Accept: 'application/json', // we want a json object back
+        //'Content-Type': 'application/json', // we are sending a json object
+      },
+    })
+      .then(response => response.json())
+      .then((historyIdxs: number[]) => {
+        console.log("Retrieved history idxs: ", historyIdxs);
+
+        return Promise.all(
+          historyIdxs
+            .map(historyIdx =>
+              fetch(`${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history/${historyIdx}`, {
+                method: 'GET',
+                mode: 'cors', // enable cross origin requests. Server must also allow this!
+                headers: {
+                  Accept: 'application/json', // we want a json object back
+                  //'Content-Type': 'application/json', // we are sending a json object
+                },
+              })
+                .then(response => response.json())
+            )
+        )
+      })
+      .then((savedResults: ObligationResult[]) => {
+        console.log('Key: Saved obligations: ', savedResults);
+
+        this.setProofsState(
+          this
+            .getProofsState()
+            .updateSavedResultsByObligationIdx(
+              obligationIdx,
+              savedResults
+            )
+        );
+
+        this.sendHistoryUpdateNotification();
+      });
+  }
+
+  public saveObligationResult(projectName: string, filePath: string, obligationResult: ObligationResult): void {
+    console.log("Trying to save an obligation result: ", obligationResult);
+
+    fetch(`${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationResult.obligationIdx}/history`, {
+      method: 'POST',
+      mode: 'cors', // enable cross origin requests. Server must also allow this!
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(obligationResult), // necessary if you want to send a JSON object in a fetch request
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          alert(
+            'Uups! Failed to save obligation.'
+          );
+        }
+
+        else {
+          console.log("Saved obligation result to server");
+        }
+      });
+  }
+
+  public setCurrentFile(projectName: string, filePath: string[]) {
+    this.proofController.openFile(projectName, filePath);
+
+    const filePathJoined = filePath.join('/');
+
+    fetch(`${serverAddress}/proof/${projectName}/${filePathJoined}/obligation`, {
+      method: 'GET',
+      mode: 'cors', // enable cross origin requests. Server must also allow this!
+      headers: {
+        Accept: 'application/json', // we want a json object back
+        //'Content-Type': 'application/json', // we are sending a json object
+      },
+    })
+      .then(response => response.json())
+      .then((obligationIdxs: number[]) => {
+        console.log("Retrieved obligation idxs: ", obligationIdxs);
+
+        for (const obligationIdx of obligationIdxs) {
+          this.refreshLastProof(projectName, filePathJoined, obligationIdx);
+          this.refreshProofHistory(projectName, filePathJoined, obligationIdx);
+        }
+      });
   }
 
   private proveFile() {
@@ -53,47 +198,64 @@ export default class Key {
     this.keyApi.proveFile(this.getFilePath()).then(this.handleResults);
   }
 
-  private sendNotifications(results: ProofResults): void {
+  private sendLastProofNotifications(obligationResult: ObligationResult): void {
     // print succeeded proofs as success notifications
     if (this.notificationSystem.current) {
       this.notificationSystem.current.clearNotifications();
-      for (const success of results.succeeded) {
-        this.notificationSystem.current.addNotification({
-          title: 'Success!',
-          message: success.resultMsg,
-          level: 'success',
-          position: 'bc',
-          autoDismiss: 15,
-        });
-      }
-      // print fails as warnings
-      for (const fail of results.failed) {
-        this.notificationSystem.current.addNotification({
-          title: 'Failure!',
-          message: fail.resultMsg,
-          level: 'warning',
-          position: 'bc',
-          autoDismiss: 15,
-        });
-      }
-      // print exception messages as errors
-      for (const error of results.errors) {
-        this.notificationSystem.current.addNotification({
-          title: 'Error!',
-          message: error.resultMsg,
-          level: 'error',
-          position: 'bc',
-          autoDismiss: 15,
-        });
+
+      switch (obligationResult.kind) {
+        case ObligationResultKind.success:
+          this.notificationSystem.current.addNotification({
+            title: 'Success!',
+            message: obligationResult.resultMsg,
+            level: 'success',
+            position: 'bc',
+            autoDismiss: 15,
+          });
+        break;
+
+        case ObligationResultKind.error:
+          this.notificationSystem.current.addNotification({
+            title: 'Error!',
+            message: obligationResult.resultMsg,
+            level: 'error',
+            position: 'bc',
+            autoDismiss: 15,
+          });
+        break;
+
+        case ObligationResultKind.failure:
+          this.notificationSystem.current.addNotification({
+            title: 'Failure!',
+            message: obligationResult.resultMsg,
+            level: 'warning',
+            position: 'bc',
+            autoDismiss: 15,
+          });
+        break;
       }
 
-      for(const stackTrace of results.stackTraces){
-        this.addNewConsoleMessage(stackTrace.resultMsg);
-      }
+      //for(const stackTrace of results.stackTraces){
+      //  this.addNewConsoleMessage(stackTrace.resultMsg);
+      //}
     }
   }
 
-  public proveObligation(nr: number) {
+  private sendHistoryUpdateNotification(): void {
+    if (this.notificationSystem.current) {
+      this.notificationSystem.current.clearNotifications();
+
+      this.notificationSystem.current.addNotification({
+        title: 'History',
+        message: 'The proof history has been updated.',
+        level: 'info',
+        position: 'bc',
+        autoDismiss: 15,
+      });
+    }
+  }
+
+  public proveObligation(nr: number): Promise<void> {
     if (this.notificationSystem.current) {
       this.notificationSystem.current.clearNotifications();
       this.notificationSystem.current.addNotification({
@@ -111,17 +273,11 @@ export default class Key {
   }
 
   private handleResults(results: ProofResults): void {
-    const provenObligations: number[] = results.succeeded.map(
-      success => success.obligationIdx
-    );
-
-    this.setProofResults(results);
-
-    this.setProvenObligations(provenObligations);
-
-    this.setOpenGoals(results.openGoals);
-
-    this.sendNotifications(results);
+    results
+      .succeeded
+      .concat(results.errors)
+      .concat(results.failed)
+      .forEach(this.proofController.setObligationResult);
   }
 
   /**

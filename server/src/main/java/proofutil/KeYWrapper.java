@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Basic KeY stub, that tries to prove all contracts in a file
@@ -122,13 +123,17 @@ public class KeYWrapper {
 					results.addFail(
               obligationIdx,
               "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open.",
-              proofTree
+              proofTree,
+              proof
+                .openGoals()
+                .stream()
+                .map((Goal goal) -> {
+                  final String sequent = LogicPrinter.quickPrintSequent(goal.sequent(),env.getServices());
+
+                  return new OpenGoalInfo(goal.getTime(), goal.toString(),sequent);
+                })
+                .collect(Collectors.toList())
           );
-				
-          for (Goal goal: proof.openGoals()) {
-            String sequent = LogicPrinter.quickPrintSequent(goal.sequent(),env.getServices());
-            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString(),sequent));
-          }
 				}
 			} catch (ProofInputException e) {
 				results.addError(
@@ -138,7 +143,7 @@ public class KeYWrapper {
 
 				results.addStackTrace(
             obligationIdx,
-            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + stackToString(e)
+            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + KeYWrapper.stackToString(e)
         );
 
 				System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
@@ -151,12 +156,12 @@ public class KeYWrapper {
 		}
 	}
 	
-	public String stackToString(Throwable e) {
-
+	public static String stackToString(final Throwable e) {
 		//https://stackoverflow.com/questions/1149703/how-can-i-convert-a-stack-trace-to-a-string
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
+		final StringWriter sw = new StringWriter();
+		final PrintWriter pw = new PrintWriter(sw);
 		e.printStackTrace(pw);
+
 		return sw.toString();
 	}
 	
