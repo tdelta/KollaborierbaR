@@ -10,6 +10,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.selectNode = this.selectNode.bind(this);
+    this.handleKeydown = this.handleKeydown.bind(this);
     this.state = {
       selectedNode: []
     };
@@ -27,6 +28,45 @@ export default class ProofTreeView extends React.Component<Props, State> {
     return this.props.displaySequent !== nextProps.displaySequent
         || this.props.proofResults !== nextProps.proofResults
         || this.state.selectedNode !== nextState.selectedNode;
+  }
+
+  public handleKeydown(event: any){
+        switch(event.keyCode){
+          case 38:
+              console.log("Up");
+              console.log(this.state.selectedNode[this.state.selectedNode.length - 1].serialNr);
+              if(this.state.selectedNode.length > 1){
+                  if(this.state.selectedNode[this.state.selectedNode.length - 1].children.length > 0
+                  && this.state.selectedNode[this.state.selectedNode.length - 1].serialNr < this.state.selectedNode[this.state.selectedNode.length - 1].children.length){
+                  
+                  }
+              }
+              break;
+          case 40:
+              console.log("Down");
+              break;
+          case 39:
+              console.log("Right");
+              if(this.state.selectedNode[this.state.selectedNode.length - 1].children.length !== 0){
+                  this.state.selectedNode.push(this.state.selectedNode[this.state.selectedNode.length - 1].children[0]);
+              }
+              break;
+          case 37:
+              console.log("Left");
+              if(this.state.selectedNode.length !== 1){
+                  this.state.selectedNode.pop();
+              }
+              break;
+        } 
+        console.log(this.state.selectedNode[this.state.selectedNode.length - 1]);        
+    } 
+
+  componentDidMount() {
+      document.addEventListener("keydown", this.handleKeydown);
+  }
+
+  componentWillUnmount() {
+      document.removeEventListener("keydown", this.handleKeydown);
   }
 
   public render() {
