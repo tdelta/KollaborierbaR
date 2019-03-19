@@ -84,18 +84,6 @@ export default class GuiProofNode extends React.Component<Props, State> {
               </div>
               <ContextMenu>
                 <ContextAction
-                  onClick={() =>
-                    alert(
-                      'Id:' +
-                        this.props.node.serialNr +
-                        'Kind' +
-                        this.props.node.kind
-                    )
-                  }
-                >
-                  Show Id of proof node
-                </ContextAction>
-                <ContextAction
                   onClick={
                     this.props.saveProof
                   }
