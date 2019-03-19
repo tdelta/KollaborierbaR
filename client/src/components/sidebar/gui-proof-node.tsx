@@ -85,17 +85,10 @@ export default class GuiProofNode extends React.Component<Props, State> {
               <ContextMenu>
                 <ContextAction
                   onClick={
-                    this.props.saveProof
+                    this.props.proofTreeOperationInfo.operation
                   }
                 >
-                  Save Proof
-                </ContextAction>
-                <ContextAction
-                  onClick={
-                    this.props.deleteFromHistory
-                  }
-                >
-                  Remove Proof from History
+                  {this.props.proofTreeOperationInfo.label}
                 </ContextAction>
               </ContextMenu>
             </Context>
@@ -111,14 +104,13 @@ export default class GuiProofNode extends React.Component<Props, State> {
                   {/* use recursion to display children.
                    */}
                   <GuiProofNode
-                    saveProof={this.props.saveProof}
-                    deleteFromHistory={this.props.deleteFromHistory}
                     node={child}
                     displaySequent={this.props.displaySequent}
                     selectNode={this.props.selectNode}
                     selectedNode={this.props.selectedNode}
                     path={this.props.path.concat(child)}
-                  />
+                    proofTreeOperationInfo={this.props.proofTreeOperationInfo}
+                    />
                 </li>
               ))}
             </ul>
@@ -154,14 +146,13 @@ export default class GuiProofNode extends React.Component<Props, State> {
                   {/* use recursion to display children.
                    */}
                   <GuiProofNode
-                    saveProof={this.props.saveProof}
-                    deleteFromHistory={this.props.deleteFromHistory}
                     node={child}
                     displaySequent={this.props.displaySequent}
                     selectNode={this.props.selectNode}
                     selectedNode={this.props.selectedNode}
                     path={this.props.path.concat(child)}
-                  />
+                    proofTreeOperationInfo={this.props.proofTreeOperationInfo}
+                    />
                 </li>
               ))}
             </ul>
@@ -196,14 +187,13 @@ export default class GuiProofNode extends React.Component<Props, State> {
 }
 
 interface Props {
-  saveProof: () => void;
-  deleteFromHistory: () => void;
   node: ProofNode;
   initiallyCollapsed: boolean;
   displaySequent: (sequent: string) => void;
   selectNode: (path: ProofNode[]) => void;
   selectedNode: ProofNode[];
   path: ProofNode[];
+  proofTreeOperationInfo: {operation: () => void, label: String};
 }
 
 interface State {
