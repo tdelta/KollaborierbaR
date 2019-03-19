@@ -97,8 +97,8 @@ export default class ProofTabView extends React.Component<Props, State> {
                   saveProof= {() => this.props.saveObligationResult(
                     (currentHistory as ObligationResultHistory)
                       .last as ObligationResult
-                  )
-                  }
+                  )}
+                  deleteFromHistory = {() => undefined}
                   obligationResult={
                     currentHistory.last
                   }
@@ -111,13 +111,13 @@ export default class ProofTabView extends React.Component<Props, State> {
                   : <>
                       History: <br />
                       {
-                        currentHistory.saved.map(savedResult =>
+                        currentHistory.saved.map((savedResult, idx) =>
                           <ProofTreeView
-                            saveProof={() => this.props.saveObligationResult(
-                              (currentHistory as ObligationResultHistory)
-                                .last as ObligationResult
-                            )
-                            }
+                            saveProof={() => undefined}
+                            deleteFromHistory = {() => this.props.deleteObligationResult(
+                              savedResult.obligationIdx,
+                              idx + 1
+                            )}
                             obligationResult={savedResult}
                             displaySequent={this.props.displaySequent}
                           />)
@@ -142,6 +142,7 @@ interface Props {
     obligationIdOfLastUpdatedProof: number | undefined;
     displaySequent: (sequent: string) => void;
     saveObligationResult: (obligationResult: ObligationResult) => void;
+    deleteObligationResult: (obligationIdx: number, historyIdx: number) => void;
 }
 
 interface State {

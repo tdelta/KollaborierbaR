@@ -302,6 +302,7 @@ export default class Sidebar extends React.Component {
                                             obligationIdOfLastUpdatedProof={this.props.obligationIdOfLastUpdatedProof}
                                             displaySequent={this.props.displayFormula}
                                             saveObligationResult={this.props.saveObligationResult}
+                                            deleteObligationResult={this.props.deleteObligationResult}
                                         />
                                     </TabPane>
                                 </TabContent>
@@ -328,5 +329,6 @@ Sidebar.propTypes = {
     'onUpdateFileName': PropTypes.func,
     'openedPath': PropTypes.arrayOf(PropTypes.string),
     'displayFormula': PropTypes.func,
-    'saveObligationResult': PropTypes.func
+    'saveObligationResult': PropTypes.func,
+    'deleteObligationResult': PropTypes.func
 };
