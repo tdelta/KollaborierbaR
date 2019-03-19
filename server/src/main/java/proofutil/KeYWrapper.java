@@ -205,44 +205,46 @@ public class KeYWrapper {
 		return results;
 	}
 
-  public ProofResult proveContractByIndex(final String className, final int index) {
+  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices) {
     if (env != null) {
-      final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
-      final ImmutableSet<IObserverFunction> targets =
-          env.getSpecificationRepository().getContractTargets(keyType);
-
-      // KeY lists obligations from bottom to top of the file.
-      // We need to take this into account, when counting the
-      // obligations from top to bottom, as the client does.
-
-      // Therefore, we start with the maximum index.
-      int currentObligationIdx = targets
-        .stream()
-        .mapToInt(target -> 
-              env
-                .getSpecificationRepository()
-                .getContracts(keyType, target)
-                .size()
-            )
-        .sum() - 1; // -1, since we start counting at 0
-
-      for (final IObserverFunction target : targets) {
-        final ImmutableSet<Contract> contracts =
-            env.getSpecificationRepository().getContracts(keyType, target);
-
-        if (contracts.size() > 0 && currentObligationIdx + 1 - contracts.size() <= index) {
-          proveContract(index, contracts.toArray(new Contract[0])[
-              contracts.size() - (currentObligationIdx - index) - 1
-              // obligations inside contract sets are sorted top to bottom
-          ]);
-
-          return results;
-        }
-
-        else {
-          currentObligationIdx -= contracts.size();
-        }
-      }
+      for (int index: indices) {
+	    final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
+	    final ImmutableSet<IObserverFunction> targets =
+	        env.getSpecificationRepository().getContractTargets(keyType);
+	
+	    // KeY lists obligations from bottom to top of the file.
+	    // We need to take this into account, when counting the
+	    // obligations from top to bottom, as the client does.
+	
+	    // Therefore, we start with the maximum index.
+	    int currentObligationIdx = targets
+	      .stream()
+	      .mapToInt(target -> 
+	            env
+	              .getSpecificationRepository()
+	              .getContracts(keyType, target)
+	              .size()
+	          )
+	      .sum() - 1; // -1, since we start counting at 0
+	
+	    for (final IObserverFunction target : targets) {
+	      final ImmutableSet<Contract> contracts =
+	          env.getSpecificationRepository().getContracts(keyType, target);
+	
+	      if (contracts.size() > 0 && currentObligationIdx + 1 - contracts.size() <= index) {
+	        proveContract(index, contracts.toArray(new Contract[0])[
+	            contracts.size() - (currentObligationIdx - index) - 1
+	            // obligations inside contract sets are sorted top to bottom
+	        ]);
+	
+	        break;
+	      }
+	
+	      else {
+	        currentObligationIdx -= contracts.size();
+	      }
+	    }
+	    }
     }
 
     return results;
