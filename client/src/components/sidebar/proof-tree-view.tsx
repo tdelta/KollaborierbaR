@@ -106,7 +106,8 @@ export default class ProofTreeView extends React.Component<Props, State> {
               }
               break;
         } 
-        console.log(newSelectedNode[newSelectedNode.length - 1]);        
+        console.log(newSelectedNode[newSelectedNode.length - 1]);     
+        this.props.displaySequent(newSelectedNode[newSelectedNode.length -1].sequent);   
         this.selectNode(newSelectedNode);
     } 
 
