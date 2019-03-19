@@ -66,8 +66,18 @@ public class KeYWrapper {
 																						// performed proof if a *.proof
 																						// file is loaded
 		} catch (ProblemLoaderException e) {
-			results.addError(-1, "Couldn't process all relevant information for verification with KeY.", null);			
-			results.addStackTrace(-1, "Exception at '" + location + "':\n" + stackToString(e));
+			results.addError(
+          -1, 
+          "unknown",
+          "Couldn't process all relevant information for verification with KeY.",
+          null
+      );
+
+			results.addStackTrace(
+          -1,
+          "unknown",
+          "Exception at '" + location + "':\n" + stackToString(e)
+      );
 
 			System.out.println("Exception at '" + location + "':");
 			e.printStackTrace();
@@ -112,8 +122,11 @@ public class KeYWrapper {
         }
 
 				if (closed) {
+          System.out.println("KeYWrapper:\n\n" + contract.getName() + "\n" + contract.getDisplayName() + "\n" + contract.getKJT() + "\n" + contract.getTarget() + "\n" + contract.id() + "\n" + contract.getTypeName() + "\n\n");
+
 					results.addSuccess(
               obligationIdx,
+              contract.getTarget().toString(),
               "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is verified.",
               proofTree
           );
@@ -122,6 +135,7 @@ public class KeYWrapper {
 				else {
 					results.addFail(
               obligationIdx,
+              contract.getTarget().toString(),
               "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open.",
               proofTree,
               proof
@@ -137,12 +151,15 @@ public class KeYWrapper {
 				}
 			} catch (ProofInputException e) {
 				results.addError(
-			             obligationIdx,"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".",
+			             obligationIdx,
+                   "unknown",
+                   "Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".",
                    null
         );
 
 				results.addStackTrace(
             obligationIdx,
+            contract.getTarget().toString(),
             "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + KeYWrapper.stackToString(e)
         );
 

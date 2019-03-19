@@ -20,13 +20,16 @@ public class ObligationResult {
   }
 
   private final int obligationIdx;
+  private final String targetName;
+
   private final String resultMsg;
   private final ProofNode proofTree;
   private final List<OpenGoalInfo> openGoals;
   private final Kind kind;
 
-  public ObligationResult(final int obligationIdx, final String resultMsg, final ProofNode proofTree, final List<OpenGoalInfo> openGoals, final Kind kind) {
+  public ObligationResult(final int obligationIdx, final String targetName, final String resultMsg, final ProofNode proofTree, final List<OpenGoalInfo> openGoals, final Kind kind) {
     this.obligationIdx = obligationIdx;
+    this.targetName = targetName;
     this.resultMsg = resultMsg;
     this.proofTree = proofTree;
     this.openGoals = openGoals;
@@ -35,6 +38,10 @@ public class ObligationResult {
 
   public int getObligationIdx() {
     return obligationIdx;
+  }
+
+  public String getTargetName() {
+    return targetName;
   }
 
   public String getResultMsg() {

@@ -205,21 +205,15 @@ export default class Sidebar extends React.Component {
             'display': genVisibilityString(!this.state.collapsed)
         };
 
-        const options = this.props.proofsState
+        const obligations = this.props.proofsState
           .getAllRecentObligationResults()
           .map(obligationResult => {
             return {
               value: obligationResult.obligationIdx,
-              label: obligationResult.resultMsg
+              label: `${obligationResult.obligationIdx}: ${obligationResult.targetName}`
             };
-          });
-        // Some methodnames for testing purposes
-        //const options = [
-        //    { value: 'methodA-contract1', label: 'methodA-contract1'},
-        //    { value: 'methodB-contract1', label: 'methodB-contract1' },
-        //    { value: 'methodC-contract1', label: 'methodC-contract1' }
-        //  ];
-        //const defaultOption = options[0];
+          })
+          .sort((lhs, rhs) => lhs.value - rhs.value);
 
         return(
             <>
@@ -303,7 +297,7 @@ export default class Sidebar extends React.Component {
                                     </TabPane>
                                     <TabPane tabId="3">
                                         <ProofTabView
-                                            methods={options}
+                                            methods={obligations}
                                             proofsState={this.props.proofsState}
                                             displaySequent={this.props.displayFormula}
                                             saveObligationResult={this.props.saveObligationResult}
