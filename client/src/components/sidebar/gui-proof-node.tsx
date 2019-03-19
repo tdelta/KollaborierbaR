@@ -6,27 +6,18 @@ import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import './sidebar.css';
 
 import ProofNode, {Kind} from '../../key/prooftree/ProofNode';
+import DisplayTreeNode from './displaytree/displaytreenode';
 
 
 import ProofIcon from './proof-icon';
 
-export default class GuiProofNode extends React.Component<Props, State> {
+export default class GuiProofNode extends React.Component<Props> {
   public static defaultProps = {
     initiallyCollapsed: false
   };
 
   constructor(props: Props) {
     super(props);
-
-    this.state = {
-      /**
-       * indicates, whether child nodes shall be visible or not
-       */
-      selected: false,
-      collapsed: this.props.node.kind !== Kind.ClosedProofTree &&
-                 this.props.node.kind !== Kind.OpenProofTree
-              || this.props.initiallyCollapsed
-    };
 
     this.handleItemDoubleClick = this.handleItemDoubleClick.bind(this);
     this.toggle = this.toggle.bind(this);
@@ -47,18 +38,10 @@ export default class GuiProofNode extends React.Component<Props, State> {
                (we'll use the css display property to hide them, if necessary)
             */
       const display: object = {
-        display: this.state.collapsed ? 'none' : '',
+        display: this.props.node.collapsed ? 'none' : '',
       };
 
-      let background: string = 'inacticeFileNode';
-      if(this.props.selectedNode.length === this.props.path.length){
-        background = 'activeFileNode';
-        for(let i: number = 0;i < this.props.path.length;i++){
-          if(this.props.selectedNode[i].text !== this.props.path[i].text){
-            background = 'inactiveFileNode';
-          }
-        }
-      }
+      let background: string = this.props.node.selected ? 'activeFileNode' : 'inacticeFileNode';
 
       return (
         <>
@@ -74,7 +57,6 @@ export default class GuiProofNode extends React.Component<Props, State> {
           >
             <ProofIcon
               node={this.props.node}
-              collapsed={this.state.collapsed}
             />
             {label}
           </div>
@@ -92,7 +74,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
                   node={child}
                   displaySequent={this.props.displaySequent}
                   selectNode={this.props.selectNode}
-                  selectedNode={this.props.selectedNode}
+                  collapseNode={this.props.collapseNode}
                   path={this.props.path.concat(child)}
                 />
               </li>
@@ -115,9 +97,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
 
   /** changes the visibility of this nodes children, if there are any. */
   private toggle() {
-    this.setState({
-      collapsed: !this.state.collapsed,
-    });
+    this.props.collapseNode(this.props.node);
   }
 
   /**
@@ -132,15 +112,9 @@ export default class GuiProofNode extends React.Component<Props, State> {
 }
 
 interface Props {
-  node: ProofNode;
-  initiallyCollapsed: boolean;
+  node: DisplayTreeNode;
   displaySequent: (sequent: string) => void;
-  selectNode: (path: ProofNode[]) => void;
-  selectedNode: ProofNode[];
-  path: ProofNode[];
-}
-
-interface State {
-  collapsed: boolean;
-  selected: boolean;
+  selectNode: (path: DisplayTreeNode[]) => void;
+  collapseNode: (node: DisplayTreeNode) => void;
+  path: DisplayTreeNode[];
 }
