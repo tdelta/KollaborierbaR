@@ -41,7 +41,20 @@ export default class ProofTabView extends React.Component<Props, State> {
 
     return this.props.displaySequent !== nextProps.displaySequent
         || this.props.proofsState !== nextProps.proofsState
-        || this.state.selectedOption !== nextState.selectedOption;
+        || this.state.selectedOption !== nextState.selectedOption
+        || this.props.obligationIdOfLastUpdatedProof !== nextProps.obligationIdOfLastUpdatedProof;
+  }
+
+  public componentDidUpdate(prevProps: Props, prevState: State): void {
+    if (prevProps.obligationIdOfLastUpdatedProof !== this.props.obligationIdOfLastUpdatedProof) {
+      const option = this.props.methods.find(e => 
+        e.value === this.props.obligationIdOfLastUpdatedProof
+      );
+
+      this.setState({
+        selectedOption: option
+      });
+    }
   }
 
   public render() {
@@ -129,8 +142,9 @@ export default class ProofTabView extends React.Component<Props, State> {
 }
 
 interface Props {
-    methods: number[] | OptionsType<number> | undefined;
+    methods: {value: number, label: string}[];
     proofsState: ProofsState;
+    obligationIdOfLastUpdatedProof: number | undefined;
     displaySequent: (sequent: string) => void;
     saveObligationResult: (obligationResult: ObligationResult) => void;
 }

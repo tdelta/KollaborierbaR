@@ -20,6 +20,7 @@ export default class Key {
   private notificationSystem: RefObject<NotificationSystem.System>;
   private getProofsState: () => ProofsState;
   private setProofsState: (proofsState: ProofsState) => void;
+  private setObligationIdOfLastUpdatedProof: (obligationId: number) => void;
 
   private addNewConsoleMessage: (message: String) => void;
 
@@ -29,11 +30,13 @@ export default class Key {
     setProvenObligations: (provenObligations: number[]) => void,
     getProofsState: () => ProofsState,
     setProofsState: (proofsState: ProofsState) => void,
+    setObligationIdOfLastUpdatedProof: (obligationId: number) => void,
     getFilePath: () => string,
     addNewConsoleMessage: (message: String) => void
   ) {
     this.notificationSystem = notificationSystem;
     this.setProvenObligations = setProvenObligations;
+    this.setObligationIdOfLastUpdatedProof = setObligationIdOfLastUpdatedProof;
     this.getFilePath = getFilePath;
     this.proveFile = this.proveFile.bind(this);
     this.proveObligation = this.proveObligation.bind(this);
@@ -86,6 +89,7 @@ export default class Key {
 
         this.setProvenObligations(this.getProofsState().getProvenObligationIdxs());
         this.sendLastProofNotifications(obligationResult);
+        this.setObligationIdOfLastUpdatedProof(obligationResult.obligationIdx);
       });
   }
 

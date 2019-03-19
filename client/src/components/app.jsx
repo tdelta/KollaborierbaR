@@ -85,6 +85,7 @@ export default class App extends React.Component {
           this.setProvenObligations,
           () => this.state.proofsState,
           (proofsState) => this.setState({proofsState}),
+          (obligationId) => this.setState({obligationIdOfLastUpdatedProof: obligationId}),
           () => this.state.project.name + '/' + this.state.openedPath.join('/'),
           this.addNewConsoleMessage
         );
@@ -120,7 +121,9 @@ export default class App extends React.Component {
             // console visibilty
             consoleIsVisible: false,
 
-            proofsState: ProofsState.create()
+            proofsState: ProofsState.create(),
+
+            obligationIdOfLastUpdatedProof: undefined
         };
     }
 
@@ -336,6 +339,7 @@ export default class App extends React.Component {
                     <Sidebar
                         project={this.state.project}
                         proofsState={this.state.proofsState}
+                        obligationIdOfLastUpdatedProof={this.state.obligationIdOfLastUpdatedProof}
                         openedPath={this.state.openedPath}
                         //TODO: Code auslagern in die aufrufenden Funktionen
                         onOpenFile={this.openFile}
