@@ -42,8 +42,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
             selectNode={this.selectNode}
             selectedNode={this.state.selectedNode}
             path={[node]}
-            saveProof={this.props.saveProof}
-            deleteFromHistory={this.props.deleteFromHistory}
+            proofTreeOperationInfo={this.props.proofTreeOperationInfo}
           />
         </div>
       );
@@ -57,8 +56,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
 interface Props {
   obligationResult?: ObligationResult;
   displaySequent: (sequent: string) => void;
-  saveProof: () => void;
-  deleteFromHistory: () => void;
+  proofTreeOperationInfo: {operation: () => void, label: String};
 }
 
 interface State {
