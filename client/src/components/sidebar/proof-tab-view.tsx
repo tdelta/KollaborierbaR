@@ -81,26 +81,16 @@ export default class ProofTabView extends React.Component<Props, State> {
               <>Please select an option.</>
             : <>
                 <ProofTreeView
+                  saveProof= {() => this.props.saveObligationResult(
+                    (currentHistory as ObligationResultHistory)
+                      .last as ObligationResult
+                  )
+                  }
                   obligationResult={
                     currentHistory.last
                   }
                   displaySequent={this.props.displaySequent}
                 />
-                {
-                  currentHistory.last == null ?
-                      <></>
-                    : <>
-                        <input
-                          type="button"
-                          value="Save"
-                          onClick={() => this.props.saveObligationResult(
-                              (currentHistory as ObligationResultHistory)
-                                .last as ObligationResult
-                            )
-                          }
-                        />
-                      </>
-                }
                 <hr />
                 {
                   currentHistory.saved.length <= 0 ?
@@ -110,6 +100,11 @@ export default class ProofTabView extends React.Component<Props, State> {
                       {
                         currentHistory.saved.map(savedResult =>
                           <ProofTreeView
+                            saveProof={() => this.props.saveObligationResult(
+                              (currentHistory as ObligationResultHistory)
+                                .last as ObligationResult
+                            )
+                            }
                             obligationResult={savedResult}
                             displaySequent={this.props.displaySequent}
                           />)
