@@ -122,8 +122,6 @@ public class KeYWrapper {
         }
 
 				if (closed) {
-          System.out.println("KeYWrapper:\n\n" + contract.getName() + "\n" + contract.getDisplayName() + "\n" + contract.getKJT() + "\n" + contract.getTarget() + "\n" + contract.id() + "\n" + contract.getTypeName() + "\n\n");
-
 					results.addSuccess(
               obligationIdx,
               contract.getTarget().toString(),
