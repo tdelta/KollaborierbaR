@@ -4,6 +4,7 @@ import OpenGoalInfo from './OpenGoalInfo';
 
 export default interface ObligationResult {
   obligationIdx: number;
+  targetName: string;
   resultMsg: string;
   proofTree: ProofNode;
   openGoals: OpenGoalInfo[];
