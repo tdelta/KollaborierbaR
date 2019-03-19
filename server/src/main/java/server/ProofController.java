@@ -102,7 +102,14 @@ public class ProofController {
       final List<ObligationResult> prevResults = prevObligations
         .getOrDefault(obligationIdx, new LinkedList<>());
 
-      prevResults.add(0, obligationResult);
+      if (prevResults.isEmpty()) {
+        prevResults.add(0, obligationResult);
+      }
+
+      else {
+        prevResults.set(0, obligationResult);
+      }
+
       prevObligations.put(obligationIdx, prevResults);
 
       obligationResults.put(projectFilePath, prevObligations);
@@ -187,6 +194,9 @@ public class ProofController {
       System.out.println("ProofController: There is data for " + previousObligations.size() + " obligations.");
 
       final List<ObligationResult> obligationResultHistory = previousObligations.getOrDefault(obligationIdx, new LinkedList<>());
+
+      System.out.println("ProofController: Updating history. There are " + (obligationResultHistory.size()-1) + " results stored in the history of obligation " + obligationIdx + " before modifying it.");
+
       if (obligationResultHistory.isEmpty()) {
         System.out.println("ProofController: There isnt any proof saved yet for obligation " + obligationIdx + ", so we will not only save the submitted obligation result to history, but also store it as the last proof.");
 
@@ -268,7 +278,7 @@ public class ProofController {
 
       final Optional<ObligationResult> maybeObligationResult;
       if (obligationResultHistory != null && !obligationResultHistory.isEmpty()) {
-        final ObligationResult obligationResult = obligationResultHistory.get(0);
+        final ObligationResult obligationResult = obligationResultHistory.get(historyIdx);
 
         System.out.println("ProofController: Returning obligation result for " + projectFilePath + ": " + obligationResult.getResultMsg());
 
