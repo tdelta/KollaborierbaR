@@ -299,6 +299,7 @@ export default class Sidebar extends React.Component {
                                         <ProofTabView
                                             methods={obligations}
                                             proofsState={this.props.proofsState}
+                                            obligationIdOfLastUpdatedProof={this.props.obligationIdOfLastUpdatedProof}
                                             displaySequent={this.props.displayFormula}
                                             saveObligationResult={this.props.saveObligationResult}
                                         />
@@ -319,6 +320,7 @@ Sidebar.propTypes = {
         'contents': PropTypes.arrayOf(PropTypes.object)
     }),
     'proofsState': PropTypes.object,
+    'obligationIdOfLastUpdatedProof': PropTypes.number,
     'onOpenFile': PropTypes.func,
     'onDeleteFile': PropTypes.func,
     'onCreateFile': PropTypes.func,
