@@ -28,6 +28,7 @@ export default class Key {
   // Find method declarations in the current line 
   // https://stackoverflow.com/questions/68633/regex-that-will-match-a-java-method-declarations
   private methodRegex: RegExp = /^[ \t]*(?:(?:public|protected|private)\s+)?(?:(static|final|native|synchronized|abstract|threadsafe|transient|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))\s+){0,}(?!return)\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})\s+\b\w+\b\s*\(\s*(?:\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*(?:,\s+\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*){0,})?\s*\)(?:\s*throws [\w.]+(\s*,\s*[\w.]+))?\s*(?:\{|;)[ \t]*$/;
+
   constructor(
     network: Network,
     notificationSystem: RefObject<NotificationSystem.System>,
@@ -166,6 +167,30 @@ export default class Key {
 
         else {
           console.log("Saved obligation result to server");
+        }
+      });
+  }
+
+  public deleteObligationResult(projectName: string, filePath: string, obligationIdx: number, historyIdx: number): void {
+    console.log("Trying to delete an element from history at index ", historyIdx);
+
+    fetch(`${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history/${historyIdx}`, {
+      method: 'DELETE',
+      mode: 'cors', // enable cross origin requests. Server must also allow this!
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      }
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          alert(
+            'Uups! Failed to delete element from history.'
+          );
+        }
+
+        else {
+          console.log("Successfully deleted element from history.");
         }
       });
   }
