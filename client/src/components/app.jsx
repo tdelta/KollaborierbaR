@@ -117,7 +117,7 @@ export default class App extends React.Component {
             provenObligations: [],
 
             // the console log
-            consolelog: '',
+            consolelog: 'No error found.',
 
             // console visibilty
             consoleIsVisible: false,
@@ -228,7 +228,7 @@ export default class App extends React.Component {
         let timeString = h + ":" + m + ":" + s;
 
         this.setState({
-            consolelog: this.state.consolelog+ timeString + " " + message + "\n",
+            consolelog: /*this.state.consolelog+*/ timeString + " " + message + "\n",
             consoleIsVisible: true
         });
     }
