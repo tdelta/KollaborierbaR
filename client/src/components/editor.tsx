@@ -8,12 +8,19 @@ import React from 'react';
 
 import CollabController from '../collaborative/CollabController';
 
+import { 
+  ContextMenu,
+  MenuItem,
+  ContextMenuTrigger 
+} from "react-contextmenu";
+
 import {
   Annotation,
   Diagnostic,
   toAnnotation,
   diagnosticPriority,
 } from '../diagnostics';
+
 import AnchoredMarker, { addToArray } from './AnchoredMarker';
 import PopoverMarker from './PopoverMarker';
 
@@ -24,7 +31,7 @@ import lint from '../linting.js';
 import './sidebar/sidebar.css';
 import '../index.css';
 
-export default class Editor extends React.Component<Props> {
+export default class Editor extends React.Component<Props, State> {
   // Defining the types of the attributes for this class
   // The exclamation mark tells typescript not to check if this attribute gets initialized
   public editor!: any; // ACE editor object
@@ -44,6 +51,10 @@ export default class Editor extends React.Component<Props> {
     this.popoverMarkers = [];
     this.errorMarkerIds = [];
     this.popoverMarkerIds = [];
+    this.state = {
+      disableContext: true,
+      contracts: []
+    };
   }
 
   /**
@@ -87,6 +98,19 @@ export default class Editor extends React.Component<Props> {
       this.setMarkers();
     });
 
+    this.editor.container.addEventListener("contextmenu", (e: any) => {
+      e.preventDefault();
+      let lineNr: number = this.editor.getSelectionRange().start.row;
+      let lineTxt: string = this.editor.session.getLines(0, this.editor.session.getLength());
+      let contracts: number[] = this.props.getContractsForMethod(lineTxt, lineNr);
+
+      if (contracts.length) {
+        this.setState({disableContext: false, contracts: contracts});
+      } else {
+        this.setState({disableContext: true, contracts: []});
+      }
+    });
+
     this.editor.on('gutterclick', (e: any) => {
       this.props.saveFile().then(() => {
         if (
@@ -102,7 +126,7 @@ export default class Editor extends React.Component<Props> {
               this.editor.session.getLines(0, this.editor.session.getLength())
             );
 
-            this.props.onProveObligation(obligations[row]);
+            this.props.onProveObligations(obligations[row]);
           }
         } else if (
           e.domEvent.target.className.includes('obligation_done') &&
@@ -118,7 +142,7 @@ export default class Editor extends React.Component<Props> {
             );
 
             this.props.resetObligation(obligations[row]);
-            this.props.onProveObligation(obligations[row]);
+            this.props.onProveObligations(obligations[row]);
           }
         }
       });
@@ -260,6 +284,7 @@ export default class Editor extends React.Component<Props> {
   public render() {
 
     let editorstyle;
+    let proveAllContracts;
     // Resize the editor depening whether or not the console is visible
     if(this.props.consoleIsVisible){
       editorstyle = {
@@ -270,8 +295,47 @@ export default class Editor extends React.Component<Props> {
         'height': "98%",
         }
     }    
+    if (this.state.contracts.length > 1) {
+        proveAllContracts = 
+          <div>
+            <MenuItem divider />
+            <MenuItem onClick={() => {
+              this.props.saveFile().then(() => {
+                for (const contract of this.state.contracts) {
+                  this.props.resetObligation(contract);
+              }})
+                this.props.onProveObligations(this.state.contracts);
+            }}>
+   	          Prove all Method Contracts
+            </MenuItem>
+          </div>;
+    }
 
-    return <div id="editor" style = {editorstyle} />;
+    return (
+        <div id="editor_container" style = {editorstyle}>      
+          <ContextMenuTrigger id="sick_menu" holdToDisplay={-1} disable={this.state.disableContext}>
+                <div id="editor" style = {editorstyle}/>
+          </ContextMenuTrigger>
+
+          <ContextMenu id="sick_menu">
+              {
+                  this.state.contracts.map((contract, id) => 
+                      <MenuItem
+                          key={id}
+                          onClick={() => {
+                            this.props.saveFile().then(() => {
+                              this.props.resetObligation(contract);
+                              this.props.onProveObligations(contract);
+                            })
+                          }}>
+                          Prove Contract {id + 1}
+                      </MenuItem>
+                  )
+              }
+              {proveAllContracts}
+          </ContextMenu>
+        </div>
+    );
   }
 
   /**
@@ -401,6 +465,12 @@ export default class Editor extends React.Component<Props> {
   }
 }
 
+// defining the structure of the state
+interface State {
+  disableContext: boolean;
+  contracts: number[];
+}
+
 // defining the structure of this react components properties
 interface Props {
   saveFile(): Promise<void>;
@@ -414,6 +484,7 @@ interface Props {
   resetObligation(obligationIdx: number): void;
   collabController: CollabController;
   getObligations: (lines: string[]) => number[];
-  onProveObligation: (nr: number) => boolean;
+  getContractsForMethod: (line: string, row: number) => number[];
+  onProveObligations: (nr: number | number[]) => boolean;
   consoleIsVisible: boolean;
 }
