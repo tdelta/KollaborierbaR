@@ -2,6 +2,8 @@ import React from 'react';
 
 import ProofNode, {Kind} from '../../key/prooftree/ProofNode';
 
+import DisplayTreeNode from './displaytree/displaytreenode';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquare as faSquareSolid, faVectorSquare, faSitemap, faPlusSquare, faDoorOpen, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import { faSquare, faCaretSquareDown, faMinusSquare } from '@fortawesome/free-regular-svg-icons';
@@ -53,7 +55,7 @@ export default class ProofIcon extends React.Component<Props, {}> {
 
         if (this.props.node.children.length > 0) {
           if (this.props.node.kind === Kind.DefaultNode) {
-            if (this.props.collapsed) {
+            if (this.props.node.collapsed) {
               icon = faPlusSquare;
             }
 
@@ -66,7 +68,7 @@ export default class ProofIcon extends React.Component<Props, {}> {
             this.props.node.kind === Kind.OpenProofTree ||
             this.props.node.kind == Kind.ClosedProofTree
           ) {
-            if (this.props.collapsed) {
+            if (this.props.node.collapsed) {
               icon = faSquareSolid;
             }
           }
@@ -82,6 +84,5 @@ export default class ProofIcon extends React.Component<Props, {}> {
 }
 
 interface Props {
-  node: ProofNode;
-  collapsed: boolean;
+  node: DisplayTreeNode;
 }
