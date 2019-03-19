@@ -239,6 +239,8 @@ export default class App extends React.Component {
      * and inserted into the DOM tree.
      */
     componentDidMount() {
+        document.title = "KollaborierbaR";
+
         this.collabController = new CollabController(
             this.network,
             this.editor.current,
@@ -379,7 +381,8 @@ export default class App extends React.Component {
                             filetype={this.state.filetype}
                             collabController={this.collabController}
                             getObligations={this.key.getObligations}
-                            onProveObligation={this.key.proveObligation}
+                            getContractsForMethod={this.key.getContractsForMethod}
+                            onProveObligations={this.key.proveObligations}
                             ref={this.editor}
                             consoleIsVisible = {this.state.consoleIsVisible}
                         />

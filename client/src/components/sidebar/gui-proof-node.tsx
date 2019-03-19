@@ -84,20 +84,8 @@ export default class GuiProofNode extends React.Component<Props, State> {
               </div>
               <ContextMenu>
                 <ContextAction
-                  onClick={() =>
-                    alert(
-                      'Id:' +
-                        this.props.node.serialNr +
-                        'Kind' +
-                        this.props.node.kind
-                    )
-                  }
-                >
-                  Show Id of proof node
-                </ContextAction>
-                <ContextAction
-                  onClick={() =>
-                    alert('TODO: Call save proof function provided by Anton')
+                  onClick={
+                    this.props.saveProof
                   }
                 >
                   Save Proof
@@ -125,6 +113,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
                   {/* use recursion to display children.
                    */}
                   <GuiProofNode
+                    saveProof={this.props.saveProof}
                     node={child}
                     displaySequent={this.props.displaySequent}
                     selectNode={this.props.selectNode}
@@ -166,6 +155,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
                   {/* use recursion to display children.
                    */}
                   <GuiProofNode
+                    saveProof={this.props.saveProof}
                     node={child}
                     displaySequent={this.props.displaySequent}
                     selectNode={this.props.selectNode}
@@ -206,6 +196,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
 }
 
 interface Props {
+  saveProof: () => void;
   node: ProofNode;
   initiallyCollapsed: boolean;
   displaySequent: (sequent: string) => void;
