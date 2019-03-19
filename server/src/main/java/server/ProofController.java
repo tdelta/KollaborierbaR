@@ -210,6 +210,56 @@ public class ProofController {
       return newHistoryIdx;
   }
 
+  @RequestMapping(value = "/**/{className}.java/obligation/{obligationIdx}/history/{historyIdx}", method = RequestMethod.DELETE)
+  public ResponseEntity deleteFromHistory(
+      @PathVariable final String className,
+      @PathVariable final int obligationIdx,
+      @PathVariable final int historyIdx,
+      final HttpServletRequest request) {
+
+      final PathData pathData = decodePath(request);
+      final String projectFilePath = pathData.projectFilePath;
+
+      final int newHistoryIdx = 1;
+
+      System.out.println("ProofController: About to delete obligation result for " + projectFilePath + " on obligation id " + obligationIdx + " from history");
+
+      final HashMap<Integer, List<ObligationResult>> previousObligations = obligationResults.getOrDefault(projectFilePath, new HashMap<>());
+
+      final List<ObligationResult> obligationResultHistory = previousObligations.getOrDefault(obligationIdx, new LinkedList<>());
+
+      if (historyIdx == 0) {
+        System.out.println("ProofController: Cant delete last element using the history delete method.");
+
+        return new ResponseEntity(HttpStatus.BAD_REQUEST);
+      }
+
+      else if (historyIdx < obligationResultHistory.size()) {
+        obligationResultHistory.remove(historyIdx);
+
+        previousObligations.put(obligationIdx, obligationResultHistory);
+        obligationResults.put(projectFilePath, previousObligations);
+
+        final UpdatedProofHistoryEvent event = new UpdatedProofHistoryEvent(
+            this,
+            pathData.projectName,
+            pathData.filePath,
+            pathData.obligationId
+        );
+        System.out.println("ProofController: Publising updated history after removal of item " + historyIdx + ".");
+
+        applicationEventPublisher.publishEvent(event);
+
+        return new ResponseEntity(HttpStatus.OK);
+      }
+
+      else {
+        System.out.println("ProofController: Cant delete history element out of bounds.");
+
+        return new ResponseEntity(HttpStatus.BAD_REQUEST);
+      }
+  }
+
   private Optional<ObligationResult> retrieveObligationResult(final String projectFilePath, final int obligationId, final int historyIdx) {
       final List<ObligationResult> obligationResultHistory = this
         .obligationResults

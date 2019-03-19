@@ -63,6 +63,7 @@ export default class App extends React.Component {
         this.setDiagnostics = this.setDiagnostics.bind(this);
         this.setProvenObligations = this.setProvenObligations.bind(this);
         this.saveObligationResult = this.saveObligationResult.bind(this);
+        this.deleteObligationResult = this.deleteObligationResult.bind(this);
         this.resetObligation = this.resetObligation.bind(this);
         this.proveFile = this.proveFile.bind(this);
         this.showProject = this.showProject.bind(this);
@@ -202,6 +203,10 @@ export default class App extends React.Component {
 
     saveObligationResult(obligationResult) {
       this.key.saveObligationResult(this.state.project.name, this.state.openedPath.join('/'), obligationResult);
+    }
+
+    deleteObligationResult(obligationIdx, historyIdx) {
+      this.key.deleteObligationResult(this.state.project.name, this.state.openedPath.join('/'), obligationIdx, historyIdx);
     }
 
     proveFile() {
@@ -351,6 +356,7 @@ export default class App extends React.Component {
                         onUpdateFileName={this.updateFileName}
                         displayFormula={this.displaySequent}
                         saveObligationResult={this.saveObligationResult}
+                        deleteObligationResult={this.deleteObligationResult}
                     />
                     <div class="rightSide">
                         {

@@ -91,10 +91,8 @@ export default class GuiProofNode extends React.Component<Props, State> {
                   Save Proof
                 </ContextAction>
                 <ContextAction
-                  onClick={() =>
-                    alert(
-                      'TODO: Call remove proof from history function provided by Anton'
-                    )
+                  onClick={
+                    this.props.deleteFromHistory
                   }
                 >
                   Remove Proof from History
@@ -114,6 +112,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
                    */}
                   <GuiProofNode
                     saveProof={this.props.saveProof}
+                    deleteFromHistory={this.props.deleteFromHistory}
                     node={child}
                     displaySequent={this.props.displaySequent}
                     selectNode={this.props.selectNode}
@@ -156,6 +155,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
                    */}
                   <GuiProofNode
                     saveProof={this.props.saveProof}
+                    deleteFromHistory={this.props.deleteFromHistory}
                     node={child}
                     displaySequent={this.props.displaySequent}
                     selectNode={this.props.selectNode}
@@ -197,6 +197,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
 
 interface Props {
   saveProof: () => void;
+  deleteFromHistory: () => void;
   node: ProofNode;
   initiallyCollapsed: boolean;
   displaySequent: (sequent: string) => void;
