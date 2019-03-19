@@ -360,7 +360,7 @@ export default class App extends React.Component {
                             collabController={this.collabController}
                             getObligations={this.key.getObligations}
                             getContractsForMethod={this.key.getContractsForMethod}
-                            onProveObligation={this.key.proveObligation}
+                            onProveObligations={this.key.proveObligations}
                             ref={this.editor}
                             consoleIsVisible = {this.state.consoleIsVisible}
                         />

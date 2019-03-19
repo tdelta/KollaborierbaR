@@ -1,5 +1,6 @@
 package server;
 
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class ProofController {
   @ResponseBody
   public ResponseEntity<ProofResult> proveAll(
       @PathVariable final String className,
-      @RequestParam("obligationIdx") final Optional<Integer> obligationIdx,
+      @RequestParam("obligationIdxs") final Optional<List<Integer>> obligationIdxs,
       final HttpServletRequest request) {
     // Get the file path for the request resource
     final String path =
@@ -39,8 +40,8 @@ public class ProofController {
     // prove by index if index is present. ternary operator can be replaced with ifPresentOrElse if
     // Java 9 is used or higher
     final ProofResult result =
-        obligationIdx.isPresent()
-            ? key.proveContractByIndex(className, obligationIdx.get())
+        obligationIdxs.isPresent()
+            ? key.proveContractByIdxs(className, obligationIdxs.get())
             : key.proveAllContracts(className);
     key.dispose();
 

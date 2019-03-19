@@ -126,7 +126,7 @@ export default class Editor extends React.Component<Props, State> {
               this.editor.session.getLines(0, this.editor.session.getLength())
             );
 
-            this.props.onProveObligation(obligations[row]);
+            this.props.onProveObligations(obligations[row]);
           }
         } else if (
           e.domEvent.target.className.includes('obligation_done') &&
@@ -142,7 +142,7 @@ export default class Editor extends React.Component<Props, State> {
             );
 
             this.props.resetObligation(obligations[row]);
-            this.props.onProveObligation(obligations[row]);
+            this.props.onProveObligations(obligations[row]);
           }
         }
       });
@@ -300,11 +300,13 @@ export default class Editor extends React.Component<Props, State> {
           <div>
             <MenuItem divider />
             <MenuItem onClick={() => {
-              for (const contract of this.state.contracts) {
-                this.props.resetObligation(contract);
-                this.props.onProveObligation(contract);
-              }}}>
-   	          Prove all Contracts
+              this.props.saveFile().then(() => {
+                for (const contract of this.state.contracts) {
+                  this.props.resetObligation(contract);
+              }})
+                this.props.onProveObligations(this.state.contracts);
+            }}>
+   	          Prove all Method Contracts
             </MenuItem>
           </div>;
     }
@@ -321,8 +323,10 @@ export default class Editor extends React.Component<Props, State> {
                       <MenuItem
                           key={id}
                           onClick={() => {
-                            this.props.resetObligation(contract);
-                            this.props.onProveObligation(contract);
+                            this.props.saveFile().then(() => {
+                              this.props.resetObligation(contract);
+                              this.props.onProveObligations(contract);
+                            })
                           }}>
                           Prove Contract {id + 1}
                       </MenuItem>
@@ -481,6 +485,6 @@ interface Props {
   collabController: CollabController;
   getObligations: (lines: string[]) => number[];
   getContractsForMethod: (line: string, row: number) => number[];
-  onProveObligation: (nr: number) => boolean;
+  onProveObligations: (nr: number | number[]) => boolean;
   consoleIsVisible: boolean;
 }
