@@ -236,6 +236,8 @@ export default class App extends React.Component {
      * and inserted into the DOM tree.
      */
     componentDidMount() {
+        document.title = "KollaborierbaR";
+
         this.collabController = new CollabController(
             this.network,
             this.editor.current,
