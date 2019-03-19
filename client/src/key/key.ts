@@ -32,7 +32,7 @@ export default class Key {
     this.setProvenObligations = setProvenObligations;
     this.getFilePath = getFilePath;
     this.proveFile = this.proveFile.bind(this);
-    this.proveObligation = this.proveObligation.bind(this);
+    this.proveObligations = this.proveObligations.bind(this);
     this.isMethodDeclaration = this.isMethodDeclaration.bind(this);
     this.getObligations = this.getObligations.bind(this);
     this.getContractsForMethod = this.getContractsForMethod.bind(this);
@@ -100,12 +100,12 @@ export default class Key {
     }
   }
 
-  public proveObligation(nr: number) {
+  public proveObligations(nr: number | number[]) {
     if (this.notificationSystem.current) {
       this.notificationSystem.current.clearNotifications();
       this.notificationSystem.current.addNotification({
         title: 'Please Wait!',
-        message: 'Running proof obligation...',
+        message: typeof(nr) == 'number' ? 'Proving obligation...' :  'Proving obligations...',
         level: 'info',
         position: 'bc',
         autoDismiss: 0,
@@ -113,7 +113,7 @@ export default class Key {
     }
 
     return this.keyApi
-      .proveObligation(this.getFilePath(), nr)
+      .proveObligations(this.getFilePath(), nr)
       .then(this.handleResults);
   }
 
