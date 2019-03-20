@@ -37,14 +37,16 @@ public class ProofNode {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Integer id;
 
-  private final String text;
+  private String text;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-  private final List<ProofNode> children;
-  private final Kind kind;
-  private final String sequent;
-  private final int serialNr;
-  private final int oneStepId;
+  @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+  private List<ProofNode> children;
+  private Kind kind;
+  private String sequent;
+  private int serialNr;
+  private int oneStepId;
+
+  public ProofNode(){}
 
   public ProofNode(final String text, final List<ProofNode> children, final Kind kind, final String sequent, final int serialNr, final int oneStepId) {
     this.text = text;
