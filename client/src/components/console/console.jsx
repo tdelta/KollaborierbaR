@@ -30,6 +30,10 @@ export default class Sidebar extends React.Component {
                 onClick = {this.props.invertConsoleVisibility}
                 
             >
+            <div className= "consoleLable">
+            Log
+            </div>
+             
                 <FontAwesome
                     name= "angle-up"
                     className="consoleRestoreHandleIcon"
@@ -42,6 +46,9 @@ export default class Sidebar extends React.Component {
                 onClick = {this.props.invertConsoleVisibility}
                 
             >
+            <div className= "consoleLable">
+            Log
+            </div>
                 <FontAwesome
                     name= "angle-down" 
                     className="consoleRestoreHandleIcon"

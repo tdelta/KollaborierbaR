@@ -5,14 +5,15 @@ import PropTypes from 'prop-types';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import './sidebar.css';
 
-import ProofNode, {Kind} from '../../key/prooftree/ProofNode';
+import ProofNode, { Kind } from '../../key/prooftree/ProofNode';
 
+import { Context, ContextMenu, ContextAction } from './context.jsx';
 
 import ProofIcon from './proof-icon';
 
 export default class GuiProofNode extends React.Component<Props, State> {
   public static defaultProps = {
-    initiallyCollapsed: false
+    initiallyCollapsed: false,
   };
 
   constructor(props: Props) {
@@ -23,9 +24,10 @@ export default class GuiProofNode extends React.Component<Props, State> {
        * indicates, whether child nodes shall be visible or not
        */
       selected: false,
-      collapsed: this.props.node.kind !== Kind.ClosedProofTree &&
-                 this.props.node.kind !== Kind.OpenProofTree
-              || this.props.initiallyCollapsed
+      collapsed:
+        (this.props.node.kind !== Kind.ClosedProofTree &&
+          this.props.node.kind !== Kind.OpenProofTree) ||
+        this.props.initiallyCollapsed,
     };
 
     this.handleItemDoubleClick = this.handleItemDoubleClick.bind(this);
@@ -35,11 +37,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
   public render() {
     // visible label of this node.
     // Consists of a file type specific icon and its name.
-    const label = (
-      <>
-        {this.props.node.text}
-      </>
-    );
+    const label = <>{this.props.node.text}</>;
 
     // Does the node have children? (checks for null *and* undefined)
     if (this.props.node.children != null) {
@@ -51,64 +49,121 @@ export default class GuiProofNode extends React.Component<Props, State> {
       };
 
       let background: string = 'inacticeFileNode';
-      if(this.props.selectedNode.length === this.props.path.length){
+      if (this.props.selectedNode.length === this.props.path.length) {
         background = 'activeFileNode';
-        for(let i: number = 0;i < this.props.path.length;i++){
-          if(this.props.selectedNode[i].text !== this.props.path[i].text){
+        for (let i: number = 0; i < this.props.path.length; i++) {
+          if (this.props.selectedNode[i].text !== this.props.path[i].text) {
             background = 'inactiveFileNode';
           }
         }
       }
 
-      return (
-        <>
-          {/* allow toggling the visibility of the node's children
+      // Check whether the current node is the root node (need to display additional context menu)
+      if (
+        this.props.node.kind === 'OpenProofTree' ||
+        this.props.node.kind === 'ClosedProofTree'
+      ) {
+        return (
+          <>
+            {/* allow toggling the visibility of the node's children
+                          by a single click.
+  
+                          Double clicks are to be interpreted as opening files
+                      */}
+            <Context>
+              <div
+                onClick={this.toggle}
+                onDoubleClick={this.handleItemDoubleClick}
+                className={background}
+              >
+                <ProofIcon
+                  node={this.props.node}
+                  collapsed={this.state.collapsed}
+                />
+                {label}
+              </div>
+              <ContextMenu>
+                <ContextAction
+                  onClick={
+                    this.props.proofTreeOperationInfo.operation
+                  }
+                >
+                  {this.props.proofTreeOperationInfo.label}
+                </ContextAction>
+              </ContextMenu>
+            </Context>
+
+            {/* display the children as unordered list */}
+            <ul className="projectTreeList" style={display}>
+              {this.props.node.children.map(child => (
+                // when rendering components using map,
+                // react needs a unique key for each sub
+                // component
+                // TODO: Use better, unique key
+                <li key={`${child.serialNr},${child.oneStepId}`}>
+                  {/* use recursion to display children.
+                   */}
+                  <GuiProofNode
+                    node={child}
+                    displaySequent={this.props.displaySequent}
+                    selectNode={this.props.selectNode}
+                    selectedNode={this.props.selectedNode}
+                    path={this.props.path.concat(child)}
+                    proofTreeOperationInfo={this.props.proofTreeOperationInfo}
+                    />
+                </li>
+              ))}
+            </ul>
+          </>
+        );
+      } else {
+        return (
+          <>
+            {/* allow toggling the visibility of the node's children
                         by a single click.
 
                         Double clicks are to be interpreted as opening files
                     */}
-          <div
-            onClick={this.toggle}
-            onDoubleClick={this.handleItemDoubleClick}
-            className={background}            
-          >
-            <ProofIcon
-              node={this.props.node}
-              collapsed={this.state.collapsed}
-            />
-            {label}
-          </div>
-          {/* display the children as unordered list */}
-          <ul className="projectTreeList" style={display}>
-            {this.props.node.children.map(child => (
-              // when rendering components using map,
-              // react needs a unique key for each sub
-              // component
-              // TODO: Use better, unique key
-              <li key={`${child.serialNr},${child.oneStepId}`}>
-                {/* use recursion to display children.
-                */}
-                <GuiProofNode
-                  node={child}
-                  displaySequent={this.props.displaySequent}
-                  selectNode={this.props.selectNode}
-                  selectedNode={this.props.selectedNode}
-                  path={this.props.path.concat(child)}
-                />
-              </li>
-            ))}
-          </ul>
-        </>
-      );
+            <div
+              onClick={this.toggle}
+              onDoubleClick={this.handleItemDoubleClick}
+              className={background}
+            >
+              <ProofIcon
+                node={this.props.node}
+                collapsed={this.state.collapsed}
+              />
+              {label}
+            </div>
+            {/* display the children as unordered list */}
+            <ul className="projectTreeList" style={display}>
+              {this.props.node.children.map(child => (
+                // when rendering components using map,
+                // react needs a unique key for each sub
+                // component
+                // TODO: Use better, unique key
+                <li key={`${child.serialNr},${child.oneStepId}`}>
+                  {/* use recursion to display children.
+                   */}
+                  <GuiProofNode
+                    node={child}
+                    displaySequent={this.props.displaySequent}
+                    selectNode={this.props.selectNode}
+                    selectedNode={this.props.selectedNode}
+                    path={this.props.path.concat(child)}
+                    proofTreeOperationInfo={this.props.proofTreeOperationInfo}
+                    />
+                </li>
+              ))}
+            </ul>
+          </>
+        );
+      }
     } else {
       // The node is a leaf
       return (
         /* double clicks are to be interpreted as opening files */
-        <div
-          onDoubleClick={this.handleItemDoubleClick}
-        >
-          {label}
-        </div>
+        <div onDoubleClick={this.handleItemDoubleClick}>{label}</div>
       );
     }
   }
@@ -124,7 +179,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
    * Called, whenever the node is double clicked. */
   private handleItemDoubleClick() {
     const node = this.props.node;
-    if(node.kind !== Kind.OneStepSimplification){
+    if (node.kind !== Kind.OneStepSimplification) {
       this.props.selectNode(this.props.path);
       this.props.displaySequent(node.sequent);
     }
@@ -138,6 +193,7 @@ interface Props {
   selectNode: (path: ProofNode[]) => void;
   selectedNode: ProofNode[];
   path: ProofNode[];
+  proofTreeOperationInfo: {operation: () => void, label: String};
 }
 
 interface State {
