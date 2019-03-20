@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 @Entity
 public class File {
 
+  public File(){}
+
   public File(final String name){
     this.name = name;
   }

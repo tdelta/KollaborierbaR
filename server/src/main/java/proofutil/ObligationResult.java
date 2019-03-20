@@ -9,21 +9,23 @@ import javax.persistence.CascadeType;
 
 import repository.MethodContract;
 
-@Entity
+@Entity(name = "ObligationResult")
 public class ObligationResult {
 
   @Id
   @GeneratedValue
   private Long id;
 
-  private final int obligationIdx;
-  private final String resultMsg;
+  private int obligationIdx;
+  private String resultMsg;
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   private MethodContract methodContract;
 
   @OneToOne(cascade = CascadeType.ALL)
-  private final ProofNode proofTree;
+  private ProofNode proofTree;
+
+  public ObligationResult(){}
 
   public ObligationResult(final int obligationIdx, final String resultMsg, final ProofNode proofTree) {
     this.obligationIdx = obligationIdx;

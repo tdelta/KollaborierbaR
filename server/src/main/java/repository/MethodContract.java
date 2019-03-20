@@ -13,6 +13,8 @@ import java.util.List;
 @Entity
 public class MethodContract {
 
+  public MethodContract(){}
+
   public MethodContract(final int number, final String methodName){
     this.number = number;
     this.methodName = methodName;
