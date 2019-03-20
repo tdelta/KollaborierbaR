@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Basic KeY stub, that tries to prove all contracts in a file
@@ -65,8 +66,18 @@ public class KeYWrapper {
 																						// performed proof if a *.proof
 																						// file is loaded
 		} catch (ProblemLoaderException e) {
-			results.addError(-1, "Couldn't process all relevant information for verification with KeY.", null);			
-			results.addStackTrace(-1, "Exception at '" + location + "':\n" + stackToString(e));
+			results.addError(
+          -1, 
+          "unknown",
+          "Couldn't process all relevant information for verification with KeY.",
+          null
+      );
+
+			results.addStackTrace(
+          -1,
+          "unknown",
+          "Exception at '" + location + "':\n" + stackToString(e)
+      );
 
 			System.out.println("Exception at '" + location + "':");
 			e.printStackTrace();
@@ -113,6 +124,7 @@ public class KeYWrapper {
 				if (closed) {
 					results.addSuccess(
               obligationIdx,
+              contract.getTarget().toString(),
               "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is verified.",
               proofTree
           );
@@ -121,24 +133,32 @@ public class KeYWrapper {
 				else {
 					results.addFail(
               obligationIdx,
+              contract.getTarget().toString(),
               "Contract '" + contract.getDisplayName() + "' of " + contract.getTarget() + " is still open.",
-              proofTree
+              proofTree,
+              proof
+                .openGoals()
+                .stream()
+                .map((Goal goal) -> {
+                  final String sequent = LogicPrinter.quickPrintSequent(goal.sequent(),env.getServices());
+
+                  return new OpenGoalInfo(goal.getTime(), goal.toString(),sequent);
+                })
+                .collect(Collectors.toList())
           );
-				
-          for (Goal goal: proof.openGoals()) {
-            String sequent = LogicPrinter.quickPrintSequent(goal.sequent(),env.getServices());
-            results.addOpenGoal(new Obligation(goal.getTime(), goal.toString(),sequent));
-          }
 				}
 			} catch (ProofInputException e) {
 				results.addError(
-			             obligationIdx,"Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".",
+			             obligationIdx,
+                   "unknown",
+                   "Something went wrong at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ".",
                    null
         );
 
 				results.addStackTrace(
             obligationIdx,
-            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + stackToString(e)
+            contract.getTarget().toString(),
+            "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":\n" + KeYWrapper.stackToString(e)
         );
 
 				System.out.println("Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
@@ -151,12 +171,12 @@ public class KeYWrapper {
 		}
 	}
 	
-	public String stackToString(Throwable e) {
-
+	public static String stackToString(final Throwable e) {
 		//https://stackoverflow.com/questions/1149703/how-can-i-convert-a-stack-trace-to-a-string
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
+		final StringWriter sw = new StringWriter();
+		final PrintWriter pw = new PrintWriter(sw);
 		e.printStackTrace(pw);
+
 		return sw.toString();
 	}
 	
@@ -200,44 +220,46 @@ public class KeYWrapper {
 		return results;
 	}
 
-  public ProofResult proveContractByIndex(final String className, final int index) {
+  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices) {
     if (env != null) {
-      final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
-      final ImmutableSet<IObserverFunction> targets =
-          env.getSpecificationRepository().getContractTargets(keyType);
-
-      // KeY lists obligations from bottom to top of the file.
-      // We need to take this into account, when counting the
-      // obligations from top to bottom, as the client does.
-
-      // Therefore, we start with the maximum index.
-      int currentObligationIdx = targets
-        .stream()
-        .mapToInt(target -> 
-              env
-                .getSpecificationRepository()
-                .getContracts(keyType, target)
-                .size()
-            )
-        .sum() - 1; // -1, since we start counting at 0
-
-      for (final IObserverFunction target : targets) {
-        final ImmutableSet<Contract> contracts =
-            env.getSpecificationRepository().getContracts(keyType, target);
-
-        if (contracts.size() > 0 && currentObligationIdx + 1 - contracts.size() <= index) {
-          proveContract(index, contracts.toArray(new Contract[0])[
-              contracts.size() - (currentObligationIdx - index) - 1
-              // obligations inside contract sets are sorted top to bottom
-          ]);
-
-          return results;
-        }
-
-        else {
-          currentObligationIdx -= contracts.size();
-        }
-      }
+      for (int index: indices) {
+	    final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
+	    final ImmutableSet<IObserverFunction> targets =
+	        env.getSpecificationRepository().getContractTargets(keyType);
+	
+	    // KeY lists obligations from bottom to top of the file.
+	    // We need to take this into account, when counting the
+	    // obligations from top to bottom, as the client does.
+	
+	    // Therefore, we start with the maximum index.
+	    int currentObligationIdx = targets
+	      .stream()
+	      .mapToInt(target -> 
+	            env
+	              .getSpecificationRepository()
+	              .getContracts(keyType, target)
+	              .size()
+	          )
+	      .sum() - 1; // -1, since we start counting at 0
+	
+	    for (final IObserverFunction target : targets) {
+	      final ImmutableSet<Contract> contracts =
+	          env.getSpecificationRepository().getContracts(keyType, target);
+	
+	      if (contracts.size() > 0 && currentObligationIdx + 1 - contracts.size() <= index) {
+	        proveContract(index, contracts.toArray(new Contract[0])[
+	            contracts.size() - (currentObligationIdx - index) - 1
+	            // obligations inside contract sets are sorted top to bottom
+	        ]);
+	
+	        break;
+	      }
+	
+	      else {
+	        currentObligationIdx -= contracts.size();
+	      }
+	    }
+	    }
     }
 
     return results;

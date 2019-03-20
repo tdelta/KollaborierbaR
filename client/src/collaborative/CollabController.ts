@@ -1,6 +1,8 @@
 import Editor from '../components/editor';
 
-import { Network, UsersUpdatedEvent } from '../network';
+import { Network } from '../network';
+import { UsersUpdatedEvent } from '../collaborative/ProjectController';
+
 import {
   LogootSRopes,
   TextInsert,

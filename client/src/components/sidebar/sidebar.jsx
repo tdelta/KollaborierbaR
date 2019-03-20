@@ -7,7 +7,7 @@ import FontAwesome from 'react-fontawesome';
 
 import ProjectTreeView from './project-tree-view.jsx';
 import OpenGoalsView from './open-goals-view.tsx';
-import ProofTreeView from './proof-tree-view.tsx';
+import ProofTabView from './proof-tab-view.tsx';
 
 import {Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
 import classnames from 'classnames';
@@ -82,9 +82,17 @@ export default class Sidebar extends React.Component {
                 // only display the sidebar initially, if a project is set
                 false
                 : true,
-              activeTab: '1'
+            activeTab: '1',
+            selectedOption: null
         };
     }
+
+    handleChange = (selectedOption) => {
+        this.setState({ selectedOption });
+        alert("Eine neue Option wurde gesetzt:" + selectedOption);
+        console.log(`Option selected:`, selectedOption);
+      }
+
 
     /**
      * invert visibility of the sidebar by collapsing it, or
@@ -170,10 +178,11 @@ export default class Sidebar extends React.Component {
         }
 
         else if (
-          prevProps.openGoals.length === 0 && this.props.openGoals.length > 0
+          prevProps.proofsState !== this.props.proofsState && !this.props.proofsState.allGoalsAreClosed()
         ) {
-          this.enableTab('2');
+          this.enableTab('3');
         }
+
         // This fixes the bug, where the height of the ace isn't correct until you resize the sidebar
         window.dispatchEvent(new Event('resize')); 
     }
@@ -195,6 +204,16 @@ export default class Sidebar extends React.Component {
         var restoreHandleStyleMod = {
             'display': genVisibilityString(!this.state.collapsed)
         };
+
+        const obligations = this.props.proofsState
+          .getAllRecentObligationResults()
+          .map(obligationResult => {
+            return {
+              value: obligationResult.obligationIdx,
+              label: `${obligationResult.obligationIdx}: ${obligationResult.targetName}`
+            };
+          })
+          .sort((lhs, rhs) => lhs.value - rhs.value);
 
         return(
             <>
@@ -272,14 +291,18 @@ export default class Sidebar extends React.Component {
                                     </TabPane>
                                     <TabPane tabId="2">
                                         <OpenGoalsView
-                                            goals={this.props.openGoals}
+                                            proofsState={this.props.proofsState}
                                             displayFormula={this.props.displayFormula}
                                         />
                                     </TabPane>
                                     <TabPane tabId="3">
-                                        <ProofTreeView
-                                            proofResults={this.props.proofResults}
+                                        <ProofTabView
+                                            methods={obligations}
+                                            proofsState={this.props.proofsState}
+                                            obligationIdOfLastUpdatedProof={this.props.obligationIdOfLastUpdatedProof}
                                             displaySequent={this.props.displayFormula}
+                                            saveObligationResult={this.props.saveObligationResult}
+                                            deleteObligationResult={this.props.deleteObligationResult}
                                         />
                                     </TabPane>
                                 </TabContent>
@@ -297,13 +320,8 @@ Sidebar.propTypes = {
         'name': PropTypes.string,
         'contents': PropTypes.arrayOf(PropTypes.object)
     }),
-    'openGoals': PropTypes.arrayOf(
-      PropTypes.shape({
-        'id': PropTypes.number,
-        'sequent': PropTypes.string
-      })
-    ),
-    'proofResults': PropTypes.object,
+    'proofsState': PropTypes.object,
+    'obligationIdOfLastUpdatedProof': PropTypes.number,
     'onOpenFile': PropTypes.func,
     'onDeleteFile': PropTypes.func,
     'onCreateFile': PropTypes.func,
@@ -311,4 +329,6 @@ Sidebar.propTypes = {
     'onUpdateFileName': PropTypes.func,
     'openedPath': PropTypes.arrayOf(PropTypes.string),
     'displayFormula': PropTypes.func,
+    'saveObligationResult': PropTypes.func,
+    'deleteObligationResult': PropTypes.func
 };

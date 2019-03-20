@@ -2,9 +2,8 @@ import React from 'react';
 
 import GuiProofNode from './gui-proof-node';
 import ProofNode from '../../key/prooftree/ProofNode';
-import ProofResults from '../../key/netdata/ProofResults';
 
-import ObligationResult from '../../key/netdata/ObligationResult';
+import ObligationResult, {ObligationResultKind} from '../../key/netdata/ObligationResult';
 
 export default class ProofTreeView extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -21,49 +20,30 @@ export default class ProofTreeView extends React.Component<Props, State> {
     });
   }
 
-  public shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
-    // only do a shallow comparison, so that the proof tree view is not constantly updated.
-
-    return this.props.displaySequent !== nextProps.displaySequent
-        || this.props.proofResults !== nextProps.proofResults
-        || this.state.selectedNode !== nextState.selectedNode;
-  }
-
   public render() {
-    let nodes: ProofNode[] = [];
-    
-    const results = this.props.proofResults;
-    console.log("RESULTS");
-    console.log(results);
-    if (results != null) {
-      nodes =
-        results.succeeded
-          .concat(results.failed)
-          .concat(results.errors)
-          .map((result: ObligationResult) => result.proofTree)
-          .filter((proofTree: ProofNode) => proofTree != null);
-    }
-      
-    // TODO better keys
+    let node = undefined;
+    let initiallyCollapsed = true;
 
-    if (nodes.length > 0) {
+    if (this.props.obligationResult != null) {
+      node = this.props.obligationResult.proofTree;
+      // Reenable, if this behavior is desired:
+      //initiallyCollapsed = this.props.obligationResult.kind === ObligationResultKind.success;
+    }
+
+    if (node != null) {
       return (
         <div>
-          {
-            nodes.map(node => (
-                <GuiProofNode
-                  key={`${node.serialNr},${node.oneStepId}`}
-                  // TODO better keys
-                  node={node}
-                  initiallyCollapsed={nodes.length > 1}
-                  displaySequent={this.props.displaySequent}
-                  selectNode={this.selectNode}
-                  selectedNode={this.state.selectedNode}
-                  path={[node]}
-                />
-                )
-            )
-          }
+          <GuiProofNode
+            key={`${node.serialNr},${node.oneStepId}`}
+            // TODO better keys
+            node={node}
+            initiallyCollapsed={initiallyCollapsed}
+            displaySequent={this.props.displaySequent}
+            selectNode={this.selectNode}
+            selectedNode={this.state.selectedNode}
+            path={[node]}
+            proofTreeOperationInfo={this.props.proofTreeOperationInfo}
+          />
         </div>
       );
     } else {
@@ -74,8 +54,9 @@ export default class ProofTreeView extends React.Component<Props, State> {
 
 // defining the structure of this react components properties
 interface Props {
-  proofResults: ProofResults;
+  obligationResult?: ObligationResult;
   displaySequent: (sequent: string) => void;
+  proofTreeOperationInfo: {operation: () => void, label: String};
 }
 
 interface State {
