@@ -1,4 +1,5 @@
 import React from 'react';
+import {Kind} from '../../key/prooftree/ProofNode';
 
 import GuiProofNode from './gui-proof-node';
 import ProofNode from '../../key/prooftree/ProofNode';
@@ -63,35 +64,49 @@ export default class ProofTreeView extends React.Component<Props, State> {
   public handleKeydown(event: any){
       
         let newSelectedNode = this.selectedPath.slice();
-
+        let leafNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 1];
+        console.log(leafNode);
         switch(event.keyCode){
           case 38:
               console.log("Up");
               console.log(newSelectedNode[newSelectedNode.length - 1].serialNr);
-              if(newSelectedNode.length > 1){
-                  let foundUp = newSelectedNode[newSelectedNode.length - 2].children.findIndex((element) => {
-                     return element.serialNr === newSelectedNode[newSelectedNode.length - 1].serialNr;
-                  });
+              if(newSelectedNode.length > 1){  //We are not in the root node
+                  let parentNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 2];
+                  let index: number = parentNode.getIndex(leafNode);
                   
-                  console.log('Index within the children array of the parent before update:' + foundUp);
-                      if(foundUp === 0){
-                        newSelectedNode.pop();
-                      }else{
-                        newSelectedNode.pop(); 
-                        newSelectedNode.push(newSelectedNode[newSelectedNode.length - 1].children[foundUp - 1]);
-                      } 
+                  console.log('Index within the children array of the parent before update:' + index);
+                  newSelectedNode.pop();
+                  if(index > 0){
+                    let nextNodeUp: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 1].children[index - 1];
+                    if(nextNodeUp.collapsed || nextNodeUp.children.length == 0 || (nextNodeUp.children.length != 0 && nextNodeUp.children[0].kind === Kind.OneStepSimplification)){
+                        newSelectedNode.push(nextNodeUp);
+                    }else{
+                        let nextNodeUpChildIndex = nextNodeUp.children.length - 1; 
+                        newSelectedNode.push(nextNodeUp);
+                        newSelectedNode.push(nextNodeUp.children[nextNodeUpChildIndex]);
+                    }
+                  }
               }
               break;
           case 40:
               // Down
-              let leafNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 1];
               if((leafNode.collapsed || leafNode.children.length == 0)&& newSelectedNode.length > 1){
                   let parentNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 2];
-                  let index: number = parentNode.getIndex(leafNode) + 1;
+                  let index: number = parentNode.getIndex(leafNode);
                   console.log(parentNode.children.length);
-                  if(index < parentNode.children.length){
-                    newSelectedNode.pop();
-                    newSelectedNode.push(parentNode.children[index]);
+                  if(index < parentNode.children.length - 1){ 
+                        newSelectedNode.pop();
+                        newSelectedNode.push(parentNode.children[index + 1]);
+                  }else{
+                     if(newSelectedNode.length > 2){
+                        let GrandParentNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 3];
+                        let GrandParentNodeChildIndex: number = GrandParentNode.getIndex(parentNode);
+                        if(GrandParentNodeChildIndex !== GrandParentNode.children.length - 1){
+                            newSelectedNode.pop();
+                            newSelectedNode.pop();
+                            newSelectedNode.push(GrandParentNode.children[GrandParentNodeChildIndex + 1]);
+                        }
+                     } 
                   }
               } else {
                   if(leafNode.children.length > 0){
@@ -133,7 +148,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
             .concat(results.failed)
             .concat(results.errors)
             .map((result: ObligationResult) => result.proofTree)
-            .map(toDisplayTree)
+            .map(proofTree => toDisplayTree(proofTree, null))
             .filter((proofTree: DisplayTreeNode | null): proofTree is DisplayTreeNode => proofTree != null);
 
       this.setState({

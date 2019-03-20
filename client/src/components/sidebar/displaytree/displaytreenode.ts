@@ -10,6 +10,7 @@ export default class DisplayTreeNode {
   public sequent: string;
   public serialNr: number;
   public oneStepId: number;
+  public parent: ProofNode;
 
   public constructor(
     collapsed: boolean,
@@ -19,7 +20,8 @@ export default class DisplayTreeNode {
     kind: Kind,
     sequent: string,
     serialNr: number,
-    oneStepId: number
+    oneStepId: number,
+    parent: ProofNode
   ) {
     this.collapsed = collapsed;
     this.selected = selected;
@@ -29,6 +31,7 @@ export default class DisplayTreeNode {
     this.sequent = sequent;
     this.serialNr = serialNr;
     this.oneStepId = oneStepId;
+    this.parent = parent;
   }
 
   public findNode(path: DisplayTreeNode[]): DisplayTreeNode | null{
@@ -49,12 +52,12 @@ export default class DisplayTreeNode {
   }
 }
 
-export function toDisplayTree(tree: ProofNode): DisplayTreeNode | null{
+export function toDisplayTree(tree: ProofNode, parent: ProofNode): DisplayTreeNode | null{
   if(tree === null) return null;
-  let children: DisplayTreeNode[] = [];
+  let children: DisplayTreeNode[] = [];   
 
   for(let child of tree.children){
-    let parsedChild: DisplayTreeNode | null = toDisplayTree(child);
+    let parsedChild: DisplayTreeNode | null = toDisplayTree(child, tree);
     if(parsedChild != null)
       children.push(parsedChild);
   }
@@ -69,6 +72,7 @@ export function toDisplayTree(tree: ProofNode): DisplayTreeNode | null{
     tree.kind,
     tree.sequent,
     tree.serialNr,
-    tree.oneStepId
+    tree.oneStepId,
+    parent
   );
 }
