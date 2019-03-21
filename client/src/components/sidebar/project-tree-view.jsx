@@ -98,6 +98,7 @@ export default class ProjectTreeView extends React.Component {
         if (isProjectValid && this.props.project.hasOwnProperty('contents')) {
             let folder = [];
             let files = []; 
+            //Sort content of project according to whether the element is a file or a folder
             for (let f of this.props.project.contents){
                 if(f.type === "folder"){
                   folder.push(f); 
@@ -106,6 +107,7 @@ export default class ProjectTreeView extends React.Component {
                   files.push(f);
                 }
             } 
+            //Sort folder elements by name
             folder.sort(function(a, b){
               if(a.name.toLowerCase() < b.name.toLowerCase()) {
                 return -1; }
@@ -113,6 +115,7 @@ export default class ProjectTreeView extends React.Component {
                 return 1; }
               return 0;}
             );
+            //Sort file elements by name
             files.sort(function(a, b){
               if(a.name.toLowerCase() < b.name.toLowerCase()) {
                 return -1; }
