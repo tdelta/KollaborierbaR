@@ -28,8 +28,7 @@ run:
 
 # run unit and api tests
 test:
-	./gradlew test
-	make -C specification test
+	./helpers/api-test.sh
 
 clean:
 	./gradlew clean
