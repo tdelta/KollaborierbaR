@@ -1,4 +1,4 @@
-.PHONY: setup check pedantic run test clean
+.PHONY: setup check format run test clean
 
 all:
 	./gradlew build
@@ -10,17 +10,13 @@ setup:
 
 # run static analysis tools
 check:
-	# run PMD tool
-	./gradlew pmdMain
-	# run Spotless coding style checker
 	./gradlew spotlessCheck
+	./gradlew pmdMain
+	./gradlew spotbugsMain
+	./gradlew checkstyleMain
 
-# run static analysis tools in aggressive mode
-pedantic:
-	# run PMD tool
-	./gradlew -b pedantic.gradle pmdMain
-	# run Spotless coding style checker
-	./gradlew -b pedantic.gradle spotlessCheck
+format:
+	./gradlew spotlessApply
 
 # run project
 run:

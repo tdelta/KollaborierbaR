@@ -21,8 +21,9 @@
     "eject": "react-scripts eject",
     "clean": "rm -r build/*",
     "eslint": "eslint -c .eslintrc.js src/**/*.js*",
-    "eslint-pedantic": "eslint -c .eslint-pedantic.js src/**/*.js*",
+    "eslint-fix": "eslint -c .eslintrc.js --fix src/**/*.js*",
     "tslint": "tslint -c .tslint.json --project tsconfig.json 'src/**/*.ts*'",
+    "tslint-fix": "tslint -c .tslint.json --project tsconfig.json --fix 'src/**/*.ts*'",
     "format": "prettier --write 'src/**/*.ts*'"
   },
   "eslintConfig": {
