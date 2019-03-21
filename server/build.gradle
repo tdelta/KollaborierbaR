@@ -1,10 +1,14 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+          url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE"
         classpath "com.diffplug.spotless:spotless-plugin-gradle:3.16.0"
+        classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.9"
     }
 }
 
@@ -16,9 +20,11 @@ apply plugin: 'io.spring.dependency-management'
 
 // coding style formatter and analysis
 apply plugin: "com.diffplug.gradle.spotless"
+apply plugin: 'checkstyle'
 
 // static analysis tools
 apply plugin: 'pmd'
+apply plugin: "com.github.spotbugs"
 
 bootJar {
     baseName = 'gs-rest-service'
@@ -69,9 +75,27 @@ spotless {
   // ...instead call spotlessCheck / spotlessApply directly
 
   java {
+    target '**/*.java'
     googleJavaFormat('1.6') // use version 1.6 of google-java-format
     paddedCell() //workaround for minor bug in spotless
   }
+}
+
+// Checkstyle tool. Also checks for aspects of the Google Java Style
+checkstyle {
+  configFile rootProject.file('checkstyle.xml')
+
+  ignoreFailures false
+  showViolations true
+  toolVersion ="6.14.1" 
+}
+
+checkstyleMain {
+    configFile rootProject.file('.checkstyle_google.xml')
+    source ='src/main/java'
+}
+checkstyleTest {
+    source ='src/test/java'
 }
 
 // PMD static analysis settings
@@ -84,6 +108,28 @@ pmd {
     // see also https://pmd.sourceforge.io/pmd-5.3.3/customizing/rule-guidelines.html
     rulePriority = 2
     consoleOutput = true
+}
+
+// SpotBugs static analysis tool.
+// Supports only Java 1.8 and 1.9
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+  reports {
+    html {
+      enabled = true
+    }
+    xml {
+      enabled = false
+    }
+  }
+}
+
+spotbugs {
+  toolVersion = '3.1.9'
+  ignoreFailures = false
+  effort = 'max'
+  reportLevel = 'high'
+  sourceSets = [sourceSets.main, sourceSets.test]
+  excludeFilter = file("$rootProject.projectDir/.spotbugs-filter.xml")
 }
 
 // configure tests to show some actually useful debug information
