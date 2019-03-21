@@ -48,9 +48,15 @@ dependencies {
     // adds /actuator/health indicator, this way, other applications can check if the
     // server is ready. Also useful for tests.
     compile("org.springframework.boot:spring-boot-starter-actuator")
+
     // include KeYnd KeY dependency libraries
     compile fileTree(dir: "${keyFolder}/deployment/libs", include: "*.jar")
     compile fileTree(dir: "${keyFolder}/deployment/components", include: "*.jar")
+
+    // SpringFox: Will automatically provide a HTML description of the API
+    compile "io.springfox:springfox-swagger2:2.9.2"
+    compile "io.springfox:springfox-swagger-ui:2.9.2"
+>>>>>>> springfoxMaster
 }
 
 wrapper {
