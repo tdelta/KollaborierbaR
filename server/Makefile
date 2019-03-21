@@ -11,9 +11,9 @@ setup:
 # run static analysis tools
 check:
 	./gradlew spotlessCheck
+	./gradlew checkstyleMain
 	./gradlew pmdMain
 	./gradlew spotbugsMain
-	./gradlew checkstyleMain
 
 format:
 	./gradlew spotlessApply

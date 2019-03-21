@@ -7,7 +7,7 @@ buildscript {
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.16.0"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.20.0"
         classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.9"
     }
 }
@@ -75,9 +75,7 @@ spotless {
   // ...instead call spotlessCheck / spotlessApply directly
 
   java {
-    target '**/*.java'
-    googleJavaFormat('1.6') // use version 1.6 of google-java-format
-    paddedCell() //workaround for minor bug in spotless
+    googleJavaFormat()
   }
 }
 
