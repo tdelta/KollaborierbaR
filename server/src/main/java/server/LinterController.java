@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import linter.Diagnostic;
-import linter.JavaJDTLinter;
+import linter.JavaJdtLinter;
 import linter.JavaSourceMemoryObject;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,15 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 /** Naive HTTP API (RESTful?) for linting (java) source code */
 @RestController
 public class LinterController {
-  private final JavaJDTLinter linter = new JavaJDTLinter();
+  private final JavaJdtLinter linter = new JavaJdtLinter();
 
   /**
    * implements "/lint" routing
    *
    * @param name class name of java source file
-   * @param source source code of file
-   *     <p>Example: POST request to http://myserver/lint?name=MyClass with the source code of
-   *     MyClass.java within the request body.
+   * @param source source code of file Example: POST request to http://myserver/lint?name=MyClass
+   *     with the source code of MyClass.java within the request body.
    */
   @RequestMapping("/lint")
   @ResponseBody
