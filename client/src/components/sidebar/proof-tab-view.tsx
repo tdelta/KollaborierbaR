@@ -4,7 +4,7 @@ import ProofNode from '../../key/prooftree/ProofNode';
 import ProofTreeView from './proof-tree-view';
 
 import ObligationResult from '../../key/netdata/ObligationResult';
-import { ObligationResultHistory } from '../../key/ProofsState';
+import ObligationResultHistory from '../../key/ObligationResultHistory';
 
 import Select from 'react-select';
 import Option from 'react-select/lib/types';

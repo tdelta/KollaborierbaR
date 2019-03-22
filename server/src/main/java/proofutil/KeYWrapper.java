@@ -267,6 +267,8 @@ public class KeYWrapper {
   }
 
   public void dispose() {
-    if (env != null) env.dispose();
+    if (env != null) {
+      env.dispose();
+    }
   }
 }
