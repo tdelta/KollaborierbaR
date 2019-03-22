@@ -50,6 +50,7 @@
         "sort-imports": false,
         "max-line-length": false,
         "no-empty-interface": false,
+        "array-type": [true, "array"],
 
         "no-console": false
     },
