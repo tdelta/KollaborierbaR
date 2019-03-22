@@ -23,8 +23,8 @@ export default class ProofTreeView extends React.Component<Props, State> {
   }
 
   public render() {
-    let node = undefined;
-    let initiallyCollapsed = true;
+    let node;
+    const initiallyCollapsed = true;
 
     if (this.props.obligationResult != null) {
       node = this.props.obligationResult.proofTree;

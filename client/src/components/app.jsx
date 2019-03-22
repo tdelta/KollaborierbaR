@@ -40,7 +40,7 @@ export default class App extends React.Component {
         this.displayCloseButton = false;
 
         this.network = new Network({
-          onConnect: () => console.log("Connected websocket.")
+          onConnect: () => console.log('Connected websocket.')
         });
 
         this.projectManagement = new ProjectManagement(
@@ -225,10 +225,10 @@ export default class App extends React.Component {
         let m = date.getMinutes();
         let s = date.getSeconds();
 
-        let timeString = h + ":" + m + ":" + s;
+        let timeString = h + ':' + m + ':' + s;
 
         this.setState({
-            consolelog: /*this.state.consolelog+*/ timeString + " " + message + "\n",
+            consolelog: /*this.state.consolelog+*/ timeString + ' ' + message + '\n',
             consoleIsVisible: true
         });
     }
@@ -244,7 +244,7 @@ export default class App extends React.Component {
      * and inserted into the DOM tree.
      */
     componentDidMount() {
-        document.title = "KollaborierbaR";
+        document.title = 'KollaborierbaR';
 
         this.collabController = new CollabController(
             this.network,
@@ -358,7 +358,7 @@ export default class App extends React.Component {
                         saveObligationResult={this.saveObligationResult}
                         deleteObligationResult={this.deleteObligationResult}
                     />
-                    <div class="rightSide">
+                    <div className="rightSide">
                         {
                         // Only display the button if this variable is true
                         this.displayCloseButton &&
@@ -372,7 +372,7 @@ export default class App extends React.Component {
                                 top:'10px', 
                                 borderRadius:'100px'
                             }}>
-                            <i class="fa fa-times"></i>
+                            <i className="fa fa-times"></i>
                         </Button>
                         }
                         <Editor

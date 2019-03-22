@@ -21,7 +21,7 @@ export default class Usernames extends React.Component<Props, State> {
   }
 
   public static updateAllUsers(users: User[]) {
-    for (let instance of Usernames.instances) {
+    for (const instance of Usernames.instances) {
       instance.updateUsers(users);
     }
   }

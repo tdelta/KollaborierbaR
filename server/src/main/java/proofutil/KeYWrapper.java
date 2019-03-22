@@ -134,9 +134,7 @@ public class KeYWrapper {
                   + contract.getTarget()
                   + " is still open.",
               proofTree,
-              proof
-                  .openGoals()
-                  .stream()
+              proof.openGoals().stream()
                   .map(
                       (Goal goal) -> {
                         final String sequent =
@@ -199,8 +197,7 @@ public class KeYWrapper {
 
       // Therefore, we start with the maximum index.
       int currentObligationIdx =
-          targets
-                  .stream()
+          targets.stream()
                   .mapToInt(
                       target ->
                           env.getSpecificationRepository().getContracts(keyType, target).size())
@@ -239,8 +236,7 @@ public class KeYWrapper {
 
         // Therefore, we start with the maximum index.
         int currentObligationIdx =
-            targets
-                    .stream()
+            targets.stream()
                     .mapToInt(
                         target ->
                             env.getSpecificationRepository().getContracts(keyType, target).size())
