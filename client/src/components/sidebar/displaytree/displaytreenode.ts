@@ -5,28 +5,26 @@ export default class DisplayTreeNode {
   public collapsed: boolean;
   public selected: boolean;
   public text: string;
-  public children: DisplayTreeNode[];
+  public children: DisplayTreeNode[] = [];
   public kind: Kind;
   public sequent: string;
   public serialNr: number;
   public oneStepId: number;
-  public parent: ProofNode|null;
+  public parent: DisplayTreeNode|null;
 
   public constructor(
     collapsed: boolean,
     selected: boolean,
     text: string,
-    children: DisplayTreeNode[],
     kind: Kind,
     sequent: string,
     serialNr: number,
     oneStepId: number,
-    parent: ProofNode|null
+    parent: DisplayTreeNode|null
   ) {
     this.collapsed = collapsed;
     this.selected = selected;
     this.text = text;
-    this.children = children;
     this.kind = kind;
     this.sequent = sequent;
     this.serialNr = serialNr;
@@ -50,29 +48,72 @@ export default class DisplayTreeNode {
        return node.serialNr === child.serialNr;
     });
   }
-}
 
-export function toDisplayTree(tree: ProofNode, parent: ProofNode|null): DisplayTreeNode | null{
-  if(tree === null) return null;
-  let children: DisplayTreeNode[] = [];   
-
-  for(let child of tree.children){
-    let parsedChild: DisplayTreeNode | null = toDisplayTree(child, tree);
-    if(parsedChild != null)
-      children.push(parsedChild);
+  public setChildren(node: DisplayTreeNode[]){
+    this.children = node;
   }
 
-  let collapsed: boolean = children.length > 1;
+  public findNextLeafUp(): DisplayTreeNode{
+      let numberOfChildren: number = this.children.length;
+      console.log(this.kind);
+      if(numberOfChildren == 0  || this.collapsed){
+          return this;
+      }else{
+        if(this.children[0].kind === Kind.OneStepSimplification){
+          return this; 
+        }else{
+          if(this.children[numberOfChildren - 1].collapsed){
+            return this.children[numberOfChildren - 1];
+          }else{
+            return this.children[numberOfChildren - 1].findNextLeafUp();
+        }
+        }
+      } 
+  }
 
-  return new DisplayTreeNode(
+  public findNextLeafDown(): DisplayTreeNode| null{
+        if(this.parent != null){
+          // am i last ? 
+          let index: number = this.parent.getIndex(this);
+          if(index < this.parent.children.length - 1){
+            return this.parent.children[index + 1];
+          }else{
+            return this.parent.findNextLeafDown();
+          }
+        }else{
+          return null;        
+       } 
+  }
+}
+
+
+
+export function toDisplayTree(tree: ProofNode, parent: DisplayTreeNode|null): DisplayTreeNode | null{
+  if(tree === null) return null;
+
+ 
+
+  let collapsed: boolean = tree.children.length > 1;
+
+  let result: DisplayTreeNode = new DisplayTreeNode(
     collapsed,
     false,
     tree.text,
-    children,
     tree.kind,
     tree.sequent,
     tree.serialNr,
     tree.oneStepId,
     parent
   );
+
+  let children: DisplayTreeNode[] = [];   
+
+ for(let child of tree.children){
+    let parsedChild: DisplayTreeNode | null = toDisplayTree(child, result);
+    if(parsedChild != null)
+      children.push(parsedChild);
+ }
+
+  result.setChildren(children);
+  return result;
 }

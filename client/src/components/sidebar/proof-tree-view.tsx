@@ -33,15 +33,14 @@ export default class ProofTreeView extends React.Component<Props, State> {
     });
   }
 
-  public selectNode(path: DisplayTreeNode[]){
-    let node: DisplayTreeNode = path[path.length - 1];
-    let previousSelected: DisplayTreeNode = this.selectedPath[this.selectedPath.length - 1];
-    if(previousSelected)
-      previousSelected.selected = false;
+  public selectNode(node: DisplayTreeNode){
+    this.props.displaySequent(node.sequent);
+    console.log(node);
+    if(this.lastSelected)
+      this.lastSelected.selected = false;
     if(node)
       node.selected = true;
     this.lastSelected = node;
-    this.selectedPath = path;
     this.setState({
       changed:true
     });
@@ -61,87 +60,54 @@ export default class ProofTreeView extends React.Component<Props, State> {
     }
   }
 
-  public findNextLeafUp(node: DisplayTreeNode): DisplayTreeNode|null{
-      let numberOfChildren: number = node.children.length;
-      if(numberOfChildren == 0 || node.kind === Kind.OneStepSimplification){
-        
-        newSelectedNode.push(node.children[numberOfChildren - 1]);
-      }else{
-        if(node.children[numberOfChildren - 1].collapsed != true){
-            newSelectedNode.push(node.children[numberOfChildren - 1]);
-            this.findNextLeafUp(node.children[numberOfChildren - 1], newSelectedNode);
-        }
-      } 
-  }
+  
 
   public handleKeydown(event: any){
-      
-        let newSelectedNode = this.selectedPath.slice();
-        let leafNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 1];
+     if(this.lastSelected != null){ 
+        let leafNode: DisplayTreeNode = this.lastSelected;
         console.log(leafNode);
         switch(event.keyCode){
           case 38:
-              console.log("Up");
-              console.log(newSelectedNode[newSelectedNode.length - 1].serialNr);
-              if(newSelectedNode.length > 1){  //We are not in the root node
-                  let parentNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 2];
+              //Up
+              if(leafNode.parent != null){  //We are not in the root node
+                  let parentNode: DisplayTreeNode = leafNode.parent;
                   let index: number = parentNode.getIndex(leafNode);
-                  
-                  console.log('Index within the children array of the parent before update:' + index);
-                  newSelectedNode.pop();
                   if(index > 0){
-                    let nextNodeUp: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 1].children[index - 1];
-                    this.findNextLeafUp(nextNodeUp, newSelectedNode);
-//                    if(nextNodeUp.collapsed || nextNodeUp.children.length == 0 || (nextNodeUp.children.length != 0 && nextNodeUp.children[0].kind === Kind.OneStepSimplification)){
-//                        newSelectedNode.push(nextNodeUp);
-//                    }else{
-//                        let nextNodeUpChildIndex = nextNodeUp.children.length - 1; 
-//                        newSelectedNode.push(nextNodeUp);
-//                        newSelectedNode.push(nextNodeUp.children[nextNodeUpChildIndex]);
-//                    }
+                    this.selectNode(parentNode.children[index - 1].findNextLeafUp());
+                  }else{
+                    this.selectNode(parentNode)
                   }
               }
               break;
           case 40:
               // Down
-              if((leafNode.collapsed || leafNode.children.length == 0)&& newSelectedNode.length > 1){
-                  let parentNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 2];
-                  let index: number = parentNode.getIndex(leafNode);
-                  console.log(parentNode.children.length);
-                  if(index < parentNode.children.length - 1){ 
-                        newSelectedNode.pop();
-                        newSelectedNode.push(parentNode.children[index + 1]);
-                  }else{
-                     if(newSelectedNode.length > 2){
-                        let GrandParentNode: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 3];
-                        let GrandParentNodeChildIndex: number = GrandParentNode.getIndex(parentNode);
-                        if(GrandParentNodeChildIndex !== GrandParentNode.children.length - 1){
-                            newSelectedNode.pop();
-                            newSelectedNode.pop();
-                            newSelectedNode.push(GrandParentNode.children[GrandParentNodeChildIndex + 1]);
-                        }
-                     } 
-                  }
-              } else {
-                  if(leafNode.children.length > 0){
-                    newSelectedNode.push(leafNode.children[0]);
-                  }
+              if(leafNode.collapsed == false && leafNode.children.length != 0 && leafNode.children[0].kind != Kind.OneStepSimplification){ 
+                  this.selectNode(leafNode.children[0]);
+                }else{
+              if(leafNode.parent != null){
+                let nextLeafDown: DisplayTreeNode|null = leafNode.findNextLeafDown();
+                if(nextLeafDown != null){
+                  this.selectNode(nextLeafDown);
+                }
+              }else{
+                  
+                  this.selectNode(leafNode);
+                } 
               }
               break;
           case 39:
               // Right
-              newSelectedNode[newSelectedNode.length - 1].collapsed = false;
+              leafNode.collapsed = false;
+              this.selectNode(leafNode);
               break;
           case 37:
               // Left
-              newSelectedNode[newSelectedNode.length - 1].collapsed = true;
+              leafNode.collapsed = true;
+              this.selectNode(leafNode);
               break;
         }
 
-        if(event.keyCode == 37 || event.keyCode == 39 || event.keyCode == 40 || event.keyCode == 38){ 
-          this.props.displaySequent(newSelectedNode[newSelectedNode.length -1].sequent);   
-          this.selectNode(newSelectedNode);
-        }
+     }
     } 
 
   componentDidMount() {
@@ -186,10 +152,8 @@ export default class ProofTreeView extends React.Component<Props, State> {
                   key={`${node.serialNr},${node.oneStepId}`}
                   // TODO better keys
                   node={node}
-                  displaySequent={this.props.displaySequent}
                   selectNode={this.selectNode}
                   collapseNode={this.collapseNode}
-                  path={[node]}
                 />
                 )
             )

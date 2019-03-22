@@ -72,10 +72,8 @@ export default class GuiProofNode extends React.Component<Props> {
                 */}
                 <GuiProofNode
                   node={child}
-                  displaySequent={this.props.displaySequent}
                   selectNode={this.props.selectNode}
                   collapseNode={this.props.collapseNode}
-                  path={this.props.path.concat(child)}
                 />
               </li>
             ))}
@@ -105,16 +103,13 @@ export default class GuiProofNode extends React.Component<Props> {
   private handleItemDoubleClick() {
     const node = this.props.node;
     if(node.kind !== Kind.OneStepSimplification){
-      this.props.selectNode(this.props.path);
-      this.props.displaySequent(node.sequent);
+      this.props.selectNode(this.props.node);
     }
   }
 }
 
 interface Props {
   node: DisplayTreeNode;
-  displaySequent: (sequent: string) => void;
-  selectNode: (path: DisplayTreeNode[]) => void;
+  selectNode: (node: DisplayTreeNode) => void;
   collapseNode: (node: DisplayTreeNode) => void;
-  path: DisplayTreeNode[];
 }
