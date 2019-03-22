@@ -120,7 +120,6 @@
             <message key="name.invalidPattern"
              value="Parameter name ''{0}'' must match pattern ''{1}''."/>
          </module>
-         <module name="ClassDataAbstractionCoupling"/>
          <module name="CyclomaticComplexity">
             <property name="max" value="10"/>
         </module>
