@@ -92,6 +92,8 @@ public class JmlNotSupportedScanner extends ASTVisitor {
       case "double":
         saveDiagnostic(node, "Doubles are not supported in KeY");
         break;
+      default:
+        break;
     }
     return true;
   }
@@ -129,11 +131,6 @@ public class JmlNotSupportedScanner extends ASTVisitor {
     return visitAnnotation(node);
   }
 
-  public boolean visitAnnotation(Annotation node) {
-    saveDiagnostic(node, "Annotations are not supported in KeY");
-    return true;
-  }
-
   @Override
   public boolean visit(EnumDeclaration node) {
     saveDiagnostic(node, "Enums are not supported in KeY");
@@ -166,8 +163,9 @@ public class JmlNotSupportedScanner extends ASTVisitor {
 
   @Override
   public boolean visit(NumberLiteral node) {
-    if (node.getToken().indexOf('b') >= 0)
+    if (node.getToken().indexOf('b') >= 0) {
       saveDiagnostic(node, "Binary literals are not supported in KeY");
+    }
     return true;
   }
 
@@ -196,6 +194,8 @@ public class JmlNotSupportedScanner extends ASTVisitor {
       case "Thread":
         message = "Multithreading is not supported in KeY";
         break;
+      default:
+        break;
     }
 
     if (message != "") {
@@ -220,23 +220,32 @@ public class JmlNotSupportedScanner extends ASTVisitor {
     return visitExpression(node);
   }
 
-  public boolean visitExpression(Expression node) {
-    if (node.resolveBoxing() || node.resolveUnboxing())
-      saveDiagnostic(node, "Autoboxing is not supported in KeY");
-    return true;
-    // TODO: Not working
-  }
-
   @Override
   public boolean visit(MethodInvocation node) {
     IMethodBinding methodBinding = node.resolveMethodBinding();
-    if (methodBinding == null) return true;
+    if (methodBinding == null) {
+      return true;
+    }
     for (ITypeBinding implemented : methodBinding.getDeclaringClass().getInterfaces()) {
       String qualifiedName = implemented.getQualifiedName();
-      if (qualifiedName.equals("java.lang.Runnable") || qualifiedName.equals("java.lang.Thread"))
+      if (qualifiedName.equals("java.lang.Runnable") || qualifiedName.equals("java.lang.Thread")) {
         saveDiagnostic(node, "Multithreading is not supported in KeY");
+      }
     }
     return true;
+  }
+
+  public boolean visitAnnotation(Annotation node) {
+    saveDiagnostic(node, "Annotations are not supported in KeY");
+    return true;
+  }
+
+  public boolean visitExpression(Expression node) {
+    if (node.resolveBoxing() || node.resolveUnboxing()) {
+      saveDiagnostic(node, "Autoboxing is not supported in KeY");
+    }
+    return true;
+    // TODO: Not working
   }
 
   /**

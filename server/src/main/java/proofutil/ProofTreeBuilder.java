@@ -28,12 +28,16 @@ class ProofTreeBuilder {
   }
 
   private Node findChild(Node n) {
-    if (n.childrenCount() == 1) return n.child(0);
+    if (n.childrenCount() == 1) {
+      return n.child(0);
+    }
 
     Node nextN = null;
     for (int i = 0; i != n.childrenCount(); ++i) {
       if (!n.child(i).isClosed()) {
-        if (nextN != null) return null;
+        if (nextN != null) {
+          return null;
+        }
         nextN = n.child(i);
       }
     }
