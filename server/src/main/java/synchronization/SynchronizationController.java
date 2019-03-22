@@ -103,7 +103,11 @@ public class SynchronizationController {
   public void handleSubscription(@Header("file") String file, Principal user, File text) {
     System.out.println("Adding user to crdt doc " + file);
     unsubscribe(user);
-    if (file.equals("")) return;
+
+    if (file.equals("")) {
+      return;
+    }
+
     int replicaNumber;
     if (users.containsKey(file)) {
       // There are already people working on this document
@@ -129,6 +133,7 @@ public class SynchronizationController {
       // Send document to user
       messagingTemplate.convertAndSendToUser(user.getName(), "/crdt-doc", document);
     }
+
     // This event is handled by the ProjectSyncController instance
     userList.setId(user, replicaNumber);
     FileOpenedEvent event = new FileOpenedEvent(this, user, file);
