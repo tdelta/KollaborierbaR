@@ -8,6 +8,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.FetchType;
 import javax.persistence.CascadeType;
+import javax.persistence.Lob;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class ProofNode {
@@ -33,15 +36,19 @@ public class ProofNode {
     }
   }
 
+  @JsonIgnore
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Integer id;
 
+  @Lob
   private String text;
 
   @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
   private List<ProofNode> children;
   private Kind kind;
+
+  @Lob
   private String sequent;
   private int serialNr;
   private int oneStepId;

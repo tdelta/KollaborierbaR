@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"server", "synchronization"})
+@ComponentScan(basePackages = {"server", "synchronization","repository"})
 @EntityScan({"repository","proofutil"})
 public class Application {
 
