@@ -143,7 +143,7 @@ export default class ProofTabView extends React.Component<Props, State> {
 }
 
 interface Props {
-  methods: Array<{ value: number; label: string }>;
+  methods: { value: number; label: string }[];
   proofsState: ProofsState;
   obligationIdOfLastUpdatedProof: number | undefined;
   displaySequent: (sequent: string) => void;

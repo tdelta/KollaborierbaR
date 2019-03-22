@@ -58,7 +58,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
 interface Props {
   obligationResult?: ObligationResult;
   displaySequent: (sequent: string) => void;
-  proofTreeOperationInfo: { operation: () => void; label: String };
+  proofTreeOperationInfo: { operation: () => void; label: string };
 }
 
 interface State {
