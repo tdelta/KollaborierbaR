@@ -433,7 +433,7 @@ public class ProjectController {
       // and that the
       // caller of that functions wants to update the content, not the name of the file.
       try {
-    	// Oldversion: Had problems with encoding
+        // Oldversion: Had problems with encoding
         // final BufferedWriter writer = new BufferedWriter(new FileWriter(path));
         final File f = new File(path);
         final Writer writer =
