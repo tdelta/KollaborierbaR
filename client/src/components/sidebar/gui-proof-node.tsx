@@ -72,6 +72,7 @@ export default class GuiProofNode extends React.Component<Props> {
                 */}
                 <GuiProofNode
                   node={child}
+                  ref={child.getRef()}
                   selectNode={this.props.selectNode}
                   collapseNode={this.props.collapseNode}
                 />
