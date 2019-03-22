@@ -5,7 +5,10 @@ import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.OneToOne;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.CascadeType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import repository.MethodContract;
 
@@ -29,10 +32,12 @@ public class ObligationResult {
     }
   }
 
+  @JsonIgnore
   @Id
   @GeneratedValue
   private Long id;
 
+  @JsonIgnore
   @ManyToOne
   private MethodContract methodContract;
 
@@ -41,8 +46,11 @@ public class ObligationResult {
   @OneToOne(cascade = CascadeType.ALL)
   private ProofNode proofTree;
 
+  @OneToMany(cascade = CascadeType.ALL)
   private List<OpenGoalInfo> openGoals;
   private Kind kind;
+  private String targetName;
+  private int obligationIdx;
 
   public ObligationResult() {}
 
@@ -55,6 +63,10 @@ public class ObligationResult {
     this.kind = kind;
   }
 
+  public void setMethodContract(MethodContract methodContract){
+    this.methodContract = methodContract;
+  }
+
   public String getResultMsg() {
     return resultMsg;
   }
@@ -63,15 +75,23 @@ public class ObligationResult {
     return proofTree;
   }
 
-  public void setMethodContract(MethodContract methodContract){
-    this.methodContract = methodContract;
-  }
-
   public List<OpenGoalInfo> getOpenGoals() {
     return openGoals;
   }
 
+  public String getTargetName(){
+    return targetName;
+  }
+
   public Kind getKind() {
     return kind;
+  }
+
+  public Long getId(){
+    return id;
+  }
+
+  public int getObligationIdx(){
+    return obligationIdx;
   }
 }

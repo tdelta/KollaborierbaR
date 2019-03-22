@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 public interface FileRepository extends CrudRepository<File, Long> {
 
   public File findByName(final String name);
+
+  public boolean existsByName(final String name);
 }
