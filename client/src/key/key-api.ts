@@ -21,7 +21,10 @@ export default class KeyApi {
     }).then(response => response.json()); // parse the response body as json};
   }
 
-  public proveObligations(path: string, nr: number | number[]): Promise<ProofResults> {
+  public proveObligations(
+    path: string,
+    nr: number | number[]
+  ): Promise<ProofResults> {
     const escapedPath = escape(path);
     const url = `${serverAddress}/proof/${escapedPath}?obligationIdxs=${nr}`;
 

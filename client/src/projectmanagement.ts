@@ -78,20 +78,106 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
-    this.projectController = new ProjectController(
-      network,
-      {
-        onProjectEvent: (
-          event:
-            | ProjectEvent
-            | RenamedFileEvent
-            | ProjectFileEvent
-            | UsersUpdatedEvent
-        ) => {
-          const currentProject = this.getCurrentProject();
-          console.log(event.eventType);
-          switch (event.eventType) {
-            case ProjectEventType.DeletedFile:
+    this.projectController = new ProjectController(network, {
+      onProjectEvent: (
+        event:
+          | ProjectEvent
+          | RenamedFileEvent
+          | ProjectFileEvent
+          | UsersUpdatedEvent
+      ) => {
+        const currentProject = this.getCurrentProject();
+        console.log(event.eventType);
+        switch (event.eventType) {
+          case ProjectEventType.DeletedFile:
+            this.openProject((currentProject as Project).name, false);
+
+            if (
+              !ProjectManagement.projectContainsPath(
+                currentProject as Project,
+                this.getOpenedPath()
+              )
+            ) {
+              this.setText('');
+              this.setOpenedPath([]);
+            }
+
+            if (this.notificationSystem.current) {
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: 'A file got deleted',
+                level: 'error',
+                position: 'bc',
+              });
+            }
+
+            break;
+          case ProjectEventType.RenamedFile:
+            this.openProject((currentProject as Project).name, false);
+
+            const renameEvent: RenamedFileEvent = event as RenamedFileEvent;
+
+            if (renameEvent.originalPath === this.getOpenedPath().join('/')) {
+              // TODO: Evtl abstimmen mit Collab controller
+              const newPathArray: string[] = renameEvent.newPath.split('/');
+
+              if (newPathArray.length < 1) {
+                console.log('Error: Updated file path is invalied.');
+              } else {
+                this.setFileName(newPathArray[newPathArray.length - 1]);
+                this.setOpenedPath(newPathArray);
+              }
+            }
+
+            if (this.notificationSystem.current) {
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: `File ${renameEvent.originalPath} got renamed to ${
+                  renameEvent.newPath
+                }.`,
+                level: 'info',
+                position: 'bc',
+              });
+            }
+
+            break;
+          case ProjectEventType.UpdatedFile:
+            const fileEvent: ProjectFileEvent = event as ProjectFileEvent;
+
+            if (fileEvent.filePath === this.getOpenedPath().join('/')) {
+              if (this.notificationSystem.current) {
+                this.notificationSystem.current.clearNotifications();
+                this.notificationSystem.current.addNotification({
+                  message: `Permanently saved the contents of your currently opened file.`,
+                  level: 'success',
+                  position: 'bc',
+                });
+              }
+            }
+
+            break;
+          case ProjectEventType.DeletedProject:
+            this.showProject({});
+            this.setText('');
+            this.setOpenedPath([]);
+
+            if (this.notificationSystem.current) {
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: 'Your project got deleted.',
+                level: 'error',
+                position: 'bc',
+              });
+            }
+
+            break;
+          case ProjectEventType.UpdatedProject:
+            if (
+              !(
+                (currentProject as any).name == null ||
+                (currentProject as any).contents == null
+              )
+            ) {
               this.openProject((currentProject as Project).name, false);
 
               if (
@@ -103,115 +189,26 @@ export default class ProjectManagement {
                 this.setText('');
                 this.setOpenedPath([]);
               }
+            }
 
-              if (this.notificationSystem.current) {
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: 'A file got deleted',
-                  level: 'error',
-                  position: 'bc',
-                });
-              }
+            if (this.notificationSystem.current) {
+              // TODO evtl. nicht alle Notifications entfernen
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: 'The project files got updated.',
+                level: 'info',
+                position: 'bc',
+              });
+            }
 
-              break;
-            case ProjectEventType.RenamedFile:
-              this.openProject((currentProject as Project).name, false);
-
-              const renameEvent: RenamedFileEvent = event as RenamedFileEvent;
-
-              if (renameEvent.originalPath === this.getOpenedPath().join('/')) {
-                // TODO: Evtl abstimmen mit Collab controller
-                const newPathArray: string[] = renameEvent.newPath.split('/');
-
-                if (newPathArray.length < 1) {
-                  console.log('Error: Updated file path is invalied.');
-                } else {
-                  this.setFileName(newPathArray[newPathArray.length - 1]);
-                  this.setOpenedPath(newPathArray);
-                }
-              }
-
-              if (this.notificationSystem.current) {
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: `File ${renameEvent.originalPath} got renamed to ${
-                    renameEvent.newPath
-                  }.`,
-                  level: 'info',
-                  position: 'bc',
-                });
-              }
-
-              break;
-            case ProjectEventType.UpdatedFile:
-              const fileEvent: ProjectFileEvent = event as ProjectFileEvent;
-
-              if (fileEvent.filePath === this.getOpenedPath().join('/')) {
-                if (this.notificationSystem.current) {
-                  this.notificationSystem.current.clearNotifications();
-                  this.notificationSystem.current.addNotification({
-                    message: `Permanently saved the contents of your currently opened file.`,
-                    level: 'success',
-                    position: 'bc',
-                  });
-                }
-              }
-
-              break;
-            case ProjectEventType.DeletedProject:
-              this.showProject({});
-              this.setText('');
-              this.setOpenedPath([]);
-
-              if (this.notificationSystem.current) {
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: 'Your project got deleted.',
-                  level: 'error',
-                  position: 'bc',
-                });
-              }
-
-              break;
-            case ProjectEventType.UpdatedProject:
-              if (
-                !(
-                  (currentProject as any).name == null ||
-                  (currentProject as any).contents == null
-                )
-              ) {
-                this.openProject((currentProject as Project).name, false);
-
-                if (
-                  !ProjectManagement.projectContainsPath(
-                    currentProject as Project,
-                    this.getOpenedPath()
-                  )
-                ) {
-                  this.setText('');
-                  this.setOpenedPath([]);
-                }
-              }
-
-              if (this.notificationSystem.current) {
-                // TODO evtl. nicht alle Notifications entfernen
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: 'The project files got updated.',
-                  level: 'info',
-                  position: 'bc',
-                });
-              }
-
-              break;
-            case ProjectEventType.UsersUpdated:
-              console.log(event);
-              Usernames.updateAllUsers((<UsersUpdatedEvent>event).users);
-              break;
-          }
+            break;
+          case ProjectEventType.UsersUpdated:
+            console.log(event);
+            Usernames.updateAllUsers((<UsersUpdatedEvent>event).users);
+            break;
         }
-      }
-    );
+      },
+    });
   }
 
   private static projectContainsPath(
@@ -267,7 +264,7 @@ export default class ProjectManagement {
         //'Content-Type': 'application/json', // we are sending a json object
       },
     }).then(response => {
-      console.log("Parsing open file response: ", response);
+      console.log('Parsing open file response: ', response);
 
       return response.json();
     }); // parse the response body as json
@@ -297,9 +294,8 @@ export default class ProjectManagement {
     const url = `${serverAddress}/projects/${escapedName}`;
 
     this.closeProject(() =>
-      this.projectController.openProject(
-        name
-      )
+      this.projectController
+        .openProject(name)
         .catch(e => {
           console.error('Could not sync with server to open project');
           console.error(e);
@@ -330,7 +326,8 @@ export default class ProjectManagement {
     if ((project as Project).name == null) {
       cb();
     } else {
-      this.projectController.closeProject((project as Project).name)
+      this.projectController
+        .closeProject((project as Project).name)
         .catch(e => {
           console.error(
             'Failed to unsubscribe, you may still receive messages for your closed project'
@@ -474,7 +471,8 @@ export default class ProjectManagement {
     if (file !== null && !file.includes('/')) {
       ProjectManagement.createOverall(file, FileFolderEnum.folder).then(
         response => {
-          this.projectController.openProject(file)
+          this.projectController
+            .openProject(file)
             .catch(e => {
               console.error(
                 'Creating the project failed, because we could not sync with the server'

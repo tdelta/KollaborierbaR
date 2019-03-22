@@ -11,11 +11,11 @@ public class ObligationResult {
     private final String value;
 
     Kind(final String value) {
-        this.value = value;
+      this.value = value;
     }
 
     public String getValue() {
-        return value;
+      return value;
     }
   }
 
@@ -27,7 +27,13 @@ public class ObligationResult {
   private final List<OpenGoalInfo> openGoals;
   private final Kind kind;
 
-  public ObligationResult(final int obligationIdx, final String targetName, final String resultMsg, final ProofNode proofTree, final List<OpenGoalInfo> openGoals, final Kind kind) {
+  public ObligationResult(
+      final int obligationIdx,
+      final String targetName,
+      final String resultMsg,
+      final ProofNode proofTree,
+      final List<OpenGoalInfo> openGoals,
+      final Kind kind) {
     this.obligationIdx = obligationIdx;
     this.targetName = targetName;
     this.resultMsg = resultMsg;
