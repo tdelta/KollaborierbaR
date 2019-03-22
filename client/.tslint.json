@@ -49,6 +49,7 @@
         "ter-no-mixed-spaces-and-tabs": true,
         "sort-imports": false,
         "max-line-length": false,
+        "no-empty-interface": false,
 
         "no-console": false
     },
