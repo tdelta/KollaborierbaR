@@ -59,11 +59,13 @@ export class Network {
   }
 
   public unsubscribe(messageType: string) {
-    messageType = `/user/${messageType}`;
+    const prefixedMessageType = `/user/${messageType}`;
+
     this.callbacks = this.callbacks.filter(
-      element => element.messageType !== messageType
+      element => element.messageType !== prefixedMessageType
     );
-    this.stompClient.unsubscribe(messageType);
+
+    this.stompClient.unsubscribe(prefixedMessageType);
   }
 
   private setCallbacks() {

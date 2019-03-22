@@ -12,6 +12,7 @@
     "rules": {
         "prettier": true,
 
+        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
         "comment-format": false,
         "object-literal-shorthand": false,
         "object-literal-sort-keys": false,

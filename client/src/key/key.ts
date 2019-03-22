@@ -26,7 +26,7 @@ export default class Key {
   private setProofsState: (proofsState: ProofsState) => void;
   private setObligationIdOfLastUpdatedProof: (obligationId: number) => void;
 
-  private addNewConsoleMessage: (message: String) => void;
+  private addNewConsoleMessage: (message: string) => void;
 
   private contractRegex: RegExp = /normal_behaviour|exceptional_behaviour|normal_behavior|exceptional_behavior/g;
   // Find method declarations in the current line
@@ -41,7 +41,7 @@ export default class Key {
     setProofsState: (proofsState: ProofsState) => void,
     setObligationIdOfLastUpdatedProof: (obligationId: number) => void,
     getFilePath: () => string,
-    addNewConsoleMessage: (message: String) => void
+    addNewConsoleMessage: (message: string) => void
   ) {
     this.notificationSystem = notificationSystem;
     this.setProvenObligations = setProvenObligations;
@@ -334,7 +334,7 @@ export default class Key {
       this.notificationSystem.current.addNotification({
         title: 'Please Wait!',
         message:
-          typeof nr == 'number'
+          typeof nr === 'number'
             ? 'Proving obligation...'
             : 'Proving obligations...',
         level: 'info',
@@ -383,17 +383,21 @@ export default class Key {
 
   public getContractsForMethod(lines: string[], row: number): number[] {
     const result: number[] = [];
+
     if (this.isMethodDeclaration(lines[row])) {
       let numObligations = 0;
+
       for (let i = 0; i < lines.length; i += 1) {
         const obligations: RegExpMatchArray | null = lines[i].match(
           this.contractRegex
         );
+
         if (obligations) {
           numObligations += obligations.length;
           result.push(numObligations - 1);
         }
-        if (row == i) {
+
+        if (row === i) {
           break;
         } else if (this.isMethodDeclaration(lines[i])) {
           result.length = 0;
