@@ -61,6 +61,19 @@ export default class ProofTreeView extends React.Component<Props, State> {
     }
   }
 
+  public findNextLeafUp(node: DisplayTreeNode): DisplayTreeNode|null{
+      let numberOfChildren: number = node.children.length;
+      if(numberOfChildren == 0 || node.kind === Kind.OneStepSimplification){
+        
+        newSelectedNode.push(node.children[numberOfChildren - 1]);
+      }else{
+        if(node.children[numberOfChildren - 1].collapsed != true){
+            newSelectedNode.push(node.children[numberOfChildren - 1]);
+            this.findNextLeafUp(node.children[numberOfChildren - 1], newSelectedNode);
+        }
+      } 
+  }
+
   public handleKeydown(event: any){
       
         let newSelectedNode = this.selectedPath.slice();
@@ -78,13 +91,14 @@ export default class ProofTreeView extends React.Component<Props, State> {
                   newSelectedNode.pop();
                   if(index > 0){
                     let nextNodeUp: DisplayTreeNode = newSelectedNode[newSelectedNode.length - 1].children[index - 1];
-                    if(nextNodeUp.collapsed || nextNodeUp.children.length == 0 || (nextNodeUp.children.length != 0 && nextNodeUp.children[0].kind === Kind.OneStepSimplification)){
-                        newSelectedNode.push(nextNodeUp);
-                    }else{
-                        let nextNodeUpChildIndex = nextNodeUp.children.length - 1; 
-                        newSelectedNode.push(nextNodeUp);
-                        newSelectedNode.push(nextNodeUp.children[nextNodeUpChildIndex]);
-                    }
+                    this.findNextLeafUp(nextNodeUp, newSelectedNode);
+//                    if(nextNodeUp.collapsed || nextNodeUp.children.length == 0 || (nextNodeUp.children.length != 0 && nextNodeUp.children[0].kind === Kind.OneStepSimplification)){
+//                        newSelectedNode.push(nextNodeUp);
+//                    }else{
+//                        let nextNodeUpChildIndex = nextNodeUp.children.length - 1; 
+//                        newSelectedNode.push(nextNodeUp);
+//                        newSelectedNode.push(nextNodeUp.children[nextNodeUpChildIndex]);
+//                    }
                   }
               }
               break;
