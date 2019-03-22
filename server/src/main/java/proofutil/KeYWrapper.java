@@ -18,17 +18,20 @@ import de.uka.ilkd.key.pp.LogicPrinter;
 import de.uka.ilkd.key.rule.RuleApp;
 import de.uka.ilkd.key.rule.OneStepSimplifier.Protocol;
 import de.uka.ilkd.key.rule.OneStepSimplifierRuleApp;
+import de.uka.ilkd.key.macros.scripts.ScriptException;
 
 import org.key_project.util.collection.ImmutableSet;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Basic KeY stub, that tries to prove all contracts in a file
@@ -38,6 +41,7 @@ import java.util.stream.Collectors;
 public class KeYWrapper {
 	KeYEnvironment<?> env;
 	ProofResult results;
+  ProofScriptExecutor proofScriptExecutor = new ProofScriptExecutor();
 
 	public KeYWrapper(String path) {
 		final File location = new File("projects/" + path); // Path to the source code folder/file or to a *.proof file
@@ -84,7 +88,7 @@ public class KeYWrapper {
 		}
 	}
 
-	public void proveContract(final int obligationIdx, final Contract contract) {
+	public void proveContract(final int obligationIdx, final Contract contract, Optional<String> macro) {
 		// Perform proof
 		Proof proof = null;
 
@@ -109,8 +113,12 @@ public class KeYWrapper {
 				proof.getSettings().getStrategySettings().setMaxSteps(maxSteps);
 				proof.setActiveStrategy(proof.getServices().getProfile().getDefaultStrategyFactory().create(proof, sp));
 
-				// Start auto mode
-				env.getUi().getProofControl().startAndWaitForAutoMode(proof);
+        if(macro.isPresent()){
+            proof = proofScriptExecutor.executeWithScript(macro.get(),proof);
+        } else {
+				    // Start auto mode
+				    env.getUi().getProofControl().startAndWaitForAutoMode(proof);
+        }
 
 				// Show proof result
 				final boolean closed = proof.openGoals().isEmpty();
@@ -147,7 +155,7 @@ public class KeYWrapper {
                 .collect(Collectors.toList())
           );
 				}
-			} catch (ProofInputException e) {
+			} catch (ProofInputException | IOException | InterruptedException | ScriptException e) {
 				results.addError(
 			             obligationIdx,
                    "unknown",
@@ -179,9 +187,12 @@ public class KeYWrapper {
 
 		return sw.toString();
 	}
-	
 
-	public ProofResult proveAllContracts(String className) {
+  public ProofResult proveAllContracts(String className){
+    return proveAllContracts(className, Optional.empty());
+  }  
+
+	public ProofResult proveAllContracts(String className, Optional<String> macro) {
 		if (env != null) {
 			final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
 			final ImmutableSet<IObserverFunction> targets =
@@ -208,7 +219,7 @@ public class KeYWrapper {
         int localObligationIdx = contracts.size() - 1;
 
 				for (Contract contract : contracts) {
-					proveContract(currentObligationIdx - localObligationIdx, contract);
+					proveContract(currentObligationIdx - localObligationIdx, contract,macro);
 
           localObligationIdx--;
 				}
@@ -220,7 +231,11 @@ public class KeYWrapper {
 		return results;
 	}
 
-  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices) {
+  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices){
+    return proveContractByIdxs(className, indices, Optional.empty());
+  }
+
+  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices, Optional<String> macro) {
     if (env != null) {
       for (int index: indices) {
 	    final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
@@ -250,7 +265,7 @@ public class KeYWrapper {
 	        proveContract(index, contracts.toArray(new Contract[0])[
 	            contracts.size() - (currentObligationIdx - index) - 1
 	            // obligations inside contract sets are sorted top to bottom
-	        ]);
+	        ],macro);
 	
 	        break;
 	      }

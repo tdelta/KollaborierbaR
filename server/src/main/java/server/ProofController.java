@@ -52,6 +52,7 @@ public class ProofController {
   public ResponseEntity<ProofResult> proveAll(
       @PathVariable final String className,
       @RequestParam("obligationIdxs") final Optional<List<Integer>> obligationIdxs,
+      @RequestParam("macro") final Optional<String> macro,
       final HttpServletRequest request) {
     // Get the file path for the request resource
     final String path =
@@ -62,8 +63,8 @@ public class ProofController {
     // Java 9 is used or higher
     final ProofResult result =
         obligationIdxs.isPresent()
-            ? key.proveContractByIdxs(className, obligationIdxs.get())
-            : key.proveAllContracts(className);
+            ? key.proveContractByIdxs(className, obligationIdxs.get(), macro)
+            : key.proveAllContracts(className, macro);
     key.dispose();
 
     return new ResponseEntity<ProofResult>(result, HttpStatus.OK);

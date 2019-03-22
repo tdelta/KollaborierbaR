@@ -24,6 +24,8 @@ export default class Key {
 
   private addNewConsoleMessage: (message: String) => void;
 
+  private macro: string = "@echo off;\nset steps=8000;\necho \"Executing until loop\";\nauto;\nrule \"Loop (Scope) Invariant\";\nselect matches=\"Invariant Initially Valid\";\ntryclose branch assertClosed=\"true\";\nauto matches=\"\\\\<\\{.*\" breakpoint=\"x=false;\";\necho \"Closing easy branches\";\ntryclose steps=\"600\";\nmacro \"symbex\";\ntryclose assertClosed=\"true\";";
+
   private contractRegex: RegExp = /normal_behaviour|exceptional_behaviour|normal_behavior|exceptional_behavior/g;
   // Find method declarations in the current line 
   // https://stackoverflow.com/questions/68633/regex-that-will-match-a-java-method-declarations
