@@ -1,4 +1,6 @@
 import ProofNode, {Kind} from '../../../key/prooftree/ProofNode';
+import React, {RefObject} from 'react';
+import GuiProofNode from '../gui-proof-node';
 
 export default class DisplayTreeNode {
 
@@ -11,6 +13,7 @@ export default class DisplayTreeNode {
   public serialNr: number;
   public oneStepId: number;
   public parent: DisplayTreeNode|null;
+  public ref: RefObject<GuiProofNode>;
 
   public constructor(
     collapsed: boolean,
@@ -20,7 +23,7 @@ export default class DisplayTreeNode {
     sequent: string,
     serialNr: number,
     oneStepId: number,
-    parent: DisplayTreeNode|null
+    parent: DisplayTreeNode|null,
   ) {
     this.collapsed = collapsed;
     this.selected = selected;
@@ -30,6 +33,9 @@ export default class DisplayTreeNode {
     this.serialNr = serialNr;
     this.oneStepId = oneStepId;
     this.parent = parent;
+    this.ref = React.createRef();
+
+    this.getRef = this.getRef.bind(this);
   }
 
   public findNode(path: DisplayTreeNode[]): DisplayTreeNode | null{
@@ -53,6 +59,13 @@ export default class DisplayTreeNode {
     this.children = node;
   }
 
+
+  public getRef(): RefObject<GuiProofNode>{
+    return this.ref;
+  }
+
+  //
+  //
   public findNextLeafUp(): DisplayTreeNode{
       let numberOfChildren: number = this.children.length;
       console.log(this.kind);
@@ -103,7 +116,7 @@ export function toDisplayTree(tree: ProofNode, parent: DisplayTreeNode|null): Di
     tree.sequent,
     tree.serialNr,
     tree.oneStepId,
-    parent
+    parent,
   );
 
   let children: DisplayTreeNode[] = [];   

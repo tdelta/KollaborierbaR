@@ -1,6 +1,8 @@
 import React from 'react';
 import {Kind} from '../../key/prooftree/ProofNode';
 
+import ReactDOM from 'react-dom';
+
 import GuiProofNode from './gui-proof-node';
 import ProofNode from '../../key/prooftree/ProofNode';
 import ProofResults from '../../key/netdata/ProofResults';
@@ -36,6 +38,19 @@ export default class ProofTreeView extends React.Component<Props, State> {
   public selectNode(node: DisplayTreeNode){
     this.props.displaySequent(node.sequent);
     console.log(node);
+
+    //const tesNode = ReactDOM.findDOMNode(node.getRef());
+    console.log(node.getRef());
+      if(node.getRef() != null && node.getRef().current != null){
+        const component : GuiProofNode = (node.getRef().current as GuiProofNode);
+        const tesNode = (ReactDOM.findDOMNode(node.getRef().current) as Element);
+        console.log(tesNode);
+        if(tesNode!=null)
+        tesNode.scrollIntoView();
+      }
+    //if(node != null && node.getRef() != null && node.getRef().current != null && node.getRef().current.offsetTop != null){
+    //  window.scrollTo(0, node.getRef().current.offsetTop);
+    //}
     if(this.lastSelected)
       this.lastSelected.selected = false;
     if(node)
@@ -151,6 +166,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
                 <GuiProofNode
                   key={`${node.serialNr},${node.oneStepId}`}
                   // TODO better keys
+                  ref={node.getRef()}
                   node={node}
                   selectNode={this.selectNode}
                   collapseNode={this.collapseNode}
