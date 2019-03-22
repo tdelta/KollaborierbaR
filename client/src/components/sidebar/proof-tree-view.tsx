@@ -39,18 +39,13 @@ export default class ProofTreeView extends React.Component<Props, State> {
     this.props.displaySequent(node.sequent);
     console.log(node);
 
-    //const tesNode = ReactDOM.findDOMNode(node.getRef());
-    console.log(node.getRef());
-      if(node.getRef() != null && node.getRef().current != null){
-        const component : GuiProofNode = (node.getRef().current as GuiProofNode);
-        const tesNode = (ReactDOM.findDOMNode(node.getRef().current) as Element);
-        console.log(tesNode);
-        if(tesNode!=null)
-        tesNode.scrollIntoView();
+    if(node.getRef().current != null){
+      const component : GuiProofNode = (node.getRef().current as GuiProofNode);
+      const element = (ReactDOM.findDOMNode(component) as Element);
+      if(element!=null) {
+        element.scrollIntoView({});
       }
-    //if(node != null && node.getRef() != null && node.getRef().current != null && node.getRef().current.offsetTop != null){
-    //  window.scrollTo(0, node.getRef().current.offsetTop);
-    //}
+    }
     if(this.lastSelected)
       this.lastSelected.selected = false;
     if(node)
