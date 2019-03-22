@@ -12,6 +12,7 @@
     "rules": {
         "prettier": true,
 
+        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
         "comment-format": false,
         "object-literal-shorthand": false,
         "object-literal-sort-keys": false,
@@ -49,6 +50,7 @@
         "max-line-length": false,
         "no-empty-interface": false,
         "increment-decrement" : false,
+        "array-type": [true, "array"],
 
         "no-console": false
     },

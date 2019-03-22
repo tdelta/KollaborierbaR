@@ -71,7 +71,7 @@ export default class ProofIcon extends React.Component<Props, {}> {
         }
       } else if (
         this.props.node.kind === Kind.OpenProofTree ||
-        this.props.node.kind == Kind.ClosedProofTree
+        this.props.node.kind === Kind.ClosedProofTree
       ) {
         if (this.props.collapsed) {
           icon = faSquareSolid;
