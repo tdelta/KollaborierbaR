@@ -5,11 +5,13 @@ import events.DeletedProjectEvent;
 import events.RenamedFileEvent;
 import events.UpdatedFileEvent;
 import events.UpdatedProjectEvent;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -431,8 +433,11 @@ public class ProjectController {
       // and that the
       // caller of that functions wants to update the content, not the name of the file.
       try {
-        final BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-
+    	// Oldversion: Had problems with encoding
+        // final BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        final File f = new File(path);
+        final Writer writer =
+            new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
         writer.write(updateData.fileContent);
         writer.close();
 
