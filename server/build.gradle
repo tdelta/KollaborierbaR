@@ -104,7 +104,9 @@ checkstyleMain {
     configFile rootProject.file('.checkstyle_google.xml')
     source ='src/main/java'
 }
+
 checkstyleTest {
+    configFile rootProject.file('.checkstyle_google.xml')
     source ='src/test/java'
 }
 
