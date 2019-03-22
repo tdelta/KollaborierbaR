@@ -592,36 +592,4 @@ export default class ProjectManagement {
       }
     });
   }
-
-  public static getUsernames(): Promise<UserIndicatorData[]> {
-    const url = serverAddress + '/usernames';
-    const test = [
-      { firstName: 'Peter', lastName: 'lalala', crdtId: 0 },
-      { firstName: 'Lustig', lastName: 'lalala', crdtId: 1 },
-      { firstName: 'Mark', lastName: 'lalala', crdtId: 2 },
-      { firstName: 'BigJ', lastName: 'lalala', crdtId: 3 },
-      { firstName: 'Hallo', lastName: 'lalala', crdtId: 4 },
-      { firstName: 'lalalala', lastName: 'lalala', crdtId: 5 },
-    ];
-    /*return test; */
-
-    const promise1 = new Promise<UserIndicatorData[]>(function(
-      resolve,
-      reject
-    ) {
-      setTimeout(function() {
-        resolve(test);
-      }, 300);
-    });
-    return promise1;
-
-    /* return fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json',
-            },
-        })
-            .then((response) => response.json());*/
-  }
 }
