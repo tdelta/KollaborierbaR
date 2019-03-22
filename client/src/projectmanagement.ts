@@ -509,7 +509,7 @@ export default class ProjectManagement {
   }
 
   /*
-   * This function updates the filename of the given resource path. 
+   * This function updates the filename of the given resource path.
    * The new filename is entered by the prompt, which is created
    * inside the fuction.
    *

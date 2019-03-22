@@ -305,6 +305,12 @@ export default class App extends React.Component {
         }
     }
 
+    /**
+     * This function instances updateFileContent to save files.
+     * This method is then handed down to the react components, which
+     * need to save the fileContent.(app knows who to instances 
+     * updateFileContent, the other react components dont)
+     */
     saveFile() {
       if (this.state.filetype !== 'sequent') {
           return this.updateFileContent(this.state.openedPath, this.state.text);
@@ -329,6 +335,7 @@ export default class App extends React.Component {
                   * state variables and state manipulation functions they need
                   * to operate.
                   */}
+                {/* Render the top component */}
                 <Top
                     setText={this.setText}
                     text={this.state.text}
@@ -343,6 +350,7 @@ export default class App extends React.Component {
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
+                    {/* Render the sidebar component */}
                     <Sidebar
                         project={this.state.project}
                         proofsState={this.state.proofsState}
@@ -375,6 +383,7 @@ export default class App extends React.Component {
                             <i className="fa fa-times"></i>
                         </Button>
                         }
+                        {/* Render the editor component */}
                         <Editor
                             saveFile={this.saveFile}
                             setDiagnostics={this.setDiagnostics}
@@ -392,6 +401,7 @@ export default class App extends React.Component {
                             ref={this.editor}
                             consoleIsVisible = {this.state.consoleIsVisible}
                         />
+                        {/* Render the console component */}
                         <Console
                             consolelog = {this.state.consolelog}
                             consoleIsVisible = {this.state.consoleIsVisible}

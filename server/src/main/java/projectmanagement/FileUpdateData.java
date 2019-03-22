@@ -1,9 +1,9 @@
 package projectmanagement;
 
 /**
- * Structure of the FileUpdateData send by clients. It is meant 
- * to be used as a data container for Java Spring Marshalling, so that
- * request contents can be easily read and handled by server methods.
+ * Structure of the FileUpdateData send by clients. It is meant to be used as a data container for
+ * Java Spring Marshalling, so that request contents can be easily read and handled by server
+ * methods.
  */
 public class FileUpdateData {
 
@@ -21,16 +21,12 @@ public class FileUpdateData {
     this.fileContent = fileContent;
   }
 
-  /**
-   * getter for the filename
-   */
+  /** getter for the filename */
   public String filefileName() {
     return this.fileName;
   }
 
-  /**
-   * getter for the filecontent
-   */
+  /** getter for the filecontent */
   public String filecontent() {
     return this.fileContent;
   }
