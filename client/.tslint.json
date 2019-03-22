@@ -18,13 +18,12 @@
         "interface-name": false,
         "ordered-imports": false,
         "no-else-after-return": false,
-        "increment-decrement": false,
 
         "member-ordering": [false],
         "jsx-boolean-value": false,
         "jsx-no-lambda": false,
 
-        "increment-decrement": [true, "allow-post"],
+        
         "import-name": false,
         "member-ordering": false,
         "no-constant-condition": true,
@@ -49,6 +48,7 @@
         "sort-imports": false,
         "max-line-length": false,
         "no-empty-interface": false,
+        "increment-decrement" : false,
 
         "no-console": false
     },

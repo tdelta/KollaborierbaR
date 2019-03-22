@@ -174,7 +174,8 @@ export default class GuiProofNode extends React.Component<Props, State> {
   }
 
   /**
-   * Called, whenever the node is double clicked. */
+   * Called, whenever the node is double clicked.
+   */
   private handleItemDoubleClick() {
     const node = this.props.node;
     if (node.kind !== Kind.OneStepSimplification) {
@@ -191,7 +192,7 @@ interface Props {
   selectNode: (path: ProofNode[]) => void;
   selectedNode: ProofNode[];
   path: ProofNode[];
-  proofTreeOperationInfo: { operation: () => void; label: String };
+  proofTreeOperationInfo: { operation: () => void; label: string };
 }
 
 interface State {
