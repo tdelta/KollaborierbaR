@@ -5,8 +5,6 @@ all:
 
 # install dependencies etc.
 setup:
-	# Specification tests need setup
-	make -C specification setup
 
 # run static analysis tools
 check:
@@ -14,9 +12,6 @@ check:
 	./gradlew checkstyleMain
 	./gradlew pmdMain
 	./gradlew spotbugsMain
-
-format:
-	./gradlew spotlessApply
 
 # auto format java code
 format:
