@@ -7,8 +7,11 @@ SERVER_DIR = server
 all: server client
 
 # install dependencies etc.
+# (will download submodules, if we are not running within a Jenkins instance)
 setup:
-	git submodule update --init --recursive
+	if [[ -z "${RUNNING_IN_JENKINS}" ]]; then \
+		git submodule update --init --recursive; \
+	fi;
 	$(MAKE) -C $(CLIENT_DIR) setup
 	$(MAKE) -C $(SERVER_DIR) setup
 
