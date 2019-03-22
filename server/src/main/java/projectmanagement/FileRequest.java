@@ -21,9 +21,7 @@ public class FileRequest {
     this.path = path;
   }
 
-  /**
-   * getter for the path
-   */
+  /** getter for the path */
   public String getPath() {
     return this.path;
   }
