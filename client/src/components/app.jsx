@@ -217,6 +217,13 @@ export default class App extends React.Component {
         this.key.proveFile();
     }
 
+    /**
+     * This functions sets a message and a timestap
+     * in the console compontent. It also makes the
+     * console visibile when a message is set.
+     *
+     * @param {*} message that will be set in the console 
+     */
     addNewConsoleMessage(message) {
         
         //Create time string
@@ -233,6 +240,11 @@ export default class App extends React.Component {
         });
     }
 
+    /**
+     * This function inverts the visibilty of the 
+     * console compontent
+     * 
+     */
     invertConsoleVisibility(){
         this.setState({
             consoleIsVisible: ! this.state.consoleIsVisible
