@@ -8,6 +8,7 @@ all: server client
 
 # install dependencies etc.
 setup:
+	git submodule update --init --recursive
 	$(MAKE) -C $(CLIENT_DIR) setup
 	$(MAKE) -C $(SERVER_DIR) setup
 
