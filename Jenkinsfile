@@ -8,9 +8,6 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
-              sshagent (credentials: ['bpguest']) {
-                sh 'git submodule update --init --recursive'
-              }
               sh 'make setup'
             }
         }
