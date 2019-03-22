@@ -23,7 +23,6 @@
         "member-ordering": [false],
         "jsx-boolean-value": false,
         "jsx-no-lambda": false,
-
         
         "import-name": false,
         "member-ordering": false,
@@ -49,10 +48,11 @@
         "sort-imports": false,
         "max-line-length": false,
         "no-empty-interface": false,
-        "increment-decrement" : false,
         "array-type": [true, "array"],
-
-        "no-console": false
+        "no-console": false,
+        "increment-decrement": [false, "allow-post"],
+        "no-increment-decrement": false,
+        "no-plusplus": false
     },
     "rulesDirectory": []
 }
