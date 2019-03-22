@@ -90,7 +90,7 @@ export default class ProofsState {
     const obligationResults = this.obligationResults;
     const prevHistory = obligationResults.get(idx);
 
-    let last: ObligationResult | undefined = undefined;
+    let last: ObligationResult | undefined;
     if (prevHistory != null) {
       last = prevHistory.last;
     }

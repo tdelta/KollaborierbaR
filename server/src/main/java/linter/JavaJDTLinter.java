@@ -85,8 +85,7 @@ public class JavaJDTLinter {
     List<Diagnostic> keyErrors = scanner.parseAst(cu);
 
     // Add all linter errors and warnings from jdt
-    Arrays.asList(cu.getProblems())
-        .stream()
+    Arrays.asList(cu.getProblems()).stream()
         .map(problem -> normalizeDiagnostic(problem, toCheck.get(0)))
         .forEach(d -> keyErrors.add(d));
 

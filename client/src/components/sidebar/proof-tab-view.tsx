@@ -74,7 +74,7 @@ export default class ProofTabView extends React.Component<Props, State> {
         }),
       };
 
-      let currentHistory: ObligationResultHistory | undefined = undefined;
+      let currentHistory: ObligationResultHistory | undefined;
       if (this.state.selectedOption != null) {
         currentHistory = this.props.proofsState.getHistoryByObligationIdx(
           this.state.selectedOption.value
@@ -143,7 +143,7 @@ export default class ProofTabView extends React.Component<Props, State> {
 }
 
 interface Props {
-  methods: { value: number; label: string }[];
+  methods: Array<{ value: number; label: string }>;
   proofsState: ProofsState;
   obligationIdOfLastUpdatedProof: number | undefined;
   displaySequent: (sequent: string) => void;

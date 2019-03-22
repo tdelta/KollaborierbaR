@@ -96,12 +96,12 @@ export default class Editor extends React.Component<Props, State> {
 
     this.editor.container.addEventListener('contextmenu', (e: any) => {
       e.preventDefault();
-      let lineNr: number = this.editor.getSelectionRange().start.row;
-      let lineTxt: string = this.editor.session.getLines(
+      const lineNr: number = this.editor.getSelectionRange().start.row;
+      const lineTxt: string = this.editor.session.getLines(
         0,
         this.editor.session.getLength()
       );
-      let contracts: number[] = this.props.getContractsForMethod(
+      const contracts: number[] = this.props.getContractsForMethod(
         lineTxt,
         lineNr
       );
@@ -210,7 +210,7 @@ export default class Editor extends React.Component<Props, State> {
 
       const row = parseInt(index, 10);
 
-      let isProven: boolean = this.props.provenObligations.includes(
+      const isProven: boolean = this.props.provenObligations.includes(
         obligationIdx
       );
 

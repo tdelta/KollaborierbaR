@@ -18,7 +18,7 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 
 export default class ProofIcon extends React.Component<Props, {}> {
-  render() {
+  public render() {
     // if no specific icon can be determined, use a question mark as
     // default symbol
     let icon = faSquare;
