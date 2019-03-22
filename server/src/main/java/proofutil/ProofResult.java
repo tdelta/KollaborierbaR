@@ -9,64 +9,101 @@ import java.util.List;
  * @author Jonas Belouadi
  */
 public class ProofResult {
-    private List<ObligationResult> succeeded = new ArrayList<>();
-    private List<ObligationResult> failed = new ArrayList<>();
-    private List<ObligationResult> errors = new ArrayList<>();
-    private List<ObligationResult> stackTraces = new ArrayList<>();
-    
-    public List<ObligationResult> getStackTraces() {
-      return stackTraces;
-    }
+  private List<ObligationResult> succeeded = new ArrayList<>();
+  private List<ObligationResult> failed = new ArrayList<>();
+  private List<ObligationResult> errors = new ArrayList<>();
+  private List<ObligationResult> stackTraces = new ArrayList<>();
 
-    public void addStackTrace(final int obligationIdx, final String methodName, final String msg) {
-      stackTraces.add(new ObligationResult(obligationIdx, methodName, msg, null, new ArrayList<>(0), ObligationResult.Kind.error));
-    }
+  public List<ObligationResult> getStackTraces() {
+    return stackTraces;
+  }
 
-    /**
-     * Add a succeeded proof to the list
-     * @param msg the result message to be displayed
-     */
-    public void addSuccess(final int obligationIdx, final String methodName, final String msg, final ProofNode proofTree) {
-        succeeded.add(new ObligationResult(obligationIdx, methodName, msg, proofTree, new ArrayList<>(0), ObligationResult.Kind.success));
-    }
+  public void addStackTrace(final int obligationIdx, final String methodName, final String msg) {
+    stackTraces.add(
+        new ObligationResult(
+            obligationIdx, methodName, msg, null, new ArrayList<>(0), ObligationResult.Kind.error));
+  }
 
-    /**
-     * Add a failed proof to the list, used for proofs that couldn't be closed
-     * @param msg the result message to be displayed
-     */
-    public void addFail(final int obligationIdx, final String methodName, final String msg, final ProofNode proofTree, List<OpenGoalInfo> openGoals) {
-        failed.add(new ObligationResult(obligationIdx, methodName, msg, proofTree, openGoals, ObligationResult.Kind.failure));
-    }
+  /**
+   * Add a succeeded proof to the list
+   *
+   * @param msg the result message to be displayed
+   */
+  public void addSuccess(
+      final int obligationIdx,
+      final String methodName,
+      final String msg,
+      final ProofNode proofTree) {
+    succeeded.add(
+        new ObligationResult(
+            obligationIdx,
+            methodName,
+            msg,
+            proofTree,
+            new ArrayList<>(0),
+            ObligationResult.Kind.success));
+  }
 
-    /**
-     * Add an error message to the list, used whenever an exception occures
-     * @param msg the result message to be displayed
-     */
-    public void addError(final int obligationIdx, final String methodName, final String msg, final ProofNode proofTree) {
-        errors.add(new ObligationResult(obligationIdx, methodName, msg, proofTree, new ArrayList<>(0), ObligationResult.Kind.error));
-    }
+  /**
+   * Add a failed proof to the list, used for proofs that couldn't be closed
+   *
+   * @param msg the result message to be displayed
+   */
+  public void addFail(
+      final int obligationIdx,
+      final String methodName,
+      final String msg,
+      final ProofNode proofTree,
+      List<OpenGoalInfo> openGoals) {
+    failed.add(
+        new ObligationResult(
+            obligationIdx, methodName, msg, proofTree, openGoals, ObligationResult.Kind.failure));
+  }
 
-    /**
-     * Basic getter for contents
-     * @return succeeded proofs
-     */
-    public List<ObligationResult> getSucceeded() {
-        return succeeded;
-    }
+  /**
+   * Add an error message to the list, used whenever an exception occures
+   *
+   * @param msg the result message to be displayed
+   */
+  public void addError(
+      final int obligationIdx,
+      final String methodName,
+      final String msg,
+      final ProofNode proofTree) {
+    errors.add(
+        new ObligationResult(
+            obligationIdx,
+            methodName,
+            msg,
+            proofTree,
+            new ArrayList<>(0),
+            ObligationResult.Kind.error));
+  }
 
-    /**
-     * Basic getter for contents
-     * @return failed proofs
-     */
-    public List<ObligationResult> getFailed() {
-        return failed;
-    }
+  /**
+   * Basic getter for contents
+   *
+   * @return succeeded proofs
+   */
+  public List<ObligationResult> getSucceeded() {
+    return succeeded;
+  }
 
-    /**
-     * Basic getter for contents
-     * @return exception messages
-     */
-    public List<ObligationResult> getErrors() {
-        return errors;
-    }
+  /**
+   * Basic getter for contents
+   *
+   * @return failed proofs
+   */
+  public List<ObligationResult> getFailed() {
+    return failed;
+  }
+
+  /**
+   * Basic getter for contents
+   *
+   * @return exception messages
+   */
+  public List<ObligationResult> getErrors() {
+    return errors;
+  }
 }

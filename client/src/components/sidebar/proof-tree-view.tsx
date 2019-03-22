@@ -3,20 +3,22 @@ import React from 'react';
 import GuiProofNode from './gui-proof-node';
 import ProofNode from '../../key/prooftree/ProofNode';
 
-import ObligationResult, {ObligationResultKind} from '../../key/netdata/ObligationResult';
+import ObligationResult, {
+  ObligationResultKind,
+} from '../../key/netdata/ObligationResult';
 
 export default class ProofTreeView extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.selectNode = this.selectNode.bind(this);
     this.state = {
-      selectedNode: []
+      selectedNode: [],
     };
   }
 
-  public selectNode(node: ProofNode[]){
+  public selectNode(node: ProofNode[]) {
     this.setState({
-      selectedNode: node
+      selectedNode: node,
     });
   }
 
@@ -56,7 +58,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
 interface Props {
   obligationResult?: ObligationResult;
   displaySequent: (sequent: string) => void;
-  proofTreeOperationInfo: {operation: () => void, label: String};
+  proofTreeOperationInfo: { operation: () => void; label: String };
 }
 
 interface State {

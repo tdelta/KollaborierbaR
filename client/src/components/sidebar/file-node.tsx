@@ -2,7 +2,13 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 
-import { faBomb, faFolderPlus, faFileMedical, faTrashAlt, faTag } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBomb,
+  faFolderPlus,
+  faFileMedical,
+  faTrashAlt,
+  faTag,
+} from '@fortawesome/free-solid-svg-icons';
 
 import FileIcon from './file-icon.jsx';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';

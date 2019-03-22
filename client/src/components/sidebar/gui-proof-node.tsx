@@ -84,9 +84,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
               </div>
               <ContextMenu>
                 <ContextAction
-                  onClick={
-                    this.props.proofTreeOperationInfo.operation
-                  }
+                  onClick={this.props.proofTreeOperationInfo.operation}
                 >
                   {this.props.proofTreeOperationInfo.label}
                 </ContextAction>
@@ -110,7 +108,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
                     selectedNode={this.props.selectedNode}
                     path={this.props.path.concat(child)}
                     proofTreeOperationInfo={this.props.proofTreeOperationInfo}
-                    />
+                  />
                 </li>
               ))}
             </ul>
@@ -152,7 +150,7 @@ export default class GuiProofNode extends React.Component<Props, State> {
                     selectedNode={this.props.selectedNode}
                     path={this.props.path.concat(child)}
                     proofTreeOperationInfo={this.props.proofTreeOperationInfo}
-                    />
+                  />
                 </li>
               ))}
             </ul>
@@ -193,7 +191,7 @@ interface Props {
   selectNode: (path: ProofNode[]) => void;
   selectedNode: ProofNode[];
   path: ProofNode[];
-  proofTreeOperationInfo: {operation: () => void, label: String};
+  proofTreeOperationInfo: { operation: () => void; label: String };
 }
 
 interface State {

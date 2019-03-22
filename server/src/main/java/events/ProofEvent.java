@@ -8,7 +8,12 @@ abstract class ProofEvent extends ApplicationEvent {
   private final String filePath;
   private final int obligationIdx;
 
-  public ProofEvent(final Object source, final String eventType, final String projectName, final String filePath, final int obligationIdx) {
+  public ProofEvent(
+      final Object source,
+      final String eventType,
+      final String projectName,
+      final String filePath,
+      final int obligationIdx) {
     super(source);
     this.eventType = eventType;
     this.projectName = projectName;
