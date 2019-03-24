@@ -96,16 +96,21 @@ export default class Editor extends React.Component<Props, State> {
 
     this.editor.container.addEventListener('contextmenu', (e: any) => {
       e.preventDefault();
+      // get x and y coordinates of the registered rightclick
       const lineNr: number = this.editor.getSelectionRange().start.row;
       const lineTxt: string = this.editor.session.getLines(
         0,
         this.editor.session.getLength()
       );
+      // if the line of the right click contains a method declaration, get
+      // the methods for it
       const contracts: number[] = this.props.getContractsForMethod(
         lineTxt,
         lineNr
       );
 
+      // if contracts exist iniciate a state change to show the context menu
+      // else disable it
       if (contracts.length) {
         this.setState({ disableContext: false, contracts: contracts });
       } else {
@@ -296,6 +301,7 @@ export default class Editor extends React.Component<Props, State> {
         height: '98%',
       };
     }
+    // if there are multiple contracts add a field to the context menu to prove all of them
     if (this.state.contracts.length > 1) {
       proveAllContracts = (
         <div>
@@ -327,6 +333,7 @@ export default class Editor extends React.Component<Props, State> {
         </ContextMenuTrigger>
 
         <ContextMenu id="sick_menu">
+          {/* for each contract add an entry to the context menu to prove it */}
           {this.state.contracts.map((contract, id) => (
             <MenuItem
               key={id}
