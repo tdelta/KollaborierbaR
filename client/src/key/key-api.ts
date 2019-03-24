@@ -6,10 +6,10 @@ import ProofResults from './netdata/ProofResults';
 import ObligationResult from './netdata/ObligationResult';
 
 export default class KeyApi {
-  public proveFile(path: string,macro: string): Promise<ProofResults> {
+  public proveFile(path: string,macro: string|null): Promise<ProofResults> {
     const escapedPath = escape(path);
     // API URL of the server we will use for our request
-    const url = `${serverAddress}/proof/${escapedPath}`;
+    const url = `${serverAddress}/proof/${escapedPath}?macro=${macro}`;
 
     return fetch(url, {
       method: 'GET',
@@ -21,9 +21,9 @@ export default class KeyApi {
     }).then(response => response.json()); // parse the response body as json};
   }
 
-  public proveObligations(path: string, nr: number | number[], macro: string): Promise<ProofResults> {
+  public proveObligations(path: string, nr: number | number[], macro: string|null): Promise<ProofResults> {
     const escapedPath = escape(path);
-    const url = `${serverAddress}/proof/${escapedPath}?obligationIdxs=${nr}`?macro={macro};
+    const url = `${serverAddress}/proof/${escapedPath}?obligationIdxs=${nr}&macro=${macro}`;
 
     return fetch(url, {
       method: 'GET',

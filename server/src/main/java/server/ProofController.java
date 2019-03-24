@@ -45,6 +45,7 @@ public class ProofController {
   private ConcurrentHashMap<String, HashMap<Integer, List<ObligationResult>>> obligationResults = new ConcurrentHashMap<>();
 
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
+  @Autowired private FileService fileService;
 
   /** Prove all Proof Obligations in a .java file or by index if a index is provided */
   @RequestMapping(value = "/**/{className}.java", method = RequestMethod.GET)
@@ -52,21 +53,27 @@ public class ProofController {
   public ResponseEntity<ProofResult> proveAll(
       @PathVariable final String className,
       @RequestParam("obligationIdxs") final Optional<List<Integer>> obligationIdxs,
-      @RequestParam("macro") final Optional<String> macro,
+      @RequestParam("macro") Optional<String> macro,
       final HttpServletRequest request) {
     // Get the file path for the request resource
-    final String path =
-        ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
-            .substring(7);
-    final KeYWrapper key = new KeYWrapper(path);
+    final PathData pathData = decodePath(request);
+    final String projectFilePath = pathData.projectFilePath;
+
+    final KeYWrapper key = new KeYWrapper(projectFilePath);
+
+    if(macro.isPresent() && macro.get() != ""){
+      // Read the macro file
+      String macroContents = fileService.getCurrent(pathData.projectName+macro.get());
+      macro = macroContents == "" ? Optional.empty() : Optional.of(macroContents);
+    }
     // prove by index if index is present. ternary operator can be replaced with ifPresentOrElse if
     // Java 9 is used or higher
     final ProofResult result =
         obligationIdxs.isPresent()
             ? key.proveContractByIdxs(className, obligationIdxs.get(), macro)
             : key.proveAllContracts(className, macro);
-    key.dispose();
 
+    key.dispose();
     return new ResponseEntity<ProofResult>(result, HttpStatus.OK);
   }
 
@@ -315,7 +322,7 @@ public class ProofController {
   }
 
   private static PathData decodePath(final HttpServletRequest request) {
-      final String regex = "\\/proof\\/(?<ProjectName>[^\\/]+)\\/(?<Path>.+)\\/obligation(\\/(?<ObligationId>\\d+)\\/.+)?";
+      final String regex = "\\/proof\\/(?<ProjectName>[^\\/]+)\\/(?<Path>[^\\.]+\\.java)(\\/obligation(\\/(?<ObligationId>\\d+)\\/.+)?)?";
 
       final String input = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
       System.out.println("ProofController: Prefix: " + input.substring(7));

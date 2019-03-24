@@ -99,11 +99,26 @@ public class KeYWrapper {
 
 				// Set proof strategy options
 				StrategyProperties sp = proof.getSettings().getStrategySettings().getActiveStrategyProperties();
-				sp.setProperty(StrategyProperties.METHOD_OPTIONS_KEY, StrategyProperties.METHOD_CONTRACT);
-				sp.setProperty(StrategyProperties.DEP_OPTIONS_KEY, StrategyProperties.DEP_ON);
-				sp.setProperty(StrategyProperties.QUERY_OPTIONS_KEY, StrategyProperties.QUERY_ON);
-				sp.setProperty(StrategyProperties.NON_LIN_ARITH_OPTIONS_KEY, StrategyProperties.NON_LIN_ARITH_DEF_OPS);
-				sp.setProperty(StrategyProperties.STOPMODE_OPTIONS_KEY, StrategyProperties.STOPMODE_NONCLOSE);
+
+        sp.setProperty(StrategyProperties.QUERYAXIOM_OPTIONS_KEY,StrategyProperties.QUERYAXIOM_ON);
+        //sp.setProperty(StrategyProperties.USER_TACLETS_OPTIONS_KEY1,StrategyProperties.USER_TACLETS_OFF);
+        sp.setProperty(StrategyProperties.QUANTIFIERS_OPTIONS_KEY,StrategyProperties.QUANTIFIERS_NON_SPLITTING_WITH_PROGS);
+        //sp.setProperty(StrategyProperties.USER_TACLETS_OPTIONS_KEY2,StrategyProperties.USER_TACLETS_OFF);
+        sp.setProperty(StrategyProperties.LOOP_OPTIONS_KEY,StrategyProperties.LOOP_NONE);
+        sp.setProperty(StrategyProperties.INF_FLOW_CHECK_PROPERTY,StrategyProperties.INF_FLOW_CHECK_FALSE);
+        sp.setProperty(StrategyProperties.NON_LIN_ARITH_OPTIONS_KEY,StrategyProperties.NON_LIN_ARITH_DEF_OPS);
+        sp.setProperty(StrategyProperties.AUTO_INDUCTION_OPTIONS_KEY,StrategyProperties.AUTO_INDUCTION_OFF);
+        sp.setProperty(StrategyProperties.STOPMODE_OPTIONS_KEY,StrategyProperties.STOPMODE_DEFAULT);
+        sp.setProperty(StrategyProperties.CLASS_AXIOM_OPTIONS_KEY,StrategyProperties.CLASS_AXIOM_DELAYED);
+        sp.setProperty(StrategyProperties.MPS_OPTIONS_KEY,StrategyProperties.MPS_MERGE);
+        //sp.setProperty(StrategyProperties.QUERY_NEW_OPTIONS_KEY,StrategyProperties.QUERY_RESTRICTED);
+        sp.setProperty(StrategyProperties.BLOCK_OPTIONS_KEY,StrategyProperties.BLOCK_EXPAND);
+        sp.setProperty(StrategyProperties.METHOD_OPTIONS_KEY,StrategyProperties.METHOD_CONTRACT);
+        //sp.setProperty(StrategyProperties.USER_TACLETS_OPTIONS_KEY3,StrategyProperties.USER_TACLETS_OFF);
+        sp.setProperty(StrategyProperties.OSS_OPTIONS_KEY,StrategyProperties.OSS_OFF);
+        sp.setProperty(StrategyProperties.SPLITTING_OPTIONS_KEY,StrategyProperties.SPLITTING_DELAYED);
+        sp.setProperty(StrategyProperties.VBT_PHASE,StrategyProperties.VBT_SYM_EX);
+
 				proof.getSettings().getStrategySettings().setActiveStrategyProperties(sp);
 
 				// Make sure that the new options are used
@@ -155,7 +170,7 @@ public class KeYWrapper {
                 .collect(Collectors.toList())
           );
 				}
-			} catch (ProofInputException | IOException | InterruptedException | ScriptException e) {
+			} catch (Exception e) {
 				results.addError(
 			             obligationIdx,
                    "unknown",
@@ -256,11 +271,12 @@ public class KeYWrapper {
 	              .size()
 	          )
 	      .sum() - 1; // -1, since we start counting at 0
+
 	
 	    for (final IObserverFunction target : targets) {
 	      final ImmutableSet<Contract> contracts =
 	          env.getSpecificationRepository().getContracts(keyType, target);
-	
+
 	      if (contracts.size() > 0 && currentObligationIdx + 1 - contracts.size() <= index) {
 	        proveContract(index, contracts.toArray(new Contract[0])[
 	            contracts.size() - (currentObligationIdx - index) - 1

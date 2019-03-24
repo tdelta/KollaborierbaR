@@ -25,6 +25,7 @@ import AnchoredMarker, { addToArray } from './AnchoredMarker';
 import PopoverMarker from './PopoverMarker';
 
 import '../highlighting/jml.js';
+import '../highlighting/macro.mjs';
 import '../highlighting/sequent.js';
 import lint from '../linting.js';
 
@@ -184,6 +185,9 @@ export default class Editor extends React.Component<Props, State> {
         break;
       case 'sequent':
         mode = 'ace/mode/sequent';
+        break;
+      case 'script':
+        mode = 'ace/mode/macro';
         break;
     }
     console.log(mode);

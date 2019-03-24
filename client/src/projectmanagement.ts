@@ -214,6 +214,30 @@ export default class ProjectManagement {
     );
   }
 
+  public getMacroFiles(){
+    const project: Project | {} = this.getCurrentProject();
+    let index: number = 0;
+    if('contents' in project){
+      return (project as Project).contents.map(item => this.getMacroFilesRec('',item))
+        .reduce((x: string[],y: string[]) => x.concat(y),[]); // flatMap does not exist in IE
+    } else {
+      return [];
+    }
+  }
+
+  private getMacroFilesRec(parentName: string, item: FileOrFolder): string[]{
+    if(item.type === FileFolderEnum.file && item.name.endsWith('.script')){
+      // item is a macro file
+      return [parentName + '/' + item.name];
+    } else if(item.contents){
+      // item is a directory
+      return item.contents.map(child => this.getMacroFilesRec(parentName+'/'+item.name,child))
+        .reduce((x: string[],y: string[]) => x.concat(y),[]); // flatMap does not exist in IE
+    } else {
+      return [];
+    }
+  }
+
   private static projectContainsPath(
     project: Project,
     path: string[]

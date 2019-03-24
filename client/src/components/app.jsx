@@ -79,6 +79,7 @@ export default class App extends React.Component {
         this.updateFileContent = this.projectManagement.updateFileContent.bind(this.projectManagement);
         this.addNewConsoleMessage = this.addNewConsoleMessage.bind(this);
         this.invertConsoleVisibility = this.invertConsoleVisibility.bind(this);
+        this.getMacroFiles = this.projectManagement.getMacroFiles.bind(this.projectManagement);
 
         this.key = new Key(
           this.network,
@@ -338,8 +339,10 @@ export default class App extends React.Component {
                     onCreateProject={this.createProject}
                     onProveFile={this.proveFile}
                     onUpdateFileName={() => {this.updateFileName(this.state.openedPath);}}
+                    onSelectMacro={this.key.setMacro}
                     saveFile={this.saveFile}
                     notificationSystem={this.notificationSystem}
+                    getMacroFiles={this.getMacroFiles}
                     //TODO: onDeleteProject={this.deleteProject}
                 />
                 <div id="mainContainer">
