@@ -251,9 +251,13 @@ export default class ProjectManagement {
         //'Content-Type': 'application/json', // we are sending a json object
       },
     }).then(response => {
-      console.log('Parsing open file response: ', response);
+      if (response.status === 200) {
+        console.log('Parsing open file response: ', response);
 
-      return response.json();
+        return response.json();
+      } else {
+        console.error('Opening file failed.', response);
+      }
     }); // parse the response body as json
   }
 
@@ -441,7 +445,10 @@ export default class ProjectManagement {
 
       ProjectManagement.createOverall(requestPath, type).then(response => {
         this.showProject(response);
-        this.openFile(path);
+
+        if (type !== 'folder') {
+          this.openFile(path);
+        }
       });
     } else if (file !== null && file.includes('/')) {
       alert('No appropriate filename. Filename includes: / ');
