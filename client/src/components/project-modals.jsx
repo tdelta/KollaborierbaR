@@ -12,7 +12,6 @@ class ModalSelect extends React.Component {
         super(props);
         this.select = this.select.bind(this);
         this.projectAction = this.projectAction.bind(this);
-        this.loadProjectNames = this.loadProjectNames.bind(this);
         this.listProjects = this.listProjects.bind(this);
         this.state = {
             projects: [],
@@ -34,15 +33,6 @@ class ModalSelect extends React.Component {
                 'name': name
             }
         });
-    }
-
-    /*
-     * loads the project list, called whenever the modal is opened
-     */
-    loadProjectNames() {
-        ProjectManagement.getProjects()
-            .then((projects) => {this.setState({projects: projects});
-            });
     }
 
     /*
@@ -83,7 +73,9 @@ class ModalSelect extends React.Component {
                                 onDoubleClick={() => this.projectAction(name)}
                                 active={this.state.selected.id === id}
                             >
-                                {name}
+                                {
+                                  (name === '') ? 'None' : name
+                                }
                             </ListGroupItem>
                         )
                     }
@@ -95,7 +87,7 @@ class ModalSelect extends React.Component {
         else {
             return (
                 <>
-                    There are no projects on the server
+                  {this.props.none} 
                 </>
             );
         }
@@ -108,10 +100,10 @@ class ModalSelect extends React.Component {
                   * onOpened: reload the project list   
                   * onClosed: when the modal is closed set the selected state to an invalid index, so that on a reopen no projects are highlighted
                   */}
-                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={() => this.loadProjectNames()} 
+                <Modal isOpen={this.props.isOpen} toggle={this.props.toggle} onOpened={this.props.onOpened.bind(this)} 
                     onClosed={() => this.select('', -1)} className={this.props.className}
                 >
-                    <ModalHeader toggle={this.props.toggle}>{'Select Project ' + this.props.usecase}</ModalHeader>
+                    <ModalHeader toggle={this.props.toggle}>{this.props.title}</ModalHeader>
                     {/* the style enables a scrollbar, when the project names don't fit on the screen (100vh) with a 210 pixels margin */}
                     <ModalBody style={{'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto'}}>
                         {/* generate the listed project names dynamically */}
@@ -130,19 +122,48 @@ class ModalSelect extends React.Component {
 }
 
 /*
+ * loads the project list, called whenever a project modal is opened
+ */
+const loadProjectNames = function() {
+    ProjectManagement.getProjects()
+        .then((projects) => {this.setState({projects: projects});
+    });
+}
+
+const loadMacroFiles = function() {
+    let options = this.props.loadFunction();
+    if(options.length > 0){
+      options.push('');
+    }
+    this.setState({
+        projects: options
+    });
+}
+
+
+/*
  * No inheritance from ModalSelect because it is considered bad practice in React.
  * See https://reactjs.org/docs/composition-vs-inheritance.html
  */
 function OpenModal(props) {
     return (
-        <ModalSelect {...props} usecase='To Open' />
+        <ModalSelect {...props} title='Select Project To Open' 
+            none='There are no projects on the server' onOpened={loadProjectNames}/>
     );
 }
 
 function DeleteModal(props) {
     return (
-        <ModalSelect {...props} usecase='To Delete'/>
+        <ModalSelect {...props} title='Select Project To Delete' 
+            none='There are no projects on the server' onOpened={loadProjectNames}/>
     );
 }
 
-export {OpenModal, DeleteModal};
+function MacroModal(props) {
+    return (
+        <ModalSelect {...props} title='Select Script For Proofs' 
+            none='Create a .script file in your project to use macros' onOpened={loadMacroFiles}/>
+    );
+}
+
+export {OpenModal, DeleteModal,MacroModal};

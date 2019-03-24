@@ -38,6 +38,10 @@ public class SynchronizationController {
   @Autowired private UserList userList;
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
+  public ConcurrentHashMap<String, LogootSRopes> getDocuments(){
+    return documents;
+  }
+
   /**
    * Called when a client calls the insert route. An insert operation is applied to the crdt
    * document and broadcasted to all subscribers on the document.

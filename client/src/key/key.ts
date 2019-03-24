@@ -24,7 +24,7 @@ export default class Key {
 
   private addNewConsoleMessage: (message: String) => void;
 
-  private macro: string = "@echo off;\nset steps=8000;\necho \"Executing until loop\";\nauto;\nrule \"Loop (Scope) Invariant\";\nselect matches=\"Invariant Initially Valid\";\ntryclose branch assertClosed=\"true\";\nauto matches=\"\\\\<\\{.*\" breakpoint=\"x=false;\";\necho \"Closing easy branches\";\ntryclose steps=\"600\";\nmacro \"symbex\";\ntryclose assertClosed=\"true\";";
+  private macro: string = '';
 
   private contractRegex: RegExp = /normal_behaviour|exceptional_behaviour|normal_behavior|exceptional_behavior/g;
   // Find method declarations in the current line 
@@ -58,6 +58,7 @@ export default class Key {
     this.addNewConsoleMessage = addNewConsoleMessage;
     this.refreshLastProof = this.refreshLastProof.bind(this);
     this.saveObligationResult = this.saveObligationResult.bind(this);
+    this.setMacro = this.setMacro.bind(this);
 
     this.proofController = new ProofCollabController(network,
       {
@@ -73,6 +74,10 @@ export default class Key {
         }
       }
     );
+  }
+
+  public setMacro(macro: string){
+    this.macro = macro;
   }
 
   private refreshLastProof(projectName: string, filePath: string, obligationIdx: number): void {
@@ -233,7 +238,7 @@ export default class Key {
       });
     }
 
-    this.keyApi.proveFile(this.getFilePath()).then(this.handleResults);
+    this.keyApi.proveFile(this.getFilePath(),this.macro).then(this.handleResults);
   }
 
   private sendLastProofNotifications(obligationResult: ObligationResult): void {
@@ -304,7 +309,7 @@ export default class Key {
     }
 
     return this.keyApi
-      .proveObligations(this.getFilePath(), nr)
+      .proveObligations(this.getFilePath(), nr, this.macro)
       .then(this.handleResults);
   }
 

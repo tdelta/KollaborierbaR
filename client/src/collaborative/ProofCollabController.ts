@@ -27,6 +27,7 @@ export default class ProofCollabController {
   }
 
   public openFile(projectName: string, path: string[]): Promise<void> {
+    console.log("Subscribing to proof updates");
     const topic = this.genTopic(projectName, path);
 
     return this.network.safeSubscribe(
