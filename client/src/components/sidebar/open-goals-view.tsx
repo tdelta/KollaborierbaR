@@ -33,15 +33,12 @@ export default class OpenGoalsView extends React.Component<Props, State> {
     // determine, whether the goals property is set and
     // contains at least one open goal. If not, the view will show an appropriate message.
     const areGoalsValid = goals.length > 0;
-    // ^ the project object must at least one goal
 
     // if there are goals, display them
     if (areGoalsValid) {
       return (
         <div>
-          {// render each element within the root folder of the
-          // project as FileNode
-          goals.map(goal => (
+          {goals.map(goal => (
             <GoalNode
               key={goal.id}
               // ^when rendering a list of elements, react
@@ -66,7 +63,6 @@ export default class OpenGoalsView extends React.Component<Props, State> {
 
 // defining the structure of this react components properties
 interface Props {
-  project: any;
   proofsState: ProofsState;
   displayFormula: (formula: string) => void;
 }
