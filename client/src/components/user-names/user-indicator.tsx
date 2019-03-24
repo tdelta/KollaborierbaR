@@ -26,8 +26,8 @@ export default class UserIndicator extends React.Component<Props, {}> {
     return colors[crdtId % 10] || '#C70039';
   }
 
-  public capitalize(string: string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  public capitalize(text: string) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   public render() {
@@ -56,7 +56,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
           placement="bottom"
           target={`user-circle-${this.props.uid}`}
         >
-          {this.props.firstName + ' ' + this.capitalize(this.props.lastName)}
+          {`${this.props.firstName} ${this.capitalize(this.props.lastName)}`}
         </UncontrolledTooltip>
       </>
     );
