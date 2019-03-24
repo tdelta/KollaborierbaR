@@ -43,7 +43,7 @@
     "eslint-fix": "eslint -c .eslintrc.js --fix src/**/*.js*",
     "tslint": "tslint -c .tslint.json --project tsconfig.json 'src/**/*.ts*'",
     "tslint-fix": "tslint -c .tslint.json --project tsconfig.json --fix 'src/**/*.ts*'",
-    "format": "prettier --write 'src/**/*.ts*'",
+    "format": "prettier --write 'src/**/*.{ts,js}*'",
     "tslint-config-check": "tslint-config-prettier-check ./.tslint.json",
     "eslint-config-check": "eslint --print-config . | eslint-config-prettier-check"
   },
@@ -66,7 +66,8 @@
     "@types/reactstrap": "^6.4.3",
     "@types/sockjs-client": "^1.1.0",
     "eslint": "^5.6.0",
-    "eslint-config-prettier": "^4.0.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.11.1",
     "fast-check": "^1.10.0",
     "neovim": "^4.2.1",
