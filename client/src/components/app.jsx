@@ -337,6 +337,7 @@ export default class App extends React.Component {
                   */}
                 {/* Render the top component */}
                 <Top
+                    getFilePath={this.projectManagement.getOpenedPath}
                     setText={this.setText}
                     text={this.state.text}
                     onDeleteFile={() => this.deleteFile(this.state.openedPath)}
