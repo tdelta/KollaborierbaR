@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
-import ProjectTreeView from './project-tree-view';
+import ProjectTreeView from './ProjectTreeView';
 import OpenGoalsView from './open-goals-view';
 import ProofTabView from './proof-tab-view';
 
@@ -59,6 +59,7 @@ export default class Sidebar extends React.Component<Props, State> {
         ? // only display the sidebar initially, if a project is set
           false
         : true,
+      // currently open tab, see NavLink tags within the render method
       activeTab: '1',
     };
   }
@@ -169,10 +170,14 @@ export default class Sidebar extends React.Component<Props, State> {
       this.setState({
         collapsed: false,
       });
-      this.enableTab('3');
-    } else if (
+      this.enableTab('1');
+    }
+
+    // otherwise, if any proof or proof history changed, open the proof view tab
+    // (given, that there are any available proofs)
+    else if (
       prevProps.proofsState !== this.props.proofsState &&
-      !this.props.proofsState.allGoalsAreClosed()
+      this.props.proofsState.numOfAvailableObligationResults() > 0
     ) {
       this.enableTab('3');
     }
@@ -205,6 +210,10 @@ export default class Sidebar extends React.Component<Props, State> {
       display: genVisibilityString(!this.state.collapsed),
     };
 
+    // We want to display a dropdown, where any obligation can be selected, for
+    // which proofs exist.
+    // For this, we need to convert all available proofs into a format, which
+    // can be used with the dropdown display library (react-select)
     const obligations = this.props.proofsState
       .getAllRecentObligationResults()
       .map(obligationResult => {
@@ -216,6 +225,8 @@ export default class Sidebar extends React.Component<Props, State> {
         };
       })
       .sort((lhs, rhs) => lhs.value - rhs.value);
+    // ^we want to show the obligation selection in the same order, as
+    //  obligations appear within their java file
 
     return (
       <>
@@ -238,6 +249,7 @@ export default class Sidebar extends React.Component<Props, State> {
             <FontAwesome name="chevron-circle-left" />
           </div>
 
+          {/* tab view */}
           <div className="sidebarContent">
             <Nav tabs>
               <NavItem>
@@ -332,12 +344,20 @@ interface Props {
   onOpenFile: (path: string[]) => void;
   /** Called, when the delete context option is selected on an item in the project tree view */
   onDeleteFile: (path: string[]) => void;
-  /** Called, when the user selects the file creation option in the project tree view */
-  onCreateFile: (path: string[]) => void;
+  /**
+   * Called, when the user selects the file creation option in the project tree view.
+   *
+   * @param path   file path to where the file shall be created. The items in the array
+   *               are folders except for the last item, which shall be the name of the
+   *               new file
+   * @param type   decides, whether a file or a folder is being created.
+   *               Possible values: 'file' or 'folder'
+   */
+  onCreateFile: (path: string[], type: string) => void;
   /** Called, when the project deletion context option is selected in the project tree view */
   onDeleteProject: (path: string) => void;
   /** Called, when a file is being renamed by the user using the project tree view */
-  onUpdateFileName: (path: string) => void;
+  onUpdateFileName: (path: string[]) => void;
   /** Path of currently opened file. Used by the {@link ProjectTreeView} to highlight it */
   openedPath: string[];
   /** Called, whenever a proof node or open goal is selected, to display its sequent formula. */

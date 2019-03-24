@@ -52,6 +52,10 @@ export default class ProofsState {
       ) as ObligationResult[];
   }
 
+  public numOfAvailableObligationResults(): number {
+    return Array.from(this.obligationResults.keys()).length;
+  }
+
   public getAllRecentTrees(): ProofNode[] {
     return this.getAllRecentObligationResults()
       .map((obligationResult: ObligationResult) => obligationResult.proofTree)
