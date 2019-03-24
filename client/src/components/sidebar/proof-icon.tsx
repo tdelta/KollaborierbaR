@@ -76,13 +76,10 @@ export default class ProofIcon extends React.Component<Props, {}> {
           if (this.props.node.kind === Kind.DefaultNode) {
             if (this.props.node.collapsed) {
               icon = faPlusSquare;
-            }
-
-            else {
+            } else {
               icon = faMinusSquare;
             }
           }
-
         } else if (
           // TODO: Check if enum comparison works
           this.props.node.kind === (Kind.OpenProofTree as Kind) ||
