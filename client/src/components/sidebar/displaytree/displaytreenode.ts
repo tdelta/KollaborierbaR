@@ -54,7 +54,7 @@ export default class DisplayTreeNode {
 
   /*
    *  Find the array index of the node in the child array of its parent
-   *  returns number representing position in the child array
+   *  @returns number representing position in the child array
    */
   public getIndex(node: DisplayTreeNode): number {
     return this.children.findIndex(child => {
@@ -71,7 +71,7 @@ export default class DisplayTreeNode {
   }
   /*
    *  Finds and returns the next visible leaf with the highest position in the tree order
-   *  returns found DisplayTreeNode if non found return this
+   *  @returns found DisplayTreeNode if non found return this
    */
   public findNextLeafUp(): DisplayTreeNode {
     const numberOfChildren: number = this.children.length;
