@@ -12,19 +12,18 @@
     "rules": {
         "prettier": true,
 
+        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
         "comment-format": false,
         "object-literal-shorthand": false,
         "object-literal-sort-keys": false,
         "interface-name": false,
         "ordered-imports": false,
         "no-else-after-return": false,
-        "increment-decrement": false,
 
         "member-ordering": [false],
         "jsx-boolean-value": false,
         "jsx-no-lambda": false,
-
-        "increment-decrement": [true, "allow-post"],
+        
         "import-name": false,
         "member-ordering": false,
         "no-constant-condition": true,
@@ -48,8 +47,12 @@
         "ter-no-mixed-spaces-and-tabs": true,
         "sort-imports": false,
         "max-line-length": false,
-
-        "no-console": false
+        "no-empty-interface": false,
+        "array-type": [true, "array"],
+        "no-console": false,
+        "increment-decrement": false,
+        "no-increment-decrement": false,
+        "no-plusplus": false
     },
     "rulesDirectory": []
 }

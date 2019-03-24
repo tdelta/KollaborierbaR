@@ -6,14 +6,18 @@ import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
 import Usernames from './components/user-names/user-names';
 
-import {
-  Network,
+import { Network } from './network';
+
+import ProjectController, {
   ProjectEvent,
   RenamedFileEvent,
   ProjectFileEvent,
   UsersUpdatedEvent,
   ProjectEventType,
-} from './network';
+} from './collaborative/ProjectController';
+
+import FileOrFolder, { FileFolderEnum } from './FileOrFolder';
+import Project from './Project';
 
 interface OpenFileData {
   fileName: string;
@@ -27,22 +31,6 @@ interface ProofResults {
   errors: string[];
 }
 
-enum FileFolderEnum {
-  file = 'file',
-  folder = 'folder',
-}
-
-interface FileOrFolder {
-  name: string;
-  type: FileFolderEnum;
-  contents?: FileOrFolder[];
-}
-
-interface Project {
-  name: string;
-  contents: FileOrFolder[];
-}
-
 export default class ProjectManagement {
   private showProject: (p: Project | {}) => void;
   private getCurrentProject: () => Project | {};
@@ -53,9 +41,10 @@ export default class ProjectManagement {
   private confirmationModal: React.RefObject<ConfirmationModal>;
   private notificationSystem: React.RefObject<NotificationSystem.System>;
   private openFile: (path: string[]) => void;
-  private network: Network;
+  private projectController: ProjectController;
 
   constructor(
+    network: Network,
     showProject: (p: Project | {}) => void,
     getCurrentProject: () => Project | {},
     setText: (s: string) => void,
@@ -76,7 +65,7 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
-    this.network = new Network({
+    this.projectController = new ProjectController(network, {
       onProjectEvent: (
         event:
           | ProjectEvent
@@ -202,17 +191,11 @@ export default class ProjectManagement {
             break;
           case ProjectEventType.UsersUpdated:
             console.log(event);
-            Usernames.updateAllUsers((<UsersUpdatedEvent>event).users);
+            Usernames.updateAllUsers((event as UsersUpdatedEvent).users);
             break;
         }
       },
-
-      onConnect: () => undefined,
     });
-  }
-
-  public getNetwork(): Network {
-    return this.network;
   }
 
   private static projectContainsPath(
@@ -267,7 +250,15 @@ export default class ProjectManagement {
         Accept: 'application/json', // we want a json object back
         //'Content-Type': 'application/json', // we are sending a json object
       },
-    }).then(response => response.json()); // parse the response body as json
+    }).then(response => {
+      if (response.status === 200) {
+        console.log('Parsing open file response: ', response);
+
+        return response.json();
+      } else {
+        console.error('Opening file failed.', response);
+      }
+    }); // parse the response body as json
   }
 
   /*
@@ -294,9 +285,13 @@ export default class ProjectManagement {
     const url = `${serverAddress}/projects/${escapedName}`;
 
     this.closeProject(() =>
-      this.network.openProject(
-        name,
-        () =>
+      this.projectController
+        .openProject(name)
+        .catch(e => {
+          console.error('Could not sync with server to open project');
+          console.error(e);
+        })
+        .then(() =>
           fetch(url, {
             method: 'GET',
             mode: 'cors',
@@ -311,9 +306,8 @@ export default class ProjectManagement {
             });
             //return {'status': response.status,
             //  'statusText': response.statusText};
-          }),
-        () => console.log('Could not sync with server to open project')
-      )
+          })
+        )
     );
   }
 
@@ -323,12 +317,16 @@ export default class ProjectManagement {
     if ((project as Project).name == null) {
       cb();
     } else {
-      this.network.closeProject((project as Project).name, cb, () => {
-        console.log(
-          'Failed to unsubscribe, you may still receive messages for your closed project'
-        );
-        cb();
-      });
+      this.projectController
+        .closeProject((project as Project).name)
+        .catch(e => {
+          console.error(
+            'Failed to unsubscribe, you may still receive messages for your closed project'
+          );
+          console.error(e);
+          cb();
+        })
+        .then(cb);
     }
   }
 
@@ -447,7 +445,10 @@ export default class ProjectManagement {
 
       ProjectManagement.createOverall(requestPath, type).then(response => {
         this.showProject(response);
-        this.openFile(path);
+
+        if (type !== 'folder') {
+          this.openFile(path);
+        }
       });
     } else if (file !== null && file.includes('/')) {
       alert('No appropriate filename. Filename includes: / ');
@@ -464,19 +465,20 @@ export default class ProjectManagement {
     if (file !== null && !file.includes('/')) {
       ProjectManagement.createOverall(file, FileFolderEnum.folder).then(
         response => {
-          this.network.openProject(
-            file,
-            () => {
+          this.projectController
+            .openProject(file)
+            .catch(e => {
+              console.error(
+                'Creating the project failed, because we could not sync with the server'
+              );
+
+              console.error(e);
+            })
+            .then(() => {
               this.showProject(response);
               this.setText('');
               this.setOpenedPath([]);
-            },
-            () => {
-              console.log(
-                'Creating the project failed, because we could not sync with the server'
-              );
-            }
-          );
+            });
         }
       );
     }
@@ -501,7 +503,9 @@ export default class ProjectManagement {
   }
 
   /*
-   * updates the filename of the given resource path
+   * This function updates the filename of the given resource path.
+   * The new filename is entered by the prompt, which is created
+   * inside the fuction.
    *
    */
   public updateFileName(path: string[]): void {
@@ -557,6 +561,14 @@ export default class ProjectManagement {
     }
   }
 
+  /**
+   * That function makes a call to the HTTP rest controller
+   * and updates the content of the file specified by the
+   * parameters.
+   *
+   * @param path to the file that will be updated
+   * @param content that will be set to the file
+   */
   public updateFileContent(path: string[], content: string): Promise<void> {
     // Path to the ressource we want to save
     // TODO: Check if project exists
@@ -583,37 +595,5 @@ export default class ProjectManagement {
         );
       }
     });
-  }
-
-  public static getUsernames(): Promise<UserIndicatorData[]> {
-    const url = serverAddress + '/usernames';
-    const test = [
-      { firstName: 'Peter', lastName: 'lalala', crdtId: 0 },
-      { firstName: 'Lustig', lastName: 'lalala', crdtId: 1 },
-      { firstName: 'Mark', lastName: 'lalala', crdtId: 2 },
-      { firstName: 'BigJ', lastName: 'lalala', crdtId: 3 },
-      { firstName: 'Hallo', lastName: 'lalala', crdtId: 4 },
-      { firstName: 'lalalala', lastName: 'lalala', crdtId: 5 },
-    ];
-    /*return test; */
-
-    const promise1 = new Promise<UserIndicatorData[]>(function(
-      resolve,
-      reject
-    ) {
-      setTimeout(function() {
-        resolve(test);
-      }, 300);
-    });
-    return promise1;
-
-    /* return fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json',
-            },
-        })
-            .then((response) => response.json());*/
   }
 }

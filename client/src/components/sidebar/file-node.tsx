@@ -2,12 +2,21 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 
-import { faBomb, faFolderPlus, faFileMedical, faTrashAlt, faTag } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBomb,
+  faFolderPlus,
+  faFileMedical,
+  faTrashAlt,
+  faTag,
+} from '@fortawesome/free-solid-svg-icons';
 
 import FileIcon from './file-icon.jsx';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import { Context, ContextMenu, ContextAction } from './context.jsx';
 import './sidebar.css';
+
+import FileOrFolder, { sort as fileSort } from '../../FileOrFolder';
+
 /**
  * Displays a node and its children (recursively) in a filesystem-like tree.
  *
@@ -150,7 +159,7 @@ export default class FileNode extends React.Component<Props, State> {
             </Context>
             {/* display the children as unordered list */}
             <ul className="projectTreeList" style={display}>
-              {this.props.data.contents.map(child => (
+              {fileSort(this.props.data.contents).map(child => (
                 // when rendering components using map,
                 // react needs a unique key for each sub
                 // component
@@ -167,7 +176,6 @@ export default class FileNode extends React.Component<Props, State> {
                     onDeleteFile={this.props.onDeleteFile}
                     onCreateFile={this.props.onCreateFile}
                     onUpdateFileName={this.props.onUpdateFileName}
-                    onOpenContext={this.props.onOpenContext}
                     openedPath={this.props.openedPath}
                   />
                 </li>
@@ -232,24 +240,12 @@ export default class FileNode extends React.Component<Props, State> {
   }
 }
 
-enum FileType {
-  file = 'file',
-  folder = 'folder',
-}
-
-interface FileNodeData {
-  name: string;
-  type: FileType;
-  contents?: [FileNodeData];
-}
-
 interface Props {
   onOpenFile: (path: string[]) => void;
   onDeleteFile: (path: string[]) => void;
   onCreateFile: (path: string[], type: string) => void;
   onUpdateFileName: (path: string[]) => void;
-  onOpenContext: (path: string[]) => void;
-  data: FileNodeData;
+  data: FileOrFolder;
   openedPath: string[];
   path: string[];
 }

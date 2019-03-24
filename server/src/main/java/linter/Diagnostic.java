@@ -64,9 +64,9 @@ public class Diagnostic {
    *
    * <p>Will return -1 on (IO) errors
    *
-   * @return Row/Column position computed from an offset position
    * @param source file the position is referencing
    * @param position offset from the start of given file
+   * @return Row/Column position computed from an offset position
    */
   private RowColPosition getRowCol(final JavaFileObject source, final long position) {
     // We start at the first column and first row

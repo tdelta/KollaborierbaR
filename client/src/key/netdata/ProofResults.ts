@@ -6,6 +6,5 @@ export default interface ProofResults {
   succeeded: ObligationResult[];
   failed: ObligationResult[];
   errors: ObligationResult[];
-  openGoals: OpenGoalInfo[];
   stackTraces: ObligationResult[];
 }

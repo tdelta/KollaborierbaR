@@ -5,12 +5,12 @@ package proofutil;
  *
  * @author Jonas Belouadi
  */
-public class Obligation {
+public class OpenGoalInfo {
   private long id;
   private String sequent;
   private String formula;
 
-  public Obligation(long id, String sequent, String formula) {
+  public OpenGoalInfo(long id, String sequent, String formula) {
     this.id = id;
     this.sequent = sequent;
     this.formula = formula;
