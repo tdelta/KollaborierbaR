@@ -16,6 +16,9 @@ import ProjectController, {
   ProjectEventType,
 } from './collaborative/ProjectController';
 
+import FileOrFolder, { FileFolderEnum } from './FileOrFolder';
+import Project from './Project';
+
 interface OpenFileData {
   fileName: string;
   fileText: string;
@@ -26,22 +29,6 @@ interface ProofResults {
   succeeded: string[];
   failed: string[];
   errors: string[];
-}
-
-enum FileFolderEnum {
-  file = 'file',
-  folder = 'folder',
-}
-
-interface FileOrFolder {
-  name: string;
-  type: FileFolderEnum;
-  contents?: FileOrFolder[];
-}
-
-interface Project {
-  name: string;
-  contents: FileOrFolder[];
 }
 
 export default class ProjectManagement {
