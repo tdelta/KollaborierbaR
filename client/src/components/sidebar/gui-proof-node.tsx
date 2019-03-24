@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import './sidebar.css';
 
-import ProofNode, {Kind} from '../../key/prooftree/ProofNode';
+import ProofNode, { Kind } from '../../key/prooftree/ProofNode';
 import DisplayTreeNode from './displaytree/displaytreenode';
 
 import { Context, ContextMenu, ContextAction } from './context.jsx';
@@ -36,7 +36,9 @@ export default class GuiProofNode extends React.Component<Props> {
 
       //console.log('rerendering', this.props.node.collapsed);
 
-      let background: string = this.props.node.selected ? 'activeFileNode' : 'inactiveFileNode';
+      let background: string = this.props.node.selected
+        ? 'activeFileNode'
+        : 'inactiveFileNode';
 
       // Check whether the current node is the root node (need to display additional context menu)
       if (
@@ -56,9 +58,7 @@ export default class GuiProofNode extends React.Component<Props> {
                 onDoubleClick={this.handleItemDoubleClick}
                 className={background}
               >
-                <ProofIcon
-                  node={this.props.node}
-                />
+                <ProofIcon node={this.props.node} />
                 {label}
               </div>
               <ContextMenu>
@@ -100,40 +100,38 @@ export default class GuiProofNode extends React.Component<Props> {
 
                         Double clicks are to be interpreted as opening files
                     */}
-          <div
-            onClick={this.toggle}
-            onDoubleClick={this.handleItemDoubleClick}
-            className={background}            
-          >
-            <ProofIcon
-              node={this.props.node}
-            />
-            {label}
-          </div>
-          {/* display the children as unordered list */}
-          <ul className="projectTreeList" style={display}>
-            {this.props.node.children.map(child => (
-              // when rendering components using map,
-              // react needs a unique key for each sub
-              // component
-              // TODO: Use better, unique key
-              <li key={`${child.serialNr},${child.oneStepId}`}>
-                {/* use recursion to display children.
-                */}
-                <GuiProofNode
-                  node={child}
-                  ref={child.getRef()}
-                  selectNode={this.props.selectNode}
-                  collapseNode={this.props.collapseNode}
-                  proofTreeOperationInfo={this.props.proofTreeOperationInfo}
-                />
-              </li>
-            ))}
-          </ul>
-        </>
-      );
-    }
-  } else {
+            <div
+              onClick={this.toggle}
+              onDoubleClick={this.handleItemDoubleClick}
+              className={background}
+            >
+              <ProofIcon node={this.props.node} />
+              {label}
+            </div>
+            {/* display the children as unordered list */}
+            <ul className="projectTreeList" style={display}>
+              {this.props.node.children.map(child => (
+                // when rendering components using map,
+                // react needs a unique key for each sub
+                // component
+                // TODO: Use better, unique key
+                <li key={`${child.serialNr},${child.oneStepId}`}>
+                  {/* use recursion to display children.
+                   */}
+                  <GuiProofNode
+                    node={child}
+                    ref={child.getRef()}
+                    selectNode={this.props.selectNode}
+                    collapseNode={this.props.collapseNode}
+                    proofTreeOperationInfo={this.props.proofTreeOperationInfo}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
+        );
+      }
+    } else {
       // The node is a leaf
       return (
         /* double clicks are to be interpreted as opening files */
@@ -152,7 +150,7 @@ export default class GuiProofNode extends React.Component<Props> {
    */
   private handleItemDoubleClick() {
     const node = this.props.node;
-    if(node.kind !== Kind.OneStepSimplification){
+    if (node.kind !== Kind.OneStepSimplification) {
       this.props.selectNode(this.props.node);
     }
   }

@@ -1,9 +1,8 @@
-import ProofNode, {Kind} from '../../../key/prooftree/ProofNode';
-import React, {RefObject} from 'react';
+import ProofNode, { Kind } from '../../../key/prooftree/ProofNode';
+import React, { RefObject } from 'react';
 import GuiProofNode from '../gui-proof-node';
 
 export default class DisplayTreeNode {
-
   public collapsed: boolean;
   public selected: boolean;
   public text: string;
@@ -12,7 +11,7 @@ export default class DisplayTreeNode {
   public sequent: string;
   public serialNr: number;
   public oneStepId: number;
-  public parent: DisplayTreeNode|null;
+  public parent: DisplayTreeNode | null;
   public ref: RefObject<GuiProofNode>;
 
   public constructor(
@@ -23,7 +22,7 @@ export default class DisplayTreeNode {
     sequent: string,
     serialNr: number,
     oneStepId: number,
-    parent: DisplayTreeNode|null,
+    parent: DisplayTreeNode | null
   ) {
     this.collapsed = collapsed;
     this.selected = selected;
@@ -38,13 +37,16 @@ export default class DisplayTreeNode {
     this.getRef = this.getRef.bind(this);
   }
 
-  public findNode(path: DisplayTreeNode[]): DisplayTreeNode | null{
-    if(path.length === 1 &&
-      this.serialNr === path[0].serialNr && this.oneStepId === path[0].oneStepId)
+  public findNode(path: DisplayTreeNode[]): DisplayTreeNode | null {
+    if (
+      path.length === 1 &&
+      this.serialNr === path[0].serialNr &&
+      this.oneStepId === path[0].oneStepId
+    )
       return this;
-    for(let child of this.children){
-      let result: DisplayTreeNode | null = child.findNode(path.splice(0,1));
-      if(result !== null) return result;
+    for (let child of this.children) {
+      let result: DisplayTreeNode | null = child.findNode(path.splice(0, 1));
+      if (result !== null) return result;
     }
     return null;
   }
@@ -53,58 +55,57 @@ export default class DisplayTreeNode {
    *  Find the array index of the node in the child array of its parent
    *  returns number representing position in the child array
    */
-  public getIndex(node: DisplayTreeNode): number{
-    return this.children.findIndex(child=> {
-       return node.serialNr === child.serialNr;
+  public getIndex(node: DisplayTreeNode): number {
+    return this.children.findIndex(child => {
+      return node.serialNr === child.serialNr;
     });
   }
 
-  public setChildren(node: DisplayTreeNode[]){
+  public setChildren(node: DisplayTreeNode[]) {
     this.children = node;
   }
 
-
-  public getRef(): RefObject<GuiProofNode>{
+  public getRef(): RefObject<GuiProofNode> {
     return this.ref;
   }
   /*
    *  Finds and returns the next visible leaf with the highest position in the tree order
    *  returns found DisplayTreeNode if non found return this
    */
-  public findNextLeafUp(): DisplayTreeNode{
-      let numberOfChildren: number = this.children.length;
-      console.log(this.kind);
-      if(numberOfChildren == 0  || this.collapsed){
-          return this;
-      }else{
-        if(this.children[0].kind === Kind.OneStepSimplification){
-          return this; 
-        }else{
-          if(this.children[numberOfChildren - 1].collapsed){
-            return this.children[numberOfChildren - 1];
-          }else{
-            return this.children[numberOfChildren - 1].findNextLeafUp();
+  public findNextLeafUp(): DisplayTreeNode {
+    let numberOfChildren: number = this.children.length;
+    console.log(this.kind);
+    if (numberOfChildren == 0 || this.collapsed) {
+      return this;
+    } else {
+      if (this.children[0].kind === Kind.OneStepSimplification) {
+        return this;
+      } else {
+        if (this.children[numberOfChildren - 1].collapsed) {
+          return this.children[numberOfChildren - 1];
+        } else {
+          return this.children[numberOfChildren - 1].findNextLeafUp();
         }
-        }
-      } 
+      }
+    }
   }
 
   /*
    *  Findes and reutrn the next visible leaf with the lowest position in the tree order
    *  @returns found DisplayTreeNode if it exists else null
    */
-  public findNextLeafDown(): DisplayTreeNode| null{
-        if(this.parent != null){
-          // am i last ? 
-          let index: number = this.parent.getIndex(this);
-          if(index < this.parent.children.length - 1){
-            return this.parent.children[index + 1];
-          }else{
-            return this.parent.findNextLeafDown();
-          }
-        }else{
-          return null;        
-       } 
+  public findNextLeafDown(): DisplayTreeNode | null {
+    if (this.parent != null) {
+      // am i last ?
+      let index: number = this.parent.getIndex(this);
+      if (index < this.parent.children.length - 1) {
+        return this.parent.children[index + 1];
+      } else {
+        return this.parent.findNextLeafDown();
+      }
+    } else {
+      return null;
+    }
   }
 }
 
@@ -115,8 +116,11 @@ export default class DisplayTreeNode {
  *  @returns converte DisplayTreeNode from ProofNode
  */
 
-export function toDisplayTree(tree: ProofNode, parent: DisplayTreeNode|null): DisplayTreeNode | null{
-  if(tree === null) return null;
+export function toDisplayTree(
+  tree: ProofNode,
+  parent: DisplayTreeNode | null
+): DisplayTreeNode | null {
+  if (tree === null) return null;
 
   let collapsed: boolean = tree.children.length > 1;
 
@@ -128,16 +132,15 @@ export function toDisplayTree(tree: ProofNode, parent: DisplayTreeNode|null): Di
     tree.sequent,
     tree.serialNr,
     tree.oneStepId,
-    parent,
+    parent
   );
 
-  let children: DisplayTreeNode[] = [];   
+  let children: DisplayTreeNode[] = [];
 
- for(let child of tree.children){
+  for (let child of tree.children) {
     let parsedChild: DisplayTreeNode | null = toDisplayTree(child, result);
-    if(parsedChild != null)
-      children.push(parsedChild);
- }
+    if (parsedChild != null) children.push(parsedChild);
+  }
 
   result.setChildren(children);
   return result;
