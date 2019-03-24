@@ -1,7 +1,5 @@
 import React from 'react';
 
-import PropTypes from 'prop-types';
-
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
@@ -11,7 +9,7 @@ import {
   faFileMedical,
 } from '@fortawesome/free-solid-svg-icons';
 
-import FileNode from './file-node';
+import FileNode from './FileNode';
 import { Context, ContextMenu, ContextAction } from './context.jsx';
 
 import Project from '../../Project';
