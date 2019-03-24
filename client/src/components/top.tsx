@@ -226,10 +226,12 @@ export default class Top extends React.Component<Props, State> {
         />
 
         <a
-          href={
-            'data:text/plain;charset=utf-8,$(encodeURIComponent(this.props.text))'
+          href={`data:text/plain;charset=utf-8, ${encodeURIComponent(
+            this.props.text
+          )}`}
+          download={
+            this.props.getFilePath()[this.props.getFilePath().length - 1]
           }
-          download="test.txt"
         >
           <input
             type="button"
@@ -262,6 +264,7 @@ interface ProofResults {
 
 // defining the structure of this react components properties
 interface Props {
+  getFilePath: () => string[];
   text: string;
   setText(text: string): void;
   onDeleteFile(): void;
