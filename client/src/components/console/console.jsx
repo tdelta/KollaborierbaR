@@ -2,6 +2,7 @@ import React from 'react';
 import FontAwesome from 'react-fontawesome';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './console.css';
+import PropTypes from 'prop-types';
 
 /**
  * This renders the console of KollaborierbaR. The 
@@ -73,4 +74,10 @@ export default class Console extends React.Component {
             </>
         );
     }
+}
+
+Console.propTypes = {
+    consolelog : PropTypes.string,
+    consoleIsVisible : PropTypes.bool,
+    invertConsoleVisibility : PropTypes.func
 }
