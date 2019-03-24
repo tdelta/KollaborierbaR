@@ -42,10 +42,11 @@ export default class DisplayTreeNode {
       path.length === 1 &&
       this.serialNr === path[0].serialNr &&
       this.oneStepId === path[0].oneStepId
-    )
+    ) {
       return this;
-    for (let child of this.children) {
-      let result: DisplayTreeNode | null = child.findNode(path.splice(0, 1));
+    }
+    for (const child of this.children) {
+      const result: DisplayTreeNode | null = child.findNode(path.splice(0, 1));
       if (result !== null) return result;
     }
     return null;
@@ -73,9 +74,9 @@ export default class DisplayTreeNode {
    *  returns found DisplayTreeNode if non found return this
    */
   public findNextLeafUp(): DisplayTreeNode {
-    let numberOfChildren: number = this.children.length;
+    const numberOfChildren: number = this.children.length;
     console.log(this.kind);
-    if (numberOfChildren == 0 || this.collapsed) {
+    if (numberOfChildren === 0 || this.collapsed) {
       return this;
     } else {
       if (this.children[0].kind === Kind.OneStepSimplification) {
@@ -97,7 +98,7 @@ export default class DisplayTreeNode {
   public findNextLeafDown(): DisplayTreeNode | null {
     if (this.parent != null) {
       // am i last ?
-      let index: number = this.parent.getIndex(this);
+      const index: number = this.parent.getIndex(this);
       if (index < this.parent.children.length - 1) {
         return this.parent.children[index + 1];
       } else {
@@ -122,9 +123,9 @@ export function toDisplayTree(
 ): DisplayTreeNode | null {
   if (tree === null) return null;
 
-  let collapsed: boolean = tree.children.length > 1;
+  const collapsed: boolean = tree.children.length > 1;
 
-  let result: DisplayTreeNode = new DisplayTreeNode(
+  const result: DisplayTreeNode = new DisplayTreeNode(
     collapsed,
     false,
     tree.text,
@@ -135,10 +136,10 @@ export function toDisplayTree(
     parent
   );
 
-  let children: DisplayTreeNode[] = [];
+  const children: DisplayTreeNode[] = [];
 
-  for (let child of tree.children) {
-    let parsedChild: DisplayTreeNode | null = toDisplayTree(child, result);
+  for (const child of tree.children) {
+    const parsedChild: DisplayTreeNode | null = toDisplayTree(child, result);
     if (parsedChild != null) children.push(parsedChild);
   }
 

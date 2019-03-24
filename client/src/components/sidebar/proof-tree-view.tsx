@@ -69,15 +69,15 @@ export default class ProofTreeView extends React.Component<Props, State> {
    */
   public handleKeydown(event: any) {
     if (this.lastSelected != null) {
-      let leafNode: DisplayTreeNode = this.lastSelected;
+      const leafNode: DisplayTreeNode = this.lastSelected;
       console.log(leafNode);
       switch (event.keyCode) {
         case 38:
           //Up
           event.preventDefault();
           if (leafNode.parent != null) {
-            let parentNode: DisplayTreeNode = leafNode.parent;
-            let index: number = parentNode.getIndex(leafNode);
+            const parentNode: DisplayTreeNode = leafNode.parent;
+            const index: number = parentNode.getIndex(leafNode);
             if (index > 0) {
               this.selectNode(parentNode.children[index - 1].findNextLeafUp());
             } else {
@@ -89,14 +89,14 @@ export default class ProofTreeView extends React.Component<Props, State> {
           // Down
           event.preventDefault();
           if (
-            leafNode.collapsed == false &&
-            leafNode.children.length != 0 &&
-            leafNode.children[0].kind != Kind.OneStepSimplification
+            !leafNode.collapsed &&
+            leafNode.children.length !== 0 &&
+            leafNode.children[0].kind !== Kind.OneStepSimplification
           ) {
             this.selectNode(leafNode.children[0]);
           } else {
             if (leafNode.parent != null) {
-              let nextLeafDown: DisplayTreeNode | null = leafNode.findNextLeafDown();
+              const nextLeafDown: DisplayTreeNode | null = leafNode.findNextLeafDown();
               if (nextLeafDown != null) {
                 this.selectNode(nextLeafDown);
               }
@@ -121,15 +121,15 @@ export default class ProofTreeView extends React.Component<Props, State> {
     }
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     document.addEventListener('keydown', this.handleKeydown);
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeydown);
   }
 
-  componentDidUpdate(prevProps: Props) {
+  public componentDidUpdate(prevProps: Props) {
     if (prevProps.obligationResult !== this.props.obligationResult) {
       let displayNode: DisplayTreeNode | null = null;
       if (this.props.obligationResult != null) {
