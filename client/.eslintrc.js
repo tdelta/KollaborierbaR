@@ -5,6 +5,7 @@ module.exports = {
         // support test files
         "jest": true
     },
+    "plugins": ["prettier"],
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended",
@@ -24,6 +25,7 @@ module.exports = {
         },
     },
     "rules": {
+        "prettier/prettier": "error",
         "linebreak-style": [
             "error",
             "unix"

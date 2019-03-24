@@ -10,7 +10,7 @@ import DisplayTreeNode from './displaytree/displaytreenode';
 
 import { Context, ContextMenu, ContextAction } from './context.jsx';
 
-import ProofIcon from './proof-icon';
+import ProofIcon from './ProofIcon';
 
 export default class GuiProofNode extends React.Component<Props> {
   constructor(props: Props) {
