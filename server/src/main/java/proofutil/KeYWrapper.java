@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 import org.key_project.util.collection.ImmutableSet;
 
 /**
- * Basic KeY stub, that tries to prove all contracts in a file
+ * Creates a wrapper around KeY functionality and provides methods to prove obligations
  *
  * @author Martin Hentschel, Jonas Belouadi
  */
 public class KeYWrapper {
-  KeYEnvironment<?> env;
-  ProofResult results;
+  private KeYEnvironment<?> env;
+  private ProofResult results;
 
   public KeYWrapper(String path) {
     final File location =
@@ -73,7 +73,13 @@ public class KeYWrapper {
     }
   }
 
-  public void proveContract(final int obligationIdx, final Contract contract) {
+  /**
+   * Proves a single contract and adds the results to results class field
+   *
+   * @param obligationIdx the index of the contract in its source file
+   * @param contract the contract that should be proven
+   */
+  private void proveContract(final int obligationIdx, final Contract contract) {
     // Perform proof
     Proof proof = null;
 
@@ -163,7 +169,7 @@ public class KeYWrapper {
                 + "' of "
                 + contract.getTarget()
                 + ":\n"
-                + KeYWrapper.stackToString(e));
+                + stackToString(e));
 
         System.out.println(
             "Exception at '" + contract.getDisplayName() + "' of " + contract.getTarget() + ":");
@@ -176,7 +182,13 @@ public class KeYWrapper {
     }
   }
 
-  public static String stackToString(final Throwable e) {
+  /**
+   * Converts a stacktrace to a string
+   *
+   * @param e the throwable whose stacktrace should be extracted as a string
+   * @return th stacktrace as string
+   */
+  private String stackToString(final Throwable e) {
     // https://stackoverflow.com/questions/1149703/how-can-i-convert-a-stack-trace-to-a-string
     final StringWriter sw = new StringWriter();
     final PrintWriter pw = new PrintWriter(sw);
@@ -185,6 +197,12 @@ public class KeYWrapper {
     return sw.toString();
   }
 
+  /**
+   * Proves all contracts that appear in a file
+   *
+   * @param className the path to the file relative to the projects folder
+   * @return the results of the tried proofs
+   */
   public ProofResult proveAllContracts(String className) {
     if (env != null) {
       final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
@@ -223,6 +241,13 @@ public class KeYWrapper {
     return results;
   }
 
+  /**
+   * Prove contracts by indices
+   *
+   * @param className the path to the file relative to the projects folder
+   * @param indices the indices of the obligations to prove
+   * @return the results of the tried proofs
+   */
   public ProofResult proveContractByIdxs(final String className, final List<Integer> indices) {
     if (env != null) {
       for (int index : indices) {
@@ -266,6 +291,7 @@ public class KeYWrapper {
     return results;
   }
 
+  /** Indicates that the KeYEnvironment is disposed. */
   public void dispose() {
     if (env != null) {
       env.dispose();
