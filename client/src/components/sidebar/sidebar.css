@@ -87,6 +87,8 @@
       when the sidebar gets too small */
     white-space: nowrap;
 
+    height: 100%;
+
     /* disallow text selections */
     user-select: none;
 }
@@ -101,8 +103,10 @@
 }
 
 .sidebarContent .tabContents {
-    margin-top: 0.5rem;
-    margin-left: 0.5rem;
+    padding-top: 0.3rem;
+    padding-left: 0.5rem;
+    overflow-y: auto;
+    height: 100%;
 }
 
 .tabWrapper {
@@ -161,4 +165,9 @@
 .contextAction {
     margin-left: .5em;
     margin-right: .5em;
+}
+
+#dropdown {
+  margin-top: 0.5em;
+  margin-right: 0.5em;
 }
