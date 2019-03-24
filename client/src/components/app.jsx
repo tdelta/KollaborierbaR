@@ -4,7 +4,7 @@ import NotificationSystem from 'react-notification-system';
 
 import Editor from './editor.tsx';
 import Top from './top.tsx';
-import Sidebar from './sidebar/sidebar.jsx';
+import Sidebar from './sidebar/Sidebar.tsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 import Console from './console/console.jsx';
 import {Network} from '../network';
@@ -337,6 +337,7 @@ export default class App extends React.Component {
                   */}
                 {/* Render the top component */}
                 <Top
+                    getFilePath={this.projectManagement.getOpenedPath}
                     setText={this.setText}
                     text={this.state.text}
                     onDeleteFile={() => this.deleteFile(this.state.openedPath)}
