@@ -218,9 +218,7 @@ public class ProjectSyncController {
   }
 
   private List<User> getSubscriberNames(List<Principal> subscriberList) {
-    return userList
-        .entrySet()
-        .stream()
+    return userList.entrySet().stream()
         .filter(x -> subscriberList.contains(x.getKey()))
         .map(x -> x.getValue())
         .collect(Collectors.toList());

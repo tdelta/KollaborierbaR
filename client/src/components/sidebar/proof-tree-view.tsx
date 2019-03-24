@@ -5,7 +5,6 @@ import ReactDOM from 'react-dom';
 
 import GuiProofNode from './gui-proof-node';
 import ProofNode from '../../key/prooftree/ProofNode';
-import ProofResults from '../../key/netdata/ProofResults';
 
 import DisplayTreeNode, {toDisplayTree} from './displaytree/displaytreenode';
 
@@ -23,7 +22,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
     this.handleKeydown = this.handleKeydown.bind(this);
     this.collapseNode = this.collapseNode.bind(this);
     this.state = {
-      displayTrees: [],
+      displayNode: null,
       changed: false,
     };
   }
@@ -63,27 +62,6 @@ export default class ProofTreeView extends React.Component<Props, State> {
     this.setState({
       changed:true
     });
-  }
-
-  /*
-   * Used to avoid to frequent updates of the renderer
-   * depending on whether the state has changed
-   * @param nextProps given props
-   * @param nextState given state
-   * @returns boolean if componet should be updated
-   */
-  public shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
-    // only do a shallow comparison, so that the proof tree view is not constantly updated.
-
-    if(nextState.changed){
-      this.setState({
-        changed: false,
-      })
-      return true;
-    } else{
-      return this.props.displaySequent !== nextProps.displaySequent
-      || this.props.proofResults !== nextProps.proofResults
-    }
   }
 
   
@@ -148,46 +126,41 @@ export default class ProofTreeView extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props){
-    if(prevProps.proofResults !== this.props.proofResults){
-      let results = this.props.proofResults;
-      let displayTrees: DisplayTreeNode[] = [];
-      if (results != null) {
-        displayTrees =
-          results.succeeded
-            .concat(results.failed)
-            .concat(results.errors)
-            .map((result: ObligationResult) => result.proofTree)
-            .map(proofTree => toDisplayTree(proofTree, null))
-            .filter((proofTree: DisplayTreeNode | null): proofTree is DisplayTreeNode => proofTree != null);
+    if(prevProps.obligationResult !== this.props.obligationResult){
+      let displayNode: DisplayTreeNode | null = null;
+      if (this.props.obligationResult != null) {
+        displayNode = toDisplayTree(this.props.obligationResult.proofTree, null);
+      }
 
       this.setState({
-        displayTrees: displayTrees,
-        changed: true
+        changed: true,
+        displayNode: displayNode
       });
-      }
     }
   }
 
   public render() {
-    console.log("rendering proof trees"); 
-    // TODO better keys
-    let nodes: DisplayTreeNode[] = this.state.displayTrees;
-    if (nodes.length > 0) {
+    let node;
+    let displayNode;
+
+    if (this.props.obligationResult != null) {
+      node = this.props.obligationResult.proofTree;
+      displayNode = this.state.displayNode;
+      // Reenable, if this behavior is desired:
+      //initiallyCollapsed = this.props.obligationResult.kind === ObligationResultKind.success;
+    }
+    
+    if (node != null && displayNode != null) {
       return (
         <div>
-          {
-            nodes.map(node => (
-                <GuiProofNode
-                  key={`${node.serialNr},${node.oneStepId}`}
-                  // TODO better keys
-                  ref={node.getRef()}
-                  node={node}
-                  selectNode={this.selectNode}
-                  collapseNode={this.collapseNode}
-                />
-                )
-            )
-          }
+          <GuiProofNode
+            key={`${node.serialNr},${node.oneStepId}`}
+            ref={displayNode.getRef()}
+            node={displayNode}
+            selectNode={this.selectNode}
+            collapseNode={this.collapseNode}
+            proofTreeOperationInfo={this.props.proofTreeOperationInfo}
+          />
         </div>
       );
     } else {
@@ -198,11 +171,12 @@ export default class ProofTreeView extends React.Component<Props, State> {
 
 // defining the structure of this react components properties
 interface Props {
-  proofResults: ProofResults;
+  obligationResult?: ObligationResult;
   displaySequent: (sequent: string) => void;
+  proofTreeOperationInfo: { operation: () => void; label: string };
 }
 
 interface State {
-  displayTrees: DisplayTreeNode[];
+  displayNode: DisplayTreeNode | null;
   changed: boolean;
 }

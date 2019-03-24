@@ -34,5 +34,6 @@ module.exports = {
         ],
         // unused function arguments shall be no error
         "no-unused-vars": ["error", { "args": "none" }],
+        "no-console": "off"
     }
 };

@@ -4,7 +4,7 @@ import './sidebar.css';
 
 import FontAwesome from 'react-fontawesome';
 
-import Goal from '../../goal';
+import OpenGoalInfo from '../../key/netdata/OpenGoalInfo';
 
 export default class GoalNode extends React.Component<Props, {}> {
   constructor(props: Props) {
@@ -38,7 +38,7 @@ export default class GoalNode extends React.Component<Props, {}> {
 }
 
 interface Props {
-  goal: Goal;
+  goal: OpenGoalInfo;
   toggled: boolean;
-  toggleGoal: (goal: Goal) => void;
+  toggleGoal: (goal: OpenGoalInfo) => void;
 }

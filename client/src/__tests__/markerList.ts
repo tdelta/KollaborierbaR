@@ -34,8 +34,8 @@ test('No range from the inputs gets left empty in the result and no ranges overl
 
         // For every given range, assert that every position in it is inside exactly one marker
         for (const range of rangesInit) {
+          let x: number;
           for (let y: number = range[0]; y < range[2]; y = y + 1) {
-            let x: number;
             if (y === range[0]) x = range[1];
             else x = 0;
             for (; x < lines[y].length; x = x + 1) {
@@ -48,7 +48,7 @@ test('No range from the inputs gets left empty in the result and no ranges overl
               ).toBeLessThanOrEqual(1);
             }
           }
-          let x: number = 0;
+          x = 0;
           for (; x < range[3]; x = x + 1) {
             expect(
               numContainingMarkers(
