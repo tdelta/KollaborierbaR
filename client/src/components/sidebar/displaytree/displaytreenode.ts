@@ -49,7 +49,11 @@ export default class DisplayTreeNode {
     return null;
   }
 
-  public getIndex(node: DisplayTreeNode){
+  /*
+   *  Find the array index of the node in the child array of its parent
+   *  returns number representing position in the child array
+   */
+  public getIndex(node: DisplayTreeNode): number{
     return this.children.findIndex(child=> {
        return node.serialNr === child.serialNr;
     });
@@ -63,9 +67,10 @@ export default class DisplayTreeNode {
   public getRef(): RefObject<GuiProofNode>{
     return this.ref;
   }
-
-  //
-  //
+  /*
+   *  Finds and returns the next visible leaf with the highest position in the tree order
+   *  returns found DisplayTreeNode if non found return this
+   */
   public findNextLeafUp(): DisplayTreeNode{
       let numberOfChildren: number = this.children.length;
       console.log(this.kind);
@@ -84,6 +89,10 @@ export default class DisplayTreeNode {
       } 
   }
 
+  /*
+   *  Findes and reutrn the next visible leaf with the lowest position in the tree order
+   *  @returns found DisplayTreeNode if it exists else null
+   */
   public findNextLeafDown(): DisplayTreeNode| null{
         if(this.parent != null){
           // am i last ? 
@@ -99,12 +108,15 @@ export default class DisplayTreeNode {
   }
 }
 
-
+/*
+ * Converts a given ProofNode into a DisplayTreeNode recursivly while including its parent
+ *  @param ProofNode tree the given ProofNode
+ *  @param DisplayTreeNode parent parent of the node
+ *  @returns converte DisplayTreeNode from ProofNode
+ */
 
 export function toDisplayTree(tree: ProofNode, parent: DisplayTreeNode|null): DisplayTreeNode | null{
   if(tree === null) return null;
-
- 
 
   let collapsed: boolean = tree.children.length > 1;
 
