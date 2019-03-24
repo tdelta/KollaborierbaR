@@ -53,6 +53,8 @@ export default class ProofTreeView extends React.Component<Props, State> {
       if(element!=null) {
         element.scrollIntoView({});
       }
+    }else{
+      console.log("spkdfks;lfdkls;d");
     }
     if(this.lastSelected)
       this.lastSelected.selected = false;
@@ -70,12 +72,14 @@ export default class ProofTreeView extends React.Component<Props, State> {
  * @param event keyevent
  */
   public handleKeydown(event: any){
+      
      if(this.lastSelected != null){ 
         let leafNode: DisplayTreeNode = this.lastSelected;
         console.log(leafNode);
         switch(event.keyCode){
           case 38:
               //Up
+              event.preventDefault();
               if(leafNode.parent != null){  
                   let parentNode: DisplayTreeNode = leafNode.parent;
                   let index: number = parentNode.getIndex(leafNode);
@@ -88,6 +92,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
               break;
           case 40:
               // Down
+              event.preventDefault();
               if(leafNode.collapsed == false && leafNode.children.length != 0 && leafNode.children[0].kind != Kind.OneStepSimplification){ 
                   this.selectNode(leafNode.children[0]);
                 }else{
@@ -104,11 +109,13 @@ export default class ProofTreeView extends React.Component<Props, State> {
               break;
           case 39:
               // Right
+              event.preventDefault();
               leafNode.collapsed = false;
               this.selectNode(leafNode);
               break;
           case 37:
               // Left
+              event.preventDefault();
               leafNode.collapsed = true;
               this.selectNode(leafNode);
               break;

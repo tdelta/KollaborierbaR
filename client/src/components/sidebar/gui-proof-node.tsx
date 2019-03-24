@@ -34,7 +34,7 @@ export default class GuiProofNode extends React.Component<Props> {
         display: this.props.node.collapsed ? 'none' : '',
       };
 
-      console.log('rerendering', this.props.node.collapsed);
+      //console.log('rerendering', this.props.node.collapsed);
 
       let background: string = this.props.node.selected ? 'activeFileNode' : 'inactiveFileNode';
 
@@ -82,6 +82,7 @@ export default class GuiProofNode extends React.Component<Props> {
                    */}
                   <GuiProofNode
                     node={child}
+                    ref={child.getRef()}
                     selectNode={this.props.selectNode}
                     collapseNode={this.props.collapseNode}
                     proofTreeOperationInfo={this.props.proofTreeOperationInfo}
