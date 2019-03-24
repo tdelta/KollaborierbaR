@@ -496,7 +496,9 @@ export default class ProjectManagement {
   }
 
   /*
-   * updates the filename of the given resource path
+   * This function updates the filename of the given resource path.
+   * The new filename is entered by the prompt, which is created
+   * inside the fuction.
    *
    */
   public updateFileName(path: string[]): void {
@@ -552,6 +554,14 @@ export default class ProjectManagement {
     }
   }
 
+  /**
+   * That function makes a call to the HTTP rest controller
+   * and updates the content of the file specified by the
+   * parameters.
+   *
+   * @param path to the file that will be updated
+   * @param content that will be set to the file
+   */
   public updateFileContent(path: string[], content: string): Promise<void> {
     // Path to the ressource we want to save
     // TODO: Check if project exists
