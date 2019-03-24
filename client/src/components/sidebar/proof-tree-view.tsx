@@ -28,6 +28,10 @@ export default class ProofTreeView extends React.Component<Props, State> {
     };
   }
 
+  /*
+   * Invert collapsed boolean of given DisplayTreeNode
+   * @param given node  
+   */
   public collapseNode(node: DisplayTreeNode){
     node.collapsed = !node.collapsed;
     this.setState({
@@ -35,6 +39,11 @@ export default class ProofTreeView extends React.Component<Props, State> {
     });
   }
 
+  /*
+   * Marks the given DisplayTreeNode as selected
+   * also scrolls selectNode into view
+   * @param node given DisplayTreeNode
+   */
   public selectNode(node: DisplayTreeNode){
     this.props.displaySequent(node.sequent);
     console.log(node);
@@ -56,6 +65,13 @@ export default class ProofTreeView extends React.Component<Props, State> {
     });
   }
 
+  /*
+   * Used to avoid to frequent updates of the renderer
+   * depending on whether the state has changed
+   * @param nextProps given props
+   * @param nextState given state
+   * @returns boolean if componet should be updated
+   */
   public shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
     // only do a shallow comparison, so that the proof tree view is not constantly updated.
 
@@ -71,7 +87,10 @@ export default class ProofTreeView extends React.Component<Props, State> {
   }
 
   
-
+/*
+ * Eventhandler for arrow buttons to navigate the proof tree
+ * @param event keyevent
+ */
   public handleKeydown(event: any){
      if(this.lastSelected != null){ 
         let leafNode: DisplayTreeNode = this.lastSelected;
@@ -79,7 +98,7 @@ export default class ProofTreeView extends React.Component<Props, State> {
         switch(event.keyCode){
           case 38:
               //Up
-              if(leafNode.parent != null){  //We are not in the root node
+              if(leafNode.parent != null){  
                   let parentNode: DisplayTreeNode = leafNode.parent;
                   let index: number = parentNode.getIndex(leafNode);
                   if(index > 0){
