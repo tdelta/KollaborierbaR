@@ -36,7 +36,7 @@ export default class GuiProofNode extends React.Component<Props> {
 
       //console.log('rerendering', this.props.node.collapsed);
 
-      let background: string = this.props.node.selected
+      const background: string = this.props.node.selected
         ? 'activeFileNode'
         : 'inactiveFileNode';
 
