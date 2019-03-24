@@ -1,19 +1,23 @@
 import React from 'react';
 import FontAwesome from 'react-fontawesome';
-
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
-// Why did I have to include this and sidebar.jsx doesnt need to include
-// sidebar.css
 import './console.css';
+import PropTypes from 'prop-types';
 
-export default class Sidebar extends React.Component {
+/**
+ * This renders the console of KollaborierbaR. The 
+ * console is displayed depending on the consoleIsVisible
+ * property handed down from app.jsx. 
+ */
+export default class Console extends React.Component {
 
     render(){
 
+        // Helper to determine the visibilty of the console
         const genVisibilityString = (collapsed) => collapsed ?
         'none' : '';
 
+        //Set visiblity for the console, the consoleRestoreDiv and the consoleCollapseDiv
         let consoleStyleModForRestore = {
         'display': genVisibilityString(this.props.consoleIsVisible)
         };  
@@ -24,6 +28,7 @@ export default class Sidebar extends React.Component {
 
         return(
             <>
+            {/*Div which onClicks restores the console*/}
             <div 
                 className = "consoleRestoreHandle"
                 style = {consoleStyleModForRestore}
@@ -40,6 +45,7 @@ export default class Sidebar extends React.Component {
                 /> 
             </div>
 
+            {/*Div which onClicks collapses the console*/}
             <div 
                 className = "consoleRestoreHandle"
                 style = {consoleStyleModForCollapse}
@@ -54,11 +60,13 @@ export default class Sidebar extends React.Component {
                     className="consoleRestoreHandleIcon"
                 /> 
             </div>
-
+            
+            {/*Actual console div */}
             <div 
                 id = "console"
                 style = {consoleStyleModForCollapse}
             >
+                {/* Console message will be rendert in this div */}
                 <div id="consoletext">
                     {this.props.consolelog}
                 </div>
@@ -66,4 +74,10 @@ export default class Sidebar extends React.Component {
             </>
         );
     }
+}
+
+Console.propTypes = {
+    consolelog : PropTypes.string,
+    consoleIsVisible : PropTypes.bool,
+    invertConsoleVisibility : PropTypes.func
 }
