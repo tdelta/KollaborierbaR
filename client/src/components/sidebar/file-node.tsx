@@ -10,7 +10,7 @@ import {
   faTag,
 } from '@fortawesome/free-solid-svg-icons';
 
-import FileIcon from './file-icon.jsx';
+import FileIcon from './FileIcon';
 import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import { Context, ContextMenu, ContextAction } from './context.jsx';
 import './sidebar.css';

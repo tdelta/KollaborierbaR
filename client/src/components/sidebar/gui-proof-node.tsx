@@ -9,7 +9,7 @@ import ProofNode, { Kind } from '../../key/prooftree/ProofNode';
 
 import { Context, ContextMenu, ContextAction } from './context.jsx';
 
-import ProofIcon from './proof-icon';
+import ProofIcon from './ProofIcon';
 
 export default class GuiProofNode extends React.Component<Props, State> {
   public static defaultProps = {
