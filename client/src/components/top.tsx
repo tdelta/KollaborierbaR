@@ -46,7 +46,6 @@ export default class Top extends React.Component<Props, State> {
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
-    this.proveKeY = this.proveKeY.bind(this);
     this.state = {
       showOpenModal: false,
       showDeleteModal: false,
@@ -59,19 +58,6 @@ export default class Top extends React.Component<Props, State> {
 
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
-  }
-
-  private proveKeY() {
-    if (this.props.notificationSystem.current) {
-      this.props.notificationSystem.current.clearNotifications();
-      this.props.notificationSystem.current.addNotification({
-        title: 'Please Wait!',
-        message: 'Proving all obligations...',
-        level: 'info',
-        position: 'bc',
-        autoDismiss: 0,
-      });
-    }
   }
 
   private onFileChosen(event: HTMLInputEvent): void {
