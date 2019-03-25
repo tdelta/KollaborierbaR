@@ -61,6 +61,10 @@ export default class Top extends React.Component<Props, State> {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
 
+  /*
+   * Proves all obligations in the currently open file,
+   * gets called when the key button is pressed
+   */
   private proveKeY() {
     if (this.props.notificationSystem.current) {
       this.props.notificationSystem.current.clearNotifications();
