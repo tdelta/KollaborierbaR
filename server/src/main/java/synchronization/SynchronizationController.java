@@ -38,7 +38,11 @@ public class SynchronizationController {
   @Autowired private UserList userList;
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
-  public ConcurrentHashMap<String, LogootSRopes> getDocuments(){
+  /**
+   * @return a list of all currently active crdt documents, mapped to their file path including the
+   *     project name, for example: /MyProject/src/main/Main.java
+   */
+  public ConcurrentHashMap<String, LogootSRopes> getDocuments() {
     return documents;
   }
 
@@ -107,7 +111,11 @@ public class SynchronizationController {
   public void handleSubscription(@Header("file") String file, Principal user, File text) {
     System.out.println("Adding user to crdt doc " + file);
     unsubscribe(user);
-    if (file.equals("")) return;
+
+    if (file.equals("")) {
+      return;
+    }
+
     int replicaNumber;
     if (users.containsKey(file)) {
       // There are already people working on this document
@@ -133,6 +141,7 @@ public class SynchronizationController {
       // Send document to user
       messagingTemplate.convertAndSendToUser(user.getName(), "/crdt-doc", document);
     }
+
     // This event is handled by the ProjectSyncController instance
     userList.setId(user, replicaNumber);
     FileOpenedEvent event = new FileOpenedEvent(this, user, file);

@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * Checks java source files for errors and warnings using the eclipse jdt lib Also checks for
  * features not supported by KeY.
  */
-public class JavaJDTLinter {
+public class JavaJdtLinter {
   final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
   /**
@@ -85,8 +85,7 @@ public class JavaJDTLinter {
     List<Diagnostic> keyErrors = scanner.parseAst(cu);
 
     // Add all linter errors and warnings from jdt
-    Arrays.asList(cu.getProblems())
-        .stream()
+    Arrays.asList(cu.getProblems()).stream()
         .map(problem -> normalizeDiagnostic(problem, toCheck.get(0)))
         .forEach(d -> keyErrors.add(d));
 
@@ -101,10 +100,13 @@ public class JavaJDTLinter {
     // determine the error type
     final Diagnostic.Kind kind;
 
-    if (d.isError()) kind = Diagnostic.Kind.ERROR;
-    else if (d.isWarning()) kind = Diagnostic.Kind.WARNING;
-    else // to simplify things, everything else is interpreted as NOTE
-    kind = Diagnostic.Kind.NOTE;
+    if (d.isError()) {
+      kind = Diagnostic.Kind.ERROR;
+    } else if (d.isWarning()) {
+      kind = Diagnostic.Kind.WARNING;
+    } else { // to simplify things, everything else is interpreted as NOTE
+      kind = Diagnostic.Kind.NOTE;
+    }
 
     return new Diagnostic(d.getMessage(), d.getSourceStart(), d.getSourceEnd() + 1, source, kind);
   }

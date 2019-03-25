@@ -26,14 +26,14 @@ export default class Key {
   private setProofsState: (proofsState: ProofsState) => void;
   private setObligationIdOfLastUpdatedProof: (obligationId: number) => void;
 
-  private addNewConsoleMessage: (message: String) => void;
+  private addNewConsoleMessage: (message: string) => void;
 
   private macro: string = '';
 
   private contractRegex: RegExp = /normal_behaviour|exceptional_behaviour|normal_behavior|exceptional_behavior/g;
-  // Find method declarations in the current line
+  // Regex that matches method declarations
   // https://stackoverflow.com/questions/68633/regex-that-will-match-a-java-method-declarations
-  private methodRegex: RegExp = /^[ \t]*(?:(?:public|protected|private)\s+)?(?:(static|final|native|synchronized|abstract|threadsafe|transient|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))\s+){0,}(?!return)\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})\s+\b\w+\b\s*\(\s*(?:\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*(?:,\s+\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*){0,})?\s*\)(?:\s*throws [\w.]+(\s*,\s*[\w.]+))?\s*(?:\{|;)[ \t]*$/;
+  private methodRegex: RegExp = /^[ \t]*(?:(?:public|protected|private)\s+)?(?:(\/\*.*\*\/|static|final|native|synchronized|abstract|threadsafe|transient|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))\s+){0,}(?!return)\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})\s+\b\w+\b\s*\(\s*(?:\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*(?:,\s+\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*){0,})?\s*\)(?:\s*throws [\w.]+(\s*,\s*[\w.]+))?\s*(?:\{|;)[ \t]*(?:\/\/.*)$/;
 
   constructor(
     network: Network,
@@ -43,7 +43,7 @@ export default class Key {
     setProofsState: (proofsState: ProofsState) => void,
     setObligationIdOfLastUpdatedProof: (obligationId: number) => void,
     getFilePath: () => string,
-    addNewConsoleMessage: (message: String) => void
+    addNewConsoleMessage: (message: string) => void
   ) {
     this.notificationSystem = notificationSystem;
     this.setProvenObligations = setProvenObligations;
@@ -90,6 +90,11 @@ export default class Key {
     });
   }
 
+  /**
+   * Sets the proof script to be used for all following proofs
+   *
+   * @param macro - path to the proof script
+   */
   public setMacro(macro: string) {
     this.macro = macro;
   }
@@ -337,13 +342,20 @@ export default class Key {
     }
   }
 
+  /**
+   * Initiates the proving of obliagtions and displays a neat notification
+   *
+   * @param nr - the index or indices of obligations that should be proved
+   * @returns a pending promise for the prove, whose value is undefined when
+   * it gets fullfiled
+   */
   public proveObligations(nr: number | number[]) {
     if (this.notificationSystem.current) {
       this.notificationSystem.current.clearNotifications();
       this.notificationSystem.current.addNotification({
         title: 'Please Wait!',
         message:
-          typeof nr == 'number'
+          typeof nr === 'number'
             ? 'Proving obligation...'
             : 'Proving obligations...',
         level: 'info',
@@ -366,9 +378,9 @@ export default class Key {
 
   /**
    * Finds all lines that contain proof obligations and gives each obligation an index.
-   * @param Lines of a text that contains JML specifications
-   * @result An array where the index of a line that contains proof obligations
-   *    is set to the index of the last obligations in the line. For the other lines it is undefined
+   * @param lines - Lines of a text that contains JML specifications
+   * @returns An array where the index of a line that contains proof obligations
+   * is set to the index of the last obligations in the line. For the other lines it is undefined
    */
   public getObligations(lines: string[]): number[] {
     let numObligations = 0;
@@ -386,23 +398,42 @@ export default class Key {
     return result;
   }
 
+  /**
+   * Checks if a string is a valid method declaration by matching it against
+   * a regular expression
+   * @param line - the string that should be tested
+   * @returns a boolean which is true when the input is method declaration and
+   * false when not
+   */
   public isMethodDeclaration(line: string): boolean {
     return this.methodRegex.test(line);
   }
 
+  /**
+   * Returns the indices of the proof obligations that belong to certain method
+   * @param lines - a string array which is filled with the string lines of a file
+   * @param row - the line number which contains the potential method declaration
+   * @returns a list which contains the indices of proofobligations, if the row
+   * parameter is the line number of a method declaration and the method has
+   * proof obligations
+   */
   public getContractsForMethod(lines: string[], row: number): number[] {
     const result: number[] = [];
+
     if (this.isMethodDeclaration(lines[row])) {
       let numObligations = 0;
+
       for (let i = 0; i < lines.length; i += 1) {
         const obligations: RegExpMatchArray | null = lines[i].match(
           this.contractRegex
         );
+
         if (obligations) {
           numObligations += obligations.length;
           result.push(numObligations - 1);
         }
-        if (row == i) {
+
+        if (row === i) {
           break;
         } else if (this.isMethodDeclaration(lines[i])) {
           result.length = 0;

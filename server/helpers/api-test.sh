@@ -5,7 +5,7 @@
 # * build the server
 # * run the server
 # * wait until its ready
-# * run the api tests
+# * run the tests
 # * stop the server
 #
 # (There are some additional safety checks to avoid waiting forever.
@@ -16,11 +16,11 @@ echo "Preparing tests on server api..."
 
 # Ensure server is already built
 echo "Building server beforehand..."
-make -C ..
+./gradlew build -x test
 
 # Run server without output in background
 echo "Running server."
-nohup make -C .. run > /dev/null 2>&1 &
+nohup make run > /dev/null 2>&1 &
 serverPid=$!
 
 # Busy waiting until server is ready
@@ -53,7 +53,7 @@ done
 echo "Server is ready! Running api tests..."
 
 # Run tests
-(cd dredd-test && npm test)
+(./gradlew test)
 
 # Capture exit code
 testResult=$?

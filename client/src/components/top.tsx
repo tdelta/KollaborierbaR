@@ -29,7 +29,7 @@ import {
   DropdownItem,
 } from 'reactstrap';
 
-import { OpenModal, DeleteModal, MacroModal } from './project-modals.jsx';
+import { OpenModal, DeleteModal, MacroModal } from './selection-modals.jsx';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -64,6 +64,9 @@ export default class Top extends React.Component<Props, State> {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
 
+  /**
+   * Inverts the visibility of the modal that selects macro files
+   */
   private toggleMacroModal(): void {
     this.setState({ showMacroModal: !this.state.showMacroModal });
   }
@@ -179,18 +182,18 @@ export default class Top extends React.Component<Props, State> {
             <OpenModal
               isOpen={this.state.showOpenModal}
               toggle={this.toggleOpenModal}
-              projectOperation={this.props.onOpenProject}
+              selectOperation={this.props.onOpenProject}
             />
             <DeleteModal
               isOpen={this.state.showDeleteModal}
               toggle={this.toggleDeleteModal}
-              projectOperation={this.props.onDeleteProject}
+              selectOperation={this.props.onDeleteProject}
             />
             <MacroModal
               isOpen={this.state.showMacroModal}
               toggle={this.toggleMacroModal}
               loadFunction={this.props.getMacroFiles}
-              projectOperation={this.props.onSelectMacro}
+              selectOperation={this.props.onSelectMacro}
             />
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -246,10 +249,12 @@ export default class Top extends React.Component<Props, State> {
         />
 
         <a
-          href={
-            'data:text/plain;charset=utf-8,$(encodeURIComponent(this.props.text))'
+          href={`data:text/plain;charset=utf-8, ${encodeURIComponent(
+            this.props.text
+          )}`}
+          download={
+            this.props.getFilePath()[this.props.getFilePath().length - 1]
           }
-          download="test.txt"
         >
           <input
             type="button"
@@ -284,6 +289,7 @@ interface ProofResults {
 // defining the structure of this react components properties
 interface Props {
   getMacroFiles: any;
+  getFilePath: () => string[];
   text: string;
   setText(text: string): void;
   onDeleteFile(): void;

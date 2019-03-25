@@ -17,11 +17,11 @@ public class ProofNode {
     private final String value;
 
     Kind(final String value) {
-        this.value = value;
+      this.value = value;
     }
 
     public String getValue() {
-        return value;
+      return value;
     }
   }
 
@@ -32,7 +32,13 @@ public class ProofNode {
   private final int serialNr;
   private final int oneStepId;
 
-  public ProofNode(final String text, final List<ProofNode> children, final Kind kind, final String sequent, final int serialNr, final int oneStepId) {
+  public ProofNode(
+      final String text,
+      final List<ProofNode> children,
+      final Kind kind,
+      final String sequent,
+      final int serialNr,
+      final int oneStepId) {
     this.text = text;
     this.children = children;
     this.kind = kind;

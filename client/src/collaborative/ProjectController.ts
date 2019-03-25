@@ -1,4 +1,4 @@
-import {Network} from '../network';
+import { Network } from '../network';
 
 export default class ProjectController {
   private network: Network;
@@ -9,9 +9,7 @@ export default class ProjectController {
     this.observer = observer;
   }
 
-  public openProject(
-    projectName: string
-  ): Promise<void> {
+  public openProject(projectName: string): Promise<void> {
     return this.network.safeSubscribe(
       `/user/projects/${projectName}`,
       msg => {
@@ -35,14 +33,11 @@ export default class ProjectController {
     );
   }
 
-  public closeProject(
-    projectName: string
-  ): Promise<void> {
+  public closeProject(projectName: string): Promise<void> {
     const topic = `/user/projects/${projectName}`;
 
     return this.network.safeUnsubscribe(topic);
   }
-
 }
 
 export interface User {
