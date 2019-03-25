@@ -30,9 +30,9 @@
   color: #cfd8dc;
 
   float: left;
-
   height: 100%;
-  width: 300px;
+  width: 500px;
+  overflow:hidden;
 }
 
 /* a slim bar between sidebar and main content. It will allow the user to
@@ -69,8 +69,8 @@
     /* this will place it floating in the upper right corner */
     position: relative;
     display: inline-block;
-    top: 0.5em;
-    left: calc(100% - 1.8em);
+    top: 0em;
+    left: calc(100% - 1.6em);
 
     /* this element is interactive, so we change the cursor to a pointer */
     cursor: pointer;
@@ -78,28 +78,63 @@
 
 /* contains the project view etc. */
 .sidebarContent {
-    margin-left: 0.5em;
-    margin-top: -1em;
+    height: 100%;
+    /* ^this is needed to fill the vertical space */
+    margin-top: -1.5em;
     /* ^this is needed to fill the space left by the toggle button */
 
-    /* dont wrap content of the sidebar, it should just be invisible,
+    /* dont wrap content of the sidebar, it should just be scrollable,
       when the sidebar gets too small */
     white-space: nowrap;
-    overflow: hidden;
+
+    height: 100%;
 
     /* disallow text selections */
     user-select: none;
 }
 
+.sidebarContent .nav-link {
+    border-radius: 0 !important;
+    font-size: 0.8em;
+    padding-bottom: 0.3em;
+    padding-top: 0.3em;
+    padding-right: 0.6em;
+    padding-left: 0.6em;
+}
+
+.sidebarContent .tabContents {
+    padding-top: 0.3rem;
+    padding-left: 0.5rem;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.tabWrapper {
+    height: 97%;
+    overflow: auto;
+}
+
 .activeFileNode {
+    position: relative;
+    left: -0.5em;
     background-color: #374c55;
     border-radius: 5px;
     padding-left: 0.5em;
     padding-right: 0.5em;
+    display: table
 }
 
 .inactiveFileNode {
     background-color: inherit;
+}
+
+.tableFileNode {
+    display: table
+}
+
+#projectTree hr {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5em;
 }
 
 /* file lists within the project view */
@@ -112,6 +147,10 @@
 .projectTreeIcon {
     margin-right: 0.5em; /* leave some space to the file/folder name */
     color: #caa576;
+}
+
+.goalNodeIcon {
+  margin-right: 0.3rem;
 }
 
 .contextList {
@@ -128,6 +167,7 @@
     margin-right: .5em;
 }
 
-ul > li{
-    display: table;
+#dropdown {
+  margin-top: 0.5em;
+  margin-right: 0.5em;
 }

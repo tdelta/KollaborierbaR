@@ -1,6 +1,8 @@
 import Editor from '../components/editor';
 
-import { Network, UsersUpdatedEvent } from '../network';
+import { Network } from '../network';
+import { UsersUpdatedEvent } from '../collaborative/ProjectController';
+
 import {
   LogootSRopes,
   TextInsert,
@@ -84,16 +86,22 @@ export default class CollabController {
       {},
       this.handleNewUserName.bind(this)
     );
+    let file = `${project}/${filepath}`;
     if (filepath === '') {
+      file = '';
       this.connected = false;
     } else {
-      const file = `${project}/${filepath}`;
-      this.network.broadcast('/file', { file: file }, { content: content });
       this.connected = true;
     }
+    this.network.broadcast('/file', { file: file }, { content: content });
 
     this.filepath = filepath;
     this.project = project;
+  }
+
+  public disconnect() {
+    this.connected = false;
+    this.network.broadcast('/file', { file: '' }, { content: '' });
   }
 
   /**
@@ -139,12 +147,15 @@ export default class CollabController {
         const start: ace_types.Ace.Point = this.editor.session.doc.indexToPosition(
           delta.index
         );
-        this.editor.ignoreChanges = true;
         // The variable ignoreChanges makes sure our on change listener does not process the insert
+        // The undo group is used to update old operations properly but not let the user undo the remote insert
+        this.editor.ignoreChanges = true;
+        const remoteUndo = this.editor.session.$undoManager.startNewGroup();
         const end: ace_types.Ace.Point = this.editor.session.insert(
           start,
           delta.content
         );
+        this.editor.session.$undoManager.markIgnored(remoteUndo);
         this.editor.ignoreChanges = false;
         const uid: number =
           parsedOperation.id.tuples[parsedOperation.id.tuples.length - 1]
@@ -183,9 +194,12 @@ export default class CollabController {
         const end: ace_types.Ace.Point = this.editor.session.doc.indexToPosition(
           delta.index + delta.length
         );
-        this.editor.ignoreChanges = true;
         // The variable ignoreChanges makes sure our on change listener does not process the insert
+        // The undo group is used to update old operations properly but not let the user undo the remote insert
+        this.editor.ignoreChanges = true;
+        const remoteUndo = this.editor.session.$undoManager.startNewGroup();
         this.editor.session.replace(Range.fromPoints(start, end), '');
+        this.editor.session.$undoManager.markIgnored(remoteUndo);
         this.editor.ignoreChanges = false;
       }
     }
