@@ -16,8 +16,8 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
   @Autowired private CustomHandshakeHandler customHandshakeHandler;
 
   /**
-   * Used to configure converters for message payload and the
-   * SimpMessagingTemplate that can address specific users
+   * Used to configure converters for message payload and the SimpMessagingTemplate that can address
+   * specific users
    *
    * @param config List of settings, initially empty
    */
@@ -26,9 +26,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     config.setUserDestinationPrefix("/user");
   }
 
-  /**
-   * Registers URLs for the websocket
-   */
+  /** Registers URLs for the websocket */
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry
