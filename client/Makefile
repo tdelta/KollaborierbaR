@@ -1,4 +1,4 @@
-.PHONY: setup check format run test clean
+.PHONY: setup check format run test clean deploy
 
 all:
 	npm run-script build
@@ -30,3 +30,6 @@ test:
 
 clean:
 	npm run-script clean
+
+deploy:
+	npm run build
