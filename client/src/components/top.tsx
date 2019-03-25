@@ -6,7 +6,18 @@ import '../index.css';
 import Usernames from './user-names/user-names';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faForward, faBoxOpen, faStarOfLife, faDownload, faCloudUploadAlt, faSave, faBomb, faTrashAlt, faTag , faDirections} from '@fortawesome/free-solid-svg-icons';
+import {
+  faForward,
+  faBoxOpen,
+  faStarOfLife,
+  faDownload,
+  faCloudUploadAlt,
+  faSave,
+  faBomb,
+  faTrashAlt,
+  faTag,
+  faDirections,
+} from '@fortawesome/free-solid-svg-icons';
 
 import {
   Navbar,
@@ -107,7 +118,7 @@ export default class Top extends React.Component<Props, State> {
     return (
       <div>
         <Navbar color="dark" dark expand="md">
-          <NavbarBrand style={{color: 'white'}}>KollaborierbaR</NavbarBrand>
+          <NavbarBrand style={{ color: 'white' }}>KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <Usernames />
 
@@ -118,21 +129,19 @@ export default class Top extends React.Component<Props, State> {
               <DropdownMenu right>
                 <DropdownItem
                   onClick={() => {
-                    this.props
-                      .saveFile()
-                      .then(() => this.props.onProveFile());
+                    this.props.saveFile().then(() => this.props.onProveFile());
                   }}
                 >
                   <FontAwesomeIcon
                     icon={faForward}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Prove all contracts
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleMacroModal}>
                   <FontAwesomeIcon
                     icon={faDirections}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Select Macro
                 </DropdownItem>
@@ -147,21 +156,21 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.props.onCreateProject}>
                   <FontAwesomeIcon
                     icon={faStarOfLife}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Create project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleOpenModal}>
                   <FontAwesomeIcon
                     icon={faBoxOpen}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Open project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleDeleteModal}>
                   <FontAwesomeIcon
                     icon={faBomb}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Delete project
                 </DropdownItem>
@@ -191,35 +200,35 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.downloadFileOnClick}>
                   <FontAwesomeIcon
                     icon={faDownload}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Download
                 </DropdownItem>
                 <DropdownItem onClick={this.openFileOnClick}>
                   <FontAwesomeIcon
                     icon={faCloudUploadAlt}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Upload
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onDeleteFile}>
                   <FontAwesomeIcon
                     icon={faTrashAlt}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Delete
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onUpdateFileName}>
                   <FontAwesomeIcon
                     icon={faTag}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Rename
                 </DropdownItem>
                 <DropdownItem onClick={this.props.saveFile}>
                   <FontAwesomeIcon
                     icon={faSave}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Save
                 </DropdownItem>
