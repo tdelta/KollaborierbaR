@@ -258,6 +258,10 @@ export default class Key {
       });
   }
 
+  /**
+   * Tries to prove all obigations in the current file and displays a status
+   * notification that a proof is in progress
+   */
   private proveFile() {
     if (this.notificationSystem.current) {
       this.notificationSystem.current.clearNotifications();
