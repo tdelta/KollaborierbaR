@@ -71,7 +71,6 @@ export default class UserIndicator extends React.Component<Props, {}> {
       </>
     );
   }
-
 }
 
 interface Props {
