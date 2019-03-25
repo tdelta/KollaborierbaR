@@ -3,14 +3,14 @@ package events;
 import org.springframework.context.ApplicationEvent;
 
 public class TestEvent extends ApplicationEvent {
-    private String message;
+  private String message;
 
-    public TestEvent(Object source, String message) {
-        super(source);
-        this.message = message;
-    }
+  public TestEvent(Object source, String message) {
+    super(source);
+    this.message = message;
+  }
 
-    public String getMessage() {
-        return message;
-    }
+  public String getMessage() {
+    return message;
+  }
 }

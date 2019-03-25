@@ -1,10 +1,14 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+          url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.16.0"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.20.0"
+        classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.9"
     }
 }
 
@@ -16,9 +20,11 @@ apply plugin: 'io.spring.dependency-management'
 
 // coding style formatter and analysis
 apply plugin: "com.diffplug.gradle.spotless"
+apply plugin: 'checkstyle'
 
 // static analysis tools
 apply plugin: 'pmd'
+apply plugin: "com.github.spotbugs"
 
 // import KeY ant project
 def keyFolder = "../key/key"
@@ -34,6 +40,15 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    test {
+        resources {
+            srcDir file('src/test/resources')
+            exclude '**/*.java'
+        }
+    }
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -42,15 +57,24 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
     compile("org.springframework.boot:spring-boot-starter-websocket")
-    compile('org.reactivestreams:reactive-streams:1.0.2')
+    compile("org.javatuples:javatuples:1.2")
     compile files('libs/logootsplit.jar')
+
+    // Karate Test Framework for the server API
+    testCompile 'com.intuit.karate:karate-junit4:0.9.1'
+    testCompile 'com.intuit.karate:karate-apache:0.9.1'
 
     // adds /actuator/health indicator, this way, other applications can check if the
     // server is ready. Also useful for tests.
     compile("org.springframework.boot:spring-boot-starter-actuator")
+
     // include KeYnd KeY dependency libraries
     compile fileTree(dir: "${keyFolder}/deployment/libs", include: "*.jar")
     compile fileTree(dir: "${keyFolder}/deployment/components", include: "*.jar")
+
+    // SpringFox: Will automatically provide a HTML description of the API
+    compile "io.springfox:springfox-swagger2:2.9.2"
+    compile "io.springfox:springfox-swagger-ui:2.9.2"
 }
 
 wrapper {
@@ -63,9 +87,27 @@ spotless {
   // ...instead call spotlessCheck / spotlessApply directly
 
   java {
-    googleJavaFormat('1.6') // use version 1.6 of google-java-format
-    paddedCell() //workaround for minor bug in spotless
+    googleJavaFormat()
   }
+}
+
+// Checkstyle tool. Also checks for aspects of the Google Java Style
+checkstyle {
+  configFile rootProject.file('checkstyle.xml')
+
+  ignoreFailures false
+  showViolations true
+  toolVersion ="6.14.1" 
+}
+
+checkstyleMain {
+    configFile rootProject.file('.checkstyle_google.xml')
+    source ='src/main/java'
+}
+
+checkstyleTest {
+    configFile rootProject.file('.checkstyle_google.xml')
+    source ='src/test/java'
 }
 
 // PMD static analysis settings
@@ -78,6 +120,28 @@ pmd {
     // see also https://pmd.sourceforge.io/pmd-5.3.3/customizing/rule-guidelines.html
     rulePriority = 2
     consoleOutput = true
+}
+
+// SpotBugs static analysis tool.
+// Supports only Java 1.8 and 1.9
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+  reports {
+    html {
+      enabled = true
+    }
+    xml {
+      enabled = false
+    }
+  }
+}
+
+spotbugs {
+  toolVersion = '3.1.9'
+  ignoreFailures = false
+  effort = 'max'
+  reportLevel = 'high'
+  sourceSets = [sourceSets.main, sourceSets.test]
+  excludeFilter = file("$rootProject.projectDir/.spotbugs-filter.xml")
 }
 
 // configure tests to show some actually useful debug information
@@ -98,5 +162,12 @@ test {
         // by assigning only 'failed' and 'skipped' events
         info.events = ["failed", "skipped"]
     }
+
+    // pull karate options into the runtime
+    systemProperty "karate.options", System.properties.getProperty("karate.options")
+    // pull karate env into the runtime
+    systemProperty "karate.env", System.properties.getProperty("karate.env")
+    // ensure tests are always run
+    outputs.upToDateWhen { false }
 }
 

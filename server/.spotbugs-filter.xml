@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match>
+    <Class name="synchronization.data.Identifier"/>
+    <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"/>
+  </Match>
+  <Match>
+    <Class name="synchronization.data.IdentifierInterval"/>
+    <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"/>
+  </Match>
+  <Match>
+    <Class name="synchronization.data.LogootSAdd"/>
+    <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"/>
+  </Match>
+  <Match>
+    <Class name="synchronization.data.LogootSDel"/>
+    <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"/>
+  </Match>
+</FindBugsFilter>

@@ -1,41 +1,37 @@
 package linter;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
 import java.io.Reader;
-import java.util.Locale;
-
 import javax.tools.JavaFileObject;
 
-/**
- * Holds diagnostic information regarding an error, warning etc. within a source
- * code file.
- */
-public class Diagnostic{
-	final String message;
-	final long end;
-	final long start;
-	final long startRow;
-	final long startCol;
-	final long endRow;
-	final long endCol;
-	final Kind kind;
+/** Holds diagnostic information regarding an error, warning etc. within a source code file. */
+public class Diagnostic {
+  final String message;
+  final long end;
+  final long start;
+  final long startRow;
+  final long startCol;
+  final long endRow;
+  final long endCol;
+  final Kind kind;
 
-	/** Indicates type of error */
-	public enum Kind {
-		ERROR,
+  /** Indicates type of error */
+  public enum Kind {
+    ERROR,
     WARNING,
     NOTE,
     NOT_SUPPORTED // indicates a java feature, which is not supported by KeY
-	}
+  }
 
-	public Diagnostic(final String message, final long start, final long end,
-		    final JavaFileObject source, final Kind kind) {
-		this.message = message;
-		this.end = end;
-		this.start = start;
-		this.kind = kind;
+  public Diagnostic(
+      final String message,
+      final long start,
+      final long end,
+      final JavaFileObject source,
+      final Kind kind) {
+    this.message = message;
+    this.end = end;
+    this.start = start;
+    this.kind = kind;
 
     {
       final RowColPosition pos = getRowCol(source, start);
@@ -50,7 +46,7 @@ public class Diagnostic{
       this.endRow = pos.row;
       this.endCol = pos.column;
     }
-	}
+  }
 
   private class RowColPosition {
     final long row;
@@ -63,15 +59,15 @@ public class Diagnostic{
   }
 
   /**
-   * Calculates row and column of a character within a file, given its offset
-   * from the beginning of the file.
+   * Calculates row and column of a character within a file, given its offset from the beginning of
+   * the file.
    *
-   * Will return -1 on (IO) errors
+   * <p>Will return -1 on (IO) errors
    *
-   * @return Row/Column position computed from an offset position
    * @param source file the position is referencing
    * @param position offset from the start of given file
-   **/
+   * @return Row/Column position computed from an offset position
+   */
   private RowColPosition getRowCol(final JavaFileObject source, final long position) {
     // We start at the first column and first row
     long seenRows = 0;
@@ -82,7 +78,7 @@ public class Diagnostic{
     boolean lastCharacterWasCarriageReturn = false;
 
     try {
-      final Reader r = source.openReader(true); //true == ignore encoding errors
+      final Reader r = source.openReader(true); // true == ignore encoding errors
 
       // We are going to traverse the file, to the given position.
       //
@@ -96,11 +92,9 @@ public class Diagnostic{
       // We will also count the current column for each character in the current
       // row. Therefore, if we detect a line termination, we will reset that
       // counter.
-      for (
-          long seenCharacters = 0;   // we need to count the seen characters...
+      for (long seenCharacters = 0; // we need to count the seen characters...
           seenCharacters < position; // ...up to position
-          ++seenCharacters
-      ) {
+          ++seenCharacters) {
         final int currentCharacter = r.read();
         final boolean characterIsCarriageReturn = currentCharacter == '\r';
         final boolean characterIsLineFeed = currentCharacter == '\n';
@@ -116,9 +110,7 @@ public class Diagnostic{
 
           // reset columns, since we have begun a new line
           seenCols = 0;
-        }
-
-        else {
+        } else {
           // for each non line termination character, count it as a column
           ++seenCols;
         }
@@ -130,16 +122,13 @@ public class Diagnostic{
       }
 
       return new RowColPosition(seenRows, seenCols);
-    }
-
-    catch (final Exception e) {
-      //TODO: Deal with exceptions properly
+    } catch (final Exception e) {
+      // TODO: Deal with exceptions properly
 
       e.printStackTrace();
 
       return new RowColPosition(-1, -1);
     }
-
 
     /*
     long row, column = -1;
@@ -177,27 +166,27 @@ public class Diagnostic{
     */
   }
 
-	public String getMessage() {
-		return message;
-	}
+  public String getMessage() {
+    return message;
+  }
 
-	public Kind getKind() {
-		return kind;
-	}
+  public Kind getKind() {
+    return kind;
+  }
 
-	public long getStartRow() {
-		return startRow;
-	}
+  public long getStartRow() {
+    return startRow;
+  }
 
-	public long getStartCol() {
-		return startCol;
-	}
+  public long getStartCol() {
+    return startCol;
+  }
 
-	public long getEndRow() {
-		return endRow;
-	}
+  public long getEndRow() {
+    return endRow;
+  }
 
-	public long getEndCol() {
-		return endCol;
-	}
+  public long getEndCol() {
+    return endCol;
+  }
 }

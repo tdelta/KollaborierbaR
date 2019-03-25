@@ -2,6 +2,9 @@ pipeline {
     agent {
         label 'master'
     }
+    environment {
+        RUNNING_IN_JENKINS = 'true'
+    }
     stages {
         stage('Setup') {
             steps {

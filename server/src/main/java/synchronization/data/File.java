@@ -1,6 +1,5 @@
 package synchronization.data;
 
-public class File{
-   public String content;
-
+public class File {
+  public String content;
 }
