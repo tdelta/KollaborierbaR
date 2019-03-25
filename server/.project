@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>linting-server</name>
+	<name>server</name>
 	<comment>Project linting-server created by Buildship.</comment>
 	<projects>
 	</projects>
