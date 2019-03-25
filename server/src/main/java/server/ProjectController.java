@@ -169,11 +169,11 @@ public class ProjectController {
     } catch (NoSuchElementException e) {
       e.printStackTrace();
       return new ResponseEntity<String>(
-          "Read Error. Error while reading the request file: " + path, HttpStatus.BAD_REQUEST);
+          "Read Error. Error while reading the request file: " + path, HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (IllegalStateException e) {
       e.printStackTrace();
       return new ResponseEntity<String>(
-          "Read Error. Error while reading the request file: " + path, HttpStatus.BAD_REQUEST);
+          "Read Error. Error while reading the request file: " + path, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -198,23 +198,6 @@ public class ProjectController {
     String path =
         ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
             .substring(1);
-
-    // final String projectName;
-    // {
-    //  final String[] pathSplit = path.split("/");
-    //  if (pathSplit.length < 1) {
-    //    return new ResponseEntity<String>("The path may not be empty.",HttpStatus.BAD_REQUEST);
-    //  }
-
-    //  else if (pathSplit.length < 2) {
-    //    return new ResponseEntity<String>("The path must contain a project
-    // name.",HttpStatus.BAD_REQUEST);
-    //  }
-
-    //  else {
-    //    projectName = pathSplit[1];
-    //  }
-    // }
 
     final File file = new File(path);
 
@@ -291,7 +274,7 @@ public class ProjectController {
       } catch (IOException e) {
         e.printStackTrace();
         return new ResponseEntity<>(
-            "File exists, but could still not be deleted", HttpStatus.BAD_REQUEST);
+            "File exists, but could still not be deleted", HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
@@ -331,7 +314,7 @@ public class ProjectController {
       } catch (IOException e) {
         e.printStackTrace();
         return new ResponseEntity<>(
-            "File exists, but could still not be deleted", HttpStatus.BAD_REQUEST);
+            "File exists, but could still not be deleted", HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
