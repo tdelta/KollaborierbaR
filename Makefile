@@ -2,7 +2,7 @@ CLIENT_DIR = client
 SERVER_DIR = server
 
 # indicate, that submodules are not files
-.PHONY: setup check format client linter test clean
+.PHONY: setup check format client linter test clean deploy
 
 all: server client
 
@@ -45,4 +45,8 @@ clean:
 	$(MAKE) -C $(CLIENT_DIR) clean
 	$(MAKE) -C $(SERVER_DIR) clean
 
+deploy:
+	$(MAKE) -C $(CLIENT_DIR) deploy
+	$(MAKE) -C $(SERVER_DIR) deploy
+	tools/createDeployable.sh
 

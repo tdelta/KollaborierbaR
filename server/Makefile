@@ -1,4 +1,4 @@
-.PHONY: setup check run test clean format
+.PHONY: setup check run test clean format deploy
 
 all:
 	./gradlew build
@@ -27,3 +27,6 @@ test:
 
 clean:
 	./gradlew clean
+
+deploy:
+	./gradlew bootJar
