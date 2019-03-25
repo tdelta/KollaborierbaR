@@ -22,6 +22,7 @@ ace.define( // create a new ace module
               {
                 token: 'keyword',
                 regex: 'matches|auto|tryclose|select|branch|formula|number|rule|set|steps|breakpoint'
+                // The regular expression matches all keywords. These shall be highlighted as 'keyword'
               }
             ]
         };

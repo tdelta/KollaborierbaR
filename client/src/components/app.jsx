@@ -4,7 +4,7 @@ import NotificationSystem from 'react-notification-system';
 
 import Editor from './editor.tsx';
 import Top from './top.tsx';
-import Sidebar from './sidebar/sidebar.jsx';
+import Sidebar from './sidebar/Sidebar.tsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 import Console from './console/console.jsx';
 import { Network } from '../network';
@@ -250,6 +250,13 @@ export default class App extends React.Component {
     this.key.proveFile();
   }
 
+  /**
+   * This functions sets a message and a timestap
+   * in the console compontent. It also makes the
+   * console visibile when a message is set.
+   *
+   * @param {*} message that will be set in the console
+   */
   addNewConsoleMessage(message) {
     //Create time string
     let date = new Date();
@@ -265,6 +272,11 @@ export default class App extends React.Component {
     });
   }
 
+  /**
+   * This function inverts the visibilty of the
+   * console compontent
+   *
+   */
   invertConsoleVisibility() {
     this.setState({
       consoleIsVisible: !this.state.consoleIsVisible,
@@ -336,6 +348,12 @@ export default class App extends React.Component {
     }
   }
 
+  /**
+   * This function instances updateFileContent to save files.
+   * This method is then handed down to the react components, which
+   * need to save the fileContent.(app knows who to instances
+   * updateFileContent, the other react components dont)
+   */
   saveFile() {
     if (this.state.filetype !== 'sequent') {
       return this.updateFileContent(this.state.openedPath, this.state.text);
@@ -358,7 +376,9 @@ export default class App extends React.Component {
          * state variables and state manipulation functions they need
          * to operate.
          */}
+        {/* Render the top component */}
         <Top
+          getFilePath={this.projectManagement.getOpenedPath}
           setText={this.setText}
           text={this.state.text}
           onDeleteFile={() => this.deleteFile(this.state.openedPath)}
@@ -376,6 +396,7 @@ export default class App extends React.Component {
           //TODO: onDeleteProject={this.deleteProject}
         />
         <div id="mainContainer">
+          {/* Render the sidebar component */}
           <Sidebar
             project={this.state.project}
             proofsState={this.state.proofsState}
@@ -393,7 +414,7 @@ export default class App extends React.Component {
             saveObligationResult={this.saveObligationResult}
             deleteObligationResult={this.deleteObligationResult}
           />
-          <div class="rightSide">
+          <div className="rightSide">
             {// Only display the button if this variable is true
             this.displayCloseButton && (
               <Button
@@ -407,9 +428,10 @@ export default class App extends React.Component {
                   borderRadius: '100px',
                 }}
               >
-                <i class="fa fa-times" />
+                <i className="fa fa-times" />
               </Button>
             )}
+            {/* Render the editor component */}
             <Editor
               saveFile={this.saveFile}
               setDiagnostics={this.setDiagnostics}
@@ -427,6 +449,7 @@ export default class App extends React.Component {
               ref={this.editor}
               consoleIsVisible={this.state.consoleIsVisible}
             />
+            {/* Render the console component */}
             <Console
               consolelog={this.state.consolelog}
               consoleIsVisible={this.state.consoleIsVisible}

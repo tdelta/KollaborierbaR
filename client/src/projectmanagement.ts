@@ -16,6 +16,9 @@ import ProjectController, {
   ProjectEventType,
 } from './collaborative/ProjectController';
 
+import FileOrFolder, { FileFolderEnum } from './FileOrFolder';
+import Project from './Project';
+
 interface OpenFileData {
   fileName: string;
   fileText: string;
@@ -26,22 +29,6 @@ interface ProofResults {
   succeeded: string[];
   failed: string[];
   errors: string[];
-}
-
-enum FileFolderEnum {
-  file = 'file',
-  folder = 'folder',
-}
-
-interface FileOrFolder {
-  name: string;
-  type: FileFolderEnum;
-  contents?: FileOrFolder[];
-}
-
-interface Project {
-  name: string;
-  contents: FileOrFolder[];
 }
 
 export default class ProjectManagement {
@@ -78,20 +65,106 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
-    this.projectController = new ProjectController(
-      network,
-      {
-        onProjectEvent: (
-          event:
-            | ProjectEvent
-            | RenamedFileEvent
-            | ProjectFileEvent
-            | UsersUpdatedEvent
-        ) => {
-          const currentProject = this.getCurrentProject();
-          console.log(event.eventType);
-          switch (event.eventType) {
-            case ProjectEventType.DeletedFile:
+    this.projectController = new ProjectController(network, {
+      onProjectEvent: (
+        event:
+          | ProjectEvent
+          | RenamedFileEvent
+          | ProjectFileEvent
+          | UsersUpdatedEvent
+      ) => {
+        const currentProject = this.getCurrentProject();
+        console.log(event.eventType);
+        switch (event.eventType) {
+          case ProjectEventType.DeletedFile:
+            this.openProject((currentProject as Project).name, false);
+
+            if (
+              !ProjectManagement.projectContainsPath(
+                currentProject as Project,
+                this.getOpenedPath()
+              )
+            ) {
+              this.setText('');
+              this.setOpenedPath([]);
+            }
+
+            if (this.notificationSystem.current) {
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: 'A file got deleted',
+                level: 'error',
+                position: 'bc',
+              });
+            }
+
+            break;
+          case ProjectEventType.RenamedFile:
+            this.openProject((currentProject as Project).name, false);
+
+            const renameEvent: RenamedFileEvent = event as RenamedFileEvent;
+
+            if (renameEvent.originalPath === this.getOpenedPath().join('/')) {
+              // TODO: Evtl abstimmen mit Collab controller
+              const newPathArray: string[] = renameEvent.newPath.split('/');
+
+              if (newPathArray.length < 1) {
+                console.log('Error: Updated file path is invalied.');
+              } else {
+                this.setFileName(newPathArray[newPathArray.length - 1]);
+                this.setOpenedPath(newPathArray);
+              }
+            }
+
+            if (this.notificationSystem.current) {
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: `File ${renameEvent.originalPath} got renamed to ${
+                  renameEvent.newPath
+                }.`,
+                level: 'info',
+                position: 'bc',
+              });
+            }
+
+            break;
+          case ProjectEventType.UpdatedFile:
+            const fileEvent: ProjectFileEvent = event as ProjectFileEvent;
+
+            if (fileEvent.filePath === this.getOpenedPath().join('/')) {
+              if (this.notificationSystem.current) {
+                this.notificationSystem.current.clearNotifications();
+                this.notificationSystem.current.addNotification({
+                  message: `Permanently saved the contents of your currently opened file.`,
+                  level: 'success',
+                  position: 'bc',
+                });
+              }
+            }
+
+            break;
+          case ProjectEventType.DeletedProject:
+            this.showProject({});
+            this.setText('');
+            this.setOpenedPath([]);
+
+            if (this.notificationSystem.current) {
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: 'Your project got deleted.',
+                level: 'error',
+                position: 'bc',
+              });
+            }
+
+            break;
+          case ProjectEventType.UpdatedProject:
+            if (
+              !(
+                (currentProject as any).name == null ||
+                (currentProject as any).contents == null
+              )
+            ) {
               this.openProject((currentProject as Project).name, false);
 
               if (
@@ -103,136 +176,65 @@ export default class ProjectManagement {
                 this.setText('');
                 this.setOpenedPath([]);
               }
+            }
 
-              if (this.notificationSystem.current) {
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: 'A file got deleted',
-                  level: 'error',
-                  position: 'bc',
-                });
-              }
+            if (this.notificationSystem.current) {
+              // TODO evtl. nicht alle Notifications entfernen
+              this.notificationSystem.current.clearNotifications();
+              this.notificationSystem.current.addNotification({
+                message: 'The project files got updated.',
+                level: 'info',
+                position: 'bc',
+              });
+            }
 
-              break;
-            case ProjectEventType.RenamedFile:
-              this.openProject((currentProject as Project).name, false);
-
-              const renameEvent: RenamedFileEvent = event as RenamedFileEvent;
-
-              if (renameEvent.originalPath === this.getOpenedPath().join('/')) {
-                // TODO: Evtl abstimmen mit Collab controller
-                const newPathArray: string[] = renameEvent.newPath.split('/');
-
-                if (newPathArray.length < 1) {
-                  console.log('Error: Updated file path is invalied.');
-                } else {
-                  this.setFileName(newPathArray[newPathArray.length - 1]);
-                  this.setOpenedPath(newPathArray);
-                }
-              }
-
-              if (this.notificationSystem.current) {
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: `File ${renameEvent.originalPath} got renamed to ${
-                    renameEvent.newPath
-                  }.`,
-                  level: 'info',
-                  position: 'bc',
-                });
-              }
-
-              break;
-            case ProjectEventType.UpdatedFile:
-              const fileEvent: ProjectFileEvent = event as ProjectFileEvent;
-
-              if (fileEvent.filePath === this.getOpenedPath().join('/')) {
-                if (this.notificationSystem.current) {
-                  this.notificationSystem.current.clearNotifications();
-                  this.notificationSystem.current.addNotification({
-                    message: `Permanently saved the contents of your currently opened file.`,
-                    level: 'success',
-                    position: 'bc',
-                  });
-                }
-              }
-
-              break;
-            case ProjectEventType.DeletedProject:
-              this.showProject({});
-              this.setText('');
-              this.setOpenedPath([]);
-
-              if (this.notificationSystem.current) {
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: 'Your project got deleted.',
-                  level: 'error',
-                  position: 'bc',
-                });
-              }
-
-              break;
-            case ProjectEventType.UpdatedProject:
-              if (
-                !(
-                  (currentProject as any).name == null ||
-                  (currentProject as any).contents == null
-                )
-              ) {
-                this.openProject((currentProject as Project).name, false);
-
-                if (
-                  !ProjectManagement.projectContainsPath(
-                    currentProject as Project,
-                    this.getOpenedPath()
-                  )
-                ) {
-                  this.setText('');
-                  this.setOpenedPath([]);
-                }
-              }
-
-              if (this.notificationSystem.current) {
-                // TODO evtl. nicht alle Notifications entfernen
-                this.notificationSystem.current.clearNotifications();
-                this.notificationSystem.current.addNotification({
-                  message: 'The project files got updated.',
-                  level: 'info',
-                  position: 'bc',
-                });
-              }
-
-              break;
-            case ProjectEventType.UsersUpdated:
-              console.log(event);
-              Usernames.updateAllUsers((<UsersUpdatedEvent>event).users);
-              break;
-          }
+            break;
+          case ProjectEventType.UsersUpdated:
+            console.log(event);
+            Usernames.updateAllUsers((event as UsersUpdatedEvent).users);
+            break;
         }
-      }
-    );
+      },
+    });
   }
 
-  public getMacroFiles(){
+  /**
+   * Recursively searches the current project files for all files that end with ".script"
+   * And returns their absolute paths.
+   *
+   * @return - An array of filepaths
+   */
+  public getMacroFiles(): string[] {
     const project: Project | {} = this.getCurrentProject();
     let index: number = 0;
-    if('contents' in project){
-      return (project as Project).contents.map(item => this.getMacroFilesRec('',item))
-        .reduce((x: string[],y: string[]) => x.concat(y),[]); // flatMap does not exist in IE
+    if ('contents' in project) {
+      return (project as Project).contents
+        .map(item => this.getMacroFilesRec('', item))
+        .reduce((x: string[], y: string[]) => x.concat(y), []); // flatMap does not exist in IE
     } else {
       return [];
     }
   }
 
-  private getMacroFilesRec(parentName: string, item: FileOrFolder): string[]{
-    if(item.type === FileFolderEnum.file && item.name.endsWith('.script')){
+  /**
+   * Recursive helper function. Given the path to the file or folder item, returns
+   * an array of absolute paths to all .script files contained in item
+   *
+   * @param parentName - path to item, e.g. /src if item is the file Main.java in /src/Main.java
+   * @param item - the file or folder to search in
+   * @return - an array of filepaths
+   */
+  private getMacroFilesRec(parentName: string, item: FileOrFolder): string[] {
+    if (item.type === FileFolderEnum.file && item.name.endsWith('.script')) {
       // item is a macro file
       return [parentName + '/' + item.name];
-    } else if(item.contents){
+    } else if (item.contents) {
       // item is a directory
-      return item.contents.map(child => this.getMacroFilesRec(parentName+'/'+item.name,child))
-        .reduce((x: string[],y: string[]) => x.concat(y),[]); // flatMap does not exist in IE
+      return item.contents
+        .map(child =>
+          this.getMacroFilesRec(parentName + '/' + item.name, child)
+        )
+        .reduce((x: string[], y: string[]) => x.concat(y), []); // flatMap does not exist in IE
     } else {
       return [];
     }
@@ -291,9 +293,13 @@ export default class ProjectManagement {
         //'Content-Type': 'application/json', // we are sending a json object
       },
     }).then(response => {
-      console.log("Parsing open file response: ", response);
+      if (response.status === 200) {
+        console.log('Parsing open file response: ', response);
 
-      return response.json();
+        return response.json();
+      } else {
+        console.error('Opening file failed.', response);
+      }
     }); // parse the response body as json
   }
 
@@ -321,9 +327,8 @@ export default class ProjectManagement {
     const url = `${serverAddress}/projects/${escapedName}`;
 
     this.closeProject(() =>
-      this.projectController.openProject(
-        name
-      )
+      this.projectController
+        .openProject(name)
         .catch(e => {
           console.error('Could not sync with server to open project');
           console.error(e);
@@ -354,7 +359,8 @@ export default class ProjectManagement {
     if ((project as Project).name == null) {
       cb();
     } else {
-      this.projectController.closeProject((project as Project).name)
+      this.projectController
+        .closeProject((project as Project).name)
         .catch(e => {
           console.error(
             'Failed to unsubscribe, you may still receive messages for your closed project'
@@ -481,7 +487,10 @@ export default class ProjectManagement {
 
       ProjectManagement.createOverall(requestPath, type).then(response => {
         this.showProject(response);
-        this.openFile(path);
+
+        if (type !== 'folder') {
+          this.openFile(path);
+        }
       });
     } else if (file !== null && file.includes('/')) {
       alert('No appropriate filename. Filename includes: / ');
@@ -498,7 +507,8 @@ export default class ProjectManagement {
     if (file !== null && !file.includes('/')) {
       ProjectManagement.createOverall(file, FileFolderEnum.folder).then(
         response => {
-          this.projectController.openProject(file)
+          this.projectController
+            .openProject(file)
             .catch(e => {
               console.error(
                 'Creating the project failed, because we could not sync with the server'
@@ -535,7 +545,9 @@ export default class ProjectManagement {
   }
 
   /*
-   * updates the filename of the given resource path
+   * This function updates the filename of the given resource path.
+   * The new filename is entered by the prompt, which is created
+   * inside the fuction.
    *
    */
   public updateFileName(path: string[]): void {
@@ -591,6 +603,14 @@ export default class ProjectManagement {
     }
   }
 
+  /**
+   * That function makes a call to the HTTP rest controller
+   * and updates the content of the file specified by the
+   * parameters.
+   *
+   * @param path to the file that will be updated
+   * @param content that will be set to the file
+   */
   public updateFileContent(path: string[], content: string): Promise<void> {
     // Path to the ressource we want to save
     // TODO: Check if project exists
@@ -617,37 +637,5 @@ export default class ProjectManagement {
         );
       }
     });
-  }
-
-  public static getUsernames(): Promise<UserIndicatorData[]> {
-    const url = serverAddress + '/usernames';
-    const test = [
-      { firstName: 'Peter', lastName: 'lalala', crdtId: 0 },
-      { firstName: 'Lustig', lastName: 'lalala', crdtId: 1 },
-      { firstName: 'Mark', lastName: 'lalala', crdtId: 2 },
-      { firstName: 'BigJ', lastName: 'lalala', crdtId: 3 },
-      { firstName: 'Hallo', lastName: 'lalala', crdtId: 4 },
-      { firstName: 'lalalala', lastName: 'lalala', crdtId: 5 },
-    ];
-    /*return test; */
-
-    const promise1 = new Promise<UserIndicatorData[]>(function(
-      resolve,
-      reject
-    ) {
-      setTimeout(function() {
-        resolve(test);
-      }, 300);
-    });
-    return promise1;
-
-    /* return fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json',
-            },
-        })
-            .then((response) => response.json());*/
   }
 }

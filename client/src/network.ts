@@ -59,11 +59,13 @@ export class Network {
   }
 
   public unsubscribe(messageType: string) {
-    messageType = `/user/${messageType}`;
+    const prefixedMessageType = `/user/${messageType}`;
+
     this.callbacks = this.callbacks.filter(
-      element => element.messageType !== messageType
+      element => element.messageType !== prefixedMessageType
     );
-    this.stompClient.unsubscribe(messageType);
+
+    this.stompClient.unsubscribe(prefixedMessageType);
   }
 
   private setCallbacks() {
@@ -117,23 +119,23 @@ export class Network {
       if (this.stompClient.connected) {
         if (!this.subscriptions.has(destination)) {
           // dont subscribe, if we are already subscribed to that location
-          const sub = this.stompClient.subscribe(destination, callback, headers);
+          const sub = this.stompClient.subscribe(
+            destination,
+            callback,
+            headers
+          );
 
           this.subscriptions.set(destination, sub);
         }
 
         resolve();
-      }
-      
-      else {
+      } else {
         reject('Could not subscribe, since we are not connected.');
       }
     });
   }
 
-  public safeUnsubscribe(
-    topic: string
-  ): Promise<void> {
+  public safeUnsubscribe(topic: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.subscriptions.has(topic) && this.stompClient.connected) {
         (this.subscriptions.get(topic) as StompSubscription).unsubscribe();
@@ -141,10 +143,10 @@ export class Network {
         this.subscriptions.delete(topic);
 
         resolve();
-      }
-      
-      else {
-        reject(`Could not unsubscribe from ${topic}, because we are not subscribed, or not connected`);
+      } else {
+        reject(
+          `Could not unsubscribe from ${topic}, because we are not subscribed, or not connected`
+        );
       }
     });
   }

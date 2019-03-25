@@ -21,10 +21,16 @@ public class FileRequest {
     this.path = path;
   }
 
+  /** getter for the path */
   public String getPath() {
     return this.path;
   }
 
+  /**
+   * setter for the path
+   *
+   * @param path which will set
+   */
   public void setPath(String path) {
     this.path = path;
   }

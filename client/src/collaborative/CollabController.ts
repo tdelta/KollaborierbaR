@@ -150,7 +150,7 @@ export default class CollabController {
         // The variable ignoreChanges makes sure our on change listener does not process the insert
         // The undo group is used to update old operations properly but not let the user undo the remote insert
         this.editor.ignoreChanges = true;
-        let remoteUndo = this.editor.session.$undoManager.startNewGroup();
+        const remoteUndo = this.editor.session.$undoManager.startNewGroup();
         const end: ace_types.Ace.Point = this.editor.session.insert(
           start,
           delta.content
@@ -197,7 +197,7 @@ export default class CollabController {
         // The variable ignoreChanges makes sure our on change listener does not process the insert
         // The undo group is used to update old operations properly but not let the user undo the remote insert
         this.editor.ignoreChanges = true;
-        let remoteUndo = this.editor.session.$undoManager.startNewGroup();
+        const remoteUndo = this.editor.session.$undoManager.startNewGroup();
         this.editor.session.replace(Range.fromPoints(start, end), '');
         this.editor.session.$undoManager.markIgnored(remoteUndo);
         this.editor.ignoreChanges = false;

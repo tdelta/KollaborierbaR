@@ -27,35 +27,33 @@ export default class ProofCollabController {
   }
 
   public openFile(projectName: string, path: string[]): Promise<void> {
-    console.log("Subscribing to proof updates");
     const topic = this.genTopic(projectName, path);
 
-    return this.network.safeSubscribe(
-      topic,
-      msg => {
-        try {
-          const event: ProofEvent = JSON.parse(msg.body);
+    return this.network
+      .safeSubscribe(
+        topic,
+        msg => {
+          try {
+            const event: ProofEvent = JSON.parse(msg.body);
 
-          console.log(`incoming proof event`, event);
-          
-          switch(event.eventType) {
-            case ProofEventType.UpdatedProof:
-              this.observer.onUpdatedProof(event);
-              break;
+            console.log(`incoming proof event`, event);
 
-            case ProofEventType.UpdatedProofHistory:
-              this.observer.onUpdatedHistory(event);
-              break;
+            switch (event.eventType) {
+              case ProofEventType.UpdatedProof:
+                this.observer.onUpdatedProof(event);
+                break;
+
+              case ProofEventType.UpdatedProofHistory:
+                this.observer.onUpdatedHistory(event);
+                break;
+            }
+          } catch (e) {
+            console.error('Failed to parse server event');
+            console.error(e);
           }
-        }
-        
-        catch (e) {
-          console.error('Failed to parse server event');
-          console.error(e);
-        }
-      },
-      {}
-    )
+        },
+        {}
+      )
       .then(() => {
         this.currentProjectName = projectName;
         this.currentFilePath = path;
@@ -65,25 +63,33 @@ export default class ProofCollabController {
 
   public closeFile(): Promise<void> {
     if (this.currentTopic == null) {
-      return Promise.reject('There is no topic set, we can not close the current proof context');
-    }
-
-    else {
-      return this.network.safeUnsubscribe(
-        this.currentTopic
+      return Promise.reject(
+        'There is no topic set, we can not close the current proof context'
       );
+    } else {
+      return this.network.safeUnsubscribe(this.currentTopic);
     }
   }
 
   public setObligationResult(obligationResult: ObligationResult): void {
-    if (this.currentTopic == null || this.currentFilePath == null || this.currentProjectName == null) {
-      console.error('There is no topic set, we can not determine the current proof context');
-    }
+    if (
+      this.currentTopic == null ||
+      this.currentFilePath == null ||
+      this.currentProjectName == null
+    ) {
+      console.error(
+        'There is no topic set, we can not determine the current proof context'
+      );
+    } else {
+      const projectFilePath = `${
+        this.currentProjectName
+      }/${this.currentFilePath.join('/')}`;
 
-    else {
-      const projectFilePath = `${this.currentProjectName}/${this.currentFilePath.join('/')}`;
-
-      const url = `/proof/${this.currentProjectName}/${this.currentFilePath.join('/')}/obligation/${obligationResult.obligationIdx}/last`;
+      const url = `/proof/${
+        this.currentProjectName
+      }/${this.currentFilePath.join('/')}/obligation/${
+        obligationResult.obligationIdx
+      }/last`;
 
       console.log('Posting obligation result to ', url);
 
@@ -100,24 +106,36 @@ export default class ProofCollabController {
           alert(
             'Uups! Something went wrong while posting your obligation result to the server'
           );
-        }
-
-        else {
-          console.log("Uploaded obligation result to server", projectFilePath, url);
+        } else {
+          console.log(
+            'Uploaded obligation result to server',
+            projectFilePath,
+            url
+          );
         }
       });
     }
   }
 
-  public saveObligationResult(obligationResult: ObligationResult):void {
-    if (this.currentTopic == null || this.currentFilePath == null || this.currentProjectName == null) {
-      console.error('There is no topic set, we can not determine the current proof context');
-    }
+  public saveObligationResult(obligationResult: ObligationResult): void {
+    if (
+      this.currentTopic == null ||
+      this.currentFilePath == null ||
+      this.currentProjectName == null
+    ) {
+      console.error(
+        'There is no topic set, we can not determine the current proof context'
+      );
+    } else {
+      const projectFilePath = `${
+        this.currentProjectName
+      }/${this.currentFilePath.join('/')}`;
 
-    else {
-      const projectFilePath = `${this.currentProjectName}/${this.currentFilePath.join('/')}`;
-
-      const url = `/proof/${this.currentProjectName}/${this.currentFilePath.join('/')}/obligation/${obligationResult.obligationIdx}/history`;
+      const url = `/proof/${
+        this.currentProjectName
+      }/${this.currentFilePath.join('/')}/obligation/${
+        obligationResult.obligationIdx
+      }/history`;
 
       console.log('Saving obligation result to ', url);
 
@@ -134,10 +152,12 @@ export default class ProofCollabController {
           alert(
             'Uups! Something went wrong while saving your obligation proof result.'
           );
-        }
-
-        else {
-          console.log("Saved obligation result to server", projectFilePath, url);
+        } else {
+          console.log(
+            'Saved obligation result to server',
+            projectFilePath,
+            url
+          );
         }
       });
     }
@@ -146,7 +166,7 @@ export default class ProofCollabController {
 
 export enum ProofEventType {
   UpdatedProof = 'UpdatedProofEvent',
-  UpdatedProofHistory = 'UpdatedProofHistoryEvent'
+  UpdatedProofHistory = 'UpdatedProofHistoryEvent',
 }
 
 export interface ProofEvent {
@@ -160,11 +180,7 @@ export interface UpdatedProofEvent extends ProofEvent {}
 export interface UpdatedProofHistoryEvent extends ProofEvent {}
 
 interface ProofEventObserver {
-  onUpdatedProof(
-    event: ProofEvent
-  ): void;
+  onUpdatedProof(event: ProofEvent): void;
 
-  onUpdatedHistory(
-    event: ProofEvent
-  ): void;
+  onUpdatedHistory(event: ProofEvent): void;
 }

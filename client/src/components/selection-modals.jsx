@@ -13,16 +13,16 @@ import {
 import ProjectManagement from '../projectmanagement.ts';
 
 /*
- * open project dialog window, that shows a list with available projects
+ * open a dialog window, that shows a list with available options
  */
 class ModalSelect extends React.Component {
   constructor(props) {
     super(props);
     this.select = this.select.bind(this);
-    this.projectAction = this.projectAction.bind(this);
-    this.listProjects = this.listProjects.bind(this);
+    this.selectAction = this.selectAction.bind(this);
+    this.listOptions = this.listOptions.bind(this);
     this.state = {
-      projects: [],
+      options: [],
       selected: {
         id: -1,
         name: '',
@@ -31,7 +31,7 @@ class ModalSelect extends React.Component {
   }
 
   /*
-   * update the state with the selected project
+   * update the state with the selected option
    */
   select(name, id) {
     this.setState({
@@ -43,25 +43,23 @@ class ModalSelect extends React.Component {
   }
 
   /*
-   * performs the esired operation for the selected project when the select button is pressed
+   * performs the desired operation for the selected option when the select button is pressed
    * through the setStructure props method the structure starts its long journey to the sidebar
    */
-  projectAction(name) {
+  selectAction(name) {
     if (!name) {
       name = this.state.selected.name;
     }
-    if (name) {
-      this.props.projectOperation(this.state.selected.name);
-      this.props.toggle();
-    }
+    this.props.selectOperation(this.state.selected.name);
+    this.props.toggle();
   }
 
   /*
-   * generates  JSX items for each project name
+   * generates  JSX items for each option
    */
-  listProjects() {
-    //sort projects list
-    this.state.projects.sort(function(a, b) {
+  listOptions() {
+    //sort options list
+    this.state.options.sort(function(a, b) {
       if (a.toLowerCase() < b.toLowerCase()) {
         return -1;
       }
@@ -70,18 +68,18 @@ class ModalSelect extends React.Component {
       }
       return 0;
     });
-    // check, whether there are any projects in list
-    if (this.state.projects && this.state.projects.length > 0) {
+    // check, whether there are any options in list
+    if (this.state.options && this.state.options.length > 0) {
       return (
         <ListGroup>
-          {// the id is an enumeration for the projects and used to check with project entry is active
-          this.state.projects.map((name, id) => (
+          {// the id is an enumeration for the options and used to check with option is active
+          this.state.options.map((name, id) => (
             <ListGroupItem
               key={id}
               onClick={() => {
                 this.select(name, id);
               }}
-              onDoubleClick={() => this.projectAction(name)}
+              onDoubleClick={() => this.selectAction(name)}
               active={this.state.selected.id === id}
             >
               {name === '' ? 'None' : name}
@@ -101,8 +99,8 @@ class ModalSelect extends React.Component {
     return (
       <div>
         {/*
-         * onOpened: reload the project list
-         * onClosed: when the modal is closed set the selected state to an invalid index, so that on a reopen no projects are highlighted
+         * onOpened: reload the list
+         * onClosed: when the modal is closed set the selected state to an invalid index, so that on a reopen no options are highlighted
          */}
         <Modal
           isOpen={this.props.isOpen}
@@ -114,16 +112,16 @@ class ModalSelect extends React.Component {
           <ModalHeader toggle={this.props.toggle}>
             {this.props.title}
           </ModalHeader>
-          {/* the style enables a scrollbar, when the project names don't fit on the screen (100vh) with a 210 pixels margin */}
+          {/* the style enables a scrollbar, when the options don't fit on the screen (100vh) with a 210 pixels margin */}
           <ModalBody
             style={{ maxHeight: 'calc(100vh - 210px)', overflowY: 'auto' }}
           >
-            {/* generate the listed project names dynamically */}
-            {this.listProjects()}
+            {/* generate the listed options dynamically */}
+            {this.listOptions()}
           </ModalBody>
           <ModalFooter>
-            {/* projectAction is a prop and defines what to do with a project (e.g. deletion) */}
-            <Button color="primary" onClick={this.projectAction}>
+            {/* selectAction is a prop and defines what to do with a selected option (e.g. deletion) */}
+            <Button color="primary" onClick={this.selectAction}>
               Select
             </Button>
             <Button color="secondary" onClick={this.props.toggle}>
@@ -141,17 +139,20 @@ class ModalSelect extends React.Component {
  */
 const loadProjectNames = function() {
   ProjectManagement.getProjects().then(projects => {
-    this.setState({ projects: projects });
+    this.setState({ options: projects });
   });
 };
 
+/*
+ * loads the available macro files from the project, called when MacroModal is opened
+ */
 const loadMacroFiles = function() {
   let options = this.props.loadFunction();
   if (options.length > 0) {
     options.push('');
   }
   this.setState({
-    projects: options,
+    options: options,
   });
 };
 
