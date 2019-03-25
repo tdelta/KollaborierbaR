@@ -1,8 +1,8 @@
 package synchronization.data;
 
 public class IdentifierTuple {
-
-  public IdentifierTuple(int random, int replicaNumber,int clock, int offset){
+  /** Default constructor to fill all values */
+  public IdentifierTuple(int random, int replicaNumber, int clock, int offset) {
     this.random = random;
     this.replicaNumber = replicaNumber;
     this.clock = clock;

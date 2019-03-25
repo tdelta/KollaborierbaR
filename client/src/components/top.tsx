@@ -3,6 +3,20 @@ import PropTypes from 'prop-types';
 import 'bootstrap/dist/css/bootstrap.css';
 import NotificationSystem from 'react-notification-system';
 import '../index.css';
+import Usernames from './user-names/user-names';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faForward,
+  faBoxOpen,
+  faStarOfLife,
+  faDownload,
+  faCloudUploadAlt,
+  faSave,
+  faBomb,
+  faTrashAlt,
+  faTag,
+} from '@fortawesome/free-solid-svg-icons';
 
 import {
   Navbar,
@@ -14,11 +28,7 @@ import {
   DropdownItem,
 } from 'reactstrap';
 
-import {
-    OpenModal, 
-    DeleteModal
-} from './project-modals.jsx';
-
+import { OpenModal, DeleteModal } from './project-modals.jsx';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -36,13 +46,12 @@ export default class Top extends React.Component<Props, State> {
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
+    this.proveKeY = this.proveKeY.bind(this);
     this.state = {
       showOpenModal: false,
       showDeleteModal: false,
     };
   }
-
-  
 
   private toggleOpenModal(): void {
     this.setState({ showOpenModal: !this.state.showOpenModal });
@@ -52,56 +61,23 @@ export default class Top extends React.Component<Props, State> {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
 
- private proveKeY() {
-        this.props.onUpdateFileContent();
-        if (this.props.notificationSystem.current) {
-            this.props.notificationSystem.current.clearNotifications();
-            this.props.notificationSystem.current.addNotification({
-                title: 'Please Wait!',
-                message: 'Running proof obligations...',
-                level: 'info',
-                position: 'bc',
-                autoDismiss: 0
-            });
-        }
-        this.props.onRunProof()
-            .then((response: ProofResults) => {  
-                // print succeeded proofs as success notifications
-                if (this.props.notificationSystem.current) {
-                this.props.notificationSystem.current.clearNotifications();
-                    for (let i in response.succeeded) {
-                        this.props.notificationSystem.current.addNotification({
-                            title: 'Success!',
-                            message: response.succeeded[i],
-                            level: 'success',
-                            position: 'bc',
-                            autoDismiss: 15
-                        });
-                }
-                // print fails as warnings
-                for (let i in response.failed) {
-                        this.props.notificationSystem.current.addNotification({
-                            title: 'Failure!',
-                            message: response.failed[i],
-                            level: 'warning',
-                            position: 'bc',
-                            autoDismiss: 15
-                        });
-                }
-                // print exception messages as errors
-                for (let i in response.errors) {
-                        this.props.notificationSystem.current.addNotification({
-                            title: 'Error!',
-                            message: response.errors[i],
-                            level: 'error',
-                            position: 'bc',
-                            autoDismiss: 15
-                        });
-                }
-                }});
-    
-    
- }
+  /*
+   * Proves all obligations in the currently open file,
+   * gets called when the key button is pressed
+   */
+  private proveKeY() {
+    if (this.props.notificationSystem.current) {
+      this.props.notificationSystem.current.clearNotifications();
+      this.props.notificationSystem.current.addNotification({
+        title: 'Please Wait!',
+        message: 'Proving all obligations...',
+        level: 'info',
+        position: 'bc',
+        autoDismiss: 0,
+      });
+    }
+  }
+
   private onFileChosen(event: HTMLInputEvent): void {
     this.fileReader = new FileReader();
     this.fileReader.onloadend = this.onFileLoaded;
@@ -139,29 +115,54 @@ export default class Top extends React.Component<Props, State> {
     return (
       <div>
         <Navbar color="dark" dark expand="md">
-          <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
+          <NavbarBrand style={{ color: 'white' }}>KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
+            <Usernames />
+
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
-                Key
+                KeY
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={() => this.proveKeY()}>Run Proof</DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    this.props.saveFile().then(() => this.props.onProveFile());
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faForward}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Prove all contracts
+                </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
+
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
                 Project
               </DropdownToggle>
               <DropdownMenu right>
+                <DropdownItem onClick={this.props.onCreateProject}>
+                  <FontAwesomeIcon
+                    icon={faStarOfLife}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Create project
+                </DropdownItem>
                 <DropdownItem onClick={this.toggleOpenModal}>
+                  <FontAwesomeIcon
+                    icon={faBoxOpen}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Open project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleDeleteModal}>
+                  <FontAwesomeIcon
+                    icon={faBomb}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Delete project
-                </DropdownItem>
-                <DropdownItem onClick={this.props.onCreateProject}>
-                  Create project
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
@@ -180,11 +181,41 @@ export default class Top extends React.Component<Props, State> {
                 File
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.downloadFileOnClick}>Download</DropdownItem>
-                <DropdownItem onClick={this.openFileOnClick}>Upload</DropdownItem>
-                <DropdownItem onClick={this.props.onDeleteFile}>Delete</DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileName}>Rename</DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileContent}>Save</DropdownItem>
+                <DropdownItem onClick={this.downloadFileOnClick}>
+                  <FontAwesomeIcon
+                    icon={faDownload}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Download
+                </DropdownItem>
+                <DropdownItem onClick={this.openFileOnClick}>
+                  <FontAwesomeIcon
+                    icon={faCloudUploadAlt}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Upload
+                </DropdownItem>
+                <DropdownItem onClick={this.props.onDeleteFile}>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Delete
+                </DropdownItem>
+                <DropdownItem onClick={this.props.onUpdateFileName}>
+                  <FontAwesomeIcon
+                    icon={faTag}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Rename
+                </DropdownItem>
+                <DropdownItem onClick={this.props.saveFile}>
+                  <FontAwesomeIcon
+                    icon={faSave}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Save
+                </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>
@@ -199,10 +230,12 @@ export default class Top extends React.Component<Props, State> {
         />
 
         <a
-          href={
-            'data:text/plain;charset=utf-8,$(encodeURIComponent(this.props.text))'
+          href={`data:text/plain;charset=utf-8, ${encodeURIComponent(
+            this.props.text
+          )}`}
+          download={
+            this.props.getFilePath()[this.props.getFilePath().length - 1]
           }
-          download="test.txt"
         >
           <input
             type="button"
@@ -228,21 +261,22 @@ interface State {
 
 // define the structure received KeY results
 interface ProofResults {
-    succeeded: string[];
-    failed: string[];
-    errors: string[];
+  succeeded: string[];
+  failed: string[];
+  errors: string[];
 }
+
 // defining the structure of this react components properties
 interface Props {
+  getFilePath: () => string[];
   text: string;
   setText(text: string): void;
-  showProject(project: object): void;
   onDeleteFile(): void;
   onDeleteProject(): void;
   onUpdateFileName(): void;
-  onUpdateFileContent(): void;
+  saveFile(): Promise<void>;
   onOpenProject(): void;
   onCreateProject(): void;
-  onRunProof(): Promise<ProofResults>;
+  onProveFile(): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
 }

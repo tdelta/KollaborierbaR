@@ -1,4 +1,4 @@
-.PHONY: setup check pedantic format run test clean
+.PHONY: setup check format run test clean
 
 all:
 	npm run-script build
@@ -12,10 +12,10 @@ check:
 	npm run-script eslint
 	npm run-script tslint
 
-# run static analysis tools in aggressive mode
-pedantic:
-	npm run-script eslint-pedantic
-	npm run-script tslint
+# fix linter errors automatically, if possible
+fix:
+	npm run-script eslint-fix
+	npm run-script tslint-fix
 
 format:
 	npm run-script format

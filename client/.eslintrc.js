@@ -5,9 +5,12 @@ module.exports = {
         // support test files
         "jest": true
     },
+    "plugins": ["prettier"],
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended",
+      "prettier",
+      "prettier/react"
     ],
     "parserOptions": {
         "ecmaFeatures": {
@@ -22,14 +25,7 @@ module.exports = {
         },
     },
     "rules": {
-        "indent": [
-            "error",
-            4,
-            {
-                // switch bodies shall be indented
-                "SwitchCase": 1,
-            }
-        ],
+        "prettier/prettier": "error",
         "linebreak-style": [
             "error",
             "unix"
@@ -38,11 +34,8 @@ module.exports = {
             "error",
             "single"
         ],
-        "semi": [
-            "error",
-            "always"
-        ],
         // unused function arguments shall be no error
         "no-unused-vars": ["error", { "args": "none" }],
+        "no-console": "off"
     }
 };
