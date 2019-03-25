@@ -169,11 +169,13 @@ public class ProjectController {
     } catch (NoSuchElementException e) {
       e.printStackTrace();
       return new ResponseEntity<String>(
-          "Read Error. Error while reading the request file: " + path, HttpStatus.INTERNAL_SERVER_ERROR);
+          "Read Error. Error while reading the request file: " + path,
+          HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (IllegalStateException e) {
       e.printStackTrace();
       return new ResponseEntity<String>(
-          "Read Error. Error while reading the request file: " + path, HttpStatus.INTERNAL_SERVER_ERROR);
+          "Read Error. Error while reading the request file: " + path,
+          HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
