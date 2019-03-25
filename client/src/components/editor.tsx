@@ -1,9 +1,14 @@
 import ace, { Range } from 'ace-builds';
 import * as ace_types from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-pastel_on_dark';
+import 'ace-builds/src-noconflict/ext-language_tools';
 
 import PropTypes from 'prop-types';
 import React from 'react';
+
+import CollabController from '../collaborative/CollabController';
+
+import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
 import {
   Annotation,
@@ -11,16 +16,18 @@ import {
   toAnnotation,
   diagnosticPriority,
 } from '../diagnostics';
+
 import AnchoredMarker, { addToArray } from './AnchoredMarker';
 import PopoverMarker from './PopoverMarker';
 
 import '../highlighting/jml.js';
+import '../highlighting/sequent.js';
 import lint from '../linting.js';
 
 import './sidebar/sidebar.css';
 import '../index.css';
 
-export default class Editor extends React.Component<Props> {
+export default class Editor extends React.Component<Props, State> {
   // Defining the types of the attributes for this class
   // The exclamation mark tells typescript not to check if this attribute gets initialized
   public editor!: any; // ACE editor object
@@ -30,6 +37,7 @@ export default class Editor extends React.Component<Props> {
   private popoverMarkers: AnchoredMarker[];
   private errorMarkerIds: number[];
   private popoverMarkerIds: number[];
+  private obligationAnnotations: Annotation[] = [];
 
   constructor(props: Props) {
     super(props);
@@ -39,6 +47,10 @@ export default class Editor extends React.Component<Props> {
     this.popoverMarkers = [];
     this.errorMarkerIds = [];
     this.popoverMarkerIds = [];
+    this.state = {
+      disableContext: true,
+      contracts: [],
+    };
   }
 
   /**
@@ -48,11 +60,14 @@ export default class Editor extends React.Component<Props> {
     // Initialize ace in the div with the id 'editor'
     this.editor = ace.edit('editor');
     this.editor.setOptions({
+      enableBasicAutocompletion: true,
+      enableSnippets: true,
+      enableLiveAutocompletion: true,
       autoScrollEditorIntoView: true,
       fontSize: 20,
       firstLineNumber: 1,
     });
-    this.editor.getSession().setMode('ace/mode/jml');
+
     this.editor.setTheme('ace/theme/pastel_on_dark');
     this.editor.$blockScrolling = Infinity;
 
@@ -78,6 +93,68 @@ export default class Editor extends React.Component<Props> {
       // Update the position of the existing error markers in the editor
       this.setMarkers();
     });
+
+    this.editor.container.addEventListener('contextmenu', (e: any) => {
+      e.preventDefault();
+      // get x and y coordinates of the registered rightclick
+      const lineNr: number = this.editor.getSelectionRange().start.row;
+      const lineTxt: string = this.editor.session.getLines(
+        0,
+        this.editor.session.getLength()
+      );
+      // if the line of the right click contains a method declaration, get
+      // the methods for it
+      const contracts: number[] = this.props.getContractsForMethod(
+        lineTxt,
+        lineNr
+      );
+
+      // if contracts exist iniciate a state change to show the context menu
+      // else disable it
+      if (contracts.length) {
+        this.setState({ disableContext: false, contracts: contracts });
+      } else {
+        this.setState({ disableContext: true, contracts: [] });
+      }
+    });
+
+    this.editor.on('gutterclick', (e: any) => {
+      this.props.saveFile().then(() => {
+        if (
+          e.domEvent.target.className.includes('obligation_todo') &&
+          e.domEvent.target.firstChild
+        ) {
+          const rowString = e.domEvent.target.firstChild.data;
+          const row = parseInt(rowString, 10) - 1;
+
+          if (row) {
+            this.editor.session.getSelection().clearSelection();
+            const obligations = this.props.getObligations(
+              this.editor.session.getLines(0, this.editor.session.getLength())
+            );
+
+            this.props.onProveObligations(obligations[row]);
+          }
+        } else if (
+          e.domEvent.target.className.includes('obligation_done') &&
+          e.domEvent.target.firstChild
+        ) {
+          const rowString = e.domEvent.target.firstChild.data;
+          const row = parseInt(rowString, 10) - 1;
+
+          if (row) {
+            this.editor.session.getSelection().clearSelection();
+            const obligations = this.props.getObligations(
+              this.editor.session.getLines(0, this.editor.session.getLength())
+            );
+
+            this.props.resetObligation(obligations[row]);
+            this.props.onProveObligations(obligations[row]);
+          }
+        }
+      });
+    });
+
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
@@ -89,7 +166,7 @@ export default class Editor extends React.Component<Props> {
     // only update the text if it actually changed to prevent infinite loops
     if (this.props.text !== this.editor.getValue()) {
       this.editor.ignoreChanges = true;
-      this.editor.setValue(this.props.text, -1);
+      this.editor.getSession().setValue(this.props.text, -1);
       this.editor.ignoreChanges = false;
 
       for (const marker of this.popoverMarkerIds) {
@@ -106,6 +183,77 @@ export default class Editor extends React.Component<Props> {
     if (this.props.diagnostics !== prevProps.diagnostics) {
       this.setAnchors();
     }
+
+    let mode = '';
+    switch (this.props.filetype) {
+      case 'java':
+        mode = 'ace/mode/jml';
+        break;
+      case 'sequent':
+        mode = 'ace/mode/sequent';
+        break;
+    }
+    console.log(mode);
+    this.editor.getSession().setMode(mode);
+    if (this.props.filetype === 'sequent') {
+      this.editor.setReadOnly(true);
+    } else {
+      this.editor.setReadOnly(false);
+    }
+
+    this.setProofObligations();
+  }
+
+  private setProofObligations() {
+    const obligations = this.props.getObligations(
+      this.editor.session.getLines(0, this.editor.session.getLength())
+    );
+    this.obligationAnnotations = [];
+    // Iterate over the indices of the result, which correspond to the line numbers
+    for (const index of Object.keys(obligations)) {
+      const obligationIdx: number = obligations[index as any] as number;
+
+      const row = parseInt(index, 10);
+
+      const isProven: boolean = this.props.provenObligations.includes(
+        obligationIdx
+      );
+
+      if (isProven) {
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Proven!',
+          type: 'obligation_done',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      } else {
+        this.obligationAnnotations.push({
+          row: row,
+          column: 0,
+          text: 'Click to prove!',
+          type: 'obligation_todo',
+          startRow: row,
+          startCol: 0,
+          endRow: row,
+          endCol: 0,
+        });
+      }
+    }
+
+    this.updateAnnotations();
+  }
+
+  private updateAnnotations(): void {
+    this.editor.session.clearAnnotations();
+    this.editor.session.setAnnotations(
+      this.props.diagnostics
+        .map(toAnnotation)
+        .concat(this.obligationAnnotations)
+    );
   }
 
   /**
@@ -124,6 +272,14 @@ export default class Editor extends React.Component<Props> {
           // set a custom css class for our own error type
           const rowInfo = this.$annotations[annotation.row];
           rowInfo.className = 'ace_not_supported';
+        } else if (annotation.type === 'obligation_todo') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_todo';
+        } else if (annotation.type === 'obligation_done') {
+          // set a custom css class for our own error type
+          const rowInfo = this.$annotations[annotation.row];
+          rowInfo.className = 'obligation_done';
         }
       }
     };
@@ -133,20 +289,85 @@ export default class Editor extends React.Component<Props> {
    * Called by react to display html of the component
    */
   public render() {
-    return <div id="editor" />;
+    let editorstyle;
+    let proveAllContracts;
+    // Resize the editor depening whether or not the console is visible
+    if (this.props.consoleIsVisible) {
+      editorstyle = {
+        height: '66%',
+      };
+    } else {
+      editorstyle = {
+        height: '98%',
+      };
+    }
+    // if there are multiple contracts add a field to the context menu to prove all of them
+    if (this.state.contracts.length > 1) {
+      proveAllContracts = (
+        <div>
+          <MenuItem divider />
+          <MenuItem
+            onClick={() => {
+              this.props.saveFile().then(() => {
+                for (const contract of this.state.contracts) {
+                  this.props.resetObligation(contract);
+                }
+              });
+              this.props.onProveObligations(this.state.contracts);
+            }}
+          >
+            Prove all Method Contracts
+          </MenuItem>
+        </div>
+      );
+    }
+
+    return (
+      <div id="editor_container" style={editorstyle}>
+        <ContextMenuTrigger
+          id="sick_menu"
+          holdToDisplay={-1}
+          disable={this.state.disableContext}
+        >
+          <div id="editor" style={editorstyle} />
+        </ContextMenuTrigger>
+
+        <ContextMenu id="sick_menu">
+          {/* for each contract add an entry to the context menu to prove it */}
+          {this.state.contracts.map((contract, id) => (
+            <MenuItem
+              key={id}
+              onClick={() => {
+                this.props.saveFile().then(() => {
+                  this.props.resetObligation(contract);
+                  this.props.onProveObligations(contract);
+                });
+              }}
+            >
+              Prove Contract {id + 1}
+            </MenuItem>
+          ))}
+          {proveAllContracts}
+        </ContextMenu>
+      </div>
+    );
   }
 
   /**
    * Function that calls lint, sending a request to the server, and passes the result to the app
    */
   private callLinter(): void {
-    const filename: string = this.props.filepath[
-      this.props.filepath.length - 1
-    ];
-    lint(filename, this.editor.getValue()).then((diagnostics: Diagnostic[]) => {
-      this.props.setDiagnostics(diagnostics);
-      this.setAnchors();
-    });
+    if (this.props.filetype === 'java') {
+      const filename: string = this.props.filepath[
+        this.props.filepath.length - 1
+      ];
+      lint(filename, this.editor.getValue()).then(
+        (diagnostics: Diagnostic[]) => {
+          this.props.setDiagnostics(diagnostics);
+          this.setAnchors();
+        }
+      );
+    }
   }
 
   /**
@@ -227,10 +448,8 @@ export default class Editor extends React.Component<Props> {
           this.editor.session
         );
       }
-      this.editor.session.clearAnnotations();
-      this.editor.session.setAnnotations(
-        this.props.diagnostics.map(toAnnotation)
-      );
+
+      this.updateAnnotations();
 
       // Display the markers in the ace editor
       this.setMarkers();
@@ -261,11 +480,26 @@ export default class Editor extends React.Component<Props> {
   }
 }
 
+// defining the structure of the state
+interface State {
+  disableContext: boolean;
+  contracts: number[];
+}
+
 // defining the structure of this react components properties
 interface Props {
+  saveFile(): Promise<void>;
   diagnostics: Diagnostic[];
+  provenObligations: number[];
   text: string;
   filepath: string;
+  filetype: string;
   setText(text: string): void;
   setDiagnostics(diagnostics: Diagnostic[]): void;
+  resetObligation(obligationIdx: number): void;
+  collabController: CollabController;
+  getObligations: (lines: string[]) => number[];
+  getContractsForMethod: (line: string, row: number) => number[];
+  onProveObligations: (nr: number | number[]) => boolean;
+  consoleIsVisible: boolean;
 }
