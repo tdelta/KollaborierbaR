@@ -1,24 +1,24 @@
 package synchronization.data;
 
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonCreator;                                                                    
-import com.fasterxml.jackson.annotation.JsonProperty;                                                                   
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 public class IdentifierInterval extends fr.loria.score.logootsplito.IdentifierInterval {
 
   private Identifier idBegin;
 
   @JsonCreator
-  public IdentifierInterval(@JsonProperty("idBegin") Identifier idBegin,@JsonProperty("end") int end){
-    super(idBegin.getBase(),idBegin.getLast(),end);
+  public IdentifierInterval(
+      @JsonProperty("idBegin") Identifier idBegin, @JsonProperty("end") int end) {
+    super(idBegin.getBase(), idBegin.getLast(), end);
     this.idBegin = idBegin;
   }
 
-  //public Identifier getIdBegin(){
+  // public Identifier getIdBegin(){
   //  return idBegin;
-  //}
+  // }
 
   // Ignore all getters and setters of the superclass
   // Except for getEnd
@@ -69,4 +69,4 @@ public class IdentifierInterval extends fr.loria.score.logootsplito.IdentifierIn
   public void setEnd(int end) {
     super.setEnd(end);
   }
-} 
+}

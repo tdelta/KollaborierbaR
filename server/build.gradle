@@ -32,7 +32,7 @@ ant.importBuild "${keyFolder}/scripts/build.xml"
 compileJava.dependsOn jarAll
 
 bootJar {
-    baseName = 'gs-rest-service'
+    baseName = 'KollaborierbaR'
     version =  '0.1.0'
 }
 
@@ -60,7 +60,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
     compile("org.springframework.boot:spring-boot-starter-websocket")
-    compile('org.reactivestreams:reactive-streams:1.0.2')
+    compile("org.javatuples:javatuples:1.2")
     compile files('libs/logootsplit.jar')
 
     // Karate Test Framework for the server API
@@ -111,6 +111,7 @@ checkstyleMain {
 }
 
 checkstyleTest {
+  configFile rootProject.file('.checkstyle_google.xml')
   source ='src/test/java'
 }
 

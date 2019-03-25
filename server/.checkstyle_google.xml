@@ -29,7 +29,7 @@
         </module>
         <module name="LineLength">
             <property name="max" value="100"/>
-            <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+            <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://|&quot;[^&quot;]+&quot;"/>
         </module>
         <module name="AvoidStarImport"/>
         <module name="OneTopLevelClass"/>
@@ -120,7 +120,6 @@
             <message key="name.invalidPattern"
              value="Parameter name ''{0}'' must match pattern ''{1}''."/>
          </module>
-         <module name="ClassDataAbstractionCoupling"/>
          <module name="CyclomaticComplexity">
             <property name="max" value="10"/>
         </module>
