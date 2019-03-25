@@ -1,12 +1,10 @@
-.PHONY: setup check format run test clean
+.PHONY: setup check run test clean format deploy
 
 all:
 	./gradlew build
 
 # install dependencies etc.
 setup:
-	# Specification tests need setup
-	make -C specification setup
 
 # run static analysis tools
 check:
@@ -15,6 +13,7 @@ check:
 	./gradlew pmdMain
 	./gradlew spotbugsMain
 
+# auto format java code
 format:
 	./gradlew spotlessApply
 
@@ -28,3 +27,6 @@ test:
 
 clean:
 	./gradlew clean
+
+deploy:
+	./gradlew bootJar
