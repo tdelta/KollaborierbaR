@@ -2,6 +2,7 @@ package server;
 
 import events.UpdatedProofEvent;
 import events.UpdatedProofHistoryEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +35,7 @@ import repository.ObligationService;
 /**
  * Basic KeY stub, that tries to prove all contracts in a file
  *
- * @author Martin Hentschel, Jonas Belouadi
+ * @author Jonas Belouadi
  */
 @RestController
 @CrossOrigin
@@ -47,10 +48,16 @@ public class ProofController {
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
   @Autowired private ObligationService obligationService;
 
-  /** Prove all Proof Obligations in a .java file or by index if a index is provided */
+  /**
+   * Prove all Proof Obligations in a .java file or by index if a index is provided
+   *
+   * @param className the path to the file relative to the projects folder
+   * @param obligationIdxs the indices of the obligations to prove
+   * @return the proof results
+   */
   @RequestMapping(value = "/**/{className}.java", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity<ProofResult> proveAll(
+  public ResponseEntity<ProofResult> runProof(
       @PathVariable final String className,
       @RequestParam("obligationIdxs") final Optional<List<Integer>> obligationIdxs,
       final HttpServletRequest request) {

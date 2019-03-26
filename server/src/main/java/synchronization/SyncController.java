@@ -2,21 +2,13 @@ package synchronization;
 
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
-import org.springframework.web.util.UriUtils;
 
 @Controller
 public class SyncController<Content> {
@@ -25,12 +17,12 @@ public class SyncController<Content> {
 
   // ContentId -> Content
   private ConcurrentHashMap<String, Content> contents = new ConcurrentHashMap<>();
-  
+
   //// SubscriptionId@User -> ContentId
   private ConcurrentHashMap<String, String> contentPerSubscription = new ConcurrentHashMap<>();
 
   private void saveSubscription(
-    final String simpSubscriptionId, final Principal user, final String contentId) {
+      final String simpSubscriptionId, final Principal user, final String contentId) {
 
     contentPerSubscription.put(simpSubscriptionId + "@" + user.getName(), contentId);
   }
@@ -39,7 +31,7 @@ public class SyncController<Content> {
     contentPerSubscription.remove(simpSubscriptionId + "@" + user.getName());
   }
 
-  private String getContentIdBySubscription( final String simpSubscriptionId, final Principal user) {
+  private String getContentIdBySubscription(final String simpSubscriptionId, final Principal user) {
     return contentPerSubscription.get(simpSubscriptionId + "@" + user.getName());
   }
 
@@ -47,8 +39,7 @@ public class SyncController<Content> {
       final Principal user,
       @Header final String simpSubscriptionId,
       final String contentId,
-      final Content defaultContent
-  ) {
+      final Content defaultContent) {
     System.out.println("User " + user.getName() + " subscribed for content " + contentId);
 
     final List<Principal> users = usersPerContent.getOrDefault(contentId, new ArrayList<>(1));
@@ -66,19 +57,14 @@ public class SyncController<Content> {
 
     if (defaultContent != null) {
       prevContent = contents.putIfAbsent(contentId, defaultContent);
-    }
-
-    else if (!contents.containsKey(contentId)) {
+    } else if (!contents.containsKey(contentId)) {
       prevContent = null;
-    }
-
-    else {
+    } else {
       prevContent = contents.get(contentId);
       contents.remove(contentId);
     }
 
-    return prevContent == null?
-      defaultContent : prevContent;
+    return prevContent == null ? defaultContent : prevContent;
   }
 
   protected void handleUnsubscribeHelper(final SessionUnsubscribeEvent event) {

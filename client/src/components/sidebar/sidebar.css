@@ -163,8 +163,13 @@
 }
 
 .contextAction {
-    margin-left: .5em;
-    margin-right: .5em;
+    padding-left: .5em;
+    padding-right: .5em;
+}
+
+.contextAction:hover {
+    background-color: #b0bec5;
+    border-radius: 5px;
 }
 
 #dropdown {

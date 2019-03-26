@@ -17,6 +17,10 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
   /**
    * Handles the websocket handshake when a user connects and returns an Object that identifies the
    * user. This enables us to target users with specific messages
+   *
+   * @param request The contents of the websocket request
+   * @param wsHandler The websocket handler that will handle the request
+   * @param attributes Handshake attributes that are passed to the websocket
    */
   @Override
   protected Principal determineUser(
