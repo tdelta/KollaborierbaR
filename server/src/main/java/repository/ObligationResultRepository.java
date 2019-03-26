@@ -6,7 +6,16 @@ import proofutil.ObligationResult;
 
 import java.util.List;
 
+/**
+ * Interface to the database, can be autowired where needed.
+ */
 @Repository
 public interface ObligationResultRepository extends CrudRepository<ObligationResult, Long> {
-    public List<ObligationResult> findByMethodContractId(final long methodContractId);
+
+  /**
+   * Returns all obligation results that have a foreign key associated with a specific method contract
+   *
+   * @param methodContractId primary key of the method contract
+   */
+  public List<ObligationResult> findByMethodContractId(final long methodContractId);
 }
