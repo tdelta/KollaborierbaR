@@ -2,7 +2,7 @@ import React, { RefObject, ReactSVG } from 'react';
 import UserIndicator from './user-indicator';
 import './animals.css';
 import ProjectManagement from '../../projectmanagement';
-import { User } from '../../network';
+import { User } from '../../collaborative/ProjectController';
 
 export default class Usernames extends React.Component<Props, State> {
   private static instances: Usernames[] = [];
@@ -21,7 +21,7 @@ export default class Usernames extends React.Component<Props, State> {
   }
 
   public static updateAllUsers(users: User[]) {
-    for (let instance of Usernames.instances) {
+    for (const instance of Usernames.instances) {
       instance.updateUsers(users);
     }
   }

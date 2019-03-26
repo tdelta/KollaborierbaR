@@ -9,6 +9,10 @@ public class LogootSAdd extends fr.loria.score.logootsplito.LogootSAdd<Character
   private Identifier id;
   private String content;
 
+  /**
+   * @param id Identifier in the format of the mute-structs library
+   * @param content The content of the removed or added text
+   */
   @JsonCreator
   public LogootSAdd(@JsonProperty("id") Identifier id, @JsonProperty("content") String content) {
     super(

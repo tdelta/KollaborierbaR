@@ -5,11 +5,13 @@ import events.DeletedProjectEvent;
 import events.RenamedFileEvent;
 import events.UpdatedFileEvent;
 import events.UpdatedProjectEvent;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,15 +21,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
-import projectmanagement.*;
+import projectmanagement.FileItem;
+import projectmanagement.FileUpdateData;
+import projectmanagement.FolderItem;
+import projectmanagement.Item;
+import projectmanagement.OpenedFileResponse;
 
 /**
  * @author Marc Arnold, David Heck This is a rest controller for handling the project file structure
@@ -126,7 +133,7 @@ public class ProjectController {
    */
   @RequestMapping(value = "/**", method = RequestMethod.GET)
   @ResponseBody
-  public ResponseEntity openFile(HttpServletRequest request) throws IOException {
+  public ResponseEntity<?> openFile(HttpServletRequest request) throws IOException {
 
     // Get the file path for the request resource
     String path =
@@ -162,11 +169,13 @@ public class ProjectController {
     } catch (NoSuchElementException e) {
       e.printStackTrace();
       return new ResponseEntity<String>(
-          "Read Error. Error while reading the request file: " + path, HttpStatus.BAD_REQUEST);
+          "Read Error. Error while reading the request file: " + path,
+          HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (IllegalStateException e) {
       e.printStackTrace();
       return new ResponseEntity<String>(
-          "Read Error. Error while reading the request file: " + path, HttpStatus.BAD_REQUEST);
+          "Read Error. Error while reading the request file: " + path,
+          HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -180,7 +189,7 @@ public class ProjectController {
    */
   @RequestMapping(value = "/{projectname}/**", method = RequestMethod.PUT)
   @ResponseBody
-  public ResponseEntity createFile(
+  public ResponseEntity<?> createFile(
       @PathVariable("projectname") String projectname,
       @RequestParam("type") String type,
       HttpServletRequest request)
@@ -192,24 +201,7 @@ public class ProjectController {
         ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
             .substring(1);
 
-    // final String projectName;
-    // {
-    //  final String[] pathSplit = path.split("/");
-    //  if (pathSplit.length < 1) {
-    //    return new ResponseEntity<String>("The path may not be empty.",HttpStatus.BAD_REQUEST);
-    //  }
-
-    //  else if (pathSplit.length < 2) {
-    //    return new ResponseEntity<String>("The path must contain a project
-    // name.",HttpStatus.BAD_REQUEST);
-    //  }
-
-    //  else {
-    //    projectName = pathSplit[1];
-    //  }
-    // }
-
-    File file = new File(path);
+    final File file = new File(path);
 
     // Java createNewFile and mkdir are not able to create a file if a file
     // with the same name already exists. Therefore, if someone tries to create
@@ -246,11 +238,10 @@ public class ProjectController {
    *
    * @param request HttpServletRequest in order to get the full path
    * @return Returns a HttpStatus depending on whether the file to be deleted exists.
-   * @throws IOException
    */
   @RequestMapping(value = "/{projectname}/**", method = RequestMethod.DELETE)
   @ResponseBody
-  public ResponseEntity deleteFile(
+  public ResponseEntity<?> deleteFile(
       @PathVariable("projectname") String projectname, HttpServletRequest request) {
 
     // Removes the first character from the path string, we need this because java.io.File need a
@@ -285,7 +276,7 @@ public class ProjectController {
       } catch (IOException e) {
         e.printStackTrace();
         return new ResponseEntity<>(
-            "File exists, but could still not be deleted", HttpStatus.BAD_REQUEST);
+            "File exists, but could still not be deleted", HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
@@ -295,11 +286,10 @@ public class ProjectController {
    *
    * @param request HttpServletRequest in order to get the full path
    * @return Returns a HttpStatus depending on whether the file to be deleted exists.
-   * @throws IOException
    */
   @RequestMapping(value = "/{projectname}", method = RequestMethod.DELETE)
   @ResponseBody
-  public ResponseEntity deleteProject(
+  public ResponseEntity<?> deleteProject(
       @PathVariable("projectname") String projectname, HttpServletRequest request) {
 
     // Removes the first character from the path string, we need this because java.io.File need a
@@ -308,7 +298,7 @@ public class ProjectController {
         ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
             .substring(1);
 
-    File file = new File(path);
+    final File file = new File(path);
     // check if the given path actually leads to a valid directory
     if (!file.exists()) {
       return new ResponseEntity<>(
@@ -326,7 +316,7 @@ public class ProjectController {
       } catch (IOException e) {
         e.printStackTrace();
         return new ResponseEntity<>(
-            "File exists, but could still not be deleted", HttpStatus.BAD_REQUEST);
+            "File exists, but could still not be deleted", HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
@@ -336,28 +326,9 @@ public class ProjectController {
    * delete a folders content.
    *
    * @param file File or directory that is supposed to be deleted.
-   * @throws IOException
+   * @throws IOException exception if file cannot be deleted (for example it might not exist)
    */
   private void delete(File file) throws IOException {
-    // if the currenct file is not a file but a directory we need to delete its content first.
-    //        if(file.isDirectory()){
-    //            if(file.list().length==0){
-    //                //if the current directory is empty, delete it
-    //                file.delete();
-    //            }else{
-    //                //if the current directory is not empty  list its content and call delete
-    // recursively
-    //                for(File f: file.listFiles()){
-    //                    delete(f);
-    //                }
-    //                //do not forget to delete the current directory itself
-    //                file.delete();
-    //            }
-    //        }else{
-    //            //if the current directory is not a directory but a file, delete it
-    //            file.delete();
-    //        }
-
     // if the currenct file is not a file but a directory we need to delete its content first.
     if (file.isDirectory()) {
       // if the current directory is not empty  list its content and call delete recursively
@@ -367,8 +338,12 @@ public class ProjectController {
         }
       }
     }
+
     // if the current directory is an empty directory or a file, delete it
-    file.delete();
+    final boolean result = file.delete();
+    if (!result) {
+      throw new IOException("Could not delete file");
+    }
   }
 
   /**
@@ -386,7 +361,7 @@ public class ProjectController {
    */
   @RequestMapping(value = "/{projectname}/**", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity updateFile(
+  public ResponseEntity<?> updateFile(
       @PathVariable("projectname") String projectname,
       @RequestBody FileUpdateData updateData,
       HttpServletRequest request) {
@@ -437,14 +412,17 @@ public class ProjectController {
       } else {
         return new ResponseEntity<>("The file could no be renamed.", HttpStatus.BAD_REQUEST);
       }
-    }
-    // If you are in this branch, the fileContent wasn't null. That implies that you do have a file
-    // and that the
-    // caller of that functions wants to update the content, not the name of the file.
-    else {
+    } else {
+      // If you are in this branch, the fileContent wasn't null. That implies that you do have a
+      // file
+      // and that the
+      // caller of that functions wants to update the content, not the name of the file.
       try {
-        final BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-
+        // Oldversion: Had problems with encoding
+        // final BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        final File f = new File(path);
+        final Writer writer =
+            new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
         writer.write(updateData.fileContent);
         writer.close();
 

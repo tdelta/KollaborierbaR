@@ -1,0 +1,49 @@
+.consoleRestoreHandle {
+    background-color: #212121;
+    color: white;
+  
+    /* it should be barely visible */
+    width: 100%;
+    height: 2%;
+    vertical-align: middle;
+
+    text-align: right; 
+
+    /* we want a cursor with a pointing finger, such that the user knows,
+       that it is an interactive element */
+    cursor: pointer;
+  }
+
+.consoleRestoreHandleIcon {
+   margin-right: 0.5em;
+}
+
+#console {
+
+   background-color: #181818;
+   color: #cfd8dc;
+   height: 33%;
+   width: 100%;
+}
+
+.consoleLable{
+
+   float:left;
+   margin-left: 0.2em;
+   margin-top: 0.1em;
+   font-size: 0.80em;
+   font-family: monospace; 
+
+}
+
+#consoletext{
+   overflow: auto;
+   width:100%;
+   height:97%; 
+   border: none;
+   color: #ffff;
+   padding: 0.5em;
+   margin-right: 10px;
+   font-family: monospace;
+   white-space: pre;
+}
