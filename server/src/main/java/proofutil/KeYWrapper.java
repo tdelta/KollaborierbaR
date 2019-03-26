@@ -6,7 +6,6 @@ import de.uka.ilkd.key.logic.op.IObserverFunction;
 import de.uka.ilkd.key.pp.LogicPrinter;
 import de.uka.ilkd.key.proof.Goal;
 import de.uka.ilkd.key.proof.Proof;
-import de.uka.ilkd.key.proof.init.ProofInputException;
 import de.uka.ilkd.key.proof.io.ProblemLoaderException;
 import de.uka.ilkd.key.settings.ChoiceSettings;
 import de.uka.ilkd.key.settings.ProofSettings;
@@ -18,6 +17,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.key_project.util.collection.ImmutableSet;
 
@@ -29,6 +29,7 @@ import org.key_project.util.collection.ImmutableSet;
 public class KeYWrapper {
   private KeYEnvironment<?> env;
   private ProofResult results;
+  private ProofScriptExecutor proofScriptExecutor = new ProofScriptExecutor();
 
   public KeYWrapper(String path) {
     final File location =
@@ -79,7 +80,8 @@ public class KeYWrapper {
    * @param obligationIdx the index of the contract in its source file
    * @param contract the contract that should be proven
    */
-  private void proveContract(final int obligationIdx, final Contract contract) {
+  private void proveContract(
+      final int obligationIdx, final Contract contract, final Optional<String> macro) {
     // Perform proof
     Proof proof = null;
 
@@ -91,13 +93,28 @@ public class KeYWrapper {
         // Set proof strategy options
         StrategyProperties sp =
             proof.getSettings().getStrategySettings().getActiveStrategyProperties();
-        sp.setProperty(StrategyProperties.METHOD_OPTIONS_KEY, StrategyProperties.METHOD_CONTRACT);
-        sp.setProperty(StrategyProperties.DEP_OPTIONS_KEY, StrategyProperties.DEP_ON);
-        sp.setProperty(StrategyProperties.QUERY_OPTIONS_KEY, StrategyProperties.QUERY_ON);
+        sp.setProperty(StrategyProperties.QUERYAXIOM_OPTIONS_KEY, StrategyProperties.QUERYAXIOM_ON);
+        sp.setProperty(
+            StrategyProperties.QUANTIFIERS_OPTIONS_KEY,
+            StrategyProperties.QUANTIFIERS_NON_SPLITTING_WITH_PROGS);
+        sp.setProperty(StrategyProperties.LOOP_OPTIONS_KEY, StrategyProperties.LOOP_NONE);
+        sp.setProperty(
+            StrategyProperties.INF_FLOW_CHECK_PROPERTY, StrategyProperties.INF_FLOW_CHECK_FALSE);
         sp.setProperty(
             StrategyProperties.NON_LIN_ARITH_OPTIONS_KEY, StrategyProperties.NON_LIN_ARITH_DEF_OPS);
         sp.setProperty(
-            StrategyProperties.STOPMODE_OPTIONS_KEY, StrategyProperties.STOPMODE_NONCLOSE);
+            StrategyProperties.AUTO_INDUCTION_OPTIONS_KEY, StrategyProperties.AUTO_INDUCTION_OFF);
+        sp.setProperty(
+            StrategyProperties.STOPMODE_OPTIONS_KEY, StrategyProperties.STOPMODE_DEFAULT);
+        sp.setProperty(
+            StrategyProperties.CLASS_AXIOM_OPTIONS_KEY, StrategyProperties.CLASS_AXIOM_DELAYED);
+        sp.setProperty(StrategyProperties.MPS_OPTIONS_KEY, StrategyProperties.MPS_MERGE);
+        sp.setProperty(StrategyProperties.BLOCK_OPTIONS_KEY, StrategyProperties.BLOCK_EXPAND);
+        sp.setProperty(StrategyProperties.METHOD_OPTIONS_KEY, StrategyProperties.METHOD_CONTRACT);
+        sp.setProperty(StrategyProperties.OSS_OPTIONS_KEY, StrategyProperties.OSS_OFF);
+        sp.setProperty(
+            StrategyProperties.SPLITTING_OPTIONS_KEY, StrategyProperties.SPLITTING_DELAYED);
+        sp.setProperty(StrategyProperties.VBT_PHASE, StrategyProperties.VBT_SYM_EX);
         proof.getSettings().getStrategySettings().setActiveStrategyProperties(sp);
 
         // Make sure that the new options are used
@@ -108,8 +125,13 @@ public class KeYWrapper {
         proof.setActiveStrategy(
             proof.getServices().getProfile().getDefaultStrategyFactory().create(proof, sp));
 
-        // Start auto mode
-        env.getUi().getProofControl().startAndWaitForAutoMode(proof);
+        if (macro.isPresent()) {
+          // Use macro for proof
+          proofScriptExecutor.executeWithScript(macro.get(), proof);
+        } else {
+          // Start auto mode
+          env.getUi().getProofControl().startAndWaitForAutoMode(proof);
+        }
 
         // Show proof result
         final boolean closed = proof.openGoals().isEmpty();
@@ -150,7 +172,7 @@ public class KeYWrapper {
                       })
                   .collect(Collectors.toList()));
         }
-      } catch (ProofInputException e) {
+      } catch (Exception e) {
         results.addError(
             obligationIdx,
             "unknown",
@@ -203,7 +225,7 @@ public class KeYWrapper {
    * @param className the path to the file relative to the projects folder
    * @return the results of the tried proofs
    */
-  public ProofResult proveAllContracts(String className) {
+  public ProofResult proveAllContracts(final String className, final Optional<String> macro) {
     if (env != null) {
       final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
       final ImmutableSet<IObserverFunction> targets =
@@ -229,7 +251,7 @@ public class KeYWrapper {
         int localObligationIdx = contracts.size() - 1;
 
         for (Contract contract : contracts) {
-          proveContract(currentObligationIdx - localObligationIdx, contract);
+          proveContract(currentObligationIdx - localObligationIdx, contract, macro);
 
           localObligationIdx--;
         }
@@ -241,6 +263,10 @@ public class KeYWrapper {
     return results;
   }
 
+  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices) {
+    return proveContractByIdxs(className, indices, Optional.empty());
+  }
+
   /**
    * Prove contracts by indices
    *
@@ -248,7 +274,8 @@ public class KeYWrapper {
    * @param indices the indices of the obligations to prove
    * @return the results of the tried proofs
    */
-  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices) {
+  public ProofResult proveContractByIdxs(
+      final String className, final List<Integer> indices, Optional<String> macro) {
     if (env != null) {
       for (int index : indices) {
         final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
@@ -278,7 +305,8 @@ public class KeYWrapper {
                 contracts
                     .toArray(new Contract[0])[contracts.size() - (currentObligationIdx - index) - 1
                     // obligations inside contract sets are sorted top to bottom
-                    ]);
+                    ],
+                macro);
 
             break;
           } else {

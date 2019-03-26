@@ -437,12 +437,4 @@ public class ProjectController {
       }
     }
   }
-
-  // TODO: Proper HTTP error handler
-
-  //    @ExceptionHandler({UnsupportedEncodingException.class})
-  //    public ResponseEntity handleUnsupportedEncoding(){
-  //        return new ResponseEntity<String>("Not supported encoding string found",
-  // HttpStatus.BAD_REQUEST);
-  //    }
 }
