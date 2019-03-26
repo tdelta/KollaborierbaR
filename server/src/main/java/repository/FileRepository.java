@@ -3,15 +3,13 @@ package repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-/**
- * Interface to the database, can be autowired where needed.
- */
+/** Interface to the database, can be autowired where needed. */
 @Repository
 public interface FileRepository extends CrudRepository<File, Long> {
 
   /**
-   * Returns a file that has the given name. There is a constraint on the database
-   * for file names to be unique
+   * Returns a file that has the given name. There is a constraint on the database for file names to
+   * be unique
    *
    * @param name The file name
    */
