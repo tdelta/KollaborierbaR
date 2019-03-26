@@ -157,7 +157,7 @@ public class ProofSyncController extends SyncController<Void> {
             + " to topic "
             + topic);
 
-    getUsersByContentId(projectFilePath)
+    getUsersByDestinationId(projectFilePath)
         .forEach(
             iterationUser -> {
               System.out.println(
@@ -199,7 +199,7 @@ public class ProofSyncController extends SyncController<Void> {
             + " to topic "
             + topic);
 
-    getUsersByContentId(projectFilePath)
+    getUsersByDestinationId(projectFilePath)
         .forEach(
             iterationUser -> {
               System.out.println(
