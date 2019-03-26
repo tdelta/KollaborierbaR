@@ -1,4 +1,4 @@
-.PHONY: setup check run test clean format deploy
+.PHONY: setup check run test clean format deploy apidoc
 
 all:
 	./gradlew build
@@ -30,3 +30,6 @@ clean:
 
 deploy:
 	./gradlew bootJar
+
+apidoc:
+	./gradlew asciidoctorPdf
