@@ -1,4 +1,4 @@
-# This feature file isn't a test all by it self. It is supposed
+# This feature file isn't a test by it self. It is supposed
 # to be called (with call read ('HttpApiTestSetup.feature')) before
 # testing other Features/Scenarios
 Feature: Setup for Http Api Testing
