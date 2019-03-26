@@ -47,12 +47,14 @@ public class ProofController {
 
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
   @Autowired private ObligationService obligationService;
+  @Autowired private FileService fileService;
 
   /**
    * Prove all Proof Obligations in a .java file or by index if a index is provided
    *
    * @param className the path to the file relative to the projects folder
    * @param obligationIdxs the indices of the obligations to prove
+   * @param macro the path to the macro file to use for the proof, if present
    * @return the proof results
    */
   @RequestMapping(value = "/**/{className}.java", method = RequestMethod.GET)
@@ -60,20 +62,31 @@ public class ProofController {
   public ResponseEntity<ProofResult> runProof(
       @PathVariable final String className,
       @RequestParam("obligationIdxs") final Optional<List<Integer>> obligationIdxs,
+      @RequestParam("macro") final Optional<String> macro,
       final HttpServletRequest request) {
     // Get the file path for the request resource
-    final String path =
-        ((String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE))
-            .substring(7);
-    final KeYWrapper key = new KeYWrapper(path);
+    final PathData pathData = decodePath(request);
+    final String projectFilePath = pathData.projectFilePath;
+
+    final KeYWrapper key = new KeYWrapper(projectFilePath);
+
+    Optional<String> macroContentsOptional = Optional.empty();
+
+    if (macro.isPresent()) {
+      // Read the macro file
+      String macroContents = fileService.getCurrent(pathData.projectName + macro.get());
+      if (macroContents != "") {
+        macroContentsOptional = Optional.of(macroContents);
+      }
+    }
     // prove by index if index is present. ternary operator can be replaced with ifPresentOrElse if
     // Java 9 is used or higher
     final ProofResult result =
         obligationIdxs.isPresent()
-            ? key.proveContractByIdxs(className, obligationIdxs.get())
-            : key.proveAllContracts(className);
-    key.dispose();
+            ? key.proveContractByIdxs(className, obligationIdxs.get(), macroContentsOptional)
+            : key.proveAllContracts(className, macroContentsOptional);
 
+    key.dispose();
     return new ResponseEntity<ProofResult>(result, HttpStatus.OK);
   }
 
@@ -272,7 +285,7 @@ public class ProofController {
 
   private static PathData decodePath(final HttpServletRequest request) {
     final String regex =
-        "\\/proof\\/(?<ProjectName>[^\\/]+)\\/(?<Path>.+)\\/obligation(\\/(?<ObligationId>\\d+)\\/.+)?";
+        "\\/proof\\/(?<ProjectName>[^\\/]+)\\/(?<Path>[^\\.]+\\.java)(\\/obligation(\\/(?<ObligationId>\\d+)\\/.+)?)?";
 
     final String input =
         (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);

@@ -16,6 +16,7 @@ import {
   faBomb,
   faTrashAlt,
   faTag,
+  faDirections,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -28,7 +29,7 @@ import {
   DropdownItem,
 } from 'reactstrap';
 
-import { OpenModal, DeleteModal } from './project-modals.jsx';
+import { OpenModal, DeleteModal, MacroModal } from './selection-modals.jsx';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -43,12 +44,14 @@ export default class Top extends React.Component<Props, State> {
     this.onFileLoaded = this.onFileLoaded.bind(this);
     this.toggleOpenModal = this.toggleOpenModal.bind(this);
     this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
+    this.toggleMacroModal = this.toggleMacroModal.bind(this);
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
     this.state = {
       showOpenModal: false,
       showDeleteModal: false,
+      showMacroModal: false,
     };
   }
 
@@ -58,6 +61,13 @@ export default class Top extends React.Component<Props, State> {
 
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
+  }
+
+  /**
+   * Inverts the visibility of the modal that selects macro files
+   */
+  private toggleMacroModal(): void {
+    this.setState({ showMacroModal: !this.state.showMacroModal });
   }
 
   private onFileChosen(event: HTMLInputEvent): void {
@@ -117,6 +127,13 @@ export default class Top extends React.Component<Props, State> {
                   />
                   Prove all contracts
                 </DropdownItem>
+                <DropdownItem onClick={this.toggleMacroModal}>
+                  <FontAwesomeIcon
+                    icon={faDirections}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Select Macro
+                </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
 
@@ -151,12 +168,18 @@ export default class Top extends React.Component<Props, State> {
             <OpenModal
               isOpen={this.state.showOpenModal}
               toggle={this.toggleOpenModal}
-              projectOperation={this.props.onOpenProject}
+              selectOperation={this.props.onOpenProject}
             />
             <DeleteModal
               isOpen={this.state.showDeleteModal}
               toggle={this.toggleDeleteModal}
-              projectOperation={this.props.onDeleteProject}
+              selectOperation={this.props.onDeleteProject}
+            />
+            <MacroModal
+              isOpen={this.state.showMacroModal}
+              toggle={this.toggleMacroModal}
+              loadFunction={this.props.getMacroFiles}
+              selectOperation={this.props.onSelectMacro}
             />
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -239,6 +262,7 @@ interface HTMLInputEvent extends React.FormEvent<HTMLInputElement> {
 interface State {
   showOpenModal: boolean;
   showDeleteModal: boolean;
+  showMacroModal: boolean;
 }
 
 // define the structure received KeY results
@@ -250,6 +274,7 @@ interface ProofResults {
 
 // defining the structure of this react components properties
 interface Props {
+  getMacroFiles: any;
   getFilePath: () => string[];
   text: string;
   setText(text: string): void;
@@ -260,5 +285,6 @@ interface Props {
   onOpenProject(): void;
   onCreateProject(): void;
   onProveFile(): void;
+  onSelectMacro(macro: string): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
 }
