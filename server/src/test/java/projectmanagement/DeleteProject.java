@@ -5,5 +5,5 @@ import com.intuit.karate.junit4.Karate;
 import org.junit.runner.RunWith;
 
 @RunWith(Karate.class)
-@KarateOptions(features = "classpath:projectController/DeleteProject.feature")
+@KarateOptions(features = "classpath:projectcontroller/DeleteProject.feature")
 public class DeleteProject {}
