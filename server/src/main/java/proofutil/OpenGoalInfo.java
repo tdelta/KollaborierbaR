@@ -4,18 +4,19 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * This class is used as a container for open goals
+ * This class is used as a container for open goals that defines a table in the database 
+ * and is also used as a response type for api routes.
+ * Fields annotated with JsonIgnore will not be included in api routes
  *
  * @author Jonas Belouadi
  */
 @Entity
 public class OpenGoalInfo {
 
-  //@ManyToOne(name="obligationResult")
-  //private ObligationResult obligationResult
-
+  @JsonIgnore
   @Id
   @GeneratedValue
   private long primaryKey;

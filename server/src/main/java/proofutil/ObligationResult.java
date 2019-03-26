@@ -14,6 +14,10 @@ import repository.MethodContract;
 
 import java.util.List;
 
+/**
+ * Definition for a table in the database and the format of the response for api routes.
+ * Fields annotated with JsonIgnore will not be included in network responses.
+ */
 @Entity(name = "ObligationResult")
 public class ObligationResult {
   public enum Kind {
@@ -52,6 +56,9 @@ public class ObligationResult {
   private String targetName;
   private int obligationIdx;
 
+  /**
+   * Default constructor needed for hibernate
+   */
   public ObligationResult() {}
 
   public ObligationResult(final int obligationIdx, final String targetName, final String resultMsg, final ProofNode proofTree, final List<OpenGoalInfo> openGoals, final Kind kind) {
@@ -63,6 +70,9 @@ public class ObligationResult {
     this.kind = kind;
   }
 
+  /**
+   * Sets the method contract (foreign key in the database) that this obligation result belongs to
+   */
   public void setMethodContract(MethodContract methodContract){
     this.methodContract = methodContract;
   }
@@ -87,6 +97,9 @@ public class ObligationResult {
     return kind;
   }
 
+  /**
+   * @return primary key in the database
+   */
   public Long getId(){
     return id;
   }
