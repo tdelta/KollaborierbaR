@@ -4,6 +4,7 @@ import React, { RefObject } from 'react';
 import ReactDom from 'react-dom';
 import { Tooltip } from 'reactstrap';
 import AnchoredMarker from './AnchoredMarker';
+import MarkerPopover from './MarkerPopover';
 
 export default class PopoverMarker {
   private anchor: AnchoredMarker;
@@ -12,11 +13,11 @@ export default class PopoverMarker {
   private name: string;
   private opacity: number;
 
-  constructor(anchor: AnchoredMarker, name: string) {
+  constructor(anchor: AnchoredMarker, name: string, opacity: number) {
     this.anchor = anchor;
     this.name = name;
     this.popover = React.createRef<MarkerPopover>();
-    this.opacity = 0.5;
+    this.opacity = opacity;
   }
 
   public vanish() {
@@ -40,90 +41,64 @@ export default class PopoverMarker {
   ) {
     let range: ace_types.Ace.Range = this.anchor.getRange(session);
     range = range.toScreenRange(session);
-    markerLayer.drawSingleLineMarker(
-      null,
-      range,
-      this.anchor.type + 'Marker',
-      config
-    );
-
-    let child = markerLayer.element.lastChild;
-    console.log(markerLayer.element.children);
-    for (let i: number = markerLayer.element.children.length - 1; i >= 0; i--) {
-      console.log(child.style.opacity);
-      if (
-        child.className === `${this.anchor.type}Marker` &&
-        !child.style.opacity
-      ) {
-        console.log('break:');
-        console.log(child);
-        break;
-      }
-      child = markerLayer.element.children[i];
+    if (range.isMultiLine()) {
+      markerLayer.drawTextMarker(
+        null,
+        range,
+        `${this.anchor.type}Marker`,
+        config
+      );
+    } else {
+      markerLayer.drawSingleLineMarker(
+        null,
+        range,
+        `${this.anchor.type}Marker`,
+        config
+      );
     }
 
-    const htmlElement = child.cloneNode(true) as HTMLElement;
+    for (
+      let i: number = markerLayer.element.children.length - 1;
+      i >= 0;
+      i = i - 1
+    ) {
+      const child = markerLayer.element.children[i];
+      if (
+        child.className.includes(`${this.anchor.type}Marker`) &&
+        !child.style.opacity
+      ) {
+        const htmlElement = child.cloneNode(true) as HTMLElement;
+        // Executed when the mouse enters the highlighted area
+        htmlElement.addEventListener('mouseenter', () => {
+          // If the ref is referring to a present element in the dom, set it to be visible
+          if (this.popover.current != null) {
+            this.popover.current.setState({ isOpen: true });
+            window.setTimeout(
+              this.popover.current.hide.bind(this.popover.current),
+              4000
+            );
+          }
+        });
 
-    // Executed when the mouse enters the highlighted area
-    htmlElement.addEventListener('mouseenter', () => {
-      // If the ref is referring to a present element in the dom, set it to be visible
-      if (this.popover.current) this.popover.current.setState({ isOpen: true });
-    });
+        // Executed when the mouse leaves the highlighted area
+        htmlElement.addEventListener('mouseout', () => {
+          // If the ref is referring to a present element in the dom, set it to be invisible
+          if (this.popover.current) {
+            this.popover.current.setState({ isOpen: false });
+          }
+        });
 
-    // Executed when the mouse leaves the highlighted area
-    htmlElement.addEventListener('mouseout', () => {
-      // If the ref is referring to a present element in the dom, set it to be invisible
-      if (this.popover.current)
-        this.popover.current.setState({ isOpen: false });
-      const openTooltips: HTMLCollection = document.getElementsByClassName(
-        'tooltip'
-      ) as HTMLCollection;
-      // if(openTooltips != null){
-      //   for(let i: number = 0;i < openTooltips.length;i++){
-      //     if(openTooltips[i] != null && openTooltips[i].parentNode != null){
-      //       let tooltipHtml : HTMLElement = openTooltips[i] as HTMLElement;
-      //       tooltipHtml.parentNode.removeChild(openTooltips[i]);
-      //     }
-      //   }
-      // }
-    });
+        htmlElement.style.opacity = `${this.opacity}`;
 
-    htmlElement.style.opacity = this.opacity + '';
+        ReactDom.render(
+          <MarkerPopover ref={this.popover} target={htmlElement}>
+            {this.name}
+          </MarkerPopover>,
+          htmlElement
+        );
 
-    ReactDom.render(
-      <MarkerPopover ref={this.popover} target={htmlElement}>
-        {this.name}
-      </MarkerPopover>,
-      htmlElement
-    );
-
-    markerLayer.element.replaceChild(htmlElement, child);
+        markerLayer.element.replaceChild(htmlElement, child);
+      }
+    }
   }
-}
-
-class MarkerPopover extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { isOpen: false };
-  }
-
-  public render() {
-    return (
-      <Tooltip
-        placement="top"
-        target={this.props.target}
-        isOpen={this.state.isOpen}
-      >
-        {this.props.children}
-      </Tooltip>
-    );
-  }
-}
-
-interface Props {
-  target: HTMLElement;
-}
-
-interface State {
-  isOpen: boolean;
 }

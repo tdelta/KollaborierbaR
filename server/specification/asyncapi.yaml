@@ -1,0 +1,126 @@
+asyncapi: "1.2.0"
+info:
+  title: Kollaborierbar Websocket
+  version: "1.0.0"
+  description: |
+    Specification for the websocket connections of KollaborierbaR.
+
+servers:
+  - url: localhost:9000/websocket
+    description: Connects to the sockjs library. Used for the synchronization of files, project contents and proof results.
+    scheme: stomp
+    
+topics:
+  file:
+    publish:
+      $ref: "#/components/messages/connectToDocument"
+  insert:
+    publish:
+      $ref: "#/components/messages/LogootSAdd"
+  remove:
+    publish:
+      $ref: "#/components/messages/LogootSDel"
+
+components:
+  messages:
+    connectToDocument:
+      summary: Connect to a collaborative document.
+      description: |
+        * If no document with the specified file path exists, a new one is created. The given text is inserted into the new document.
+        * If a document with the specified file path already exists, the given text is dismissed.
+        * The user will receive all future insert and remove operations for the specified file
+        * If the user was connected to a different file, is is removed from the previous file
+      headers:
+        type: object
+        properties:
+          file:
+            $ref: "#/components/schemas/FileHeader"
+      payload:
+        type: object
+        properties:
+          content:
+            type: string
+            description: The text content of the file
+
+    LogootSAdd:
+      summary: Crdt insert operation
+      description: |
+        For more information, please refer to the mute-structs library that was used in the implementation:
+        https://github.com/coast-team/mute-structs
+      payload:
+        type: object
+        required:
+          - content
+          - id
+        properties:
+          content:
+            type: string
+            description: The inserted text
+          id:
+            $ref: "#/components/schemas/LogootIdentifier"
+            description: The position in the crdt data structure for the inserted text (Identifier)
+            
+    LogootSDel:
+      summary: Crdt delete operation
+      description: |
+        For more information, please refer to the mute-structs library that was used in the implementation:
+        https://github.com/coast-team/mute-structs
+      payload:
+        type: object
+        required:
+          - lid
+          - end
+        properties:
+          end:
+            type: integer
+          lid:
+            description: The range of characters to delete (IdentifierInterval)
+            type: array
+            items:
+              type: object
+              required:
+                - idBegin
+              properties:
+                idBegin:
+                  $ref: "#/components/schemas/LogootIdentifier"
+                  description: Position in the crdt data structure for the inserted text (Identifier)
+  schemas:
+    FileHeader:
+      title: file path
+      description: |
+        Determines the file that the crdt operation refers to
+      type: string
+    FileObject:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          description: Text content of the file
+          type: string
+    LogootIdentifier:
+      type: object
+      required:
+        - tuples
+      properties:
+          tuples:
+            type: array
+            items:
+              type: object
+              required:
+                - random
+                - replicaNumber
+                - clock
+                - offset
+              properties:
+                random:
+                  type: integer
+                replicaNumber:
+                  type: integer
+                clock:
+                  type: integer
+                offset:
+                  type: integer
+                
+
+    

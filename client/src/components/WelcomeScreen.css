@@ -1,0 +1,38 @@
+
+.welcomeScreenContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+  user-select: none;
+  align-items: center;
+  justify-content: center;
+  background-color: #333333;
+}
+
+.welcomeLogoContainer {
+  width: 40%;
+}
+
+.welcomeLogo {
+  width: 100%;
+}
+
+.welcomeMessage {
+  width: 100%;
+  text-align: center;
+  color: white;
+  line-height: 2em;
+  margin-top: 1em;
+}
+
+.welcomeBigBrace {
+  color: #aaaaaa;
+  font-size: 1.8em;
+  vertical-align: middle;
+}
+
+.welcomeMessageSmallerText {
+  font-size: 1.5em;
+  vertical-align: middle;
+}
