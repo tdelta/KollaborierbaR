@@ -16,7 +16,7 @@ export default class KeyApi {
     const escapedPath = escape(path);
     // API URL of the server we will use for our request
     let url = `${serverAddress}/proof/${escapedPath}`;
-    if (macro != '') {
+    if (macro !== '') {
       url = `${url}?macro=${macro}`;
     }
 
@@ -44,7 +44,7 @@ export default class KeyApi {
   ): Promise<ProofResults> {
     const escapedPath = escape(path);
     let url = `${serverAddress}/proof/${escapedPath}?obligationIdxs=${nr}`;
-    if (macro != '') {
+    if (macro !== '') {
       url = `${url}&macro=${macro}`;
     }
 
