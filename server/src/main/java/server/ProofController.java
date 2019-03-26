@@ -148,7 +148,7 @@ public class ProofController {
 
     return retrieveObligationResult(projectFilePath, obligationIdx, 0)
         .map(obligationResult -> new ResponseEntity<>(obligationResult, HttpStatus.OK))
-        .orElse(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @RequestMapping(
@@ -165,7 +165,7 @@ public class ProofController {
 
     return retrieveObligationResult(projectFilePath, obligationIdx, historyIdx)
         .map(obligationResult -> new ResponseEntity<>(obligationResult, HttpStatus.OK))
-        .orElse(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @RequestMapping(
@@ -281,7 +281,7 @@ public class ProofController {
       System.out.println(
           "ProofController: Cant delete last element using the history delete method.");
 
-      return new ResponseEntity(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity(HttpStatus.NOT_FOUND);
     } else if (historyIdx < obligationResultHistory.size()) {
       obligationResultHistory.remove(historyIdx);
 
@@ -300,7 +300,7 @@ public class ProofController {
     } else {
       System.out.println("ProofController: Cant delete history element out of bounds.");
 
-      return new ResponseEntity(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
   }
 

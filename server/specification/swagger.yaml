@@ -5,27 +5,62 @@ info:
     specification and verification web app.
   version: '0.1'
   title: KollaborierbaR Server
+  contact:
+    email: "kollaborierbar-team@googlegroups.com"
 host: 'localhost:9000'
 basePath: /
 tags:
-  - name: lint
+  - name: linter-controller
     description: Generate diagnostics for Java code by static analysis
-  - name: project
+  - name: project-controller
     description: Access projects stored on server
+  - name: proof-controller
+    description: Generate proofs for Java code using KeY
 schemes:
   - http
 paths:
+  /lint:
+    post:
+      tags:
+        - linter-controller
+      summary: Run static analysis on a java source file
+      description: Will return an empty list, if static analysis fails, or no source code was submitted.
+      operationId: lintUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: name
+          in: query
+          description: Filename of the uploaded source code
+          required: true
+          type: string
+        - in: body
+          name: source
+          description: Java source code to be analyzed
+          required: true
+          schema:
+            type: string
+            example: "public class LimitedIntegerSet {\n\t//@ public invariant (\\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);\n\tprivate /*@ spec_public @*/ int[] arr;\n\t\n\t//@ public invariant size >= 0 && size <= arr.length;\n\tprivate /*@ spec_public @*/ int size;\n\n\tpublic LimitedIntegerSet(int limit) {\n\t\tthis.arr = new int[limit];\n\t}\n\n\t/*@ public normal_behavior ///This is a JML comment!\n      @ ensures \\result == (\\exists int i;\n      @                             0 <= i && i < size;\n      @                             arr[i] == elem);\n      @*/\n\tpublic /*@ pure @*/ boolean contains(int elem) {/*...*/ throw new RuntimeException(\"Not yet implemented\");}\n\n    private void provokeWarning() {\n        switch (1) {\n            case 1:\n                System.out.println(\"Hello World\");\n            case 2: // Theres a fall-through warning around here\n                break;\n        }\n    }\n\n\t/*@ public normal_behavior\n\t  @ requires contains(elem);\n      @ assignable size, arr[*];  // allows arbitrary reordering of the array elements\n      @ ensures !contains(elem); \n      @ ensures (\\forall int e;\n      @                  e != elem;\n      @                  contains(e) <==> \\old(contains(e)));\n      @ ensures size == \\old(size) - 1;\n      @\n      @ also\n      @ \n      @ public normal_behavior\n      @ requires !contains(elem);\n      @ assignable \\nothing;\n      @*/\n\tpublic void remove(int elem) {/*...*/}\n\n\n\t// we specify that the array is sorted afterwards and that the set has not changed; the latter works in this case and is easier \n\t// than if we would have to try to formalize permutation\n\t/*@ public normal_behavior\n\t  @ assignable a[0..size - 1];\n      @ ensures\n      @   (\\forall int i, j; i>=0 && i<j && j<size; arr[i]<arr[j]);\n      @ ensures (\\forall int e;  \n      @                  contains(e) <==> \\old(contains(e)));\n      @*/\n\tpublic void sort() { /* ... */ }\n\n\t\n\t/*@ public normal_behavior\n\t  @ requires size > 0;\n      @ assignable \\nothing;\n      @ ensures ( \\forall int i;\n      @                  i>=0 && i<size;\n      @                  \\result >= a[i] );\n      @ ensures ( \\exists int i;\n      @                  i>=0 && i<size;\n      @                  \\result == a[i] );\n      @\n      @ also\n      @ \n      @ public exceptional_behavior\n      @ requires size == 0;\n      @ assignable \\nothing;\n      @ signals  (RuntimeException) true;\n      @*/\n\tpublic int max() {\n\t\t// ...\n\t\tthrow new RuntimeException(\"Not yet implemented.\");\n\t}\n}\n"
+      responses:
+        '200':
+          description: OK. Successful static analysis. Returning results
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Diagnostic'
   /projects:
     get:
       tags:
-        - project
+        - project-controller
       summary: List projects stored on server
-      operationId: project.listProjects
+      operationId: listProjectsUsingGET
       produces:
         - application/json;charset=UTF-8
       responses:
         '200':
-          description: A json list of project names
+          description: OK. A list of project names
           schema:
             type: array
             items:
@@ -33,230 +68,736 @@ paths:
             example:
               - My Project
               - KeY
+      deprecated: false
+  /projects/**:
+    get:
+      tags:
+        - project-controller
+      summary: Load content and name of specific file on the server
+      description: >-
+        Replace `**` with any file path, starting with the project name as root directory.
+        
+        For example: `/projects/SimpleJML/src/examples/IntegerUtil.java`
+      operationId: openFileUsingGET
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OpenedFileResponse'
+        '500':
+          description: Internal server error. The file could not be read, though it exists.
+          schema:
+            type: string
+        '404':
+          description: Not Found. The requested file could not be found within the project.
+          schema:
+            type: string
+      deprecated: false
   '/projects/{projectname}':
     get:
       tags:
-        - project
-      summary: Load content list of a specific project stored on the server
-      operationId: project.showProject
+        - project-controller
+      summary: Load file tree of a specific project stored on the server
+      operationId: showProjectUsingGET
       produces:
         - application/json;charset=UTF-8
       parameters:
         - name: projectname
           in: path
-          description: Name of the selected project
+          description: Name of the project, for which the file tree shall be retrieved.
           required: true
           type: string
-          x-example: 'Hello World'
+          x-example: Hello World
       responses:
         '200':
           description: >-
-            Tree structure of a (java) project. Consists of files, folders and
-            some project metadata
+            OK. Tree file structure of a (java) project. Consists of files and folders.
+            The name of the root folder is the same as the project name.
+            (The data structure is recursive, which OpenAPI 2.0 descriptions can not
+            express, therefore the specified model lacks the recursion.)
           schema:
-            $ref: '#/definitions/Project'
-  '/projects/{projectname}/**/{filename}':
-    get:
-      tags:
-        - project
-      summary: Load content and name of specific file on the server
-      operationId: project.openFile
-      produces:
-        - application/json;charset=UTF-8
-      parameters:
-        #- name: **
-        #  in: path
-        #  description: filepath within project. Can contain / 
-        #  required: true
-        #  type: string
-        - name: projectname
-          in: path
-          description: Name of the selected project containing the wanted file
-          required: true
-          type: string
-          x-example: 'Hello World'
-        - name: filename
-          in: path
-          description: Name of the file to be opened
-          required: true
-          type: string
-          x-example: 'LICENSE'
-      responses:
-        '200':
-          description: A json object which contains the filename and the filecontents
-          schema:
-            $ref: '#/definitions/OpenedFile'
-  '/projects/**':
+            $ref: '#/definitions/FileOrFolderItem'
+        '500':
+          description: Internal Server Error. Occurs, if project does not exist.
+          # TODO: This should be 400 instead.
     delete:
       tags:
-        - project
-      summary: Delete a specific resource on the server
-      operationId: project.deleteFile
-      #parameters:
-        #- name: **
-        #  in: path
-        #  description: filepath, starting with project name. Can contain / 
-        #  required: true
-        #  type: string
-      responses:
-        '204':
-          description: The resource was deleted successfully.
-        '400':
-          description: The resourse was found but could not be deleted.
-        '404':
-          description: The resource was not found.
-    put:
-      tags:
-        - project
-      summary: 'Depending on the type, this endpoint creates a file or a folder'
-      operationId: project.createFile
-      parameters:
-        #- name: **
-        #  in: path
-        #  description: filepath, starting with project name. Can contain / 
-        #  required: true
-        #  type: string
-        - name: type
-          in: query
-          description: 'type of file to create: Either file or folder'
-          required: true
-          type: string
-          enum:
-            - file
-            - folder
-      responses:
-        '200':
-          description: The project was created successfully
-        '400':
-          description: The project was not created
-  '/projects/{projectname}/**':
-    put:
-      tags:
-        - project
-      summary: Creates a new project one the server
-      operationId: project.createProject
-      parameters:
-        - name: projectname
-          in: path
-          description: Name of the project about to be created
-          required: true
-          type: string
-          x-example: 'Hello World'
-      responses:
-        '200':
-          description: The project was created successfully
-        '400':
-          description: The project was not created
-  /lint:
-    post:
-      tags:
-        - lint
-      summary: Check a java source file
-      operationId: lintClass
-      consumes:
-        - text/plain
+        - project-controller
+      summary: Deletes a project
+      operationId: deleteProjectUsingDELETE
       produces:
         - application/json;charset=UTF-8
       parameters:
-        - in: query
-          name: name
-          description: Filename of the uploaded source code
+        - name: projectname
+          in: path
+          description: Name of the project which shall be deleted.
           required: true
           type: string
-          x-example: LimitedIntegerSet
-        - in: body
-          name: source
-          description: Java source code to be linted
-          required: true
-          schema:
-            type: string
-            example: "public class LimitedIntegerSet {\n\t//@ public invariant (\\forall int i,j; i>=0 && i<j && j<size; arr[i] != arr[j]);\n\tprivate /*@ spec_public @*/ int[] arr;\n\t\n\t//@ public invariant size >= 0 && size <= arr.length;\n\tprivate /*@ spec_public @*/ int size;\n\n\tpublic LimitedIntegerSet(int limit) {\n\t\tthis.arr = new int[limit];\n\t}\n\n\t/*@ public normal_behavior ///This is a JML comment!\n      @ ensures \\result == (\\exists int i;\n      @                             0 <= i && i < size;\n      @                             arr[i] == elem);\n      @*/\n\tpublic /*@ pure @*/ boolean contains(int elem) {/*...*/ throw new RuntimeException(\"Not yet implemented\");}\n\n    private void provokeWarning() {\n        switch (1) {\n            case 1:\n                System.out.println(\"Hello World\");\n            case 2: // Theres a fall-through warning around here\n                break;\n        }\n    }\n\n\t/*@ public normal_behavior\n\t  @ requires contains(elem);\n      @ assignable size, arr[*];  // allows arbitrary reordering of the array elements\n      @ ensures !contains(elem); \n      @ ensures (\\forall int e;\n      @                  e != elem;\n      @                  contains(e) <==> \\old(contains(e)));\n      @ ensures size == \\old(size) - 1;\n      @\n      @ also\n      @ \n      @ public normal_behavior\n      @ requires !contains(elem);\n      @ assignable \\nothing;\n      @*/\n\tpublic void remove(int elem) {/*...*/}\n\n\n\t// we specify that the array is sorted afterwards and that the set has not changed; the latter works in this case and is easier \n\t// than if we would have to try to formalize permutation\n\t/*@ public normal_behavior\n\t  @ assignable a[0..size - 1];\n      @ ensures\n      @   (\\forall int i, j; i>=0 && i<j && j<size; arr[i]<arr[j]);\n      @ ensures (\\forall int e;  \n      @                  contains(e) <==> \\old(contains(e)));\n      @*/\n\tpublic void sort() { /* ... */ }\n\n\t\n\t/*@ public normal_behavior\n\t  @ requires size > 0;\n      @ assignable \\nothing;\n      @ ensures ( \\forall int i;\n      @                  i>=0 && i<size;\n      @                  \\result >= a[i] );\n      @ ensures ( \\exists int i;\n      @                  i>=0 && i<size;\n      @                  \\result == a[i] );\n      @\n      @ also\n      @ \n      @ public exceptional_behavior\n      @ requires size == 0;\n      @ assignable \\nothing;\n      @ signals  (RuntimeException) true;\n      @*/\n\tpublic int max() {\n\t\t// ...\n\t\tthrow new RuntimeException(\"Not yet implemented.\");\n\t}\n}\n"
+          x-example: Hello World
       responses:
         '200':
-          description: Successful static analysis. Returning results
+          description: OK. Project got successfully deleted.
+          schema:
+            type: object
+        '500':
+          description: Internal Server Error. The project exists, but could not be deleted.
+          schema:
+            type: string
+        '404':
+          description: Not found. There exists no such project on the server.
+          schema:
+            type: string
+  '/projects/{projectname}/**':
+    post:
+      tags:
+        - project-controller
+      summary: Update the contents of a file stored the server or rename it.
+      description: >-
+        1. Allows to save a file, such that other clients may access it using the server API.
+        
+        2. Also allows to rename a file.
+        
+        
+        If the field `fileContent` is not set in the body, case 2 applies.
+        
+        Otherwise, if `fileContent` is set, the content of the file
+        will be replaced with the contents of `fileContent`, such that all subsequent calls
+        to GET `/projects/<projectname>/<path-to-file>` will return the updated content.
+        In this case, the file name will not be changed, even if `fileName` is set, too.
+        It is assumed, that the file content is encoded in UTF-8.
+        
+        Replace `**` with a path to a file within the specified project.
+        
+        For example: `src/example/IntegerUtils.java`
+      operationId: updateFileUsingPOST
+      consumes:
+        - application/json;charset=UTF-8
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: projectname
+          in: path
+          description: Name of the project of which we'd like to change the content of a file. 
+          required: true
+          type: string
+        - in: body
+          name: updateData
+          description: Name and new content 
+          required: true
+          schema:
+            $ref: '#/definitions/FileUpdateData'
+      responses:
+        '200':
+          description: >-
+            OK. The change was successfully applied.
+            
+            The new project tree is returned, see `GET /projects/{projectname}`.
+            
+            If the file name has not been changed, the returned tree will also appear unchanged,
+            given no other client changed the project structure in the meantime.
+          schema:
+            $ref: '#/definitions/FileOrFolderItem'
+        '400':
+          description: >-
+            Bad request. The file does not exist, or the rename path is invalid.
+            
+            Can also be caused by an internal error while updating.
+          schema:
+            type: string
+        # TODO: Throw internal server error (500) in that last case.
+    put:
+      tags:
+        - project-controller
+      summary: Create a new file or folder on the server.
+      description: >-
+        Allows to create a file or folder on the server, such that other clients may access
+        it using the server API.
+        
+        Replace `**` with a path within the specified project.
+        
+        For example: `src/example/IntegerUtils.java`
+      operationId: createFileUsingPUT
+      consumes:
+        - application/json
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: projectname
+          in: path
+          description: Name of the project, within we want to create a new file/folder
+          required: true
+          type: string
+        - name: type
+          in: query
+          description: >-
+            Indicates, whether to create a file or folder.
+            
+            Possible values: 'file', 'folder'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: >-
+            OK. The file/folder was successfully created.
+            
+            The updated project tree is returned, see `GET /projects/{projectname}`.
+          schema:
+            $ref: '#/definitions/FileOrFolderItem'
+        '400':
+          description: >-
+            Bad request.
+            Sent in the following cases:
+            
+            1. There already exists a file/folder at the given path.
+            
+            2. The type parameter has an invalid value. It must equal either 'file' or 'folder'
+          schema:
+            type: string
+    delete:
+      tags:
+        - project-controller
+      summary: Delete a file or folder from a project
+      operationId: deleteFileUsingDELETE
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: projectname
+          in: path
+          description: Name of the project, where a file/folder shall be deleted
+          required: true
+          type: string
+      responses:
+        '200':
+          description: >-
+            OK. The file/folder was successfully deleted.
+            
+            The updated project tree is returned, see also `GET /projects/{projectname}`.
+          schema:
+            $ref: '#/definitions/FileOrFolderItem'
+        '404':
+          description: >-
+            Not found.
+            Returned, if the specified file/folder does not exist or the path is invalid.
+          schema:
+            type: string
+        '500':
+          description: >-
+            Internal server error.
+            The file/folder which shall be deleted does exist, but could not be deleted.
+          schema:
+            type: string
+      deprecated: false
+  '/proof/**/{className}.java':
+    get:
+      tags:
+        - proof-controller
+      summary: Prove obligations within a Java file using KeY
+      description: >-
+        This method will try to prove the specified proof obligations within the given file
+        using KeY (https://www.key-project.org/)
+        
+        If no obligation indices are specified, the server will try to prove all obligations
+        within the given file.
+      operationId: runProofUsingGET
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: >-
+            Name of the class in which the proofs shall be run.
+          required: true
+          type: string
+        - name: obligationIdxs
+          in: query
+          description: >-
+            Indices of the proof obligations, which shall be proven, counted from the beginning
+            of the Java file.
+          required: false
+          type: array
+          items:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: >-
+            OK. If an obligation could not be proven, the reasons are encoded within the
+            returned structure.
+            
+            Beware of the example return value generated by Swagger, which can for example contain successful proofs in the failed list. This is because OpenAPI 2.0's way of specifying examples is very restricted.
+          schema:
+            $ref: '#/definitions/ProofResult'
+  '/proof/**/{className}.java/obligation':
+    get:
+      tags:
+        - proof-controller
+      summary: Lists proof obligation indices of saved proofs.
+      description: >-
+        Lists all obligation indices for the given file, for which there are saved proofs available on the server.
+        
+        The indices are counted per file from top to bottom for each discovered proof obligation.
+        
+        The returned indices can be used to retrieve saved proofs using `GET /proof/**/{className}.java/obligation/{obligation index}/**`.
+      operationId: listSavedObligationsUsingGET
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: Name of the class, for which we want to list obligation indices of saved proofs.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: >-
+            OK.
+            
+            This method will always return code 200.
+            If there are no saved proofs, an empty list will be returned.
           schema:
             type: array
             items:
-              $ref: '#/definitions/Diagnostic'
+              type: integer
+              format: int32
+            example: [0, 2, 3]
+  '/proof/**/{className}.java/obligation/{obligationIdx}/history':
+    get:
+      tags:
+        - proof-controller
+      summary: List ids of proofs saved to history
+      description: >-
+        The server can save proof results within a history, such that they can be retrieved and reviewed at a
+        later time.
+        
+        Each saved proof result is given a history id, which can be used to retrieve a result using `GET /proof/**/{className}.java/obligation/{obligationIdx}/history/{history id}`.
+        
+        The id also decodes the age of a saved result, more recent proof results get assigned bigger ids than their predecessors.
+      operationId: getHistoryItemsUsingGET
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: Name of the class, for which we want to retrieve proof history information.
+          required: true
+          type: string
+        - name: obligationIdx
+          in: path
+          description: >-
+            A history is maintained for each proof obligation.
+            
+            This is the index of the obligation counted from the top of the file, for which proof result
+            history information shall be retrieved.
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: >-
+            OK.
+            
+            This method will always return code 200.
+            If there are no saved proofs, an empty list will be returned.
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            example: [2, 20, 3]
+    post:
+      tags:
+        - proof-controller
+      summary: Add a proof result to the server history.
+      description: >-
+        The server can save proof results within a history for each proof obligation, for each file, such that they can be retrieved and reviewed at a later time.
+        
+        Using this route, a proof result can be added to the history.
+      operationId: addToHistoryUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: Name of the class, for which we want to save a proof result.
+          required: true
+          type: string
+        - name: obligationIdx
+          in: path
+          description: >-
+            Index of the proof obligation the saved proof belongs to,
+            counted from top to bottom in the given Java file.
+          required: true
+          type: integer
+          format: int32
+        - in: body
+          name: obligationResult
+          description: Proof result, which shall be saved.
+          required: true
+          schema:
+            $ref: '#/definitions/ObligationResult'
+      responses:
+        '200':
+          description: OK. Returns the unique history id of the saved proof.
+          schema:
+            type: integer
+            format: int32
+            example: 3
+  '/proof/**/{className}.java/obligation/{obligationIdx}/history/{historyIdx}':
+    get:
+      tags:
+        - proof-controller
+      summary: Retrieve a proof from the server history.
+      description: >-
+        The server can save proof results within a history for each proof obligation, for each file, such that they can be retrieved and reviewed at a later time.
+        
+        Using this route, a proof result can be retrieved from the history.
+      operationId: getHistoricProofUsingGET
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: Name of the class, for which we want to retrieve a proof result.
+          required: true
+          type: string
+        - name: obligationIdx
+          in: path
+          description:  >-
+            Index of the proof obligation the proof which shall be retrieved belongs to,
+            counted from top to bottom in the given Java file.
+          required: true
+          type: integer
+          format: int32
+        - name: historyIdx
+          in: path
+          description: >-
+            Unique history id of the saved proof.
+            See `GET /proof/**/{className}.java/obligation/{obligationIdx}/history`
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK. Returns the saved proof result.
+          schema:
+            $ref: '#/definitions/ObligationResult'
+        '404':
+          description: Not found. There is no proof result saved for the given path and parameters.
+    delete:
+      tags:
+        - proof-controller
+      summary: Delete a proof result from the server history.
+      description: >-
+        The server can save proof results within a history for each proof obligation, for each file, such that they can be retrieved and reviewed at a later time.
+        
+        Using this route, a proof result can be deleted from the history.
+      operationId: deleteFromHistoryUsingDELETE
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: Name of the class, for which we want to delete a proof result from the history.
+          required: true
+          type: string
+        - name: historyIdx
+          in: path
+          description: >-
+            Unique history id of the proof result which shall be deleted from the history.
+            See `GET /proof/**/{className}.java/obligation/{obligationIdx}/history`
+          required: true
+          type: integer
+          format: int32
+        - name: obligationIdx
+          in: path
+          description: >-
+            Index of the proof obligation the proof which shall be deleted belongs to,
+            counted from top to bottom in the given Java file.
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK. Successfully deleted proof result from history.
+        '404':
+          description: >-
+            Not found.
+            The specified proof result can not be deleted from history, since there is no such
+            result saved.
+  '/proof/**/{className}.java/obligation/{obligationIdx}/last':
+    get:
+      tags:
+        - proof-controller
+      summary: Retrieve the latest temporary proof result.
+      description: >-
+        In addition to a permanent proof result history, the server can temporarily store the latest prove result. It is lost as soon as the server is shut down.
+        
+        This feature is used by KollaborierbaR to always share the latest proof result by any developer with everyone working on the same file.
+        
+        Using this route, this temporarily stored result can be retrieved.
+      operationId: getCurrentProofUsingGET
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: >-
+            Name of the class, for which we want to retrieve the latest, temporary proof result.
+          required: true
+          type: string
+        - name: obligationIdx
+          in: path
+          description: >-
+            Index of the proof obligation for which the latest temporary results shall be retrieved,
+            counted from top to bottom in the given Java file.
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK. Returns the temporarily saved proof result.
+          schema:
+            $ref: '#/definitions/ObligationResult'
+        '404':
+          description: >-
+            Not found.
+            There has no temporary proof result been saved for the given path and parameters.
+    post:
+      tags:
+        - proof-controller
+      summary: Save a temporary proof result.
+      description: >-
+        In addition to a permanent proof result history, the server can temporarily store the latest prove result. It is lost as soon as the server is shut down.
+        
+        This feature is used by KollaborierbaR to always share the latest proof result by any developer with everyone working on the same file.
+        
+        Using this route, such a temporarily result can be uploaded.
+      operationId: uploadCurrentObligationResultUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json;charset=UTF-8
+      parameters:
+        - name: className
+          in: path
+          description: >-
+            Name of the class, for which we want to save a temporary proof result.
+          required: true
+          type: string
+        - name: obligationIdx
+          in: path
+          description:  >-
+            Index of the proof obligation to which the uploaded result belongs,
+            counted from top to bottom in the given Java file.
+          required: true
+          type: integer
+          format: int32
+        - in: body
+          name: obligationResult
+          description: proof result to be stored
+          required: true
+          schema:
+            $ref: '#/definitions/ObligationResult'
+      responses:
+        '200':
+          description: OK. The proof result has been temporarily stored.
 definitions:
   Diagnostic:
     type: object
     properties:
-      message:
-        type: string
-      column:
-        type: integer
-        format: int64
-      line:
-        type: integer
-        format: int64
-      end:
-        type: integer
-        format: int64
-      start:
-        type: integer
-        format: int64
-      position:
-        type: integer
-        format: int64
-      startRow:
-        type: integer
-        format: int64
-      startCol:
-        type: integer
-        format: int64
-      endRow:
-        type: integer
-        format: int64
       endCol:
         type: integer
         format: int64
+        example: 42
+      endRow:
+        type: integer
+        format: int64
+        example: 24
       kind:
         type: string
         enum:
           - ERROR
           - WARNING
           - NOTE
-  File:
+          - NOT_SUPPORTED
+      message:
+        type: string
+        example: Syntax error
+      startCol:
+        type: integer
+        format: int64
+        example: 0
+      startRow:
+        type: integer
+        format: int64
+        example: 24
+    title: Diagnostic
+  FileUpdateData:
+    type: object
+    properties:
+      fileContent:
+        type: string
+        example: public class Main {\n public static void main(String[] args) {}\n}
+      fileName:
+        type: string
+        example: /projects/src/main/java/Main.java
+    title: FileUpdateData
+  FileOrFolderItem:
     type: object
     required:
       - name
       - type
     properties:
+      contents:
+        type: array
+        items:
+          $ref: '#/definitions/FileOrFolderItem'
+        description: >-
+          Contents of the folder. This field is not set, if the item is a file, not a folder.
       name:
         type: string
+        example: Main.java
       type:
         type: string
         enum:
           - file
           - folder
-      contents:
+    title: FileOrFolderItem
+  ObligationResult:
+    type: object
+    required:
+      - kind
+      - obligationIdx
+      - openGoals
+      - resultMsg
+      - targetName
+    properties:
+      kind:
+        type: string
+        enum:
+          - success
+          - failure
+          - error
+      obligationIdx:
+        type: integer
+        format: int32
+        example: 0
+        description: >-
+          Obligation index this proof belongs to.
+          It is counted from top to bottom in the corresponding source file.
+      openGoals:
         type: array
         items:
-          type: object
-  Project:
-    type: object
-    properties:
-      name:
+          $ref: '#/definitions/OpenGoalInfo'
+      proofTree:
+        $ref: '#/definitions/ProofNode'
+      resultMsg:
         type: string
-      contents:
-        type: array
-        items:
-          $ref: '#/definitions/File'
-  RequestedFile:
-    type: object
-    properties:
-      path:
+        example: "Contract 'JML normal_behavior operation contract 0' of IntegerUtil2::add is verified."
+        description: Human readable statement about the result state of the proof.
+      targetName:
         type: string
-    example:
-      path: /My Project/README.md
-  OpenedFile:
+        example: "IntegerUtil2::add"
+        description: Target subject of the proof, for example a method name.
+    title: ObligationResult
+  OpenGoalInfo:
+    type: object
+    required:
+      - formula
+      - id
+      - sequent
+    properties:
+      formula:
+        type: string
+        example: "wellFormed(heap), measuredByEmpty ==> y = 0\n"
+        description: Created by calling toString on KeY goals, may not be equal to `sequent`, but oftentimes is.
+      id:
+        type: integer
+        format: int64
+        example: 64
+      sequent:
+        type: string
+        example: "wellFormed(heap), measuredByEmpty ==> y = 0\n"
+        description: Created using the `quickPrintSequent` function of KeY's `LogicPrinter`. May not be equal to `formula`.
+    title: OpenGoalInfo
+  OpenedFileResponse:
     type: object
     properties:
       filename:
         type: string
-      filecontent:
+        example: 'IntegerUtil.java'
+      filetext:
         type: string
-    example:
-      filename: README.md
-      content: Hello!
+        example: "public class IntegerUtil {\n/*@ normal_behavior\n     @ ensures \\result == x + y;\n     @*/\n   public static int add(int x, int y) {\n      return x + y;\n   }\n   \n   /*@ normal_behavior\n     @ requires (x != y);\n     @ ensures \\result == x - y;\n     @\n     @ exceptional_behaviour\n     @ requires (x == y);\n     @ signals (RuntimeException) true;\n     @*/\n   public static int sub(int x, int y) {\n       if (x == y) {throw new RuntimeException();}\n      return x + y;\n   }\n}"
+  ProofNode:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/ProofNode'
+      kind:
+        type: string
+        enum:
+          - ClosedProofTree
+          - OneStepSimplification
+          - OpenProofTree
+          - BranchNode
+          - OpenGoal
+          - ClosedGoal
+          - InteractiveGoal
+          - LinkedGoal
+          - DefaultNode
+      oneStepId:
+        type: integer
+        format: int32
+        example: 0
+        description: >-
+          Unique id of this node relative to all its siblings,
+          if it is a child of a One Step Simplification node.
+          
+          Otherwise, it always equals 0.
+          
+          Together with `serialNr`, this field forms a unique id within the whole proof tree.
+      sequent:
+        type: string
+        example: " \n==>\n wellFormed(heap)\n & ..."
+      serialNr:
+        type: integer
+        format: int32
+        example: 0
+        description: >-
+          Unique id of this node within the proof tree, if its parent is not a One Step Simplification.
+          If its parent is a One Step simplification, it forms a unique key together with `oneStepId`.
+      text:
+        type: string
+        example: "IntegerUtil2[IntegerUtil2::add(int,int)].JML normal_behavior operation contract.0"
+    title: ProofNode
+  ProofResult:
+    type: object
+    properties:
+      errors:
+        type: array
+        items:
+          $ref: '#/definitions/ObligationResult'
+        description: Proofs, which failed to execute correctly.
+      failed:
+        type: array
+        items:
+          $ref: '#/definitions/ObligationResult'
+        description: Proofs, which could not be closed.
+      stackTraces:
+        type: array
+        items:
+          $ref: '#/definitions/ObligationResult'
+        description: Same as `errors`, but with stack traces as message.
+      succeeded:
+        type: array
+        items:
+          $ref: '#/definitions/ObligationResult'
+        description: Successful proofs.
+    title: ProofResult

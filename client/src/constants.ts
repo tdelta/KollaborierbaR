@@ -1,5 +1,8 @@
 // Contains application wide constants
-export const serverAddress: string = 'http://localhost:9000';
+
+declare var staticConfiguration: { serverAddress: string };
+
+export const serverAddress: string = staticConfiguration.serverAddress;
 
 // names of server routes. Can be used to construct urls for calls to fetch()
 export const serverRoutes: object = {

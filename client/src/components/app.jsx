@@ -1,7 +1,11 @@
 import React from 'react';
 
+import './app.css';
+
 import NotificationSystem from 'react-notification-system';
 
+import Toggleable from './Toggleable.tsx';
+import WelcomeScreen from './WelcomeScreen.tsx';
 import Editor from './editor.tsx';
 import Top from './top.tsx';
 import Sidebar from './sidebar/Sidebar.tsx';
@@ -431,30 +435,48 @@ export default class App extends React.Component {
                 <i className="fa fa-times" />
               </Button>
             )}
-            {/* Render the editor component */}
-            <Editor
-              saveFile={this.saveFile}
-              setDiagnostics={this.setDiagnostics}
-              diagnostics={this.state.diagnostics}
-              provenObligations={this.state.provenObligations}
-              resetObligation={this.resetObligation}
-              setText={this.setText}
-              text={this.state.text}
-              filepath={this.state.openedPath}
-              filetype={this.state.filetype}
-              collabController={this.collabController}
-              getObligations={this.key.getObligations}
-              getContractsForMethod={this.key.getContractsForMethod}
-              onProveObligations={this.key.proveObligations}
-              ref={this.editor}
-              consoleIsVisible={this.state.consoleIsVisible}
-            />
-            {/* Render the console component */}
-            <Console
-              consolelog={this.state.consolelog}
-              consoleIsVisible={this.state.consoleIsVisible}
-              invertConsoleVisibility={this.invertConsoleVisibility}
-            />
+            {/* Render the editor component, if there is a project/file to display */}
+            <Toggleable
+              className="appMainContent"
+              isVisible={
+                this.state.project.name != null &&
+                this.state.openedPath.length > 0
+              }
+            >
+              <Editor
+                saveFile={this.saveFile}
+                setDiagnostics={this.setDiagnostics}
+                diagnostics={this.state.diagnostics}
+                provenObligations={this.state.provenObligations}
+                resetObligation={this.resetObligation}
+                setText={this.setText}
+                text={this.state.text}
+                filepath={this.state.openedPath}
+                filetype={this.state.filetype}
+                collabController={this.collabController}
+                getObligations={this.key.getObligations}
+                getContractsForMethod={this.key.getContractsForMethod}
+                onProveObligations={this.key.proveObligations}
+                ref={this.editor}
+                consoleIsVisible={this.state.consoleIsVisible}
+              />
+              {/* Render the console component */}
+              <Console
+                consolelog={this.state.consolelog}
+                consoleIsVisible={this.state.consoleIsVisible}
+                invertConsoleVisibility={this.invertConsoleVisibility}
+              />
+            </Toggleable>
+            {/* render the welcome screen, if there is not a file to display yet */}
+            <Toggleable className="appMainContent" isVisible={true}>
+              <WelcomeScreen
+                project={this.state.project}
+                isVisible={
+                  this.state.project.name == null ||
+                  this.state.openedPath.length === 0
+                }
+              />
+            </Toggleable>
           </div>
         </div>
         <ConfirmationModal ref={this.confirmationModal} />
