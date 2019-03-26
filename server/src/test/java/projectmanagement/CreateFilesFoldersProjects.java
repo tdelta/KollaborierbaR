@@ -5,5 +5,5 @@ import com.intuit.karate.junit4.Karate;
 import org.junit.runner.RunWith;
 
 @RunWith(Karate.class)
-@KarateOptions(features = "classpath:projectController/CreateFileFolderProject.feature")
+@KarateOptions(features = "classpath:projectcontroller/CreateFileFolderProject.feature")
 public class CreateFilesFoldersProjects {}
