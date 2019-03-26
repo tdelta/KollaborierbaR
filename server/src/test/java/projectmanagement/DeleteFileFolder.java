@@ -5,5 +5,5 @@ import com.intuit.karate.junit4.Karate;
 import org.junit.runner.RunWith;
 
 @RunWith(Karate.class)
-@KarateOptions(features = "classpath:DeleteFileFolder.feature")
+@KarateOptions(features = "classpath:projectController/DeleteFileFolder.feature")
 public class DeleteFileFolder {}
