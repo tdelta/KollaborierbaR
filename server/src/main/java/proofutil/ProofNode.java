@@ -1,16 +1,15 @@
 package proofutil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.FetchType;
-import javax.persistence.CascadeType;
 import javax.persistence.Lob;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.OneToMany;
 
 @Entity
 public class ProofNode {
@@ -28,11 +27,11 @@ public class ProofNode {
     private final String value;
 
     Kind(final String value) {
-        this.value = value;
+      this.value = value;
     }
 
     public String getValue() {
-        return value;
+      return value;
     }
   }
 
@@ -41,21 +40,26 @@ public class ProofNode {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Integer id;
 
-  @Lob
-  private String text;
+  @Lob private String text;
 
-  @OneToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private List<ProofNode> children;
+
   private Kind kind;
 
-  @Lob
-  private String sequent;
+  @Lob private String sequent;
   private int serialNr;
   private int oneStepId;
 
-  public ProofNode(){}
+  public ProofNode() {}
 
-  public ProofNode(final String text, final List<ProofNode> children, final Kind kind, final String sequent, final int serialNr, final int oneStepId) {
+  public ProofNode(
+      final String text,
+      final List<ProofNode> children,
+      final Kind kind,
+      final String sequent,
+      final int serialNr,
+      final int oneStepId) {
     this.text = text;
     this.children = children;
     this.kind = kind;

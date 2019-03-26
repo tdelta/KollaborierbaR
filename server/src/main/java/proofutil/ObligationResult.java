@@ -1,22 +1,19 @@
 package proofutil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
-import javax.persistence.OneToOne;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.CascadeType;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import javax.persistence.OneToOne;
 import repository.MethodContract;
 
-import java.util.List;
-
 /**
- * Definition for a table in the database and the format of the response for api routes.
- * Fields annotated with JsonIgnore will not be included in network responses.
+ * Definition for a table in the database and the format of the response for api routes. Fields
+ * annotated with JsonIgnore will not be included in network responses.
  */
 @Entity(name = "ObligationResult")
 public class ObligationResult {
@@ -28,22 +25,17 @@ public class ObligationResult {
     private final String value;
 
     Kind(final String value) {
-        this.value = value;
+      this.value = value;
     }
 
     public String getValue() {
-        return value;
+      return value;
     }
   }
 
-  @JsonIgnore
-  @Id
-  @GeneratedValue
-  private Long id;
+  @JsonIgnore @Id @GeneratedValue private Long id;
 
-  @JsonIgnore
-  @ManyToOne
-  private MethodContract methodContract;
+  @JsonIgnore @ManyToOne private MethodContract methodContract;
 
   private String resultMsg;
 
@@ -52,16 +44,21 @@ public class ObligationResult {
 
   @OneToMany(cascade = CascadeType.ALL)
   private List<OpenGoalInfo> openGoals;
+
   private Kind kind;
   private String targetName;
   private int obligationIdx;
 
-  /**
-   * Default constructor needed for hibernate
-   */
+  /** Default constructor needed for hibernate */
   public ObligationResult() {}
 
-  public ObligationResult(final int obligationIdx, final String targetName, final String resultMsg, final ProofNode proofTree, final List<OpenGoalInfo> openGoals, final Kind kind) {
+  public ObligationResult(
+      final int obligationIdx,
+      final String targetName,
+      final String resultMsg,
+      final ProofNode proofTree,
+      final List<OpenGoalInfo> openGoals,
+      final Kind kind) {
     this.obligationIdx = obligationIdx;
     this.targetName = targetName;
     this.resultMsg = resultMsg;
@@ -73,7 +70,7 @@ public class ObligationResult {
   /**
    * Sets the method contract (foreign key in the database) that this obligation result belongs to
    */
-  public void setMethodContract(MethodContract methodContract){
+  public void setMethodContract(MethodContract methodContract) {
     this.methodContract = methodContract;
   }
 
@@ -89,7 +86,7 @@ public class ObligationResult {
     return openGoals;
   }
 
-  public String getTargetName(){
+  public String getTargetName() {
     return targetName;
   }
 
@@ -97,14 +94,12 @@ public class ObligationResult {
     return kind;
   }
 
-  /**
-   * @return primary key in the database
-   */
-  public Long getId(){
+  /** @return primary key in the database */
+  public Long getId() {
     return id;
   }
 
-  public int getObligationIdx(){
+  public int getObligationIdx() {
     return obligationIdx;
   }
 }
