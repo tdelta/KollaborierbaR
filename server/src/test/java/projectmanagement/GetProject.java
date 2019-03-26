@@ -5,5 +5,5 @@ import com.intuit.karate.junit4.Karate;
 import org.junit.runner.RunWith;
 
 @RunWith(Karate.class)
-@KarateOptions(features = "classpath:GetProject.feature")
+@KarateOptions(features = "classpath:projectController/GetProject.feature")
 public class GetProject {}
