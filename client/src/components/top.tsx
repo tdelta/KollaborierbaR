@@ -6,7 +6,17 @@ import '../index.css';
 import Usernames from './user-names/user-names';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faForward, faBoxOpen, faStarOfLife, faDownload, faCloudUploadAlt, faSave, faBomb, faTrashAlt, faTag } from '@fortawesome/free-solid-svg-icons';
+import {
+  faForward,
+  faBoxOpen,
+  faStarOfLife,
+  faDownload,
+  faCloudUploadAlt,
+  faSave,
+  faBomb,
+  faTrashAlt,
+  faTag,
+} from '@fortawesome/free-solid-svg-icons';
 
 import {
   Navbar,
@@ -36,7 +46,6 @@ export default class Top extends React.Component<Props, State> {
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
-    this.proveKeY = this.proveKeY.bind(this);
     this.state = {
       showOpenModal: false,
       showDeleteModal: false,
@@ -49,19 +58,6 @@ export default class Top extends React.Component<Props, State> {
 
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
-  }
-
-  private proveKeY() {
-    if (this.props.notificationSystem.current) {
-      this.props.notificationSystem.current.clearNotifications();
-      this.props.notificationSystem.current.addNotification({
-        title: 'Please Wait!',
-        message: 'Proving all obligations...',
-        level: 'info',
-        position: 'bc',
-        autoDismiss: 0,
-      });
-    }
   }
 
   private onFileChosen(event: HTMLInputEvent): void {
@@ -101,7 +97,7 @@ export default class Top extends React.Component<Props, State> {
     return (
       <div>
         <Navbar color="dark" dark expand="md">
-          <NavbarBrand style={{color: 'white'}}>KollaborierbaR</NavbarBrand>
+          <NavbarBrand style={{ color: 'white' }}>KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <Usernames />
 
@@ -112,14 +108,12 @@ export default class Top extends React.Component<Props, State> {
               <DropdownMenu right>
                 <DropdownItem
                   onClick={() => {
-                    this.props
-                      .saveFile()
-                      .then(() => this.props.onProveFile());
+                    this.props.saveFile().then(() => this.props.onProveFile());
                   }}
                 >
                   <FontAwesomeIcon
                     icon={faForward}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Prove all contracts
                 </DropdownItem>
@@ -134,21 +128,21 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.props.onCreateProject}>
                   <FontAwesomeIcon
                     icon={faStarOfLife}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Create project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleOpenModal}>
                   <FontAwesomeIcon
                     icon={faBoxOpen}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Open project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleDeleteModal}>
                   <FontAwesomeIcon
                     icon={faBomb}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Delete project
                 </DropdownItem>
@@ -172,35 +166,35 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownItem onClick={this.downloadFileOnClick}>
                   <FontAwesomeIcon
                     icon={faDownload}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Download
                 </DropdownItem>
                 <DropdownItem onClick={this.openFileOnClick}>
                   <FontAwesomeIcon
                     icon={faCloudUploadAlt}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Upload
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onDeleteFile}>
                   <FontAwesomeIcon
                     icon={faTrashAlt}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Delete
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onUpdateFileName}>
                   <FontAwesomeIcon
                     icon={faTag}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Rename
                 </DropdownItem>
                 <DropdownItem onClick={this.props.saveFile}>
                   <FontAwesomeIcon
                     icon={faSave}
-                    style={{marginRight: '0.5em'}}
+                    style={{ marginRight: '0.5em' }}
                   />
                   Save
                 </DropdownItem>
@@ -218,10 +212,12 @@ export default class Top extends React.Component<Props, State> {
         />
 
         <a
-          href={
-            'data:text/plain;charset=utf-8,$(encodeURIComponent(this.props.text))'
+          href={`data:text/plain;charset=utf-8, ${encodeURIComponent(
+            this.props.text
+          )}`}
+          download={
+            this.props.getFilePath()[this.props.getFilePath().length - 1]
           }
-          download="test.txt"
         >
           <input
             type="button"
@@ -254,6 +250,7 @@ interface ProofResults {
 
 // defining the structure of this react components properties
 interface Props {
+  getFilePath: () => string[];
   text: string;
   setText(text: string): void;
   onDeleteFile(): void;
