@@ -29,3 +29,4 @@ Given url 'http://localhost:9000/projects/'
 When method get
 Then status 200
 And match response contains ["My Project", "JMLProject", "SimpleJML", "HelloWorld"]
+And match response !contains ["ProjectCreatedByTest"]

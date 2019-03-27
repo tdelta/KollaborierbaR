@@ -123,6 +123,8 @@ export default class ProofTreeView extends React.Component<Props, State> {
 
   public componentDidMount() {
     document.addEventListener('keydown', this.handleKeydown);
+
+    this.convertToDisplayTree();
   }
 
   public componentWillUnmount() {
@@ -131,19 +133,20 @@ export default class ProofTreeView extends React.Component<Props, State> {
 
   public componentDidUpdate(prevProps: Props) {
     if (prevProps.obligationResult !== this.props.obligationResult) {
-      let displayNode: DisplayTreeNode | null = null;
-      if (this.props.obligationResult != null) {
-        displayNode = toDisplayTree(
-          this.props.obligationResult.proofTree,
-          null
-        );
-      }
-
-      this.setState({
-        changed: true,
-        displayNode: displayNode,
-      });
+      this.convertToDisplayTree();
     }
+  }
+
+  public convertToDisplayTree() {
+    let displayNode: DisplayTreeNode | null = null;
+    if (this.props.obligationResult != null) {
+      displayNode = toDisplayTree(this.props.obligationResult.proofTree, null);
+    }
+
+    this.setState({
+      changed: true,
+      displayNode: displayNode,
+    });
   }
 
   public render() {
@@ -156,6 +159,9 @@ export default class ProofTreeView extends React.Component<Props, State> {
       // Reenable, if this behavior is desired:
       //initiallyCollapsed = this.props.obligationResult.kind === ObligationResultKind.success;
     }
+
+    if (node == null) console.log('Node ist null');
+    if (displayNode == null) console.log('DisplayNode ist null');
 
     if (node != null && displayNode != null) {
       return (
