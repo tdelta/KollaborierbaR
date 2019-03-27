@@ -57,6 +57,7 @@ public class ProofController {
    * changes to the proof result history and temporarily stored proof results.
    */
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
+
   @Autowired private ObligationService obligationService;
 
   @Autowired private FileService fileService;
@@ -312,7 +313,6 @@ public class ProofController {
     ObligationResult savedObligationResult = obligationService.save(obligationResult);
     methodContract.addToHistory(savedObligationResult);
     obligationService.save(methodContract);
-
 
     final UpdatedProofHistoryEvent event =
         new UpdatedProofHistoryEvent(
