@@ -2,7 +2,7 @@ import React from 'react';
 
 import ProofNode, { Kind } from '../../key/prooftree/ProofNode';
 
-import DisplayTreeNode from './displaytree/displaytreenode';
+import DisplayTreeNode from './displaytree/DisplayTreeNode';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
