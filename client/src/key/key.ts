@@ -28,6 +28,8 @@ export default class Key {
 
   private addNewConsoleMessage: (message: string) => void;
 
+  private macro: string = '';
+
   private contractRegex: RegExp = /normal_behaviour|exceptional_behaviour|normal_behavior|exceptional_behavior/g;
   // Regex that matches method declarations
   // https://stackoverflow.com/questions/68633/regex-that-will-match-a-java-method-declarations
@@ -64,6 +66,7 @@ export default class Key {
     this.addNewConsoleMessage = addNewConsoleMessage;
     this.refreshLastProof = this.refreshLastProof.bind(this);
     this.saveObligationResult = this.saveObligationResult.bind(this);
+    this.setMacro = this.setMacro.bind(this);
 
     this.proofController = new ProofCollabController(network, {
       onUpdatedProof: (event: ProofEvent) => {
@@ -85,6 +88,15 @@ export default class Key {
         );
       },
     });
+  }
+
+  /**
+   * Sets the proof script to be used for all following proofs
+   *
+   * @param macro - path to the proof script
+   */
+  public setMacro(macro: string) {
+    this.macro = macro;
   }
 
   private refreshLastProof(
@@ -274,7 +286,9 @@ export default class Key {
       });
     }
 
-    this.keyApi.proveFile(this.getFilePath()).then(this.handleResults);
+    this.keyApi
+      .proveFile(this.getFilePath(), this.macro)
+      .then(this.handleResults);
   }
 
   private sendLastProofNotifications(obligationResult: ObligationResult): void {
@@ -355,7 +369,7 @@ export default class Key {
     }
 
     return this.keyApi
-      .proveObligations(this.getFilePath(), nr)
+      .proveObligations(this.getFilePath(), nr, this.macro)
       .then(this.handleResults);
   }
 
