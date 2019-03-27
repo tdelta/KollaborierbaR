@@ -55,10 +55,16 @@ export default class Top extends React.Component<Props, State> {
     };
   }
 
+  /**
+   * toggle visibility of the open project modal
+   */
   private toggleOpenModal(): void {
     this.setState({ showOpenModal: !this.state.showOpenModal });
   }
 
+  /**
+   * toggle visibility of the delete project modal
+   */
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
