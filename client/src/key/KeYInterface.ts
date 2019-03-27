@@ -1,4 +1,4 @@
-import KeyApi from './key-api';
+import KeYApi from './KeYApi';
 import ProofResults from './netdata/ProofResults';
 import ObligationResult, {
   ObligationResultKind,
@@ -11,13 +11,30 @@ import { serverAddress } from '../constants';
 import { Network } from '../network';
 import ProofsState from '../key/ProofsState';
 
-import ProofCollabController, {
+import ProofSyncController, {
   ProofEvent,
-} from '../collaborative/ProofCollabController';
+} from '../collaborative/ProofSyncController';
 
-export default class Key {
-  private keyApi: KeyApi = new KeyApi();
-  private proofController: ProofCollabController;
+/**
+ * Provides access to features of the
+ * <a href="https://key-project.org">KeY project</a>
+ * for the client application and other useful proof related services.
+ *
+ * For many of those functions it employs the KollaborierbaR backend server.
+ *
+ * Provided services include:
+ *
+ * - proving specifications of Java methods
+ * - storing a history of proof results
+ * - synchonizing proof results between clients working on the same file
+ */
+export default class KeYInterface {
+  /** synchronization service for proof results between clients */
+  private proofController: ProofSyncController;
+
+  // various callbacks allowing to manipulate application UI on proof result related events
+  // or for retrieving information from the application.
+  // See constructor for a description of them
 
   private getFilePath: () => string;
   private setProvenObligations: (provenObligations: number[]) => void;
@@ -25,14 +42,32 @@ export default class Key {
   private getProofsState: () => ProofsState;
   private setProofsState: (proofsState: ProofsState) => void;
   private setObligationIdOfLastUpdatedProof: (obligationId: number) => void;
-
   private addNewConsoleMessage: (message: string) => void;
 
+  /** currently selected macro */
+  private macro: string = '';
+
+  /** Regex that matches JML behaviour declarations */
   private contractRegex: RegExp = /normal_behaviour|exceptional_behaviour|normal_behavior|exceptional_behavior/g;
-  // Regex that matches method declarations
-  // https://stackoverflow.com/questions/68633/regex-that-will-match-a-java-method-declarations
+  /**
+   * Regex that matches method declarations
+   * https://stackoverflow.com/questions/68633/regex-that-will-match-a-java-method-declarations
+   */
   private methodRegex: RegExp = /^[ \t]*(?:(?:public|protected|private)\s+)?(?:(\/\*.*\*\/|static|final|native|synchronized|abstract|threadsafe|transient|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))\s+){0,}(?!return)\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})\s+\b\w+\b\s*\(\s*(?:\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*(?:,\s+\b([\w.]+)\b(?:|(?:<[?\w\[\] ,&]+>)|(?:<[^<]*<[?\w\[\] ,&]+>[^>]*>)|(?:<[^<]*<[^<]*<[?\w\[\] ,&]+>[^>]*>[^>]*>))((?:\[\]){0,})(\.\.\.)?\s+(\w+)\b(?![>\[])\s*){0,})?\s*\)(?:\s*throws [\w.]+(\s*,\s*[\w.]+))?\s*(?:\{|;)[ \t]*(\/\/.*)?$/;
 
+  /**
+   * This interface needs to be provided various callbacks to be able to
+   * integrate backend services into the application.
+   *
+   * @param network - access to a websocket connection with the server, needed for synchronization between clients.
+   * @param notificationSystem - allows to send notifications to the UI, which will directly be displayed to the user. Useful to inform about changes caused by other clients working on the same file.
+   * @param setProvenObligations - allows to set the list of proven obligations, so that the UI may display which proofs have been closed
+   * @param getProofsState - retrieves the state of available proofs displayed in the UI
+   * @param setProofsState - change the state of available proof results displayed in the UI
+   * @param setObligationIdOfLastUpdatedProof - inform the UI about an proof obligation whose proof results recently changed
+   * @param getFilePath - allows to retrieve the currently opened file
+   * @param addNewConsoleMessage - display a message in the console at the bottom of the UI
+   */
   constructor(
     network: Network,
     notificationSystem: RefObject<NotificationSystem.System>,
@@ -64,8 +99,13 @@ export default class Key {
     this.addNewConsoleMessage = addNewConsoleMessage;
     this.refreshLastProof = this.refreshLastProof.bind(this);
     this.saveObligationResult = this.saveObligationResult.bind(this);
+    this.setMacro = this.setMacro.bind(this);
 
-    this.proofController = new ProofCollabController(network, {
+    // Initialize the proof synchronization service.
+    // It must be supplied callbacks, which are invoked, if the proof state
+    // is changed for all clients of the current file.
+    // (Happens for example, when we or someone else working on the file saves a proof to history)
+    this.proofController = new ProofSyncController(network, {
       onUpdatedProof: (event: ProofEvent) => {
         console.log('Key: Proof event: ', event);
 
@@ -87,24 +127,32 @@ export default class Key {
     });
   }
 
+  /**
+   * Sets the proof script to be used for all following proofs
+   *
+   * @param macro - path to the proof script
+   */
+  public setMacro(macro: string) {
+    this.macro = macro;
+  }
+
+  /**
+   * Refresh the UI with the most recent proof result for a file / obligation.
+   * This method is usually called, whenever {@link ProofSyncController}
+   * indicates, that it changed (for example if another client tried to prove
+   * the obligation)
+   *
+   * @param obligationIdx - index of the obligation (counted from top to bottom
+   *                        in the source file), for which the latest proof
+   *                        shall be retrieved.
+   */
   private refreshLastProof(
     projectName: string,
     filePath: string,
     obligationIdx: number
   ): void {
-    fetch(
-      `${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/last`,
-      {
-        method: 'GET',
-        mode: 'cors', // enable cross origin requests. Server must also allow this!
-        headers: {
-          Accept: 'application/json', // we want a json object back
-          //'Content-Type': 'application/json', // we are sending a json object
-        },
-      }
-    )
-      .then(response => response.json())
-      .then(obligationResult => {
+    KeYApi.downloadLatestProof(projectName, filePath, obligationIdx).then(
+      obligationResult => {
         console.log('Key: Obligation result: ', obligationResult);
 
         this.setProofsState(
@@ -119,46 +167,27 @@ export default class Key {
         );
         this.sendLastProofNotifications(obligationResult);
         this.setObligationIdOfLastUpdatedProof(obligationResult.obligationIdx);
-      });
+      }
+    );
   }
 
+  /**
+   * Refresh the UI with the most recent proof result history for a file / obligation.
+   * This method is usually called, whenever {@link ProofSyncController}
+   * indicates, that it changed (for example if another client saved a proof
+   * to the history, or deleted one).
+   *
+   * @param obligationIdx - index of the obligation (counted from top to bottom
+   *                        in the source file), for which the latest proof
+   *                        shall be retrieved.
+   */
   private refreshProofHistory(
     projectName: string,
     filePath: string,
     obligationIdx: number
   ): void {
-    fetch(
-      `${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history`,
-      {
-        method: 'GET',
-        mode: 'cors', // enable cross origin requests. Server must also allow this!
-        headers: {
-          Accept: 'application/json', // we want a json object back
-          //'Content-Type': 'application/json', // we are sending a json object
-        },
-      }
-    )
-      .then(response => response.json())
-      .then((historyIdxs: number[]) => {
-        console.log('Retrieved history idxs: ', historyIdxs);
-
-        return Promise.all(
-          historyIdxs.map(historyIdx =>
-            fetch(
-              `${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history/${historyIdx}`,
-              {
-                method: 'GET',
-                mode: 'cors', // enable cross origin requests. Server must also allow this!
-                headers: {
-                  Accept: 'application/json', // we want a json object back
-                  //'Content-Type': 'application/json', // we are sending a json object
-                },
-              }
-            ).then(response => response.json())
-          )
-        );
-      })
-      .then((savedResults: ObligationResult[]) => {
+    KeYApi.downloadAllHistoricProofs(projectName, filePath, obligationIdx).then(
+      (savedResults: ObligationResult[]) => {
         console.log('Key: Saved obligations: ', savedResults);
 
         this.setProofsState(
@@ -169,9 +198,14 @@ export default class Key {
         );
 
         this.sendHistoryUpdateNotification();
-      });
+      }
+    );
   }
 
+  /**
+   * Sets the most recent proof for a specific file / obligation on the server,
+   * so that it can be shared with other clients working on the same file.
+   */
   public saveObligationResult(
     projectName: string,
     filePath: string,
@@ -179,28 +213,20 @@ export default class Key {
   ): void {
     console.log('Trying to save an obligation result: ', obligationResult);
 
-    fetch(
-      `${serverAddress}/proof/${projectName}/${filePath}/obligation/${
-        obligationResult.obligationIdx
-      }/history`,
-      {
-        method: 'POST',
-        mode: 'cors', // enable cross origin requests. Server must also allow this!
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(obligationResult), // necessary if you want to send a JSON object in a fetch request
-      }
-    ).then(response => {
-      if (response.status !== 200) {
-        alert('Uups! Failed to save obligation.');
-      } else {
-        console.log('Saved obligation result to server');
-      }
-    });
+    KeYApi.saveHistoricProof(projectName, filePath, obligationResult);
   }
 
+  /**
+   * Deletes a proof result from the server's history for a
+   * specific file / obligation
+   *
+   * @param obligationIdx - index of the obligation (counted from top to bottom
+   *                        in the source file), for which a result shall be
+   *                        deleted
+   * @param historyIdx - which result shall be deleted from the history?
+   *                     {@link #downloadHistoryIds) can be used to retrieve a
+   *                     list of ids available on the server.
+   */
   public deleteObligationResult(
     projectName: string,
     filePath: string,
@@ -212,50 +238,38 @@ export default class Key {
       historyIdx
     );
 
-    fetch(
-      `${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history/${historyIdx}`,
-      {
-        method: 'DELETE',
-        mode: 'cors', // enable cross origin requests. Server must also allow this!
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then(response => {
-      if (response.status !== 200) {
-        alert('Uups! Failed to delete element from history.');
-      } else {
-        console.log('Successfully deleted element from history.');
-      }
-    });
+    KeYApi.deleteHistoricProof(
+      projectName,
+      filePath,
+      obligationIdx,
+      historyIdx
+    );
   }
 
+  /**
+   * Downloads saved proofs from the backend server history and updates the UI
+   * for the specified file.
+   * Also instructs the synchronization service {@link ProofSyncController}
+   * to synchronize proofs with other clients for this file.
+   *
+   * This method should be called by the application for everytime a file is
+   * opened.
+   */
   public setCurrentFile(projectName: string, filePath: string[]) {
     this.proofController.openFile(projectName, filePath);
 
     const filePathJoined = filePath.join('/');
 
-    fetch(
-      `${serverAddress}/proof/${projectName}/${filePathJoined}/obligation`,
-      {
-        method: 'GET',
-        mode: 'cors', // enable cross origin requests. Server must also allow this!
-        headers: {
-          Accept: 'application/json', // we want a json object back
-          //'Content-Type': 'application/json', // we are sending a json object
-        },
-      }
-    )
-      .then(response => response.json())
-      .then((obligationIdxs: number[]) => {
+    KeYApi.downloadObligationIds(projectName, filePathJoined).then(
+      (obligationIdxs: number[]) => {
         console.log('Retrieved obligation idxs: ', obligationIdxs);
 
         for (const obligationIdx of obligationIdxs) {
           this.refreshLastProof(projectName, filePathJoined, obligationIdx);
           this.refreshProofHistory(projectName, filePathJoined, obligationIdx);
         }
-      });
+      }
+    );
   }
 
   /**
@@ -274,9 +288,13 @@ export default class Key {
       });
     }
 
-    this.keyApi.proveFile(this.getFilePath()).then(this.handleResults);
+    KeYApi.proveFile(this.getFilePath(), this.macro).then(this.handleResults);
   }
 
+  /**
+   * Internal helper method, which is used to inform the user about changes to
+   * the most recent proof via notifications.
+   */
   private sendLastProofNotifications(obligationResult: ObligationResult): void {
     // print succeeded proofs as success notifications
     if (this.notificationSystem.current) {
@@ -318,6 +336,10 @@ export default class Key {
     }
   }
 
+  /**
+   * Internal helper method, which is used to inform the user about changes to
+   * the most proof history via notifications.
+   */
   private sendHistoryUpdateNotification(): void {
     if (this.notificationSystem.current) {
       this.notificationSystem.current.clearNotifications();
@@ -354,11 +376,17 @@ export default class Key {
       });
     }
 
-    return this.keyApi
-      .proveObligations(this.getFilePath(), nr)
-      .then(this.handleResults);
+    return KeYApi.proveObligations(this.getFilePath(), nr, this.macro).then(
+      this.handleResults
+    );
   }
 
+  /**
+   * Called, whenever a proof request to the backend server finishes.
+   * It informs the synchronization service {@link ProofSyncController}
+   * about the results, which in turn informs the server, which informs other
+   * clients (and ourselves) to download the updated proof state.
+   */
   private handleResults(results: ProofResults): void {
     results.succeeded
       .concat(results.errors)

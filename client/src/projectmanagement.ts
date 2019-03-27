@@ -8,13 +8,13 @@ import Usernames from './components/user-names/user-names';
 
 import { Network } from './network';
 
-import ProjectController, {
+import ProjectSyncController, {
   ProjectEvent,
   RenamedFileEvent,
   ProjectFileEvent,
   UsersUpdatedEvent,
   ProjectEventType,
-} from './collaborative/ProjectController';
+} from './collaborative/ProjectSyncController';
 
 import FileOrFolder, { FileFolderEnum } from './FileOrFolder';
 import Project from './Project';
@@ -41,7 +41,7 @@ export default class ProjectManagement {
   private confirmationModal: React.RefObject<ConfirmationModal>;
   private notificationSystem: React.RefObject<NotificationSystem.System>;
   private openFile: (path: string[]) => void;
-  private projectController: ProjectController;
+  private projectController: ProjectSyncController;
 
   constructor(
     network: Network,
@@ -65,7 +65,7 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
-    this.projectController = new ProjectController(network, {
+    this.projectController = new ProjectSyncController(network, {
       onProjectEvent: (
         event:
           | ProjectEvent
@@ -191,11 +191,52 @@ export default class ProjectManagement {
             break;
           case ProjectEventType.UsersUpdated:
             console.log(event);
-            Usernames.updateAllUsers((event as UsersUpdatedEvent).users);
+            Usernames.updateUsers((event as UsersUpdatedEvent).users);
             break;
         }
       },
     });
+  }
+
+  /**
+   * Recursively searches the current project files for all files that end with ".script"
+   * And returns their absolute paths.
+   *
+   * @return - An array of filepaths
+   */
+  public getMacroFiles(): string[] {
+    const project: Project | {} = this.getCurrentProject();
+    if ('contents' in project) {
+      return (project as Project).contents
+        .map(item => this.getMacroFilesRec('', item))
+        .reduce((x: string[], y: string[]) => x.concat(y), []); // flatMap does not exist in IE
+    } else {
+      return [];
+    }
+  }
+
+  /**
+   * Recursive helper function. Given the path to the file or folder item, returns
+   * an array of absolute paths to all .script files contained in item
+   *
+   * @param parentName - path to item, e.g. /src if item is the file Main.java in /src/Main.java
+   * @param item - the file or folder to search in
+   * @return - an array of filepaths
+   */
+  private getMacroFilesRec(parentName: string, item: FileOrFolder): string[] {
+    if (item.type === FileFolderEnum.file && item.name.endsWith('.script')) {
+      // item is a macro file
+      return [`${parentName}/${item.name}`];
+    } else if (item.contents) {
+      // item is a directory
+      return item.contents
+        .map(child =>
+          this.getMacroFilesRec(`${parentName}/${item.name}`, child)
+        )
+        .reduce((x: string[], y: string[]) => x.concat(y), []); // flatMap does not exist in IE
+    } else {
+      return [];
+    }
   }
 
   private static projectContainsPath(
