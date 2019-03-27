@@ -89,6 +89,5 @@ public class MethodContract {
   @OneToMany(orphanRemoval = true, mappedBy = "methodContract")
   private List<ObligationResult> history;
 
-  @OneToOne(orphanRemoval = true)
-  private ObligationResult last;
+  @OneToOne private ObligationResult last;
 }

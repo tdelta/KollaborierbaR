@@ -122,7 +122,7 @@ export default class ProofTabView extends React.Component<Props, State> {
                         operation: () =>
                           this.props.deleteObligationResult(
                             savedResult.obligationIdx,
-                            idx + 1
+                            savedResult.id
                           ),
                         label: 'Remove Proof from History',
                       }}
