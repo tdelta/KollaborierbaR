@@ -19,7 +19,7 @@ export default class KeYApi {
   public static proveFile(path: string, macro: string): Promise<ProofResults> {
     const escapedPath = escape(path);
     // API URL of the server we will use for our request
-    const url = `${serverAddress}/proof/${escapedPath}`;
+    let url = `${serverAddress}/proof/${escapedPath}`;
     if (macro !== '') {
       url = `${url}?macro=${macro}`;
     }
@@ -48,7 +48,7 @@ export default class KeYApi {
     macro: string
   ): Promise<ProofResults> {
     const escapedPath = escape(path);
-    const url = `${serverAddress}/proof/${escapedPath}?obligationIdxs=${nr}`;
+    let url = `${serverAddress}/proof/${escapedPath}?obligationIdxs=${nr}`;
     if (macro !== '') {
       url = `${url}&macro=${macro}`;
     }
