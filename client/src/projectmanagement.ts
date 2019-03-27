@@ -8,13 +8,13 @@ import Usernames from './components/user-names/user-names';
 
 import { Network } from './network';
 
-import ProjectController, {
+import ProjectSyncController, {
   ProjectEvent,
   RenamedFileEvent,
   ProjectFileEvent,
   UsersUpdatedEvent,
   ProjectEventType,
-} from './collaborative/ProjectController';
+} from './collaborative/ProjectSyncController';
 
 import FileOrFolder, { FileFolderEnum } from './FileOrFolder';
 import Project from './Project';
@@ -41,7 +41,7 @@ export default class ProjectManagement {
   private confirmationModal: React.RefObject<ConfirmationModal>;
   private notificationSystem: React.RefObject<NotificationSystem.System>;
   private openFile: (path: string[]) => void;
-  private projectController: ProjectController;
+  private projectController: ProjectSyncController;
 
   constructor(
     network: Network,
@@ -65,7 +65,7 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
-    this.projectController = new ProjectController(network, {
+    this.projectController = new ProjectSyncController(network, {
       onProjectEvent: (
         event:
           | ProjectEvent
