@@ -1,7 +1,7 @@
 import Editor from '../components/editor';
 
 import { Network } from '../network';
-import { UsersUpdatedEvent } from '../collaborative/ProjectController';
+import { UsersUpdatedEvent } from '../collaborative/ProjectSyncController';
 
 import {
   LogootSRopes,
@@ -17,6 +17,19 @@ import * as ace_types from 'ace-builds';
 
 import { IMessage } from '@stomp/stompjs';
 
+/**
+ * Manages synchronization of the file editor with other clients working on the
+ * same file.
+ *
+ * For this, it uses a CRDT based approach (https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type).
+ * Changes are incorporated into a local CRDT structure and also send to the backend server.
+ * The backend server will also add the change to his own replicated structure, as will all other clients
+ * working on the same file, which also get sent the change by the server.
+ *
+ * A LogootSplit based CRDT implementation is used.
+ * On the client side, this implementation is provided by
+ * <a href="https://www.npmjs.com/package/mute-structs">mute-structs</a>.
+ */
 export default class CollabController {
   private document: LogootSRopes | null = null;
   private network: Network;
