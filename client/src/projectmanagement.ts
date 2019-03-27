@@ -191,7 +191,7 @@ export default class ProjectManagement {
             break;
           case ProjectEventType.UsersUpdated:
             console.log(event);
-            Usernames.updateAllUsers((event as UsersUpdatedEvent).users);
+            Usernames.updateUsers((event as UsersUpdatedEvent).users);
             break;
         }
       },
