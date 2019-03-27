@@ -19,10 +19,16 @@ export default class Context extends React.Component {
     };
   }
 
+  /**
+   * When a node gets right clicked open/close its context menu
+   */
   handleRightClick() {
     this.setState({ context: !this.state.context });
   }
 
+  /**
+   * When a click does not hit a node close the last opened context menu
+   */
   closeContext() {
     this.setState({ context: false });
   }
@@ -47,6 +53,11 @@ export default class Context extends React.Component {
     );
   }
 
+  /**
+   * mouseclick handler when a node is clicked
+   *@param Event e mouse click event
+   */
+
   handleContextClick(e) {
     e.preventDefault();
     if (
@@ -58,6 +69,10 @@ export default class Context extends React.Component {
     }
   }
 
+  /**
+   * mouseclick handler when no node is clicked
+   *@param Event e mouse click event
+   */
   handleMouseDown(e) {
     // if its a left click, close the context menu.
     if (e.which === 1) {
