@@ -73,6 +73,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
   }
 }
 
+// defining the structure of this react components properties
 interface Props {
   uid: number;
   firstName: string;
