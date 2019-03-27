@@ -3,7 +3,7 @@ import React from 'react';
 import './WelcomeScreen.css';
 
 import Project from '../Project';
-import KollaborierbarLogo from '../kollaborierbarLogo.svg';
+import KollaborierbarLogo from '../graphics/kollaborierbarLogo.svg';
 
 /**
  * Component used to replace the Editor, if there is nothing to edit.

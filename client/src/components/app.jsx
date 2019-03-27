@@ -11,7 +11,7 @@ import Top from './top.tsx';
 import Sidebar from './sidebar/Sidebar.tsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 import Console from './console/console.jsx';
-import { Network } from '../network';
+import { StompService } from '../StompService';
 
 import ProofsState from '../key/ProofsState';
 
@@ -19,7 +19,7 @@ import ProjectManagement from '../projectmanagement.ts';
 
 import CollabController from '../collaborative/CollabController.ts';
 
-import Key from '../key/key';
+import KeYInterface from '../key/KeYInterface.ts';
 
 import { Button } from 'reactstrap';
 
@@ -43,12 +43,10 @@ export default class App extends React.Component {
     this.notificationSystem = React.createRef();
     this.displayCloseButton = false;
 
-    this.network = new Network({
-      onConnect: () => console.log('Connected websocket.'),
-    });
+    this.stompService = new StompService();
 
     this.projectManagement = new ProjectManagement(
-      this.network,
+      this.stompService,
       this.showProject.bind(this),
       () => this.state.project,
       this.setText.bind(this),
@@ -102,8 +100,8 @@ export default class App extends React.Component {
       this.projectManagement
     );
 
-    this.key = new Key(
-      this.network,
+    this.keyInterface = new KeYInterface(
+      this.stompService,
       this.notificationSystem,
       this.setProvenObligations,
       () => this.state.proofsState,
@@ -198,7 +196,7 @@ export default class App extends React.Component {
         path.join('/'),
         this.state.text
       );
-      this.key.setCurrentFile(this.state.project.name, path);
+      this.keyInterface.setCurrentFile(this.state.project.name, path);
     }
     this.displayCloseButton = false;
   }
@@ -213,12 +211,22 @@ export default class App extends React.Component {
     });
   }
 
+  /**
+   * Set the results of proofs carried out by key
+   * @param provenObligations - provenObligations
+   */
   setProvenObligations(provenObligations) {
     this.setState({
       provenObligations: provenObligations,
     });
   }
 
+  /**
+   * Reset/remove a result of a proof carried out previously. Useful when a
+   * proof should be carried out again
+   * @param obligationIdx - the index of the obligation whose result should
+   * be reset
+   */
   resetObligation(obligationIdx) {
     const provenObligations = this.state.provenObligations.filter(
       provenObligationIdx => provenObligationIdx !== obligationIdx
@@ -229,16 +237,24 @@ export default class App extends React.Component {
     });
   }
 
+  /**
+   * Save an obligation result permanently on the server side
+   * @param obligationResult - the result that should be saved
+   */
   saveObligationResult(obligationResult) {
-    this.key.saveObligationResult(
+    this.keyInterface.saveObligationResult(
       this.state.project.name,
       this.state.openedPath.join('/'),
       obligationResult
     );
   }
 
+  /**
+   * Delete an obligation result permanently on the server side
+   * @param obligationResult - the result that should be deleted
+   */
   deleteObligationResult(obligationIdx, historyIdx) {
-    this.key.deleteObligationResult(
+    this.keyInterface.deleteObligationResult(
       this.state.project.name,
       this.state.openedPath.join('/'),
       obligationIdx,
@@ -251,7 +267,7 @@ export default class App extends React.Component {
       provenObligations: [],
     });
 
-    this.key.proveFile();
+    this.keyInterface.proveFile();
   }
 
   /**
@@ -259,7 +275,7 @@ export default class App extends React.Component {
    * in the console compontent. It also makes the
    * console visibile when a message is set.
    *
-   * @param {*} message that will be set in the console
+   * @param message - that will be set in the console
    */
   addNewConsoleMessage(message) {
     //Create time string
@@ -295,7 +311,7 @@ export default class App extends React.Component {
     document.title = 'KollaborierbaR';
 
     this.collabController = new CollabController(
-      this.network,
+      this.stompService,
       this.editor.current,
       this.setText.bind(this)
     );
@@ -306,8 +322,11 @@ export default class App extends React.Component {
     document.addEventListener('keydown', this.handleCtrlS.bind(this));
   }
 
-  componentDidUpdate(prevProps, prevsState) {}
-
+  /**
+   * Open a file and display its contents in the editor
+   * @param path - the file path as a list of files, relative to the project
+   * root folder
+   */
   openFile(path) {
     // This string composition is necessary because path contains only the path within a project.
     ProjectManagement.openFile(
@@ -323,6 +342,11 @@ export default class App extends React.Component {
     });
   }
 
+  /**
+   * Display a sequent of a proof in the editor text field.
+   * Also display a button to close the sequent and return to the file
+   * @param formula - the sequent formula that should be displayed
+   */
   displaySequent(formula) {
     this.collabController.disconnect();
     this.setState({
@@ -333,6 +357,10 @@ export default class App extends React.Component {
     this.displayCloseButton = true;
   }
 
+  /**
+   * Close a sequent and display the previous file. Also hide the sequent
+   * close button
+   */
   closeSequent() {
     this.openFile(this.state.openedPath);
     this.displayCloseButton = false;
@@ -393,7 +421,7 @@ export default class App extends React.Component {
           onUpdateFileName={() => {
             this.updateFileName(this.state.openedPath);
           }}
-          onSelectMacro={this.key.setMacro}
+          onSelectMacro={this.keyInterface.setMacro}
           saveFile={this.saveFile}
           notificationSystem={this.notificationSystem}
           getMacroFiles={this.getMacroFiles}
@@ -454,9 +482,9 @@ export default class App extends React.Component {
                 filepath={this.state.openedPath}
                 filetype={this.state.filetype}
                 collabController={this.collabController}
-                getObligations={this.key.getObligations}
-                getContractsForMethod={this.key.getContractsForMethod}
-                onProveObligations={this.key.proveObligations}
+                getObligations={this.keyInterface.getObligations}
+                getContractsForMethod={this.keyInterface.getContractsForMethod}
+                onProveObligations={this.keyInterface.proveObligations}
                 ref={this.editor}
                 consoleIsVisible={this.state.consoleIsVisible}
               />
