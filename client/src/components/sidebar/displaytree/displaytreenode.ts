@@ -37,21 +37,6 @@ export default class DisplayTreeNode {
     this.getRef = this.getRef.bind(this);
   }
 
-  public findNode(path: DisplayTreeNode[]): DisplayTreeNode | null {
-    if (
-      path.length === 1 &&
-      this.serialNr === path[0].serialNr &&
-      this.oneStepId === path[0].oneStepId
-    ) {
-      return this;
-    }
-    for (const child of this.children) {
-      const result: DisplayTreeNode | null = child.findNode(path.splice(0, 1));
-      if (result !== null) return result;
-    }
-    return null;
-  }
-
   /*
    *  Find the array index of the node in the child array of its parent
    *  @returns number representing position in the child array
