@@ -9,6 +9,7 @@ Given url 'http://localhost:9000/proof/testProject5/Test.java?obligationIdxs=0'
 And request {}
 When method get
 Then call read('DefineTypes.feature')
+And status 200
 And match response ==
 """
 {
@@ -35,6 +36,7 @@ Given url 'http://localhost:9000/proof/testProject5/Test.java'
 And request {}
 When method get
 Then call read('DefineTypes.feature')
+And status 200
 And match response ==
 """
 {
@@ -60,6 +62,29 @@ And match response ==
       "targetName": "#string"
     }
   ]
+}
+"""
+Scenario: Proving a file with syntax errors leads to a single error
+
+# Insert incorrect java code into the test file
+Given url 'http://localhost:9000/projects/testProject5/Test.java'
+And request { fileContent: "mlem" }
+When method post
+Then status 200
+
+# Request proofs for all contracts of the file 
+Given url 'http://localhost:9000/proof/testProject5/Test.java'
+And request {}
+When method get
+Then call read('DefineTypes.feature')
+And status 200
+And match response ==
+"""
+{
+  succeeded: [],
+  failed: [],
+  errors: "#[1] error",
+  stackTraces: "#[1] error",
 }
 """
 

@@ -21,3 +21,14 @@ Scenario:
   "text": "#string"
 }
 """
+* def error =
+"""
+{
+  obligationIdx: "#number",
+  targetName: "#string",
+  resultMsg: "#string",
+  proofTree: null,
+  openGoals: [],
+  kind: "error",
+}
+"""
