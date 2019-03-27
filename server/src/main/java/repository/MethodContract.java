@@ -33,6 +33,7 @@ public class MethodContract {
     this.file = file;
   }
 
+  /** @return Primary key in the database */
   public Long getId() {
     return id;
   }
@@ -74,11 +75,17 @@ public class MethodContract {
 
   @Id @GeneratedValue private Long id;
 
+  // The column is named because it corresponds to the index in the hash map of the file object
   @Column(name = "number")
   private int number;
 
   @ManyToOne private File file;
 
+  /**
+   * orphanRemoval: If an obligation result is removed from the list it is removed from the database
+   * as well mappedBy methodContract: Means the obligation result is part of this list iff its
+   * method contract field is set to this object
+   */
   @OneToMany(orphanRemoval = true, mappedBy = "methodContract")
   private List<ObligationResult> history;
 

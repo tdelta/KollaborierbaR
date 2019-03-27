@@ -267,9 +267,10 @@ public class ProjectController {
           "The file you try to delete does not exist.", HttpStatus.NOT_FOUND);
     } else {
       try {
-        delete(file);
 
-        final DeletedFileEvent event = new DeletedFileEvent(this, projectname, filePath);
+        List<String> deletedFiles = delete(path, file);
+        final DeletedFileEvent event =
+            new DeletedFileEvent(this, projectname, filePath, deletedFiles);
         applicationEventPublisher.publishEvent(event);
 
         return new ResponseEntity<FolderItem>(showProject(projectname, request), HttpStatus.OK);
@@ -305,9 +306,9 @@ public class ProjectController {
           "The file you try to delete does not exist.", HttpStatus.NOT_FOUND);
     } else {
       try {
-        delete(file);
 
-        final DeletedProjectEvent event = new DeletedProjectEvent(this, projectname);
+        List<String> deletedFiles = delete(path, file);
+        final DeletedProjectEvent event = new DeletedProjectEvent(this, projectname, deletedFiles);
         applicationEventPublisher.publishEvent(event);
 
         // WICHTIG: Der Grund für die Existenz dieser Funktion separat von deleteFile ist, dass wenn
@@ -322,28 +323,31 @@ public class ProjectController {
   }
 
   /**
-   * Helper method that handles the deletion of a given file type. Needs to be called recursively to
-   * delete a folders content.
+   * Recursive helper method for deleting a file or folder that is called with a base path and
+   * returns the absolute path of all deleted files or folders
    *
-   * @param file File or directory that is supposed to be deleted.
+   * @param path path of the second parameter file
+   * @param file file or directory to delete
    * @throws IOException exception if file cannot be deleted (for example it might not exist)
    */
-  private void delete(File file) throws IOException {
+  private List<String> delete(String path, File file) throws IOException {
+    List<String> result = new LinkedList<>();
     // if the currenct file is not a file but a directory we need to delete its content first.
     if (file.isDirectory()) {
       // if the current directory is not empty  list its content and call delete recursively
       if (file.list().length != 0) {
         for (File f : file.listFiles()) {
-          delete(f);
+          result.addAll(delete(path + "/" + f.getName(), f));
         }
       }
     }
-
+    result.add(path);
     // if the current directory is an empty directory or a file, delete it
-    final boolean result = file.delete();
-    if (!result) {
+    final boolean deleted = file.delete();
+    if (!deleted) {
       throw new IOException("Could not delete file");
     }
+    return result;
   }
 
   /**

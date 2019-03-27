@@ -2,7 +2,6 @@ package server;
 
 import events.UpdatedProofEvent;
 import events.UpdatedProofHistoryEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,7 +107,7 @@ public class ProofController {
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
       final HttpServletRequest request,
-      @RequestBody ObligationResult obligationResult) {
+      @RequestBody final ObligationResult obligationResult) {
 
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
@@ -123,8 +122,8 @@ public class ProofController {
     MethodContract methodContract = obligationService.getMethodContract(file, obligationIdx);
     System.out.println("Target name: " + obligationResult.getTargetName());
 
-    obligationResult = obligationService.save(obligationResult);
-    methodContract.setLast(obligationResult);
+    ObligationResult savedObligationResult = obligationService.save(obligationResult);
+    methodContract.setLast(savedObligationResult);
     obligationService.save(methodContract);
 
     final UpdatedProofEvent event =
@@ -199,7 +198,7 @@ public class ProofController {
   public void addToHistory(
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
-      @RequestBody ObligationResult obligationResult,
+      @RequestBody final ObligationResult obligationResult,
       final HttpServletRequest request) {
 
     final PathData pathData = decodePath(request);
@@ -210,8 +209,8 @@ public class ProofController {
     final File file = obligationService.getFile(pathData.projectFilePath);
     final MethodContract methodContract = obligationService.getMethodContract(file, obligationIdx);
 
-    obligationResult = obligationService.save(obligationResult);
-    methodContract.addToHistory(obligationResult);
+    ObligationResult savedObligationResult = obligationService.save(obligationResult);
+    methodContract.addToHistory(savedObligationResult);
     obligationService.save(methodContract);
 
     final UpdatedProofHistoryEvent event =

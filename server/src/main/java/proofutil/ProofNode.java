@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 
-
 /**
  * Definition for a table in the database and the format of the response for api routes. Fields
  * annotated with JsonIgnore will not be included in network responses.
