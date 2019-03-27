@@ -682,6 +682,10 @@ definitions:
       - resultMsg
       - targetName
     properties:
+      id:
+        type: number
+        description: >-
+          Unique id used to identify obligation results in other routes
       kind:
         type: string
         enum:

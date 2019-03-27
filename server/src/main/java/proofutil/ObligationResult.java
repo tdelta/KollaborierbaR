@@ -46,7 +46,7 @@ public class ObligationResult {
     }
   }
 
-  @JsonIgnore @Id @GeneratedValue private Long id;
+  @Id @GeneratedValue private Long id;
 
   @JsonIgnore @ManyToOne private MethodContract methodContract;
 

@@ -206,7 +206,7 @@ public class ProofController {
           file.getObligations().get(obligationIdx).getLast(), HttpStatus.OK);
     }
 
-    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
   }
 
   /**
@@ -296,7 +296,8 @@ public class ProofController {
   @RequestMapping(
       value = "/**/{className}.java/obligation/{obligationIdx}/history",
       method = RequestMethod.POST)
-  public void addToHistory(
+  @ResponseBody
+  public ResponseEntity<Long> addToHistory(
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
       @RequestBody final ObligationResult obligationResult,
@@ -313,6 +314,7 @@ public class ProofController {
     ObligationResult savedObligationResult = obligationService.save(obligationResult);
     methodContract.addToHistory(savedObligationResult);
     obligationService.save(methodContract);
+    obligationService.save(savedObligationResult);
 
     final UpdatedProofHistoryEvent event =
         new UpdatedProofHistoryEvent(
@@ -324,6 +326,8 @@ public class ProofController {
             + obligationIdx);
 
     applicationEventPublisher.publishEvent(event);
+
+    return new ResponseEntity(savedObligationResult.getId(), HttpStatus.OK);
   }
 
   /**
@@ -345,7 +349,7 @@ public class ProofController {
   @RequestMapping(
       value = "/**/{className}.java/obligation/{obligationIdx}/history/{historyIdx}",
       method = RequestMethod.DELETE)
-  public ResponseEntity deleteFromHistory(
+  public ResponseEntity<Long> deleteFromHistory(
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
       @PathVariable final int historyIdx,
@@ -361,11 +365,14 @@ public class ProofController {
             + obligationIdx
             + " from history");
 
-    File file = obligationService.getFile(projectFilePath);
-    MethodContract methodContract = obligationService.getMethodContract(file, obligationIdx);
-    if (methodContract.getHistory().size() >= historyIdx) {
-      ObligationResult toDelete = methodContract.getHistory().get(historyIdx - 1);
-      obligationService.deleteObligationResult(toDelete.getId());
+    final Optional<ObligationResult> toDeleteOptional =
+        obligationService.findObligationResultById(historyIdx);
+    if (!toDeleteOptional.isPresent()) {
+      return new ResponseEntity(HttpStatus.NOT_FOUND);
+    } else {
+      ObligationResult toDelete = toDeleteOptional.get();
+      toDelete.setMethodContract(null);
+      toDelete = obligationService.save(toDelete);
 
       final UpdatedProofHistoryEvent event =
           new UpdatedProofHistoryEvent(
@@ -375,10 +382,8 @@ public class ProofController {
 
       applicationEventPublisher.publishEvent(event);
 
-      return new ResponseEntity(HttpStatus.OK);
+      return new ResponseEntity(historyIdx, HttpStatus.OK);
     }
-
-    return new ResponseEntity(HttpStatus.NOT_FOUND);
   }
 
   /**
