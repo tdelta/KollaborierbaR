@@ -20,6 +20,7 @@ When method post
 Then status 200
 Then def historyId = response 
 
+# Now check that the proof result was saved in the history
 Given url 'http://localhost:9000/proof/testProject1/test.java/obligation/0/history/' + historyId
 And request {}
 When method get
@@ -34,6 +35,3 @@ And match response contains
 	"targetName" : "test1"
 }
 """
-
-
-# Now check that the proof result was saved in the history
