@@ -252,7 +252,7 @@
         </module>
         -->
         <module name="SingleLineJavadoc">
-            <property name="ignoreInlineTags" value="false"/>
+            <property name="ignoreInlineTags" value="true"/>
         </module>
         <module name="EmptyCatchBlock">
             <property name="exceptionVariableName" value="expected"/>
