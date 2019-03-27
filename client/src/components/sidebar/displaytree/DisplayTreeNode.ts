@@ -1,6 +1,6 @@
 import ProofNode, { Kind } from '../../../key/prooftree/ProofNode';
 import React, { RefObject } from 'react';
-import GuiProofNode from '../gui-proof-node';
+import GuiProofNode from '../GuiProofNode';
 
 /**
  * View model of an proof tree.

@@ -12,6 +12,15 @@ import { Context, ContextMenu, ContextAction } from './context.jsx';
 
 import ProofIcon from './ProofIcon';
 
+/**
+ * Visual representation of a step within a proof, a {@link ProofNode},
+ * represented by a {@link DisplayTreeNode} within the rendered tree (view model).
+ *
+ * It displays a label for the node (based on {@link DisplayTreeNode#text}) and an
+ * icon based on what kind of node it is (see {@link ProofIcon}).
+ *
+ * It is usually used as a part of an {@link ProofTreeView}.
+ */
 export default class GuiProofNode extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
@@ -157,8 +166,18 @@ export default class GuiProofNode extends React.Component<Props> {
 }
 
 interface Props {
+  /** view model of a node withing the proof tree */
   node: DisplayTreeNode;
+  /** callback, which is invoked, if the node is selected by the user */
   selectNode: (node: DisplayTreeNode) => void;
+  /** callback, which is invoked, when the node's children should be collapsed. */
   collapseNode: (node: DisplayTreeNode) => void;
+  /**
+   * Context menu item displayed only in the root node of the tree.
+   * It contains a label that is displayed in
+   * the menu and an operation that is executed when selecting the item.
+   *
+   * This is usually used to display a save / delete option for a proof
+   */
   proofTreeOperationInfo: { operation: () => void; label: string };
 }
