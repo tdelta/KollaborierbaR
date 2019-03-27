@@ -213,12 +213,22 @@ export default class App extends React.Component {
     });
   }
 
+  /**
+   * Set the results of proofs carried out by key
+   * @param provenObligations - provenObligations
+   */
   setProvenObligations(provenObligations) {
     this.setState({
       provenObligations: provenObligations,
     });
   }
 
+  /**
+   * Reset/remove a result of a proof carried out previously. Useful when a
+   * proof should be carried out again
+   * @param obligationIdx - the index of the obligation whose result should
+   * be reset
+   */
   resetObligation(obligationIdx) {
     const provenObligations = this.state.provenObligations.filter(
       provenObligationIdx => provenObligationIdx !== obligationIdx
@@ -229,6 +239,10 @@ export default class App extends React.Component {
     });
   }
 
+  /**
+   * Save an obligation result permanently on the server side
+   * @param obligationResult - the result that should be saved
+   */
   saveObligationResult(obligationResult) {
     this.key.saveObligationResult(
       this.state.project.name,
@@ -237,6 +251,10 @@ export default class App extends React.Component {
     );
   }
 
+  /**
+   * Delete an obligation result permanently on the server side
+   * @param obligationResult - the result that should be deleted
+   */
   deleteObligationResult(obligationIdx, historyIdx) {
     this.key.deleteObligationResult(
       this.state.project.name,
@@ -259,7 +277,7 @@ export default class App extends React.Component {
    * in the console compontent. It also makes the
    * console visibile when a message is set.
    *
-   * @param {*} message that will be set in the console
+   * @param message - that will be set in the console
    */
   addNewConsoleMessage(message) {
     //Create time string
@@ -306,8 +324,11 @@ export default class App extends React.Component {
     document.addEventListener('keydown', this.handleCtrlS.bind(this));
   }
 
-  componentDidUpdate(prevProps, prevsState) {}
-
+  /**
+   * Open a file and display its contents in the editor
+   * @param path - the file path as a list of files, relative to the project
+   * root folder
+   */
   openFile(path) {
     // This string composition is necessary because path contains only the path within a project.
     ProjectManagement.openFile(
@@ -323,6 +344,11 @@ export default class App extends React.Component {
     });
   }
 
+  /**
+   * Display a sequent of a proof in the editor text field.
+   * Also display a button to close the sequent and return to the file
+   * @param formula - the sequent formula that should be displayed
+   */
   displaySequent(formula) {
     this.collabController.disconnect();
     this.setState({
@@ -333,6 +359,10 @@ export default class App extends React.Component {
     this.displayCloseButton = true;
   }
 
+  /**
+   * Close a sequent and display the previous file. Also hide the sequent
+   * close button
+   */
   closeSequent() {
     this.openFile(this.state.openedPath);
     this.displayCloseButton = false;
