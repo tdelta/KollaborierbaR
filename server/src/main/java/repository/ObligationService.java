@@ -1,9 +1,12 @@
 package repository;
 
+import events.DeletedFileEvent;
+import events.DeletedProjectEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import proofutil.ObligationResult;
 import proofutil.OpenGoalInfo;
@@ -20,6 +23,35 @@ public class ObligationService {
   @Autowired private FileRepository fileRepository;
   @Autowired private OpenGoalInfoRepository openGoalInfoRepository;
 
+  /** Callback for when a DeletedProjectEvent is triggered */
+  @EventListener
+  public void onProjectDeleted(final DeletedProjectEvent e) {
+    deleteFiles(e.getDeleted());
+  }
+
+  /** Callback for when a DeletedFileEvent is triggered */
+  @EventListener
+  public void onFileDeleted(final DeletedFileEvent e) {
+    deleteFiles(e.getDeleted());
+  }
+
+  /**
+   * Purges files from the database. All Obligation results belonging to the file will be deleted as
+   * well.
+   *
+   * @param paths Paths of the files to delete
+   */
+  public void deleteFiles(final List<String> paths) {
+    for (String path : paths) {
+      path = path.replaceFirst("projects/", "");
+      System.out.println("Obligation Service: Delete file: " + path);
+      if (fileRepository.existsByName(path)) {
+        File toDelete = fileRepository.findByName(path);
+        fileRepository.delete(toDelete);
+      }
+    }
+  }
+
   /**
    * Creates a file with the given name and saves it in the database or returns it from the database
    * if it already exists.
@@ -27,6 +59,7 @@ public class ObligationService {
    * @param filename unique file name (should include the project name and filepath)
    */
   public File getFile(String filename) {
+    System.out.println("ObligationService: Loading file: " + filename);
     if (!fileRepository.existsByName(filename)) {
       File file = new File(filename);
       file = fileRepository.save(file);
