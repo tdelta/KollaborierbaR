@@ -11,9 +11,9 @@ import { serverAddress } from '../constants';
 import { Network } from '../network';
 import ProofsState from '../key/ProofsState';
 
-import ProofCollabController, {
+import ProofSyncController, {
   ProofEvent,
-} from '../collaborative/ProofCollabController';
+} from '../collaborative/ProofSyncController';
 
 /**
  * Provides access to features of the
@@ -30,7 +30,7 @@ import ProofCollabController, {
  */
 export default class KeYInterface {
   /** synchronization service for proof results between clients */
-  private proofController: ProofCollabController;
+  private proofController: ProofSyncController;
 
   // various callbacks allowing to manipulate application UI on proof result related events
   // or for retrieving information from the application.
@@ -105,7 +105,7 @@ export default class KeYInterface {
     // It must be supplied callbacks, which are invoked, if the proof state
     // is changed for all clients of the current file.
     // (Happens for example, when we or someone else working on the file saves a proof to history)
-    this.proofController = new ProofCollabController(network, {
+    this.proofController = new ProofSyncController(network, {
       onUpdatedProof: (event: ProofEvent) => {
         console.log('Key: Proof event: ', event);
 
@@ -138,7 +138,7 @@ export default class KeYInterface {
 
   /**
    * Refresh the UI with the most recent proof result for a file / obligation.
-   * This method is usually called, whenever {@link ProofCollabController}
+   * This method is usually called, whenever {@link ProofSyncController}
    * indicates, that it changed (for example if another client tried to prove
    * the obligation)
    *
@@ -173,7 +173,7 @@ export default class KeYInterface {
 
   /**
    * Refresh the UI with the most recent proof result history for a file / obligation.
-   * This method is usually called, whenever {@link ProofCollabController}
+   * This method is usually called, whenever {@link ProofSyncController}
    * indicates, that it changed (for example if another client saved a proof
    * to the history, or deleted one).
    *
@@ -249,7 +249,7 @@ export default class KeYInterface {
   /**
    * Downloads saved proofs from the backend server history and updates the UI
    * for the specified file.
-   * Also instructs the synchronization service {@link ProofCollabController}
+   * Also instructs the synchronization service {@link ProofSyncController}
    * to synchronize proofs with other clients for this file.
    *
    * This method should be called by the application for everytime a file is
@@ -383,7 +383,7 @@ export default class KeYInterface {
 
   /**
    * Called, whenever a proof request to the backend server finishes.
-   * It informs the synchronization service {@link ProofCollabController}
+   * It informs the synchronization service {@link ProofSyncController}
    * about the results, which in turn informs the server, which informs other
    * clients (and ourselves) to download the updated proof state.
    */

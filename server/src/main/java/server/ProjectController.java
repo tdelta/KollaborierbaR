@@ -37,7 +37,10 @@ import projectmanagement.Item;
 import projectmanagement.OpenedFileResponse;
 
 /**
- * @author Marc Arnold, David Heck This is a rest controller for handling the project file structure
+ * This is a rest controller for manipulating the project file structure. This includes for example
+ * deleting or adding files.
+ *
+ * @author Marc Arnold, David Heck
  */
 @RestController
 @CrossOrigin
