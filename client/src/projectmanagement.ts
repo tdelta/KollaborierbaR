@@ -6,7 +6,7 @@ import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
 import Usernames from './components/user-names/user-names';
 
-import { Network } from './network';
+import { StompService } from './StompService';
 
 import ProjectSyncController, {
   ProjectEvent,
@@ -44,7 +44,7 @@ export default class ProjectManagement {
   private projectController: ProjectSyncController;
 
   constructor(
-    network: Network,
+    stompService: StompService,
     showProject: (p: Project | {}) => void,
     getCurrentProject: () => Project | {},
     setText: (s: string) => void,
@@ -65,7 +65,7 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
-    this.projectController = new ProjectSyncController(network, {
+    this.projectController = new ProjectSyncController(stompService, {
       onProjectEvent: (
         event:
           | ProjectEvent
