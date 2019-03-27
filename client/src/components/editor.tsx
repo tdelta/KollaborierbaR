@@ -21,6 +21,7 @@ import AnchoredMarker, { addToArray } from './AnchoredMarker';
 import PopoverMarker from './PopoverMarker';
 
 import '../highlighting/jml.js';
+import '../highlighting/macro.mjs';
 import '../highlighting/sequent.js';
 import lint from '../linting.js';
 
@@ -192,6 +193,9 @@ export default class Editor extends React.Component<Props, State> {
       case 'sequent':
         mode = 'ace/mode/sequent';
         break;
+      case 'script':
+        mode = 'ace/mode/macro';
+        break;
     }
     console.log(mode);
     this.editor.getSession().setMode(mode);
@@ -204,6 +208,10 @@ export default class Editor extends React.Component<Props, State> {
     this.setProofObligations();
   }
 
+  /**
+   * Evaluate the obligation information and update
+   * the obligation indicators of the gutter of the editor
+   */
   private setProofObligations() {
     const obligations = this.props.getObligations(
       this.editor.session.getLines(0, this.editor.session.getLength())
@@ -247,6 +255,10 @@ export default class Editor extends React.Component<Props, State> {
     this.updateAnnotations();
   }
 
+  /**
+   * Remove previous gutter information of the editor
+   * and set new gutter information.
+   */
   private updateAnnotations(): void {
     this.editor.session.clearAnnotations();
     this.editor.session.setAnnotations(
@@ -372,10 +384,10 @@ export default class Editor extends React.Component<Props, State> {
 
   /**
    * Adds a marker to the array that will be displayed as a highlighted color behind the text.
-   * @param start The start position of the marker
-   * @param end The end position of the marker
-   * @param uid The id of the color to display (defined in marker-colors.css)
-   * @param name Displayed in a tooltip on hovering over the marker
+   * @param start - The start position of the marker
+   * @param end - The end position of the marker
+   * @param uid - The id of the color to display (defined in marker-colors.css)
+   * @param name - Displayed in a tooltip on hovering over the marker
    */
   public addBackMarker(start: any, end: any, uid: number, name: string) {
     const range = Range.fromPoints(start, end);

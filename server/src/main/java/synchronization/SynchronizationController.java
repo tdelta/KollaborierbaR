@@ -39,6 +39,14 @@ public class SynchronizationController {
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
   /**
+   * @return a list of all currently active crdt documents, mapped to their file path including the
+   *     project name, for example: /MyProject/src/main/Main.java
+   */
+  public ConcurrentHashMap<String, LogootSRopes> getDocuments() {
+    return documents;
+  }
+
+  /**
    * Called when a client calls the insert route. An insert operation is applied to the crdt
    * document and broadcasted to all subscribers on the document.
    *

@@ -1,13 +1,16 @@
 public class IntegerUtil {
    /*@ normal_behavior
      @ ensures \result == x + y;
+     @
+     @ normal_behavior
+     @ ensures \result == x - y;
      @*/
    public static int add(int x, int y) {
       return x + y;
    }
    
    /*@ normal_behavior
-     @ requires (x != y);
+     @ requires (x == y);
      @ ensures \result == x - y;
      @
      @ exceptional_behaviour
