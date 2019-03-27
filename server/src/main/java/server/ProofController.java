@@ -522,6 +522,7 @@ public class ProofController {
     // Applying the regex
     final Pattern p = Pattern.compile(regex);
     final Matcher m = p.matcher(input);
+    m.matches();
 
     // Extracting information
     final String projectName = m.group("ProjectName");

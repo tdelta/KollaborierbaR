@@ -19,7 +19,7 @@ import ProjectManagement from '../projectmanagement.ts';
 
 import CollabController from '../collaborative/CollabController.ts';
 
-import Key from '../key/key';
+import KeYInterface from '../key/KeYInterface.ts';
 
 import { Button } from 'reactstrap';
 
@@ -99,7 +99,7 @@ export default class App extends React.Component {
     this.addNewConsoleMessage = this.addNewConsoleMessage.bind(this);
     this.invertConsoleVisibility = this.invertConsoleVisibility.bind(this);
 
-    this.key = new Key(
+    this.keyInterface = new KeYInterface(
       this.network,
       this.notificationSystem,
       this.setProvenObligations,
@@ -195,7 +195,7 @@ export default class App extends React.Component {
         path.join('/'),
         this.state.text
       );
-      this.key.setCurrentFile(this.state.project.name, path);
+      this.keyInterface.setCurrentFile(this.state.project.name, path);
     }
     this.displayCloseButton = false;
   }
@@ -227,7 +227,7 @@ export default class App extends React.Component {
   }
 
   saveObligationResult(obligationResult) {
-    this.key.saveObligationResult(
+    this.keyInterface.saveObligationResult(
       this.state.project.name,
       this.state.openedPath.join('/'),
       obligationResult
@@ -235,7 +235,7 @@ export default class App extends React.Component {
   }
 
   deleteObligationResult(obligationIdx, historyIdx) {
-    this.key.deleteObligationResult(
+    this.keyInterface.deleteObligationResult(
       this.state.project.name,
       this.state.openedPath.join('/'),
       obligationIdx,
@@ -248,7 +248,7 @@ export default class App extends React.Component {
       provenObligations: [],
     });
 
-    this.key.proveFile();
+    this.keyInterface.proveFile();
   }
 
   /**
@@ -449,9 +449,9 @@ export default class App extends React.Component {
                 filepath={this.state.openedPath}
                 filetype={this.state.filetype}
                 collabController={this.collabController}
-                getObligations={this.key.getObligations}
-                getContractsForMethod={this.key.getContractsForMethod}
-                onProveObligations={this.key.proveObligations}
+                getObligations={this.keyInterface.getObligations}
+                getContractsForMethod={this.keyInterface.getContractsForMethod}
+                onProveObligations={this.keyInterface.proveObligations}
                 ref={this.editor}
                 consoleIsVisible={this.state.consoleIsVisible}
               />
