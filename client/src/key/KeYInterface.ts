@@ -8,7 +8,7 @@ import { RefObject } from 'react';
 
 import { serverAddress } from '../constants';
 
-import { Network } from '../network';
+import { StompService } from '../StompService';
 import ProofsState from '../key/ProofsState';
 
 import ProofSyncController, {
@@ -59,7 +59,7 @@ export default class KeYInterface {
    * This interface needs to be provided various callbacks to be able to
    * integrate backend services into the application.
    *
-   * @param network - access to a websocket connection with the server, needed for synchronization between clients.
+   * @param stompService - access to a websocket connection with the server, needed for synchronization between clients.
    * @param notificationSystem - allows to send notifications to the UI, which will directly be displayed to the user. Useful to inform about changes caused by other clients working on the same file.
    * @param setProvenObligations - allows to set the list of proven obligations, so that the UI may display which proofs have been closed
    * @param getProofsState - retrieves the state of available proofs displayed in the UI
@@ -69,7 +69,7 @@ export default class KeYInterface {
    * @param addNewConsoleMessage - display a message in the console at the bottom of the UI
    */
   constructor(
-    network: Network,
+    stompService: StompService,
     notificationSystem: RefObject<NotificationSystem.System>,
     setProvenObligations: (provenObligations: number[]) => void,
     getProofsState: () => ProofsState,
@@ -105,7 +105,7 @@ export default class KeYInterface {
     // It must be supplied callbacks, which are invoked, if the proof state
     // is changed for all clients of the current file.
     // (Happens for example, when we or someone else working on the file saves a proof to history)
-    this.proofController = new ProofSyncController(network, {
+    this.proofController = new ProofSyncController(stompService, {
       onUpdatedProof: (event: ProofEvent) => {
         console.log('Key: Proof event: ', event);
 
