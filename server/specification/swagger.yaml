@@ -320,6 +320,12 @@ paths:
           items:
             type: integer
             format: int32
+        - name: macro
+          in: query
+          type: string
+          description: >-
+            Path to the macro file to use for the requested proof(s), including the project name. Can be ommited if the proof should be executed without a macro/ proof script.
+          required: false
       responses:
         '200':
           description: >-
@@ -801,3 +807,4 @@ definitions:
           $ref: '#/definitions/ObligationResult'
         description: Successful proofs.
     title: ProofResult
+
