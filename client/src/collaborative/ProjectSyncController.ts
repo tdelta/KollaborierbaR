@@ -1,4 +1,4 @@
-import { Network } from '../network';
+import { StompService } from '../StompService';
 
 /**
  * Manages synchronization of the project tree with other clients working on
@@ -14,16 +14,16 @@ import { Network } from '../network';
  * synchronization.ProjectSyncController.
  */
 export default class ProjectSyncController {
-  private network: Network;
+  private stompService: StompService;
   private observer: ProjectEventObserver;
 
   /**
-   * @param network - access to a websocket connection with the server, needed for synchronization between clients.
+   * @param stompService - access to a websocket connection with the server, needed for synchronization between clients.
    * @param observer - this observer will be informed about changes to the project, this controller witnesses.
    *                   Usually it is used to update the UI when a change happens.
    */
-  constructor(network: Network, observer: ProjectEventObserver) {
-    this.network = network;
+  constructor(stompService: StompService, observer: ProjectEventObserver) {
+    this.stompService = stompService;
     this.observer = observer;
   }
 
@@ -35,7 +35,7 @@ export default class ProjectSyncController {
    * until {@link #closeProject} is called.
    */
   public openProject(projectName: string): Promise<void> {
-    return this.network.safeSubscribe(
+    return this.stompService.safeSubscribe(
       `/user/projects/${projectName}`,
       msg => {
         try {
@@ -65,7 +65,7 @@ export default class ProjectSyncController {
   public closeProject(projectName: string): Promise<void> {
     const topic = `/user/projects/${projectName}`;
 
-    return this.network.safeUnsubscribe(topic);
+    return this.stompService.safeUnsubscribe(topic);
   }
 }
 
