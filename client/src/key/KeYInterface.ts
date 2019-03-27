@@ -288,9 +288,7 @@ export default class KeYInterface {
       });
     }
 
-    KeYApi
-      .proveFile(this.getFilePath(), this.macro)
-      .then(this.handleResults);
+    KeYApi.proveFile(this.getFilePath(), this.macro).then(this.handleResults);
   }
 
   /**
@@ -378,9 +376,9 @@ export default class KeYInterface {
       });
     }
 
-    return KeYApi
-      .proveObligations(this.getFilePath(), nr, this.macro)
-      .then(this.handleResults);
+    return KeYApi.proveObligations(this.getFilePath(), nr, this.macro).then(
+      this.handleResults
+    );
   }
 
   /**

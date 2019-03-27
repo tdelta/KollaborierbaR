@@ -54,6 +54,7 @@ public class ProofController {
    * changes to the proof result history and temporarily stored proof results.
    */
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
+
   @Autowired private FileService fileService;
 
   /**
@@ -514,8 +515,8 @@ public class ProofController {
    * Since Spring does not decode arbitrary paths (`/**`) into method parameters for us, we have to
    * extract them from the request object.
    *
-   * <p>It also extracts additional information from the path.
-   * See {@link PathData} for the extracted information.
+   * <p>It also extracts additional information from the path. See {@link PathData} for the
+   * extracted information.
    *
    * @param request Spring generated object, describing a request. Can be obtained by simply adding
    *     the type to the parameter list of a method with a {@link RequestMapping}.
