@@ -62,6 +62,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+	testCompile 'com.intuit.karate:karate-junit4:0.9.1'
+    testCompile 'com.intuit.karate:karate-apache:0.9.1'
+	//testCompile 'io.rest-assured:rest-assured:3.3.0'
     implementation "org.eclipse.jdt:org.eclipse.jdt.core:3.15.0"
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -102,21 +105,23 @@ spotless {
 
 // Checkstyle tool. Also checks for aspects of the Google Java Style
 checkstyle {
-  configFile rootProject.file('checkstyle.xml')
+  configFile rootProject.file('.checkstyle_google.xml')
 
   ignoreFailures false
   showViolations true
   toolVersion ="6.14.1" 
+
+  checkstyleTest.enabled = false
 }
 
 checkstyleMain {
-    configFile rootProject.file('.checkstyle_google.xml')
-    source ='src/main/java'
+  configFile rootProject.file('.checkstyle_google.xml')
+  source ='src/main/java'
 }
 
 checkstyleTest {
-    configFile rootProject.file('.checkstyle_google.xml')
-    source ='src/test/java'
+  configFile rootProject.file('.checkstyle_google.xml')
+  source ='src/test/java'
 }
 
 // PMD static analysis settings

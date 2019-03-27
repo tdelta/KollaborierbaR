@@ -175,7 +175,7 @@ export default class Sidebar extends React.Component<Props, State> {
     // (given, that there are any available proofs)
     else if (
       prevProps.proofsState !== this.props.proofsState &&
-      this.props.proofsState.numOfAvailableObligationResults() > 0
+      this.props.proofsState.numOfObligationsWithAvailableProofs() > 0
     ) {
       this.enableTab('3');
     }

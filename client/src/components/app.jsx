@@ -11,7 +11,7 @@ import Top from './top.tsx';
 import Sidebar from './sidebar/Sidebar.tsx';
 import ConfirmationModal from './confirmation-modal.tsx';
 import Console from './console/console.jsx';
-import { Network } from '../network';
+import { StompService } from '../StompService';
 
 import ProofsState from '../key/ProofsState';
 
@@ -22,14 +22,6 @@ import CollabController from '../collaborative/CollabController.ts';
 import KeYInterface from '../key/KeYInterface.ts';
 
 import { Button } from 'reactstrap';
-
-//import testSource from '../sample-text.js';
-
-/**
- * Main component of KollaborierbaR. Renders all other components (Editor etc.)
- * while holding global state.
-
-//import testSource from '../sample-text.js';
 
 /**
  * Main component of KollaborierbaR. Renders all other components (Editor etc.)
@@ -43,12 +35,10 @@ export default class App extends React.Component {
     this.notificationSystem = React.createRef();
     this.displayCloseButton = false;
 
-    this.network = new Network({
-      onConnect: () => console.log('Connected websocket.'),
-    });
+    this.stompService = new StompService();
 
     this.projectManagement = new ProjectManagement(
-      this.network,
+      this.stompService,
       this.showProject.bind(this),
       () => this.state.project,
       this.setText.bind(this),
@@ -103,7 +93,7 @@ export default class App extends React.Component {
     );
 
     this.keyInterface = new KeYInterface(
-      this.network,
+      this.stompService,
       this.notificationSystem,
       this.setProvenObligations,
       () => this.state.proofsState,
@@ -313,7 +303,7 @@ export default class App extends React.Component {
     document.title = 'KollaborierbaR';
 
     this.collabController = new CollabController(
-      this.network,
+      this.stompService,
       this.editor.current,
       this.setText.bind(this)
     );
