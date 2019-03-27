@@ -423,7 +423,7 @@ export default class App extends React.Component {
           onUpdateFileName={() => {
             this.updateFileName(this.state.openedPath);
           }}
-          onSelectMacro={this.key.setMacro}
+          onSelectMacro={this.keyInterface.setMacro}
           saveFile={this.saveFile}
           notificationSystem={this.notificationSystem}
           getMacroFiles={this.getMacroFiles}
