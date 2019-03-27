@@ -55,10 +55,16 @@ export default class Top extends React.Component<Props, State> {
     };
   }
 
+  /**
+   * Toggle the react modal component for opening a project
+   */
   private toggleOpenModal(): void {
     this.setState({ showOpenModal: !this.state.showOpenModal });
   }
 
+  /**
+   * Toggle the react modal component for deleting a project
+   */
   private toggleDeleteModal(): void {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
@@ -70,6 +76,10 @@ export default class Top extends React.Component<Props, State> {
     this.setState({ showMacroModal: !this.state.showMacroModal });
   }
 
+  /**
+   * Reads the file that is about to be uploaded
+   * @param HTMLInputEvent file to upload
+   */
   private onFileChosen(event: HTMLInputEvent): void {
     this.fileReader = new FileReader();
     this.fileReader.onloadend = this.onFileLoaded;
@@ -79,24 +89,36 @@ export default class Top extends React.Component<Props, State> {
     }
   }
 
+  /**
+   * When a file gets uploaded that can be read it gets displayed
+   */
   private onFileLoaded(): void {
     if (this.fileReader != null && typeof this.fileReader.result === 'string') {
       this.props.setText(this.fileReader.result);
     }
   }
 
+  /**
+   * mouselistener so we know which Project in "Open Project" being clicked.
+   */
   private openProjectOnClick(): void {
     if (this.fileSelector.current != null) {
       this.fileSelector.current.click();
     }
   }
 
+  /**
+   * mouselistener so we know when "Download" in menu file is being clicked.
+   */
   private downloadFileOnClick(): void {
     if (this.downloadSelector.current != null) {
       this.downloadSelector.current.click();
     }
   }
 
+  /**
+   * Needed in order to set the file that is being uploaded when the Upload button is clicked.
+   */
   private openFileOnClick(): void {
     if (this.fileSelector.current != null) {
       this.fileSelector.current.click();
