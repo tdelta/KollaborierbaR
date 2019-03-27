@@ -15,7 +15,7 @@ import repository.MethodContract;
  * Definition for a table in the database and the format of the response for api routes. Fields
  * annotated with JsonIgnore will not be included in network responses.
  *
- * Contains data describing the result of a KeY proof.
+ * <p>Contains data describing the result of a KeY proof.
  *
  * <p>Eventually, most of this data will be displayed within UI elements of the client application.
  *
@@ -132,7 +132,6 @@ public class ObligationResult {
     return openGoals;
   }
 
-
   /**
    * Reports, whether the proof was successful, could not be closed, or failed to run. See {@link
    * Kind}.
@@ -145,6 +144,4 @@ public class ObligationResult {
   public Long getId() {
     return id;
   }
-
- 
 }

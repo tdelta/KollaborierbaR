@@ -14,9 +14,9 @@ import javax.persistence.OneToMany;
 /**
  * Definition for a table in the database and the format of the response for api routes. Fields
  * annotated with JsonIgnore will not be included in network responses.
- 
- * Representation of one step or branch in a KeY proof. Since it also contains it children, it can
- * be used to represent an entire proof tree.
+ *
+ * <p>Representation of one step or branch in a KeY proof. Since it also contains it children, it
+ * can be used to represent an entire proof tree.
  *
  * <p>Its primary purpose is to conveniently provide all data to the client, the client needs for
  * its KeY features, without replicating many of KeYs data structures on the client side.
