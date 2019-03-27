@@ -1,4 +1,4 @@
-import { Network } from '../network';
+import { StompService } from '../StompService';
 import KeYApi from '../key/KeYApi';
 
 import ProofNode from '../key/prooftree/ProofNode';
@@ -19,19 +19,19 @@ import { serverAddress } from '../constants';
  * synchronization.ProofSyncController.
  */
 export default class ProofSyncController {
-  private network: Network;
+  private stompService: StompService;
   private observer: ProofEventObserver;
   private currentProjectName?: string;
   private currentFilePath?: string[];
   private currentTopic?: string;
 
   /**
-   * @param network - access to a websocket connection with the server, needed for synchronization between clients.
+   * @param stompService - access to a websocket connection with the server, needed for synchronization between clients.
    * @param observer - this observer will be informed about changes to proofs, this controller witnesses.
    *                   Usually it is used to update the UI when a change happens.
    */
-  constructor(network: Network, observer: ProofEventObserver) {
-    this.network = network;
+  constructor(stompService: StompService, observer: ProofEventObserver) {
+    this.stompService = stompService;
     this.observer = observer;
 
     this.setObligationResult = this.setObligationResult.bind(this);
@@ -59,7 +59,7 @@ export default class ProofSyncController {
   public openFile(projectName: string, path: string[]): Promise<void> {
     const topic = this.genTopic(projectName, path);
 
-    return this.network
+    return this.stompService
       .safeSubscribe(
         topic,
         msg => {
@@ -101,7 +101,7 @@ export default class ProofSyncController {
         'There is no topic set, we can not close the current proof context'
       );
     } else {
-      return this.network.safeUnsubscribe(this.currentTopic);
+      return this.stompService.safeUnsubscribe(this.currentTopic);
     }
   }
 
