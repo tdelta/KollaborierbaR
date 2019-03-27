@@ -5,24 +5,28 @@ import ProjectManagement from '../../projectmanagement';
 import { User } from '../../collaborative/ProjectSyncController';
 
 export default class Usernames extends React.Component<Props, State> {
-  private static instances: Usernames[] = [];
+  /**
+   * Provides static access to the current Usernames
+   */
+  private static instance: Usernames | undefined;
 
   constructor(props: Props) {
     super(props);
-    this.updateUsers = this.updateUsers.bind(this);
     this.state = {
       userindicators: [],
     };
-    Usernames.instances.push(this);
+    Usernames.instance = this;
   }
 
-  public updateUsers(users: User[]) {
-    this.setState({ userindicators: users });
-  }
-
-  public static updateAllUsers(users: User[]) {
-    for (const instance of Usernames.instances) {
-      instance.updateUsers(users);
+  /**
+   * Update the displayed User names of a project.
+   * This static method is used by the projectmanagement.ts file because it has
+   * no direct pointer to the instance
+   * @param users - the users that should be displayed in the top bar
+   */
+  public static updateUsers(users: User[]) {
+    if (Usernames.instance) {
+      Usernames.instance.setState({ userindicators: users });
     }
   }
 
@@ -42,6 +46,7 @@ export default class Usernames extends React.Component<Props, State> {
     );
   }
 }
+
 interface Props {}
 
 interface State {
