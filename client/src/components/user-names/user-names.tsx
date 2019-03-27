@@ -2,7 +2,7 @@ import React, { RefObject, ReactSVG } from 'react';
 import UserIndicator from './user-indicator';
 import './animals.css';
 import ProjectManagement from '../../projectmanagement';
-import { User } from '../../collaborative/ProjectController';
+import { User } from '../../collaborative/ProjectSyncController';
 
 export default class Usernames extends React.Component<Props, State> {
   private static instances: Usernames[] = [];

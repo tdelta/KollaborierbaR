@@ -89,6 +89,40 @@ export default class KeYApi {
   }
 
   /**
+   * Sets the most recent proof result for a specific file / obligation at the
+   * server, so that other clients may access it.
+   */
+  public static uploadLatestProof(
+    projectName: string,
+    filePath: string,
+    obligationResult: ObligationResult
+  ): Promise<void> {
+    const url = `/proof/${projectName}/${filePath}/obligation/${
+      obligationResult.obligationIdx
+    }/last`;
+
+    console.log('Posting obligation result to ', url);
+
+    return fetch(`${serverAddress}/${url}`, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(obligationResult), // necessary if you want to send a JSON object in a fetch request
+    }).then(response => {
+      if (response.status !== 200) {
+        alert(
+          'Uups! Something went wrong while posting your obligation result to the server'
+        );
+      } else {
+        console.log('Uploaded obligation result to server', url);
+      }
+    });
+  }
+
+  /**
    * Downloads a list of all ids of proof results, which have been saved to the
    * server's history for a specific file / obligation
    *
