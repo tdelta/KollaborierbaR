@@ -7,6 +7,10 @@ import OpenGoalInfo from '../../key/netdata/OpenGoalInfo';
 
 import ProofsState from '../../key/ProofsState';
 
+/**
+ * This compontent renders all open goal-nodes for a
+ * proof. 
+ */
 export default class OpenGoalsView extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -18,6 +22,14 @@ export default class OpenGoalsView extends React.Component<Props, State> {
     this.toggleGoal = this.toggleGoal.bind(this);
   }
 
+  /**
+   * This function displays the sequent of an open 
+   * goal. The function is passed down to every open
+   * goal node and will be called when a goal node is 
+   * double clicked.
+   * 
+   * @param goal necassary information about the goal to render the sequent 
+   */
   private toggleGoal(goal: OpenGoalInfo): void {
     this.setState({
       toggledGoal: goal.id,

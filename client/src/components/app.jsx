@@ -23,14 +23,6 @@ import KeYInterface from '../key/KeYInterface.ts';
 
 import { Button } from 'reactstrap';
 
-//import testSource from '../sample-text.js';
-
-/**
- * Main component of KollaborierbaR. Renders all other components (Editor etc.)
- * while holding global state.
-
-//import testSource from '../sample-text.js';
-
 /**
  * Main component of KollaborierbaR. Renders all other components (Editor etc.)
  * while holding global state.
