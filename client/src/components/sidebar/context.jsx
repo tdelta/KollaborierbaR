@@ -80,14 +80,21 @@ export default class Context extends React.Component {
     }
   }
 
+  /**
+   * React lifecycle method: Called after this component has been initialized
+   * and inserted into the DOM tree.
+   */
   componentDidMount() {
     // addeventlistener doesnt add handlers twice
     document.addEventListener('contextmenu', this.handleContextClick);
     document.addEventListener('click', this.handleMouseDown);
   }
 
+  /**
+   * Invoked immediately before a component is unmounted and destroyed.
+   * Used to remove DOM listener when component is unmounted
+   */
   componentWillUnmount() {
-    // Make sure to remove the DOM listener when the component is unmounted.
     document.removeEventListener('contextmenu', this.handleContextClick);
     document.removeEventListener('click', this.handleMouseDown);
   }
