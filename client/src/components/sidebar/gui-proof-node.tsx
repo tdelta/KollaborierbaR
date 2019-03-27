@@ -6,7 +6,7 @@ import { Collapse, ListGroup, ListGroupItem } from 'reactstrap';
 import './sidebar.css';
 
 import ProofNode, { Kind } from '../../key/prooftree/ProofNode';
-import DisplayTreeNode from './displaytree/displaytreenode';
+import DisplayTreeNode from './displaytree/DisplayTreeNode';
 
 import { Context, ContextMenu, ContextAction } from './context.jsx';
 
