@@ -6,6 +6,11 @@ import FontAwesome from 'react-fontawesome';
 
 import OpenGoalInfo from '../../key/netdata/OpenGoalInfo';
 
+/**
+ * This component is a signle open goal node of a proof. 
+ * It is created by the openGoalView component.
+ * 
+ */
 export default class GoalNode extends React.Component<Props, {}> {
   constructor(props: Props) {
     super(props);
@@ -32,13 +37,18 @@ export default class GoalNode extends React.Component<Props, {}> {
     );
   }
 
+  /**
+   * This function calls toogleGoal from props and thus
+   * displays the sequent of the open goal.
+   */
   private handleDoubleClick() {
     this.props.toggleGoal(this.props.goal);
   }
 }
 
 interface Props {
-  goal: OpenGoalInfo;
-  toggled: boolean;
-  toggleGoal: (goal: OpenGoalInfo) => void;
+  goal: OpenGoalInfo; // Contains all important information about the open goal (sequent, id)
+  toggled: boolean; // boolean whether the sequent is displayed at the moment
+  toggleGoal: (goal: OpenGoalInfo) => void; // function which will when called display the sequent of the 
+                                            // open goal
 }
