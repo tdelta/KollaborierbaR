@@ -10,6 +10,8 @@ import javax.persistence.Id;
  * used as a response type for api routes. Fields annotated with JsonIgnore will not be included in
  * api routes
  *
+ * <p>It is based on the data provided by {@link de.uka.ilkd.key.proof.Goal}.
+ *
  * @author Jonas Belouadi
  */
 @Entity
@@ -29,14 +31,17 @@ public class OpenGoalInfo {
     this.formula = formula;
   }
 
+  /** Number of proof steps, until this goal was reached. TODO: Rename to getTime */
   public long getId() {
     return id;
   }
 
+  /** KeY Goal rendered as string, using {@link de.uka.ilkd.key.proof.Goal#toString} */
   public String getSequent() {
     return sequent;
   }
 
+  /** KeY Goal rendered using {@link de.uka.ilkd.key.pp.LogicPrinter#quickPrintSequent}. */
   public String getFormula() {
     return formula;
   }
