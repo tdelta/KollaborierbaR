@@ -4,7 +4,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
 import ProjectTreeView from './ProjectTreeView';
-import OpenGoalsView from './open-goals-view';
+import OpenGoalsView from './OpenGoalsView';
 import ProofTabView from './ProofTabView';
 
 import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';

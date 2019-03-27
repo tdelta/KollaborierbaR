@@ -3,7 +3,7 @@ import { Kind } from '../../key/prooftree/ProofNode';
 
 import ReactDOM from 'react-dom';
 
-import GuiProofNode from './gui-proof-node';
+import GuiProofNode from './GuiProofNode';
 import ProofNode from '../../key/prooftree/ProofNode';
 
 import DisplayTreeNode, { toDisplayTree } from './displaytree/DisplayTreeNode';

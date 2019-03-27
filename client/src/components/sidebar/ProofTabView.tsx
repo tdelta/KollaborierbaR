@@ -9,7 +9,7 @@ import ObligationResultHistory from '../../key/ObligationResultHistory';
 import Select from 'react-select';
 import Option from 'react-select/lib/types';
 
-import GuiProofNode from './gui-proof-node';
+import GuiProofNode from './GuiProofNode';
 import { ValueType, OptionProps, OptionsType } from 'react-select/lib/types';
 import { StylesConfig } from 'react-select/lib/styles';
 
