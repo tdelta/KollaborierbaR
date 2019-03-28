@@ -8,7 +8,7 @@
 
 (requires python3 for running a local webserver and Java 8 for running the backend)
 
-1. [Download](deliverable/KollaborierbaR.tar.gz) `KollaborierbaR.tar.gz` from the `deliverables` folder
+1. [Download](https://git.key-project.org/dsteinhoefel/kollaborierbar/raw/presentation/deliverables/KollaborierbaR.tar.gz?inline=false) `KollaborierbaR.tar.gz` from the `deliverables` folder
 2. **OR** build an up to date version yourself:
 
 ```sh
