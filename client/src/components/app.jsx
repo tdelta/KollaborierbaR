@@ -3,7 +3,7 @@ import React from 'react';
 import './app.css';
 
 import NotificationSystem from 'react-notification-system';
-
+import ErrorMessages from '../collaborative/ErrorMessages';
 import Toggleable from './Toggleable.tsx';
 import WelcomeScreen from './WelcomeScreen.tsx';
 import Editor from './editor.tsx';
@@ -284,9 +284,12 @@ export default class App extends React.Component {
       this.setText.bind(this)
     );
 
+    let errorMessages = new ErrorMessages(this.notificationSystem);
+
     this.consoleSyncController = new ConsoleSyncController(
       this.stompService,
-      this.console.current
+      this.console.current,
+      errorMessages
     );
 
     this.setState({

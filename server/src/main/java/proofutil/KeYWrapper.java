@@ -32,13 +32,15 @@ public class KeYWrapper {
   private ProofResult results;
   private ProofScriptExecutor proofScriptExecutor;
   private Observer console;
+  private Observer errorObserver;
 
-  public KeYWrapper(String path, Observer console) {
+  public KeYWrapper(String path, Observer console, Observer errorObserver) {
     final File location =
         new File("projects/" + path); // Path to the source code folder/file or to a *.proof file
     results = new ProofResult();
 
     this.console = console;
+    this.errorObserver = errorObserver;
     proofScriptExecutor = new ProofScriptExecutor(console);
 
     try {
@@ -66,11 +68,8 @@ public class KeYWrapper {
       // performed proof if a *.proof
       // file is loaded
     } catch (ProblemLoaderException e) {
-      results.addError(
-          -1,
-          "unknown",
-          "Couldn't process all relevant information for verification with KeY.",
-          null);
+      errorObserver.update(null,
+          "Couldn't process all relevant information for verification with KeY.");
 
       console.update(null,"Exception at '" + location + "':\n"+stackToString(e));
 
@@ -178,15 +177,12 @@ public class KeYWrapper {
                   .collect(Collectors.toList()));
         }
       } catch (Exception e) {
-        results.addError(
-            obligationIdx,
-            "unknown",
+        errorObserver.update(null,
             "Something went wrong at '"
                 + contract.getDisplayName()
                 + "' of "
                 + contract.getTarget()
-                + ".",
-            null);
+                + ".");
 
         console.update(null,
             "Exception at '"

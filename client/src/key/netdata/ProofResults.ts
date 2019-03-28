@@ -11,6 +11,4 @@ import OpenGoalInfo from './OpenGoalInfo';
 export default interface ProofResults {
   succeeded: ObligationResult[];
   failed: ObligationResult[];
-  errors: ObligationResult[];
-  stackTraces: ObligationResult[];
 }

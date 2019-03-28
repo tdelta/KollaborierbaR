@@ -3,6 +3,7 @@ package server;
 import events.UpdatedProofEvent;
 import events.UpdatedProofHistoryEvent;
 import events.ConsoleMessageEvent;
+import events.ErrorEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -85,7 +86,13 @@ public class ProofController {
       applicationEventPublisher.publishEvent(event);
     };
 
-    final KeYWrapper key = new KeYWrapper(projectFilePath, console);
+    final Observer errorObserver = (observable, object) -> {
+      String message = (String) object;
+      ErrorEvent event = new ErrorEvent(this, pathData.projectName, pathData.filePath, message);
+      applicationEventPublisher.publishEvent(event);
+    };
+
+    final KeYWrapper key = new KeYWrapper(projectFilePath, console, errorObserver);
 
     // KeYWrapper provides KeY functionalities to this API controller
     Optional<String> macroContentsOptional = Optional.empty();
@@ -94,7 +101,7 @@ public class ProofController {
       // Read the macro file
       String macroContents = fileService.getCurrent(pathData.projectName + macro.get());
       if (macroContents != "") {
-        System.out.println("ProofController: Using macro:\n"+macroContents);
+        System.out.println("ProofController: Using macro:\n"+macro.get());
         macroContentsOptional = Optional.of(macroContents);
       }
     }

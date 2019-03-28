@@ -305,16 +305,6 @@ export default class KeYInterface {
           });
           break;
 
-        case ObligationResultKind.error:
-          this.notificationSystem.current.addNotification({
-            title: 'Error!',
-            message: obligationResult.resultMsg,
-            level: 'error',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-          break;
-
         case ObligationResultKind.failure:
           this.notificationSystem.current.addNotification({
             title: 'Failure!',
@@ -325,10 +315,6 @@ export default class KeYInterface {
           });
           break;
       }
-
-      //for(const stackTrace of results.stackTraces){
-      //  this.addNewConsoleMessage(stackTrace.resultMsg);
-      //}
     }
   }
 
@@ -385,7 +371,6 @@ export default class KeYInterface {
    */
   private handleResults(results: ProofResults): void {
     results.succeeded
-      .concat(results.errors)
       .concat(results.failed)
       .forEach(this.proofController.setObligationResult);
   }
