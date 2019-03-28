@@ -10,7 +10,7 @@ import ProofTabView from './ProofTabView';
 import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
 import classnames from 'classnames';
 
-import './sidebar.css'
+import './sidebar.css';
 import Project from '../../Project';
 import ProofsState from '../../key/ProofsState';
 import ObligationResult from '../../key/netdata/ObligationResult';
@@ -47,8 +47,8 @@ export default class Sidebar extends React.Component<Props, State> {
     // ^ the project object must not be empty
 
     this.enableTab = this.enableTab.bind(this);
-	this.setUrgentTab = this.setUrgentTab.bind(this);
-	this.resetUrgentTab = this.resetUrgentTab.bind(this);
+    this.setUrgentTab = this.setUrgentTab.bind(this);
+    this.resetUrgentTab = this.resetUrgentTab.bind(this);
     this.toggle = this.toggle.bind(this);
     this.moveSplitBar = this.moveSplitBar.bind(this);
 
@@ -110,7 +110,7 @@ export default class Sidebar extends React.Component<Props, State> {
    * Using this function, the urgent tab can be reset to a normal tab
    * param tab - the id of the tab or undefined
    */
-  private resetUrgentTab(tab: string | undefined = undefined): void {
+  private resetUrgentTab(tab?: string | undefined): void {
     if (!tab || this.state.urgentTab === tab) {
       this.setState({
         urgentTab: '-1',
@@ -212,10 +212,14 @@ export default class Sidebar extends React.Component<Props, State> {
       this.setUrgentTab('3');
     }
 
-	if (prevProps.openedPath.length !== this.props.openedPath.length ||
-		prevProps.openedPath.some((value, index) => value !== this.props.openedPath[index])) {
-		this.resetUrgentTab();
-	}
+    if (
+      prevProps.openedPath.length !== this.props.openedPath.length ||
+      prevProps.openedPath.some(
+        (value, index) => value !== this.props.openedPath[index]
+      )
+    ) {
+      this.resetUrgentTab();
+    }
 
     // This fixes the bug, where the height of the ace isn't correct until you resize the sidebar
     window.dispatchEvent(new Event('resize'));
@@ -291,10 +295,10 @@ export default class Sidebar extends React.Component<Props, State> {
                 <NavLink
                   className={classnames({
                     active: this.state.activeTab === '1',
-					urgent: this.state.urgentTab == '1',
+                    urgent: this.state.urgentTab === '1',
                   })}
                   onClick={() => {
-					this.resetUrgentTab('1');
+                    this.resetUrgentTab('1');
                     this.enableTab('1');
                   }}
                 >
@@ -305,10 +309,10 @@ export default class Sidebar extends React.Component<Props, State> {
                 <NavLink
                   className={classnames({
                     active: this.state.activeTab === '2',
-					urgent: this.state.urgentTab == '2',
+                    urgent: this.state.urgentTab === '2',
                   })}
                   onClick={() => {
-					this.resetUrgentTab('2');
+                    this.resetUrgentTab('2');
                     this.enableTab('2');
                   }}
                 >
@@ -319,10 +323,10 @@ export default class Sidebar extends React.Component<Props, State> {
                 <NavLink
                   className={classnames({
                     active: this.state.activeTab === '3',
-					urgent: this.state.urgentTab == '3',
+                    urgent: this.state.urgentTab === '3',
                   })}
                   onClick={() => {
-					this.resetUrgentTab('3');
+                    this.resetUrgentTab('3');
                     this.enableTab('3');
                   }}
                 >
