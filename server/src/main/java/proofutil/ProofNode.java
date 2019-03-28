@@ -1,16 +1,29 @@
 package proofutil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 
 /**
- * Representation of one step or branch in a KeY proof. Since it also contains it children, it can
- * be used to represent an entire proof tree.
+ * Definition for a table in the database and the format of the response for api routes. Fields
+ * annotated with JsonIgnore will not be included in network responses.
+ *
+ * <p>Representation of one step or branch in a KeY proof. Since it also contains it children, it
+ * can be used to represent an entire proof tree.
  *
  * <p>Its primary purpose is to conveniently provide all data to the client, the client needs for
  * its KeY features, without replicating many of KeYs data structures on the client side.
  *
  * <p>Usually, ProofNodes are constructed by {@link proofutil.ProofTreeBuilder}.
  */
+@Entity
 public class ProofNode {
   /**
    * Encodes different types of nodes.
@@ -40,12 +53,23 @@ public class ProofNode {
     }
   }
 
-  private final String text;
-  private final List<ProofNode> children;
-  private final Kind kind;
-  private final String sequent;
-  private final int serialNr;
-  private final int oneStepId;
+  @JsonIgnore
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Integer id;
+
+  @Lob private String text;
+
+  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private List<ProofNode> children;
+
+  private Kind kind;
+
+  @Lob private String sequent;
+  private int serialNr;
+  private int oneStepId;
+
+  public ProofNode() {}
 
   public ProofNode(
       final String text,
