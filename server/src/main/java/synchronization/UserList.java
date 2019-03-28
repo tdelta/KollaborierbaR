@@ -5,6 +5,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 
+/**
+ * Autowireable component that is shared over websocket sessions.
+ *
+ * <p>Holds information about all users currently working on collaborative documents
+ */
 @Component
 public class UserList {
 
@@ -21,6 +26,7 @@ public class UserList {
 
   /**
    * Creates a User object containing a generated name and saves it.
+   *
    * @param user The Stomp user
    */
   public void addUser(Principal user) {
@@ -32,6 +38,7 @@ public class UserList {
 
   /**
    * Sets the Crdt id of an existing user
+   *
    * @param user The Stomp user
    * @param id The Crdt id
    */
@@ -44,12 +51,19 @@ public class UserList {
 
   /**
    * Returns a map of Stomp users to their additional Information
+   *
    * @return The map
    */
   public Set<ConcurrentHashMap.Entry<Principal, User>> entrySet() {
     return map.entrySet();
   }
 
+  /**
+   * Given the identification of a user from a websocket request, returns saved information about
+   * the user
+   *
+   * @return the information associated with the user
+   */
   public User get(Principal user) {
     return map.get(user);
   }

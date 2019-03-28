@@ -4,6 +4,9 @@ import './animals.css';
 import ProjectManagement from '../../projectmanagement';
 import { User } from '../../collaborative/ProjectSyncController';
 
+/**
+ * UI Component for displaying user icons (circles) and names
+ */
 export default class Usernames extends React.Component<Props, State> {
   /**
    * Provides static access to the current Usernames
@@ -30,6 +33,9 @@ export default class Usernames extends React.Component<Props, State> {
     }
   }
 
+  /**
+   * React callback that creates the html elements
+   */
   public render() {
     return (
       <>
