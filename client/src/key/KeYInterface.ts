@@ -42,7 +42,6 @@ export default class KeYInterface {
   private getProofsState: () => ProofsState;
   private setProofsState: (proofsState: ProofsState) => void;
   private setObligationIdOfLastUpdatedProof: (obligationId: number) => void;
-  private addNewConsoleMessage: (message: string) => void;
 
   /** currently selected macro */
   private macro: string = '';
@@ -66,7 +65,6 @@ export default class KeYInterface {
    * @param setProofsState - change the state of available proof results displayed in the UI
    * @param setObligationIdOfLastUpdatedProof - inform the UI about an proof obligation whose proof results recently changed
    * @param getFilePath - allows to retrieve the currently opened file
-   * @param addNewConsoleMessage - display a message in the console at the bottom of the UI
    */
   constructor(
     stompService: StompService,
@@ -76,7 +74,6 @@ export default class KeYInterface {
     setProofsState: (proofsState: ProofsState) => void,
     setObligationIdOfLastUpdatedProof: (obligationId: number) => void,
     getFilePath: () => string,
-    addNewConsoleMessage: (message: string) => void
   ) {
     this.notificationSystem = notificationSystem;
     this.setProvenObligations = setProvenObligations;
@@ -96,7 +93,6 @@ export default class KeYInterface {
     this.getObligations = this.getObligations.bind(this);
     this.getContractsForMethod = this.getContractsForMethod.bind(this);
     this.handleResults = this.handleResults.bind(this);
-    this.addNewConsoleMessage = addNewConsoleMessage;
     this.refreshLastProof = this.refreshLastProof.bind(this);
     this.saveObligationResult = this.saveObligationResult.bind(this);
     this.setMacro = this.setMacro.bind(this);

@@ -10,7 +10,7 @@ import Editor from './editor.tsx';
 import Top from './top.tsx';
 import Sidebar from './sidebar/Sidebar.tsx';
 import ConfirmationModal from './confirmation-modal.tsx';
-import Console from './console/console.jsx';
+import Console from './console/Console.tsx';
 import { StompService } from '../StompService';
 
 import ProofsState from '../key/ProofsState';
@@ -18,6 +18,7 @@ import ProofsState from '../key/ProofsState';
 import ProjectManagement from '../projectmanagement.ts';
 
 import CollabController from '../collaborative/CollabController.ts';
+import ConsoleSyncController from '../collaborative/ConsoleSyncController.ts';
 
 import KeYInterface from '../key/KeYInterface.ts';
 
@@ -86,8 +87,7 @@ export default class App extends React.Component {
     this.updateFileContent = this.projectManagement.updateFileContent.bind(
       this.projectManagement
     );
-    this.addNewConsoleMessage = this.addNewConsoleMessage.bind(this);
-    this.invertConsoleVisibility = this.invertConsoleVisibility.bind(this);
+    this.setConsoleVisibility = this.setConsoleVisibility.bind(this);
     this.getMacroFiles = this.projectManagement.getMacroFiles.bind(
       this.projectManagement
     );
@@ -101,10 +101,10 @@ export default class App extends React.Component {
       obligationId =>
         this.setState({ obligationIdOfLastUpdatedProof: obligationId }),
       () => this.state.project.name + '/' + this.state.openedPath.join('/'),
-      this.addNewConsoleMessage
     );
 
     this.editor = React.createRef();
+    this.console = React.createRef();
 
     // setup initial state
     this.state = {
@@ -128,9 +128,6 @@ export default class App extends React.Component {
 
       // indices of obligations, that have been proven
       provenObligations: [],
-
-      // the console log
-      consolelog: 'No error found.',
 
       // console visibilty
       consoleIsVisible: false,
@@ -189,6 +186,7 @@ export default class App extends React.Component {
         this.state.text
       );
       this.keyInterface.setCurrentFile(this.state.project.name, path);
+      this.consoleSyncController.openFile(this.state.project.name, path);
     }
     this.displayCloseButton = false;
   }
@@ -263,35 +261,13 @@ export default class App extends React.Component {
   }
 
   /**
-   * This functions sets a message and a timestap
-   * in the console compontent. It also makes the
-   * console visibile when a message is set.
-   *
-   * @param message - that will be set in the console
-   */
-  addNewConsoleMessage(message) {
-    //Create time string
-    let date = new Date();
-    let h = date.getHours();
-    let m = date.getMinutes();
-    let s = date.getSeconds();
-
-    let timeString = h + ':' + m + ':' + s;
-
-    this.setState({
-      consolelog: /*this.state.consolelog+*/ timeString + ' ' + message + '\n',
-      consoleIsVisible: true,
-    });
-  }
-
-  /**
    * This function inverts the visibilty of the
    * console compontent
    *
    */
-  invertConsoleVisibility() {
+  setConsoleVisibility(visible) {
     this.setState({
-      consoleIsVisible: !this.state.consoleIsVisible,
+      consoleIsVisible: visible
     });
   }
 
@@ -307,6 +283,12 @@ export default class App extends React.Component {
       this.editor.current,
       this.setText.bind(this)
     );
+
+    this.consoleSyncController = new ConsoleSyncController(
+      this.stompService,
+      this.console.current
+    );
+
     this.setState({
       text: '',
       openedPath: [],
@@ -482,9 +464,9 @@ export default class App extends React.Component {
               />
               {/* Render the console component */}
               <Console
-                consolelog={this.state.consolelog}
-                consoleIsVisible={this.state.consoleIsVisible}
-                invertConsoleVisibility={this.invertConsoleVisibility}
+                ref={this.console}
+                visible={this.state.consoleIsVisible}
+                setVisibility={this.setConsoleVisibility}
               />
             </Toggleable>
             {/* render the welcome screen, if there is not a file to display yet */}

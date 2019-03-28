@@ -1,7 +1,6 @@
 package synchronization;
 
-import events.UpdatedProofEvent;
-import events.UpdatedProofHistoryEvent;
+import events.ConsoleMessageEvent;
 import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
