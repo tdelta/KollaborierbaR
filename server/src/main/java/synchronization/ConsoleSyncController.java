@@ -1,6 +1,6 @@
 package synchronization;
 
-import events.ConsoleMessageEvent;
+import events.ConsoleEvent;
 import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -81,7 +81,7 @@ public class ConsoleSyncController extends SyncController<Void> {
   }
 
   @EventListener
-  public void handleNewMessage(final ConsoleMessageEvent event) {
+  public void handleNewMessage(final ConsoleEvent event) {
     final String projectFilePath = genProjectFilePath(event.getProjectName(), event.getFilePath());
     final String topic = genUserTopic(projectFilePath);
 
