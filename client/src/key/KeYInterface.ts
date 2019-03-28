@@ -145,7 +145,8 @@ export default class KeYInterface {
   private refreshLastProof(
     projectName: string,
     filePath: string,
-    obligationIdx: number
+    obligationIdx: number,
+    notification: boolean = true
   ): void {
     KeYApi.downloadLatestProof(projectName, filePath, obligationIdx).then(
       obligationResult => {
@@ -161,7 +162,9 @@ export default class KeYInterface {
         this.setProvenObligations(
           this.getProofsState().getProvenObligationIdxs()
         );
-        this.sendLastProofNotifications(obligationResult);
+		if (notification) {
+		  this.sendLastProofNotifications(obligationResult);
+		}
         this.setObligationIdOfLastUpdatedProof(obligationResult.obligationIdx);
       }
     );
@@ -251,7 +254,7 @@ export default class KeYInterface {
    * This method should be called by the application for everytime a file is
    * opened.
    */
-  public setCurrentFile(projectName: string, filePath: string[]) {
+  public setCurrentFile(projectName: string, filePath: string[], notification: boolean = true) {
     this.proofController.openFile(projectName, filePath);
 
     const filePathJoined = filePath.join('/');
@@ -261,7 +264,7 @@ export default class KeYInterface {
         console.log('Retrieved obligation idxs: ', obligationIdxs);
 
         for (const obligationIdx of obligationIdxs) {
-          this.refreshLastProof(projectName, filePathJoined, obligationIdx);
+          this.refreshLastProof(projectName, filePathJoined, obligationIdx, notification);
           this.refreshProofHistory(projectName, filePathJoined, obligationIdx);
         }
       }
