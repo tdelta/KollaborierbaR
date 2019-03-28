@@ -18,7 +18,7 @@ And request
 """
 When method post
 Then status 200
-Then def historyId = response 
+Then def historyId = Number(response)
 
 
 # Now check that the proof result was saved in the history
@@ -29,6 +29,7 @@ Then status 200
 And match response contains
 """
 {
+  "id": "#(historyId)",
 	"kind" : "success",
 	"obligationIdx" : 0,
 	"openGoals" : [],

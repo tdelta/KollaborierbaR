@@ -1,6 +1,6 @@
 import NotificationSystem from 'react-notification-system';
 
-import { UserIndicatorData } from './components/user-names/user-indicator-data';
+import { User } from './collaborative/ProjectSyncController';
 import UserIndicator from './components/user-names/user-indicator';
 import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
@@ -76,6 +76,8 @@ export default class ProjectManagement {
         const currentProject = this.getCurrentProject();
         console.log(event.eventType);
         switch (event.eventType) {
+          // Delete File event
+
           case ProjectEventType.DeletedFile:
             this.openProject((currentProject as Project).name, false);
 
@@ -89,6 +91,7 @@ export default class ProjectManagement {
               this.setOpenedPath([]);
             }
 
+            // Send notification for file delete
             if (this.notificationSystem.current) {
               this.notificationSystem.current.clearNotifications();
               this.notificationSystem.current.addNotification({
@@ -99,6 +102,9 @@ export default class ProjectManagement {
             }
 
             break;
+
+          // Rename File event
+
           case ProjectEventType.RenamedFile:
             this.openProject((currentProject as Project).name, false);
 
@@ -116,6 +122,7 @@ export default class ProjectManagement {
               }
             }
 
+            // Send notification for file rename
             if (this.notificationSystem.current) {
               this.notificationSystem.current.clearNotifications();
               this.notificationSystem.current.addNotification({
@@ -128,10 +135,14 @@ export default class ProjectManagement {
             }
 
             break;
+
+          // Update File event
+
           case ProjectEventType.UpdatedFile:
             const fileEvent: ProjectFileEvent = event as ProjectFileEvent;
 
             if (fileEvent.filePath === this.getOpenedPath().join('/')) {
+              // Send notification for file save
               if (this.notificationSystem.current) {
                 this.notificationSystem.current.clearNotifications();
                 this.notificationSystem.current.addNotification({
@@ -143,11 +154,15 @@ export default class ProjectManagement {
             }
 
             break;
+
+          // Delete Project event
+
           case ProjectEventType.DeletedProject:
             this.showProject({});
             this.setText('');
             this.setOpenedPath([]);
 
+            // Send notification for project delete
             if (this.notificationSystem.current) {
               this.notificationSystem.current.clearNotifications();
               this.notificationSystem.current.addNotification({
@@ -158,6 +173,9 @@ export default class ProjectManagement {
             }
 
             break;
+
+          // Update Project event
+
           case ProjectEventType.UpdatedProject:
             if (
               !(
@@ -178,6 +196,7 @@ export default class ProjectManagement {
               }
             }
 
+            // Send notification for project update
             if (this.notificationSystem.current) {
               // TODO evtl. nicht alle Notifications entfernen
               this.notificationSystem.current.clearNotifications();
@@ -189,6 +208,9 @@ export default class ProjectManagement {
             }
 
             break;
+
+          // User Updated event
+
           case ProjectEventType.UsersUpdated:
             console.log(event);
             Usernames.updateUsers((event as UsersUpdatedEvent).users);

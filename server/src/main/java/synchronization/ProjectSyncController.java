@@ -208,6 +208,13 @@ public class ProjectSyncController {
     }
   }
 
+  /**
+   * Send information about a specific project to a list of users. The information consists of an
+   * object per connected user containing: - Their id in a collaborative document - Their name
+   *
+   * @param users The users to send the information to
+   * @param projectName The project that the information concerns
+   */
   private void broadcastUsernames(List<Principal> users, String projectName) {
     List<User> subscriberNames = getSubscriberNames(users);
     UsersUpdatedEvent userEvent = new UsersUpdatedEvent(this, projectName, subscriberNames);
@@ -217,6 +224,14 @@ public class ProjectSyncController {
     }
   }
 
+  /**
+   * From a list of websocket users, load their current user information saved in the UserList
+   * Component. If there is no information saved about the user, they are excluded from the result.
+   *
+   * @param subscriberList Websocket user objects, obtained from websocket requests
+   * @return A list of User objects containing information about the users - Their id in a
+   *     collaborative document - Their name
+   */
   private List<User> getSubscriberNames(List<Principal> subscriberList) {
     return userList.entrySet().stream()
         .filter(x -> subscriberList.contains(x.getKey()))
