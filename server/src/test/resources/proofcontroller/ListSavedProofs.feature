@@ -38,7 +38,6 @@ When method post
 Then status 200
 Then def historyId2 = Number(response)
 
-
 # Save proof3 to obligation 0
 Given url 'http://localhost:9000/proof/testProject1/testListProofIds.java/obligation/0/history'
 And request 
@@ -54,12 +53,13 @@ And request
 When method post
 Then status 200
 Then def historyId3 = Number(response)
+Then print 'got history id: ', historyId3
 
 # Now check that the list of proofIds which belong to obligation 0 is correct
 
 Given url 'http://localhost:9000/proof/testProject1/testListProofIds.java/obligation/0/history'
 And request {}
 When method get
-Then status 200 
+Then status 200
 And match response contains ['#(historyId1)', '#(historyId2)', '#(historyId3)']
 

@@ -18,6 +18,7 @@ export default interface ObligationResult {
   proofTree: ProofNode;
   openGoals: OpenGoalInfo[];
   kind: ObligationResultKind;
+  id: number;
 }
 
 export enum ObligationResultKind {
