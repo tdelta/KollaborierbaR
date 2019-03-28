@@ -11,7 +11,9 @@ export default class UserIndicator extends React.Component<Props, {}> {
   }
 
   /*
-   * Gives the color coresponding with the given number
+   * Gives the color coresponding with the given number.
+   * This corresponds to the colors specified in {@link src/collaborative/marker-colors.css}
+   * that are displayed in the editor.
    * @param number given
    * @returns string contain color in hex
    */
@@ -40,10 +42,14 @@ export default class UserIndicator extends React.Component<Props, {}> {
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
+  /**
+   * React callback that creates the html elements
+   */
   public render() {
     return (
       <>
-        <span className="login-text" id={`user-circle-${this.props.uid}`}>
+        {/** Render a circle with the color corresponding to the given crdtId */}
+        <span id={`user-circle-${this.props.uid}`}>
           <div
             style={{
               backgroundColor: this.getColor(this.props.crdtId),
@@ -51,6 +57,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
             }}
             className={'circle'}
           >
+            {/** Render an icon corresponding the given animal name */}
             <FontAwesomeIcon
               name={
                 this.props.lastName === 'kiwi'
@@ -61,6 +68,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
             />
           </div>
         </span>
+        {/** Render a tooltip that displays the given name, when the user hovers over the circle */}
         <UncontrolledTooltip
           delay={{ show: 0, hide: 0 }}
           placement="bottom"
