@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import NotificationSystem from 'react-notification-system';
 import '../index.css';
 import Usernames from './user-names/user-names';
+import Toggleable from './Toggleable';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -133,31 +134,33 @@ export default class Top extends React.Component<Props, State> {
           <Nav className="ml-auto" navbar>
             <Usernames />
 
-            <UncontrolledDropdown>
-              <DropdownToggle nav caret>
-                KeY
-              </DropdownToggle>
-              <DropdownMenu right>
-                <DropdownItem
-                  onClick={() => {
-                    this.props.saveFile().then(() => this.props.onProveFile());
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faForward}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Prove all contracts
-                </DropdownItem>
-                <DropdownItem onClick={this.toggleMacroModal}>
-                  <FontAwesomeIcon
-                    icon={faDirections}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Select Macro
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
+            <Toggleable isVisible={this.props.isFileOpen}>
+              <UncontrolledDropdown>
+                <DropdownToggle nav caret>
+                  KeY
+                </DropdownToggle>
+                <DropdownMenu right>
+                  <DropdownItem
+                    onClick={() => {
+                      this.props.saveFile().then(() => this.props.onProveFile());
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faForward}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Prove all contracts
+                  </DropdownItem>
+                  <DropdownItem onClick={this.toggleMacroModal}>
+                    <FontAwesomeIcon
+                      icon={faDirections}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Select Macro
+                  </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
+            </Toggleable>
 
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -203,48 +206,50 @@ export default class Top extends React.Component<Props, State> {
               loadFunction={this.props.getMacroFiles}
               selectOperation={this.props.onSelectMacro}
             />
-            <UncontrolledDropdown>
-              <DropdownToggle nav caret>
-                File
-              </DropdownToggle>
-              <DropdownMenu right>
-                <DropdownItem onClick={this.downloadFileOnClick}>
-                  <FontAwesomeIcon
-                    icon={faDownload}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Download
-                </DropdownItem>
-                <DropdownItem onClick={this.openFileOnClick}>
-                  <FontAwesomeIcon
-                    icon={faCloudUploadAlt}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Upload
-                </DropdownItem>
-                <DropdownItem onClick={this.props.onDeleteFile}>
-                  <FontAwesomeIcon
-                    icon={faTrashAlt}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Delete
-                </DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileName}>
-                  <FontAwesomeIcon
-                    icon={faTag}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Rename
-                </DropdownItem>
-                <DropdownItem onClick={this.props.saveFile}>
-                  <FontAwesomeIcon
-                    icon={faSave}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Save
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
+            <Toggleable isVisible={this.props.isFileOpen}>
+              <UncontrolledDropdown>
+                <DropdownToggle nav caret>
+                  File
+                </DropdownToggle>
+                <DropdownMenu right>
+                  <DropdownItem onClick={this.downloadFileOnClick}>
+                    <FontAwesomeIcon
+                      icon={faDownload}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Download
+                  </DropdownItem>
+                  <DropdownItem onClick={this.openFileOnClick}>
+                    <FontAwesomeIcon
+                      icon={faCloudUploadAlt}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Upload
+                  </DropdownItem>
+                  <DropdownItem onClick={this.props.onDeleteFile}>
+                    <FontAwesomeIcon
+                      icon={faTrashAlt}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Delete
+                  </DropdownItem>
+                  <DropdownItem onClick={this.props.onUpdateFileName}>
+                    <FontAwesomeIcon
+                      icon={faTag}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Rename
+                  </DropdownItem>
+                  <DropdownItem onClick={this.props.saveFile}>
+                    <FontAwesomeIcon
+                      icon={faSave}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Save
+                  </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
+            </Toggleable>
           </Nav>
         </Navbar>
 
@@ -312,4 +317,5 @@ interface Props {
   onProveFile(): void;
   onSelectMacro(macro: string): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
+  isFileOpen: boolean;
 }
