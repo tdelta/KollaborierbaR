@@ -8,7 +8,7 @@
 
 (requires python3 for running a local webserver and Java 8 for running the backend)
 
-1. Download `KollaborierbaR.tar.gz` from the `deliverables` folder
+1. [Download](deliverable/KollaborierbaR.tar.gz) `KollaborierbaR.tar.gz` from the `deliverables` folder
 2. **OR** build an up to date version yourself:
 
 ```sh
@@ -26,7 +26,7 @@ cd KollaborierbaR
 
 4. If you want others to join you in KollaborierbaR, stop the server, configure your public IP address in `config.js`, and restart it.
 
-# KollaborierbaRs build system
+# KollaborierbaRs build system 🛠️
 
 KollaborierbaR consists of 2 components, a web frontend (located in the `client` folder) and a backend server (see `server` folder).
 
