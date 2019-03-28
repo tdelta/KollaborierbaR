@@ -1,17 +1,27 @@
 package proofutil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import repository.MethodContract;
 
 /**
- * Contains data describing the result of a KeY proof.
+ * Definition for a table in the database and the format of the response for api routes. Fields
+ * annotated with JsonIgnore will not be included in network responses.
  *
- * <p>It is used for communicating proof results to clients and also storing them on the server, see
- * {@link server.ProofController}.
+ * <p>Contains data describing the result of a KeY proof.
  *
  * <p>Eventually, most of this data will be displayed within UI elements of the client application.
  *
  * <p>Instances of this class are usually generated as part of {@link proofutil.ProofResult}.
  */
+@Entity(name = "ObligationResult")
 public class ObligationResult {
   /**
    * Encodes, whether the proof was successful, could not be closed (failure) or could not be run at
@@ -36,13 +46,24 @@ public class ObligationResult {
     }
   }
 
-  private final int obligationIdx;
-  private final String targetName;
+  @Id @GeneratedValue private Long id;
 
-  private final String resultMsg;
-  private final ProofNode proofTree;
-  private final List<OpenGoalInfo> openGoals;
-  private final Kind kind;
+  @JsonIgnore @ManyToOne private MethodContract methodContract;
+
+  private String resultMsg;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  private ProofNode proofTree;
+
+  @OneToMany(cascade = CascadeType.ALL)
+  private List<OpenGoalInfo> openGoals;
+
+  private Kind kind;
+  private String targetName;
+  private int obligationIdx;
+
+  /** Default constructor needed for hibernate */
+  public ObligationResult() {}
 
   public ObligationResult(
       final int obligationIdx,
@@ -57,6 +78,13 @@ public class ObligationResult {
     this.proofTree = proofTree;
     this.openGoals = openGoals;
     this.kind = kind;
+  }
+
+  /**
+   * Sets the method contract (foreign key in the database) that this obligation result belongs to
+   */
+  public void setMethodContract(MethodContract methodContract) {
+    this.methodContract = methodContract;
   }
 
   /**
@@ -110,5 +138,10 @@ public class ObligationResult {
    */
   public Kind getKind() {
     return kind;
+  }
+
+  /** @return primary key in the database */
+  public Long getId() {
+    return id;
   }
 }
