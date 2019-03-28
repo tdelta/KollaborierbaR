@@ -98,7 +98,7 @@ export default class Sidebar extends React.Component<Props, State> {
    * @param tab   id of the tab that should be set urgent. Use the same Id as in the NavLink definitions within the render method.
    */
   private setUrgentTab(tab: string): void {
-    if (this.state.urgentTab !== tab) {
+    if (this.state.urgentTab !== tab && this.state.activeTab !== tab) {
       this.setState({
         urgentTab: tab,
       });
