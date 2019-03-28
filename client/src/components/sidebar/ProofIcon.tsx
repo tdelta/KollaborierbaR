@@ -2,7 +2,7 @@ import React from 'react';
 
 import ProofNode, { Kind } from '../../key/prooftree/ProofNode';
 
-import DisplayTreeNode from './displaytree/displaytreenode';
+import DisplayTreeNode from './displaytree/DisplayTreeNode';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -19,6 +19,11 @@ import {
   faMinusSquare,
 } from '@fortawesome/free-regular-svg-icons';
 
+
+/**
+ * Displays a matching icon for a node within a proof tree, based on what kind
+ * of node it is.
+ */
 export default class ProofIcon extends React.Component<Props, {}> {
   public render() {
     // if no specific icon can be determined, use a question mark as
@@ -30,7 +35,7 @@ export default class ProofIcon extends React.Component<Props, {}> {
     const green = '#4CAF50';
     const blue = '#00796B';
 
-    // check, whether the file in question is actually a file or a folder
+    // decide on a icon, based on the kind property
     switch (this.props.node.kind) {
       case Kind.OpenProofTree:
         icon = faVectorSquare;
@@ -102,5 +107,6 @@ export default class ProofIcon extends React.Component<Props, {}> {
 }
 
 interface Props {
+  /** view model of the node, for which an icon shall be displayed. */
   node: DisplayTreeNode;
 }

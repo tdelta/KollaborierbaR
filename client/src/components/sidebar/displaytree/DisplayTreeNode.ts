@@ -1,7 +1,12 @@
 import ProofNode, { Kind } from '../../../key/prooftree/ProofNode';
 import React, { RefObject } from 'react';
-import GuiProofNode from '../gui-proof-node';
+import GuiProofNode from '../GuiProofNode';
 
+/**
+ * View model of an proof tree.
+ * Its main purpose is to provide helper functions for navigating the tree
+ * (for example if the user moves through the tree using arrow keys.)
+ */
 export default class DisplayTreeNode {
   public collapsed: boolean;
   public selected: boolean;
