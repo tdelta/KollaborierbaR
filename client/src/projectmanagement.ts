@@ -1,6 +1,6 @@
 import NotificationSystem from 'react-notification-system';
 
-import { UserIndicatorData } from './components/user-names/user-indicator-data';
+import { User } from './collaborative/ProjectSyncController';
 import UserIndicator from './components/user-names/user-indicator';
 import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
