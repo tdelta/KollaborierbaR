@@ -43,6 +43,8 @@ export default class KeYInterface {
   private setProofsState: (proofsState: ProofsState) => void;
   private setObligationIdOfLastUpdatedProof: (obligationId: number) => void;
 
+  private cancelDownloads: AbortController;
+
   /** currently selected macro */
   private macro: string = '';
 
@@ -96,6 +98,7 @@ export default class KeYInterface {
     this.refreshLastProof = this.refreshLastProof.bind(this);
     this.saveObligationResult = this.saveObligationResult.bind(this);
     this.setMacro = this.setMacro.bind(this);
+    this.cancelDownloads = new AbortController();
 
     // Initialize the proof synchronization service.
     // It must be supplied callbacks, which are invoked, if the proof state
@@ -148,10 +151,10 @@ export default class KeYInterface {
     obligationIdx: number,
     notification: boolean = true
   ): void {
-    KeYApi.downloadLatestProof(projectName, filePath, obligationIdx).then(
+    KeYApi.downloadLatestProof(projectName, filePath, obligationIdx, this.cancelDownloads.signal).then(
       obligationResult => {
         console.log('Key: Obligation result: ', obligationResult);
-
+        
         this.setProofsState(
           this.getProofsState().updateLastResultByObligationIdx(
             obligationResult.obligationIdx,
@@ -185,7 +188,7 @@ export default class KeYInterface {
     filePath: string,
     obligationIdx: number
   ): void {
-    KeYApi.downloadAllHistoricProofs(projectName, filePath, obligationIdx).then(
+    KeYApi.downloadAllHistoricProofs(projectName, filePath, obligationIdx, this.cancelDownloads.signal).then(
       (savedResults: ObligationResult[]) => {
         console.log('Key: Saved obligations: ', savedResults);
 
@@ -259,11 +262,15 @@ export default class KeYInterface {
     filePath: string[],
     notification: boolean = true
   ) {
+    // Stop all downloads since they concern a different file
+    this.cancelDownloads.abort();
+    this.cancelDownloads = new AbortController();
+
     this.proofController.openFile(projectName, filePath);
 
     const filePathJoined = filePath.join('/');
 
-    KeYApi.downloadObligationIds(projectName, filePathJoined).then(
+    KeYApi.downloadObligationIds(projectName, filePathJoined,this.cancelDownloads.signal).then(
       (obligationIdxs: number[]) => {
         console.log('Retrieved obligation idxs: ', obligationIdxs);
 
@@ -296,7 +303,7 @@ export default class KeYInterface {
       });
     }
 
-    KeYApi.proveFile(this.getFilePath(), this.macro).then(this.handleResults);
+    KeYApi.proveFile(this.getFilePath(), this.macro,this.cancelDownloads.signal).then(this.handleResults);
   }
 
   /**
@@ -370,7 +377,7 @@ export default class KeYInterface {
       });
     }
 
-    return KeYApi.proveObligations(this.getFilePath(), nr, this.macro).then(
+    return KeYApi.proveObligations(this.getFilePath(), nr, this.macro, this.cancelDownloads.signal).then(
       this.handleResults
     );
   }
