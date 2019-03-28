@@ -20,14 +20,14 @@ export default class UserIndicator extends React.Component<Props, {}> {
   public getColor(crdtId: number): string {
     const colors = [
       '#4CAF50',
-      '#FF5722',
-      '#448AFF',
+      '#009688',
+      '#9E9E9E',
       '#00BCD4',
+      '#448AFF',
       '#D32F2F',
       '#FF4081',
-      '#9E9E9E',
+      '#FF5722',
       '#FFEB3B',
-      '#009688',
       '#7C4DFF',
     ];
     return colors[crdtId % 10] || '#C70039';
@@ -49,7 +49,7 @@ export default class UserIndicator extends React.Component<Props, {}> {
     return (
       <>
         {/** Render a circle with the color corresponding to the given crdtId */}
-        <span id={`user-circle-${this.props.uid}`}>
+        <span className="login-text" id={`user-circle-${this.props.uid}`}>
           <div
             style={{
               backgroundColor: this.getColor(this.props.crdtId),

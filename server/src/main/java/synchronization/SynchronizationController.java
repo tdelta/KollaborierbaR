@@ -143,7 +143,7 @@ public class SynchronizationController {
     }
 
     // This event is handled by the ProjectSyncController instance
-    userList.setId(user, replicaNumber);
+    userList.setCrdtId(user, replicaNumber);
     FileOpenedEvent event = new FileOpenedEvent(this, user, file);
     applicationEventPublisher.publishEvent(event);
   }
