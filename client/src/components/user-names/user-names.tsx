@@ -45,7 +45,7 @@ export default class Usernames extends React.Component<Props, State> {
             uid={index}
             firstName={iterator.firstName}
             lastName={iterator.lastName}
-            crdtId={iterator.crdtId}
+            crdtId={iterator.idInProject}
           />
         ))}
       </>
