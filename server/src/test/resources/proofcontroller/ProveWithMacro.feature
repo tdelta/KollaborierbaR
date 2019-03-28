@@ -27,8 +27,8 @@ And match response ==
 {
   succeeded: [],
   failed: [],
-  errors: "#[1] error",
-  stackTraces: "#[1] error",
+  errors: "#[1] ^error",
+  stackTraces: "#[1] ^error",
 }
 """
 
@@ -43,8 +43,8 @@ And match response ==
 {
   succeeded: [],
   failed: [],
-  errors: "#[2] error",
-  stackTraces: "#[2] error",
+  errors: "#[2] ^error",
+  stackTraces: "#[2] ^error",
 }
 """
 

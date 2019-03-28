@@ -4,8 +4,8 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import FontAwesome from 'react-fontawesome';
 
 import ProjectTreeView from './ProjectTreeView';
-import OpenGoalsView from './open-goals-view';
-import ProofTabView from './proof-tab-view';
+import OpenGoalsView from './OpenGoalsView';
+import ProofTabView from './ProofTabView';
 
 import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
 import classnames from 'classnames';
@@ -311,7 +311,7 @@ export default class Sidebar extends React.Component<Props, State> {
                   </TabPane>
                   <TabPane tabId="3">
                     <ProofTabView
-                      methods={obligations}
+                      obligationOptions={obligations}
                       proofsState={this.props.proofsState}
                       obligationIdOfLastUpdatedProof={
                         this.props.obligationIdOfLastUpdatedProof
