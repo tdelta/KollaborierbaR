@@ -403,6 +403,10 @@ export default class App extends React.Component {
           notificationSystem={this.notificationSystem}
           getMacroFiles={this.getMacroFiles}
           //TODO: onDeleteProject={this.deleteProject}
+          isFileOpen={
+            this.state.project.name != null &&
+            this.state.openedPath.length > 0
+          }
         />
         <div id="mainContainer">
           {/* Render the sidebar component */}

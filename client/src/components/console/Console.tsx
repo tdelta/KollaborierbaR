@@ -101,12 +101,12 @@ export default class Console extends React.Component<Props, State>
     const m = date.getMinutes();
     const s = date.getSeconds();
 
-    const timeString = '${h}:${m}:${s}';
+    const timeString = `${h}:${m}:${s}`;
 
     // Append the message with date and time to the array of console messages
     this.setState({
       consolelog: this.state.consolelog.concat([
-        '${timeString} ${msg.message}\n',
+        `${timeString} ${msg.message}\n`,
       ]),
     });
 

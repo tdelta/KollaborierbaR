@@ -38,11 +38,17 @@ export default class ProofIcon extends React.Component<Props, {}> {
     switch (this.props.node.kind) {
       case Kind.OpenProofTree:
         icon = faVectorSquare;
+        if (this.props.node.collapsed) {
+          icon = faSquareSolid
+        }
         color = red;
         break;
 
       case Kind.ClosedProofTree:
         icon = faVectorSquare;
+        if (this.props.node.collapsed) {
+          icon = faSquareSolid
+        }
         color = green;
         break;
 
@@ -69,29 +75,12 @@ export default class ProofIcon extends React.Component<Props, {}> {
     }
 
     if (this.props.node.children.length > 0) {
+      console.log('TEST');
       if (this.props.node.kind === Kind.DefaultNode) {
         if (this.props.node.collapsed) {
           icon = faPlusSquare;
         } else {
           icon = faMinusSquare;
-        }
-
-        if (this.props.node.children.length > 0) {
-          if (this.props.node.kind === Kind.DefaultNode) {
-            if (this.props.node.collapsed) {
-              icon = faPlusSquare;
-            } else {
-              icon = faMinusSquare;
-            }
-          }
-        } else if (
-          // TODO: Check if enum comparison works
-          this.props.node.kind === (Kind.OpenProofTree as Kind) ||
-          this.props.node.kind === (Kind.ClosedProofTree as Kind)
-        ) {
-          if (this.props.node.collapsed) {
-            icon = faSquareSolid;
-          }
         }
       }
     }

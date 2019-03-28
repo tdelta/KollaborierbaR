@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
+/** Custom implementation of a Spring Service that handles connections to websockets. */
 @Service
 public class CustomHandshakeHandler extends DefaultHandshakeHandler {
 
