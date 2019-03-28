@@ -12,20 +12,18 @@
     "rules": {
         "prettier": true,
 
+        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
         "comment-format": false,
         "object-literal-shorthand": false,
-        "quotemark": [true, "single", "jsx-double"],
-        "object-literal-key-quotes": [true, "as-needed"],
         "object-literal-sort-keys": false,
         "interface-name": false,
         "ordered-imports": false,
         "no-else-after-return": false,
-        "increment-decrement": false,
 
         "member-ordering": [false],
         "jsx-boolean-value": false,
         "jsx-no-lambda": false,
-
+        
         "import-name": false,
         "member-ordering": false,
         "no-constant-condition": true,
@@ -35,29 +33,26 @@
         "no-empty-character-class": true,
         "no-ex-assign": true,
         "no-extra-boolean-cast": true,
-        "no-extra-semi": true,
         "no-inner-declarations": true,
         "no-invalid-regexp": true,
-        "ter-no-irregular-whitespace": true,
         "no-regex-spaces": true,
         "ter-no-sparse-arrays": true,
         "no-unexpected-multiline": true,
         "valid-typeof": true,
-        "no-multi-spaces": true,
         "ter-no-proto": true,
         "ter-no-script-url": true,
         "ter-no-self-compare": true,
         "handle-callback-err": true,
         "array-bracket-spacing": false,
-        "block-spacing": true,
-        "ter-computed-property-spacing": true,
-        "ter-func-call-spacing": true,
         "ter-no-mixed-spaces-and-tabs": true,
         "sort-imports": false,
-        "ter-arrow-spacing": true,
         "max-line-length": false,
-
-        "no-console": false
+        "no-empty-interface": false,
+        "array-type": [true, "array"],
+        "no-console": false,
+        "increment-decrement": false,
+        "no-increment-decrement": false,
+        "no-plusplus": false
     },
     "rulesDirectory": []
 }

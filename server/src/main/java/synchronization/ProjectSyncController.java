@@ -57,7 +57,7 @@ public class ProjectSyncController {
       @DestinationVariable String projectName) {
     final String decodedProjectName = UriUtils.decode(projectName, "UTF-8");
 
-    System.out.println(decodedProjectName);
+    System.out.println("Decoded project name" + decodedProjectName);
 
     final List<Principal> users = sessions.getOrDefault(decodedProjectName, new ArrayList<>(1));
 
@@ -68,15 +68,8 @@ public class ProjectSyncController {
       sessions.put(decodedProjectName, users);
     }
 
-    List<User> subscriberNames = getSubscriberNames(sessions.get(decodedProjectName));
-    for (Principal otherUser : sessions.get(decodedProjectName)) {
-      UsersUpdatedEvent userEvent =
-          new UsersUpdatedEvent(this, decodedProjectName, subscriberNames);
-      messagingTemplate.convertAndSendToUser(
-          otherUser.getName(), "/projects/" + decodedProjectName, userEvent);
-    }
-
     saveSubscription(simpSubscriptionId, user, decodedProjectName);
+    broadcastUsernames(users, decodedProjectName);
   }
 
   @EventListener
@@ -86,20 +79,21 @@ public class ProjectSyncController {
         event.getMessage().getHeaders().get("simpSubscriptionId", String.class);
 
     final String projectName = getProjectNameBySubscription(simpSubscriptionId, user);
+    if (projectName != null) {
+      System.out.println(
+          "Got unsubscribe from " + event.getUser().getName() + " for project " + projectName);
 
-    System.out.println(
-        "Got unsubscribe from " + event.getUser().getName() + " for project " + projectName);
+      final List<Principal> users = sessions.getOrDefault(projectName, new ArrayList<>(0));
 
-    deleteSubscription(simpSubscriptionId, user);
-
-    final List<Principal> users = sessions.getOrDefault(projectName, new ArrayList<>(0));
-
-    System.out.println("Removed user " + user.getName() + " from project " + projectName);
-    users.remove(user);
-    if (users.isEmpty()) {
-      System.out.println("Removed project " + projectName + ", since all users left.");
-      sessions.remove(projectName);
+      System.out.println("Removed user " + user.getName() + " from project " + projectName);
+      users.remove(user);
+      broadcastUsernames(users, projectName);
+      if (users.isEmpty()) {
+        System.out.println("Removed project " + projectName + ", since all users left.");
+        sessions.remove(projectName);
+      }
     }
+    deleteSubscription(simpSubscriptionId, user);
   }
 
   @EventListener
@@ -111,16 +105,17 @@ public class ProjectSyncController {
     final Set<String> keys = sessions.keySet();
     for (final String project : keys) {
       final List<Principal> users = sessions.getOrDefault(project, new ArrayList<>(0));
+      if (users.contains(user)) {
+        System.out.println("Removed user " + user.getName() + " from project " + project);
+        users.remove(user);
 
-      System.out.println("Removed user " + user.getName() + " from project " + project);
-      users.remove(user);
-
-      if (users.isEmpty()) {
-        System.out.println("Removed project " + project + ", since all users left.");
-        sessions.remove(project);
+        if (users.isEmpty()) {
+          System.out.println("Removed project " + project + ", since all users left.");
+          sessions.remove(project);
+        }
+        broadcastUsernames(users, project);
       }
     }
-
     deleteSubscription(event.getSessionId(), user);
   }
 
@@ -193,19 +188,19 @@ public class ProjectSyncController {
 
   @EventListener
   public void handleOpenedFile(final FileOpenedEvent event) {
-    System.out.println("File opened event");
     Principal user = event.getPrincipal();
 
     for (ConcurrentHashMap.Entry<String, List<Principal>> projectEntry : sessions.entrySet()) {
       if (projectEntry.getValue().contains(user)) {
         System.out.println(
             "Notifying users of project " + projectEntry.getKey() + " that a file was opened");
+
         HashMap<String, Object> headers = new HashMap<String, Object>();
         headers.put("file", event.getFile());
+        List<User> subscriberNames = getSubscriberNames(projectEntry.getValue());
+        UsersUpdatedEvent userEvent =
+            new UsersUpdatedEvent(this, projectEntry.getKey(), subscriberNames);
         for (Principal otherUser : projectEntry.getValue()) {
-          List<User> subscriberNames = getSubscriberNames(projectEntry.getValue());
-          UsersUpdatedEvent userEvent =
-              new UsersUpdatedEvent(this, projectEntry.getKey(), subscriberNames);
           messagingTemplate.convertAndSendToUser(
               otherUser.getName(), "/projects/" + projectEntry.getKey(), userEvent, headers);
         }
@@ -213,10 +208,17 @@ public class ProjectSyncController {
     }
   }
 
+  private void broadcastUsernames(List<Principal> users, String projectName) {
+    List<User> subscriberNames = getSubscriberNames(users);
+    UsersUpdatedEvent userEvent = new UsersUpdatedEvent(this, projectName, subscriberNames);
+    for (Principal otherUser : users) {
+      messagingTemplate.convertAndSendToUser(
+          otherUser.getName(), "/projects/" + projectName, userEvent);
+    }
+  }
+
   private List<User> getSubscriberNames(List<Principal> subscriberList) {
-    return userList
-        .entrySet()
-        .stream()
+    return userList.entrySet().stream()
         .filter(x -> subscriberList.contains(x.getKey()))
         .map(x -> x.getValue())
         .collect(Collectors.toList());

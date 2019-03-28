@@ -5,6 +5,20 @@ import NotificationSystem from 'react-notification-system';
 import '../index.css';
 import Usernames from './user-names/user-names';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faForward,
+  faBoxOpen,
+  faStarOfLife,
+  faDownload,
+  faCloudUploadAlt,
+  faSave,
+  faBomb,
+  faTrashAlt,
+  faTag,
+  faDirections,
+} from '@fortawesome/free-solid-svg-icons';
+
 import {
   Navbar,
   NavbarBrand,
@@ -15,7 +29,7 @@ import {
   DropdownItem,
 } from 'reactstrap';
 
-import { OpenModal, DeleteModal } from './project-modals.jsx';
+import { OpenModal, DeleteModal, MacroModal } from './selection-modals.jsx';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
@@ -30,13 +44,14 @@ export default class Top extends React.Component<Props, State> {
     this.onFileLoaded = this.onFileLoaded.bind(this);
     this.toggleOpenModal = this.toggleOpenModal.bind(this);
     this.toggleDeleteModal = this.toggleDeleteModal.bind(this);
+    this.toggleMacroModal = this.toggleMacroModal.bind(this);
     this.openProjectOnClick = this.openProjectOnClick.bind(this);
     this.openFileOnClick = this.openFileOnClick.bind(this);
     this.downloadFileOnClick = this.downloadFileOnClick.bind(this);
-    this.proveKeY = this.proveKeY.bind(this);
     this.state = {
       showOpenModal: false,
       showDeleteModal: false,
+      showMacroModal: false,
     };
   }
 
@@ -48,53 +63,13 @@ export default class Top extends React.Component<Props, State> {
     this.setState({ showDeleteModal: !this.state.showDeleteModal });
   }
 
-  private proveKeY() {
-    if (this.props.notificationSystem.current) {
-      this.props.notificationSystem.current.clearNotifications();
-      this.props.notificationSystem.current.addNotification({
-        title: 'Please Wait!',
-        message: 'Running proof obligations...',
-        level: 'info',
-        position: 'bc',
-        autoDismiss: 0,
-      });
-    }
-    this.props.onRunProof().then((response: ProofResults) => {
-      // print succeeded proofs as success notifications
-      if (this.props.notificationSystem.current) {
-        this.props.notificationSystem.current.clearNotifications();
-        for (const i of response.succeeded) {
-          this.props.notificationSystem.current.addNotification({
-            title: 'Success!',
-            message: i,
-            level: 'success',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-        }
-        // print fails as warnings
-        for (const i of response.failed) {
-          this.props.notificationSystem.current.addNotification({
-            title: 'Failure!',
-            message: i,
-            level: 'warning',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-        }
-        // print exception messages as errors
-        for (const i of response.errors) {
-          this.props.notificationSystem.current.addNotification({
-            title: 'Error!',
-            message: i,
-            level: 'error',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-        }
-      }
-    });
+  /**
+   * Inverts the visibility of the modal that selects macro files
+   */
+  private toggleMacroModal(): void {
+    this.setState({ showMacroModal: !this.state.showMacroModal });
   }
+
   private onFileChosen(event: HTMLInputEvent): void {
     this.fileReader = new FileReader();
     this.fileReader.onloadend = this.onFileLoaded;
@@ -132,16 +107,33 @@ export default class Top extends React.Component<Props, State> {
     return (
       <div>
         <Navbar color="dark" dark expand="md">
-          <NavbarBrand href="/">KollaborierbaR</NavbarBrand>
+          <NavbarBrand style={{ color: 'white' }}>KollaborierbaR</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <Usernames />
 
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
-                Key
+                KeY
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.proveKeY}>Run Proof</DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    this.props.saveFile().then(() => this.props.onProveFile());
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faForward}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Prove all contracts
+                </DropdownItem>
+                <DropdownItem onClick={this.toggleMacroModal}>
+                  <FontAwesomeIcon
+                    icon={faDirections}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Select Macro
+                </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
 
@@ -150,26 +142,44 @@ export default class Top extends React.Component<Props, State> {
                 Project
               </DropdownToggle>
               <DropdownMenu right>
+                <DropdownItem onClick={this.props.onCreateProject}>
+                  <FontAwesomeIcon
+                    icon={faStarOfLife}
+                    style={{ marginRight: '0.5em' }}
+                  />
+                  Create project
+                </DropdownItem>
                 <DropdownItem onClick={this.toggleOpenModal}>
+                  <FontAwesomeIcon
+                    icon={faBoxOpen}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Open project
                 </DropdownItem>
                 <DropdownItem onClick={this.toggleDeleteModal}>
+                  <FontAwesomeIcon
+                    icon={faBomb}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Delete project
-                </DropdownItem>
-                <DropdownItem onClick={this.props.onCreateProject}>
-                  Create project
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
             <OpenModal
               isOpen={this.state.showOpenModal}
               toggle={this.toggleOpenModal}
-              projectOperation={this.props.onOpenProject}
+              selectOperation={this.props.onOpenProject}
             />
             <DeleteModal
               isOpen={this.state.showDeleteModal}
               toggle={this.toggleDeleteModal}
-              projectOperation={this.props.onDeleteProject}
+              selectOperation={this.props.onDeleteProject}
+            />
+            <MacroModal
+              isOpen={this.state.showMacroModal}
+              toggle={this.toggleMacroModal}
+              loadFunction={this.props.getMacroFiles}
+              selectOperation={this.props.onSelectMacro}
             />
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -177,18 +187,38 @@ export default class Top extends React.Component<Props, State> {
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem onClick={this.downloadFileOnClick}>
+                  <FontAwesomeIcon
+                    icon={faDownload}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Download
                 </DropdownItem>
                 <DropdownItem onClick={this.openFileOnClick}>
+                  <FontAwesomeIcon
+                    icon={faCloudUploadAlt}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Upload
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onDeleteFile}>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Delete
                 </DropdownItem>
                 <DropdownItem onClick={this.props.onUpdateFileName}>
+                  <FontAwesomeIcon
+                    icon={faTag}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Rename
                 </DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileContent}>
+                <DropdownItem onClick={this.props.saveFile}>
+                  <FontAwesomeIcon
+                    icon={faSave}
+                    style={{ marginRight: '0.5em' }}
+                  />
                   Save
                 </DropdownItem>
               </DropdownMenu>
@@ -205,10 +235,12 @@ export default class Top extends React.Component<Props, State> {
         />
 
         <a
-          href={
-            'data:text/plain;charset=utf-8,$(encodeURIComponent(this.props.text))'
+          href={`data:text/plain;charset=utf-8, ${encodeURIComponent(
+            this.props.text
+          )}`}
+          download={
+            this.props.getFilePath()[this.props.getFilePath().length - 1]
           }
-          download="test.txt"
         >
           <input
             type="button"
@@ -230,6 +262,7 @@ interface HTMLInputEvent extends React.FormEvent<HTMLInputElement> {
 interface State {
   showOpenModal: boolean;
   showDeleteModal: boolean;
+  showMacroModal: boolean;
 }
 
 // define the structure received KeY results
@@ -238,17 +271,20 @@ interface ProofResults {
   failed: string[];
   errors: string[];
 }
+
 // defining the structure of this react components properties
 interface Props {
+  getMacroFiles: any;
+  getFilePath: () => string[];
   text: string;
   setText(text: string): void;
-  showProject(project: object): void;
   onDeleteFile(): void;
   onDeleteProject(): void;
   onUpdateFileName(): void;
-  onUpdateFileContent(): void;
+  saveFile(): Promise<void>;
   onOpenProject(): void;
   onCreateProject(): void;
-  onRunProof(): Promise<ProofResults>;
+  onProveFile(): void;
+  onSelectMacro(macro: string): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
 }

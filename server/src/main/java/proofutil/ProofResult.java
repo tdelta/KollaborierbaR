@@ -9,17 +9,39 @@ import java.util.List;
  * @author Jonas Belouadi
  */
 public class ProofResult {
-  private List<String> succeeded = new ArrayList<String>();
-  private List<String> failed = new ArrayList<String>();
-  private List<String> errors = new ArrayList<String>();
+  private List<ObligationResult> succeeded = new ArrayList<>();
+  private List<ObligationResult> failed = new ArrayList<>();
+  private List<ObligationResult> errors = new ArrayList<>();
+  private List<ObligationResult> stackTraces = new ArrayList<>();
+
+  public List<ObligationResult> getStackTraces() {
+    return stackTraces;
+  }
+
+  public void addStackTrace(final int obligationIdx, final String methodName, final String msg) {
+    stackTraces.add(
+        new ObligationResult(
+            obligationIdx, methodName, msg, null, new ArrayList<>(0), ObligationResult.Kind.error));
+  }
 
   /**
-   * Add a succeded proof to the list
+   * Add a succeeded proof to the list
    *
    * @param msg the result message to be displayed
    */
-  public void addSuccess(String msg) {
-    succeeded.add(msg);
+  public void addSuccess(
+      final int obligationIdx,
+      final String methodName,
+      final String msg,
+      final ProofNode proofTree) {
+    succeeded.add(
+        new ObligationResult(
+            obligationIdx,
+            methodName,
+            msg,
+            proofTree,
+            new ArrayList<>(0),
+            ObligationResult.Kind.success));
   }
 
   /**
@@ -27,8 +49,15 @@ public class ProofResult {
    *
    * @param msg the result message to be displayed
    */
-  public void addFail(String msg) {
-    failed.add(msg);
+  public void addFail(
+      final int obligationIdx,
+      final String methodName,
+      final String msg,
+      final ProofNode proofTree,
+      List<OpenGoalInfo> openGoals) {
+    failed.add(
+        new ObligationResult(
+            obligationIdx, methodName, msg, proofTree, openGoals, ObligationResult.Kind.failure));
   }
 
   /**
@@ -36,16 +65,27 @@ public class ProofResult {
    *
    * @param msg the result message to be displayed
    */
-  public void addError(String msg) {
-    errors.add(msg);
+  public void addError(
+      final int obligationIdx,
+      final String methodName,
+      final String msg,
+      final ProofNode proofTree) {
+    errors.add(
+        new ObligationResult(
+            obligationIdx,
+            methodName,
+            msg,
+            proofTree,
+            new ArrayList<>(0),
+            ObligationResult.Kind.error));
   }
 
   /**
    * Basic getter for contents
    *
-   * @return succeded proofs
+   * @return succeeded proofs
    */
-  public List<String> getSucceeded() {
+  public List<ObligationResult> getSucceeded() {
     return succeeded;
   }
 
@@ -54,7 +94,7 @@ public class ProofResult {
    *
    * @return failed proofs
    */
-  public List<String> getFailed() {
+  public List<ObligationResult> getFailed() {
     return failed;
   }
 
@@ -63,7 +103,7 @@ public class ProofResult {
    *
    * @return exception messages
    */
-  public List<String> getErrors() {
+  public List<ObligationResult> getErrors() {
     return errors;
   }
 }
