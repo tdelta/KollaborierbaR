@@ -1,51 +1,49 @@
-# Allgemeine Hinweise
+<p align="center">
+	<img width="60%" src="client/src/graphics/kollaborierbarLogo.svg"/>
+</p>
 
-Eine einheitliche Bedienung (bauen, ausführen, testen, ...) wird zur Zeit durch Makefiles realisiert:
+*KollaborierbaR* is a web-based IDE for collaboratively editing Java source code and running automated proofs on [JML](https://en.wikipedia.org/wiki/Java_Modeling_Language) specifications. *KollaborierbaRs* automated proof system is based on the [KeY project](https://www.key-project.org/).
 
-* Nach dem Klonen definitiv mindestens einmal `make setup` im Hauptordner durchführen
-* Die folgenden Befehle funktioniern sowohl in den Unterprojekten, als auch im Wurzelverzeichnis.
-  Ihre Ausführung im Wurzelverzeichnis wird dann an alle Unterordner delegiert:
-  * **bauen**: `make`
-  * **ausführen**: `make run`
-  * **statische Analyse**: `make check`
-  * **statische Analyse im agressiven Modus**: `make pedantic`
-  * **unit tests**: `make test`
-* Ein automatisierter Build mit statischer Analyse und Tests lässt sich im Wurzelverzeichnis durch `make pipeline`
-  auslösen.
+# Quickstart 🚀
 
-## Git Hooks
+(requires python3 for running a local webserver and Java 8 for running the backend)
 
-Es wurden git-hook Skripte angelegt, welche einige Tests vor jedem Commit
-automatisch ausführen. Der Commit kann nur gelingen, wenn alle Tests erfolgreich
-verlaufen. Somit sollen die Skripte zur Vermeidung von Fehlern beitragen.
-
-Lokales Installieren der Hooks:
+1. Download `KollaborierbaR.tar.gz` from the `deliverables` folder
+2. **OR** build an up to date version yourself:
 
 ```sh
-hooks/helpers/install_hooks.sh
+make setup
+make deploy
+cd deliverables
 ```
 
-# Hinweise Client
-
-## Dependencies
-Seltsame "Dependency-Fehler"? `make setup`!
-
-Um eine neue Bibliothek in den Dependencies aufzulisten, muss muss sie folgendermaßen installiert werden:
-``npm install <package> --save``
-
-## Website anzeigen
-
-```sh
-make run
+3. Extract the archive and run KollaborierbaR
+```
+tar -xf KollaborierbaR.tar.gz
+cd KollaborierbaR
+./run.sh
 ```
 
-Die Website kann im Browser unter localhost:3000 angezeigt werden
+4. If you want others to join you in KollaborierbaR, stop the server, configure your public IP address in `config.js`, and restart it.
 
-## Linting / Syntax checking
+# KollaborierbaRs build system
 
-Damit Syntaxüberprüfungen etc. funktionieren, bitte Server starten
+KollaborierbaR consists of 2 components, a web frontend (located in the `client` folder) and a backend server (see `server` folder).
 
-```sh
-cd linting-server
-make run
-```
+A set of makefiles abstracts from the different tooling used in those projects. The following `make` commands are available:
+
+
+|command        |effect                                                                   |
+|---------------|-------------------------------------------------------------------------|
+|`make setup`   |Download all dependencies required for building KollaborierbaR           |
+|`make check`   |Run style checks and static analysis tools                               |
+|`make`         |Build client and server                                                  |
+|`make test`    |Run tests on the server API                                              |
+|`make pipeline`|Run all of the above                                                     |
+|`make deploy`  |Build a tar.gz archive, which makes it easy to distribute KollaborierbaR |
+|`make format`  |Run automatic code formatters                                            |
+|`make clean`   |Clean build artifacts                                                    |
+
+**Remember to always run `make setup` first, after downloading the repository**
+
+You can use all of the above commands (except for `deploy`) also within the `client` or `server` folders, so that the described effects only apply to the client or server respectively.
