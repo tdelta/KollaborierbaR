@@ -19,7 +19,6 @@ import {
   faMinusSquare,
 } from '@fortawesome/free-regular-svg-icons';
 
-
 /**
  * Displays a matching icon for a node within a proof tree, based on what kind
  * of node it is.
