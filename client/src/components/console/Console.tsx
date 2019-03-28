@@ -1,42 +1,44 @@
-import React, {RefObject} from 'react';
+import React, { RefObject } from 'react';
 import FontAwesome from 'react-fontawesome';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './console.css';
 import PropTypes from 'prop-types';
-import {ConsoleEventObserver, ConsoleEvent} from '../../collaborative/ConsoleSyncController';
+import {
+  ConsoleEventObserver,
+  ConsoleEvent,
+} from '../../collaborative/ConsoleSyncController';
 
 /**
  * This renders the console of KollaborierbaR. The
  * console is displayed depending on the consoleIsVisible
  * property handed down from app.jsx.
  */
-export default class Console extends React.Component<Props, State> implements ConsoleEventObserver {
-
+export default class Console extends React.Component<Props, State>
+  implements ConsoleEventObserver {
   private lastMsg: RefObject<HTMLDivElement>;
 
-  constructor(props: Props, state: State){
+  constructor(props: Props, state: State) {
     super(props);
     this.invertVisibility = this.invertVisibility.bind(this);
     this.onConsoleEvent = this.onConsoleEvent.bind(this);
     this.lastMsg = React.createRef();
-    this.state = 
-    {
+    this.state = {
       consolelog: [],
-      visible: true
-    }
+      visible: true,
+    };
   }
 
-  render() {
+  public render() {
     // Helper to determine the visibilty of the console
-    const genVisibilityString: (collapsed: boolean) => string = 
-      collapsed => (collapsed ? 'none' : '');
+    const genVisibilityString: (collapsed: boolean) => string = collapsed =>
+      collapsed ? 'none' : '';
 
     //Set visiblity for the console, the consoleRestoreDiv and the consoleCollapseDiv
-    let consoleStyleModForRestore = {
+    const consoleStyleModForRestore = {
       display: genVisibilityString(this.props.visible),
     };
 
-    let consoleStyleModForCollapse = {
+    const consoleStyleModForCollapse = {
       display: genVisibilityString(!this.props.visible),
     };
 
@@ -68,13 +70,14 @@ export default class Console extends React.Component<Props, State> implements Co
           <div id="consoletext">
             {/* Console message will be rendert in this div */
             this.state.consolelog.map((text, id) => (
-              <div 
-                id={'consolemessage '+id}
+              <div
+                id={'consolemessage ${id}'}
                 ref={
                   // Set the ref lastMsg to the div containing the last console message
                   // so we can scroll to it later
-                  id === this.state.consolelog.length-1? this.lastMsg: null
-                }>
+                  id === this.state.consolelog.length - 1 ? this.lastMsg : null
+                }
+              >
                 {text}
               </div>
             ))}
@@ -91,31 +94,33 @@ export default class Console extends React.Component<Props, State> implements Co
    *
    * @param msg - that will be set in the console
    */
-  onConsoleEvent(msg: ConsoleEvent): void { 
+  public onConsoleEvent(msg: ConsoleEvent): void {
     //Create time string
-    let date = new Date();
-    let h = date.getHours();
-    let m = date.getMinutes();
-    let s = date.getSeconds();
+    const date = new Date();
+    const h = date.getHours();
+    const m = date.getMinutes();
+    const s = date.getSeconds();
 
-    let timeString = h + ':' + m + ':' + s;
+    const timeString = '${h}:${m}:${s}';
 
     // Append the message with date and time to the array of console messages
     this.setState({
-      consolelog: this.state.consolelog.concat([timeString + ' ' + msg.message + '\n']),
+      consolelog: this.state.consolelog.concat([
+        '${timeString} ${msg.message}\n',
+      ]),
     });
-    
+
     this.props.setVisibility(true);
   }
 
-  invertVisibility() :void {
+  private invertVisibility(): void {
     this.props.setVisibility(!this.props.visible);
   }
 
-  componentDidUpdate(): void {
-    if(this.lastMsg.current){
-      let msgDiv: HTMLElement = this.lastMsg.current;
-      if(msgDiv.parentNode != null){
+  public componentDidUpdate(): void {
+    if (this.lastMsg.current) {
+      const msgDiv: HTMLElement = this.lastMsg.current;
+      if (msgDiv.parentNode != null) {
         // Scroll to the top of the div element containing the last message
         (msgDiv.parentNode as HTMLElement).scrollTop = msgDiv.offsetTop - 450;
       }

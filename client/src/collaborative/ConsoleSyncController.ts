@@ -11,7 +11,11 @@ export default class ConsoleSyncController {
    * @param stompService - access to a websocket connection with the server, needed for synchronization between clients.
    * @param observer - this observer will be informed about changes to the console, this controller witnesses.
    */
-  constructor(stompService: StompService, consoleObserver: ConsoleEventObserver, errorObserver: ErrorEventObserver) {
+  constructor(
+    stompService: StompService,
+    consoleObserver: ConsoleEventObserver,
+    errorObserver: ErrorEventObserver
+  ) {
     this.stompService = stompService;
     this.consoleObserver = consoleObserver;
     this.errorObserver = errorObserver;
@@ -40,22 +44,23 @@ export default class ConsoleSyncController {
   public openFile(projectName: string, path: string[]): Promise<void> {
     const topic = this.genTopic(projectName, path);
 
-    return this.stompService
-      .safeSubscribe(
-        topic,
-        msg => {
-          console.log(msg);
-          const consoleEvent: ConsoleEvent = JSON.parse(msg.body);
-          switch(consoleEvent.eventType){
-            case ConsoleEventType.Error:
-              this.errorObserver.onErrorEvent(consoleEvent as ErrorEvent)
-              break;
-            case ConsoleEventType.ConsoleMessage:
-              this.consoleObserver.onConsoleEvent(consoleEvent as ConsoleMessageEvent);
-              break;
-          }
-        },
-        {}
+    return this.stompService.safeSubscribe(
+      topic,
+      msg => {
+        console.log(msg);
+        const consoleEvent: ConsoleEvent = JSON.parse(msg.body);
+        switch (consoleEvent.eventType) {
+          case ConsoleEventType.Error:
+            this.errorObserver.onErrorEvent(consoleEvent as ErrorEvent);
+            break;
+          case ConsoleEventType.ConsoleMessage:
+            this.consoleObserver.onConsoleEvent(
+              consoleEvent as ConsoleMessageEvent
+            );
+            break;
+        }
+      },
+      {}
     );
   }
 
@@ -76,7 +81,7 @@ export default class ConsoleSyncController {
 
 enum ConsoleEventType {
   Error = 'ErrorEvent',
-  ConsoleMessage = 'ConsoleMessageEvent'
+  ConsoleMessage = 'ConsoleMessageEvent',
 }
 
 export interface ConsoleEvent {

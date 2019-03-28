@@ -100,7 +100,7 @@ export default class App extends React.Component {
       proofsState => this.setState({ proofsState }),
       obligationId =>
         this.setState({ obligationIdOfLastUpdatedProof: obligationId }),
-      () => this.state.project.name + '/' + this.state.openedPath.join('/'),
+      () => this.state.project.name + '/' + this.state.openedPath.join('/')
     );
 
     this.editor = React.createRef();
@@ -267,7 +267,7 @@ export default class App extends React.Component {
    */
   setConsoleVisibility(visible) {
     this.setState({
-      consoleIsVisible: visible
+      consoleIsVisible: visible,
     });
   }
 
