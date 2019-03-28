@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Observer;
 import org.key_project.util.collection.ImmutableSet;
 
 /**
@@ -29,12 +30,16 @@ import org.key_project.util.collection.ImmutableSet;
 public class KeYWrapper {
   private KeYEnvironment<?> env;
   private ProofResult results;
-  private ProofScriptExecutor proofScriptExecutor = new ProofScriptExecutor();
+  private ProofScriptExecutor proofScriptExecutor;
+  private Observer console;
 
-  public KeYWrapper(String path) {
+  public KeYWrapper(String path, Observer console) {
     final File location =
         new File("projects/" + path); // Path to the source code folder/file or to a *.proof file
     results = new ProofResult();
+
+    this.console = console;
+    proofScriptExecutor = new ProofScriptExecutor(console);
 
     try {
       List<File> classPaths = null; // Optionally: Additional specifications for API classes
@@ -67,7 +72,7 @@ public class KeYWrapper {
           "Couldn't process all relevant information for verification with KeY.",
           null);
 
-      results.addStackTrace(-1, "unknown", "Exception at '" + location + "':\n" + stackToString(e));
+      console.update(null,"Exception at '" + location + "':\n"+stackToString(e));
 
       System.out.println("Exception at '" + location + "':");
       e.printStackTrace();
@@ -183,9 +188,7 @@ public class KeYWrapper {
                 + ".",
             null);
 
-        results.addStackTrace(
-            obligationIdx,
-            contract.getTarget().toString(),
+        console.update(null,
             "Exception at '"
                 + contract.getDisplayName()
                 + "' of "

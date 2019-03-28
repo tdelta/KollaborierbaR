@@ -2,6 +2,7 @@ package server;
 
 import events.UpdatedProofEvent;
 import events.UpdatedProofHistoryEvent;
+import events.ConsoleMessageEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Observer;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -77,7 +79,13 @@ public class ProofController {
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
 
-    final KeYWrapper key = new KeYWrapper(projectFilePath);
+    final Observer console = (observable, object) -> {
+      String message = (String) object;
+      ConsoleMessageEvent event = new ConsoleMessageEvent(this, pathData.projectName, pathData.filePath, message);
+      applicationEventPublisher.publishEvent(event);
+    };
+
+    final KeYWrapper key = new KeYWrapper(projectFilePath, console);
 
     // KeYWrapper provides KeY functionalities to this API controller
     Optional<String> macroContentsOptional = Optional.empty();
@@ -86,6 +94,7 @@ public class ProofController {
       // Read the macro file
       String macroContents = fileService.getCurrent(pathData.projectName + macro.get());
       if (macroContents != "") {
+        System.out.println("ProofController: Using macro:\n"+macroContents);
         macroContentsOptional = Optional.of(macroContents);
       }
     }
