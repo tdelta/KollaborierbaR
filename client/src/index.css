@@ -62,7 +62,7 @@ nav{
   z-index:20;
   color: red;
   text-decoration: none;
-  background: url(error-underline.png) bottom repeat-x;
+  background: url(graphics/error-underline.png) bottom repeat-x;
 }
 
 .warningMarker {
@@ -70,17 +70,17 @@ nav{
   z-index:20;
   color: red;
   text-decoration: none;
-  background: url(warning-underline.png) bottom repeat-x;
+  background: url(graphics/warning-underline.png) bottom repeat-x;
 }
 
 .not_supportedMarker {
   position:absolute;
   z-index:20;
-  background: url(not-supported-underline.png) bottom repeat-x;
+  background: url(graphics/not-supported-underline.png) bottom repeat-x;
 }
 
 .ace_gutter-cell.ace_not_supported {
-  background-image: url(not-supported-annotation.png);
+  background-image: url(graphics/not-supported-annotation.png);
   background-position: 2px center;
 }
 
@@ -88,13 +88,13 @@ nav{
 html, body {margin: 0; height: 100%; overflow: hidden}
 
 .ace_gutter-cell.obligation_todo {
-  background-image: url(obligation-todo.png);
+  background-image: url(graphics/obligation-todo.png);
   background-position: 4px center;
   cursor: pointer;
 }
 
 .ace_gutter-cell.obligation_done {
-  background-image: url(obligation-done.png);
+  background-image: url(graphics/obligation-done.png);
   background-size: 16px;
   background-position: 2px center;
   cursor: pointer;

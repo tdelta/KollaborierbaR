@@ -1,7 +1,7 @@
 import Editor from '../components/editor';
 
-import { Network } from '../network';
-import { UsersUpdatedEvent } from '../collaborative/ProjectController';
+import { StompService } from '../StompService';
+import { UsersUpdatedEvent } from '../collaborative/ProjectSyncController';
 
 import {
   LogootSRopes,
@@ -17,9 +17,22 @@ import * as ace_types from 'ace-builds';
 
 import { IMessage } from '@stomp/stompjs';
 
+/**
+ * Manages synchronization of the file editor with other clients working on the
+ * same file.
+ *
+ * For this, it uses a CRDT based approach (https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type).
+ * Changes are incorporated into a local CRDT structure and also send to the backend server.
+ * The backend server will also add the change to his own replicated structure, as will all other clients
+ * working on the same file, which also get sent the change by the server.
+ *
+ * A LogootSplit based CRDT implementation is used.
+ * On the client side, this implementation is provided by
+ * <a href="https://www.npmjs.com/package/mute-structs">mute-structs</a>.
+ */
 export default class CollabController {
   private document: LogootSRopes | null = null;
-  private network: Network;
+  private stompService: StompService;
   private editor: any;
   private editorComponent: Editor;
   private setText: (text: string) => void;
@@ -28,17 +41,21 @@ export default class CollabController {
   private names: string[];
   private connected: boolean;
 
-  constructor(net: Network, editor: Editor, setText: (text: string) => void) {
-    this.network = net;
+  constructor(
+    stompService: StompService,
+    editor: Editor,
+    setText: (text: string) => void
+  ) {
+    this.stompService = stompService;
     this.editorComponent = editor;
     this.editor = editor.editor; // Ace editor
     this.setText = setText;
     this.names = [];
     this.connected = false;
 
-    this.network.on('insert', {}, this.handleRemoteInsert.bind(this));
-    this.network.on('remove', {}, this.handleRemoteRemove.bind(this));
-    this.network.on('crdt-doc', {}, this.handleDocumentInit.bind(this));
+    this.stompService.on('insert', {}, this.handleRemoteInsert.bind(this));
+    this.stompService.on('remove', {}, this.handleRemoteRemove.bind(this));
+    this.stompService.on('crdt-doc', {}, this.handleDocumentInit.bind(this));
 
     /**
      * Called when the user modifies the content of the editor
@@ -62,12 +79,20 @@ export default class CollabController {
               start,
               delta.lines.join('\n')
             );
-            this.network.broadcast('/insert', headers, operation);
+            this.stompService.sendMessageToDestination(
+              '/insert',
+              headers,
+              operation
+            );
             break;
           case 'remove':
             const end: number = start + delta.lines.join(' ').length - 1;
             operation = this.document.delLocal(start, end);
-            this.network.broadcast('/remove', headers, operation);
+            this.stompService.sendMessageToDestination(
+              '/remove',
+              headers,
+              operation
+            );
         }
       }
     });
@@ -80,8 +105,8 @@ export default class CollabController {
    * @param content the content of the opened file
    */
   public setFile(project: string, filepath: string, content: string) {
-    this.network.unsubscribe(`projects/${this.project}`);
-    this.network.on(
+    this.stompService.unsubscribe(`projects/${this.project}`);
+    this.stompService.on(
       `projects/${project}`,
       {},
       this.handleNewUserName.bind(this)
@@ -93,7 +118,11 @@ export default class CollabController {
     } else {
       this.connected = true;
     }
-    this.network.broadcast('/file', { file: file }, { content: content });
+    this.stompService.sendMessageToDestination(
+      '/file',
+      { file: file },
+      { content: content }
+    );
 
     this.filepath = filepath;
     this.project = project;
@@ -101,7 +130,11 @@ export default class CollabController {
 
   public disconnect() {
     this.connected = false;
-    this.network.broadcast('/file', { file: '' }, { content: '' });
+    this.stompService.sendMessageToDestination(
+      '/file',
+      { file: '' },
+      { content: '' }
+    );
   }
 
   /**
