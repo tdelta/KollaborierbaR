@@ -1,7 +1,8 @@
 Feature: Save and retrieve the last proof
 
 
-Scenario: Save the last proof
+  #Scenario: Save the last proof
+Scenario: Check whether the last proof (of the same obligation) is the one we just saved
 
 
 Given url 'http://localhost:9000/proof/testProject1/SomeTest.java/obligation/1/last'
@@ -17,9 +18,8 @@ And request
 """
 When method post 
 Then status 200 
+Then def historyId = Number(response)
 
-
-Scenario: Check whether the last proof (of the same obligation) is the one we just saved
 
 
 Given url 'http://localhost:9000/proof/testProject1/SomeTest.java/obligation/1/last'

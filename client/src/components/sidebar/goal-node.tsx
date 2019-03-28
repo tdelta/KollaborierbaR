@@ -7,9 +7,9 @@ import FontAwesome from 'react-fontawesome';
 import OpenGoalInfo from '../../key/netdata/OpenGoalInfo';
 
 /**
- * This component is a signle open goal node of a proof. 
+ * This component is a signle open goal node of a proof.
  * It is created by the openGoalView component.
- * 
+ *
  */
 export default class GoalNode extends React.Component<Props, {}> {
   constructor(props: Props) {
@@ -47,8 +47,10 @@ export default class GoalNode extends React.Component<Props, {}> {
 }
 
 interface Props {
-  goal: OpenGoalInfo; // Contains all important information about the open goal (sequent, id)
-  toggled: boolean; // boolean whether the sequent is displayed at the moment
-  toggleGoal: (goal: OpenGoalInfo) => void; // function which will when called display the sequent of the 
-                                            // open goal
+  /** Contains all important information about the open goal (sequent, id) */
+  goal: OpenGoalInfo;
+  /** boolean whether the sequent is displayed at the moment */
+  toggled: boolean;
+  /** function which will when called display the sequent of the open goal */
+  toggleGoal: (goal: OpenGoalInfo) => void;
 }
