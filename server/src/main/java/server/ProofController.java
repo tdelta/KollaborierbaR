@@ -2,11 +2,11 @@ package server;
 
 import events.UpdatedProofEvent;
 import events.UpdatedProofHistoryEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +27,9 @@ import org.springframework.web.servlet.HandlerMapping;
 import proofutil.KeYWrapper;
 import proofutil.ObligationResult;
 import proofutil.ProofResult;
+import repository.File;
+import repository.MethodContract;
+import repository.ObligationService;
 
 /**
  * Controller which provides access to KollaborierbaRs KeY functionalities. Those are:
@@ -54,6 +57,8 @@ public class ProofController {
    * changes to the proof result history and temporarily stored proof results.
    */
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
+
+  @Autowired private ObligationService obligationService;
 
   @Autowired private FileService fileService;
 
@@ -115,14 +120,14 @@ public class ProofController {
    * @return indices of saved proof results, counted per file from top to bottom.
    */
   @RequestMapping(value = "/**/{className}.java/obligation", method = RequestMethod.GET)
-  public List<Integer> listSavedObligations(
+  public Set<Integer> listSavedObligations(
       @PathVariable final String className, final HttpServletRequest request) {
 
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
 
-    return new ArrayList<>(
-        obligationResults.getOrDefault(projectFilePath, new HashMap<>()).keySet());
+    final File file = obligationService.getFile(projectFilePath);
+    return file.getObligations().keySet();
   }
 
   /**
@@ -149,7 +154,7 @@ public class ProofController {
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
       final HttpServletRequest request,
-      @RequestBody ObligationResult obligationResult) {
+      @RequestBody final ObligationResult obligationResult) {
 
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
@@ -160,21 +165,13 @@ public class ProofController {
             + ": "
             + obligationResult.getResultMsg());
 
-    final HashMap<Integer, List<ObligationResult>> prevObligations =
-        obligationResults.getOrDefault(projectFilePath, new HashMap<>());
+    File file = obligationService.getFile(projectFilePath);
+    MethodContract methodContract = obligationService.getMethodContract(file, obligationIdx);
+    System.out.println("Target name: " + obligationResult.getTargetName());
 
-    final List<ObligationResult> prevResults =
-        prevObligations.getOrDefault(obligationIdx, new LinkedList<>());
-
-    if (prevResults.isEmpty()) {
-      prevResults.add(0, obligationResult);
-    } else {
-      prevResults.set(0, obligationResult);
-    }
-
-    prevObligations.put(obligationIdx, prevResults);
-
-    obligationResults.put(projectFilePath, prevObligations);
+    ObligationResult savedObligationResult = obligationService.save(obligationResult);
+    methodContract.setLast(savedObligationResult);
+    obligationService.save(methodContract);
 
     final UpdatedProofEvent event =
         new UpdatedProofEvent(this, pathData.projectName, pathData.filePath, pathData.obligationId);
@@ -203,9 +200,13 @@ public class ProofController {
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
 
-    return retrieveObligationResult(projectFilePath, obligationIdx, 0)
-        .map(obligationResult -> new ResponseEntity<>(obligationResult, HttpStatus.OK))
-        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    File file = obligationService.getFile(projectFilePath);
+    if (file.getObligations().containsKey(obligationIdx)) {
+      return new ResponseEntity<>(
+          file.getObligations().get(obligationIdx).getLast(), HttpStatus.OK);
+    }
+
+    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
   }
 
   /**
@@ -231,12 +232,12 @@ public class ProofController {
       @PathVariable final int historyIdx,
       final HttpServletRequest request) {
 
-    final PathData pathData = decodePath(request);
-    final String projectFilePath = pathData.projectFilePath;
+    Optional<ObligationResult> requested = obligationService.findObligationResultById(historyIdx);
+    if (requested.isPresent()) {
+      return new ResponseEntity<>(requested.get(), HttpStatus.OK);
+    }
 
-    return retrieveObligationResult(projectFilePath, obligationIdx, historyIdx)
-        .map(obligationResult -> new ResponseEntity<>(obligationResult, HttpStatus.OK))
-        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
   }
 
   /**
@@ -257,24 +258,25 @@ public class ProofController {
   @RequestMapping(
       value = "/**/{className}.java/obligation/{obligationIdx}/history",
       method = RequestMethod.GET)
-  public List<Integer> getHistoryItems(
+  public List<Long> getHistoryItems(
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
       final HttpServletRequest request) {
 
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
-    final List<ObligationResult> prevResults =
-        obligationResults
-            .getOrDefault(projectFilePath, new HashMap<>())
-            .getOrDefault(obligationIdx, new LinkedList<>());
 
-    final List<Integer> result = new LinkedList<>();
-    for (int i = 1; i < prevResults.size(); ++i) {
-      result.add(i);
+    final List<Long> ids = new LinkedList<>();
+
+    final File file = obligationService.getFile(projectFilePath);
+    if (file.getObligations().containsKey(obligationIdx)) {
+      List<ObligationResult> history = file.getObligations().get(obligationIdx).getHistory();
+      for (ObligationResult result : history) {
+        ids.add(result.getId());
+      }
     }
 
-    return result;
+    return ids;
   }
 
   /**
@@ -294,61 +296,38 @@ public class ProofController {
   @RequestMapping(
       value = "/**/{className}.java/obligation/{obligationIdx}/history",
       method = RequestMethod.POST)
-  public int addToHistory(
+  @ResponseBody
+  public ResponseEntity<Long> addToHistory(
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
-      @RequestBody ObligationResult obligationResult,
+      @RequestBody final ObligationResult obligationResult,
       final HttpServletRequest request) {
 
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
 
-    final int newHistoryIdx = 1;
-
     System.out.println("ProofController: About to save a new obligation result to history");
 
-    final HashMap<Integer, List<ObligationResult>> previousObligations =
-        obligationResults.getOrDefault(projectFilePath, new HashMap<>());
+    final File file = obligationService.getFile(pathData.projectFilePath);
+    final MethodContract methodContract = obligationService.getMethodContract(file, obligationIdx);
 
-    System.out.println(
-        "ProofController: There is data for " + previousObligations.size() + " obligations.");
-
-    final List<ObligationResult> obligationResultHistory =
-        previousObligations.getOrDefault(obligationIdx, new LinkedList<>());
-
-    System.out.println(
-        "ProofController: Updating history. There are "
-            + (obligationResultHistory.size() - 1)
-            + " results stored in the history of obligation "
-            + obligationIdx
-            + " before modifying it.");
-
-    if (obligationResultHistory.isEmpty()) {
-      System.out.println(
-          "ProofController: There isnt any proof saved yet for obligation "
-              + obligationIdx
-              + ", so we will not only save the submitted obligation result to history, but also store it as the last proof.");
-
-      obligationResultHistory.add(0, obligationResult);
-    }
-
-    obligationResultHistory.add(newHistoryIdx, obligationResult);
-    previousObligations.put(obligationIdx, obligationResultHistory);
-
-    obligationResults.put(projectFilePath, previousObligations);
+    ObligationResult savedObligationResult = obligationService.save(obligationResult);
+    methodContract.addToHistory(savedObligationResult);
+    obligationService.save(methodContract);
+    obligationService.save(savedObligationResult);
 
     final UpdatedProofHistoryEvent event =
         new UpdatedProofHistoryEvent(
             this, pathData.projectName, pathData.filePath, pathData.obligationId);
     System.out.println(
         "ProofController: Publising updated history. There are now "
-            + (obligationResultHistory.size() - 1)
+            + methodContract.getHistory().size()
             + " results stored in the history of obligation "
             + obligationIdx);
 
     applicationEventPublisher.publishEvent(event);
 
-    return newHistoryIdx;
+    return new ResponseEntity(savedObligationResult.getId(), HttpStatus.OK);
   }
 
   /**
@@ -370,7 +349,7 @@ public class ProofController {
   @RequestMapping(
       value = "/**/{className}.java/obligation/{obligationIdx}/history/{historyIdx}",
       method = RequestMethod.DELETE)
-  public ResponseEntity deleteFromHistory(
+  public ResponseEntity<Long> deleteFromHistory(
       @PathVariable final String className,
       @PathVariable final int obligationIdx,
       @PathVariable final int historyIdx,
@@ -379,8 +358,6 @@ public class ProofController {
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
 
-    final int newHistoryIdx = 1;
-
     System.out.println(
         "ProofController: About to delete obligation result for "
             + projectFilePath
@@ -388,22 +365,14 @@ public class ProofController {
             + obligationIdx
             + " from history");
 
-    final HashMap<Integer, List<ObligationResult>> previousObligations =
-        obligationResults.getOrDefault(projectFilePath, new HashMap<>());
-
-    final List<ObligationResult> obligationResultHistory =
-        previousObligations.getOrDefault(obligationIdx, new LinkedList<>());
-
-    if (historyIdx == 0) {
-      System.out.println(
-          "ProofController: Cant delete last element using the history delete method.");
-
+    final Optional<ObligationResult> toDeleteOptional =
+        obligationService.findObligationResultById(historyIdx);
+    if (!toDeleteOptional.isPresent()) {
       return new ResponseEntity(HttpStatus.NOT_FOUND);
-    } else if (historyIdx < obligationResultHistory.size()) {
-      obligationResultHistory.remove(historyIdx);
-
-      previousObligations.put(obligationIdx, obligationResultHistory);
-      obligationResults.put(projectFilePath, previousObligations);
+    } else {
+      ObligationResult toDelete = toDeleteOptional.get();
+      toDelete.setMethodContract(null);
+      toDelete = obligationService.save(toDelete);
 
       final UpdatedProofHistoryEvent event =
           new UpdatedProofHistoryEvent(
@@ -413,55 +382,8 @@ public class ProofController {
 
       applicationEventPublisher.publishEvent(event);
 
-      return new ResponseEntity(HttpStatus.OK);
-    } else {
-      System.out.println("ProofController: Cant delete history element out of bounds.");
-
-      return new ResponseEntity(HttpStatus.NOT_FOUND);
+      return new ResponseEntity(historyIdx, HttpStatus.OK);
     }
-  }
-
-  /**
-   * Helper method for loading a proof result saved to history. See class description for more
-   * information on the proof history feature.
-   *
-   * @param projectFilePath path to a Java source file, for which a result shall be retrieved. It
-   *     includes the project name as the root folder.
-   * @param obligationId Index of the proof obligation for which a proof result shall be retrieved.
-   * @param historyIdx unique history id of the result which shall be retrieved. See {@link
-   *     #getHistoryItems} for more information about history ids.
-   * @return A proof result, if one had been saved for the given parameters. Nothing otherwise.
-   */
-  private Optional<ObligationResult> retrieveObligationResult(
-      final String projectFilePath, final int obligationId, final int historyIdx) {
-    final List<ObligationResult> obligationResultHistory =
-        this.obligationResults
-            .getOrDefault(projectFilePath, new HashMap<>())
-            .getOrDefault(obligationId, new LinkedList<>());
-
-    final Optional<ObligationResult> maybeObligationResult;
-    if (obligationResultHistory != null && !obligationResultHistory.isEmpty()) {
-      final ObligationResult obligationResult = obligationResultHistory.get(historyIdx);
-
-      System.out.println(
-          "ProofController: Returning obligation result for "
-              + projectFilePath
-              + ": "
-              + obligationResult.getResultMsg());
-
-      maybeObligationResult = Optional.of(obligationResult);
-    } else {
-      System.out.println(
-          "ProofController: Could not retrieve obligation result, since there is no result saved with id "
-              + projectFilePath
-              + " and "
-              + " history number "
-              + historyIdx);
-
-      maybeObligationResult = Optional.empty();
-    }
-
-    return maybeObligationResult;
   }
 
   /**

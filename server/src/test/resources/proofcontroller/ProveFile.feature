@@ -18,6 +18,7 @@ And match response ==
   stackTraces:[],
   succeeded:[
     {
+      "id": null,
       "kind": "success",
       "obligationIdx": 0,
       "openGoals": [],
@@ -43,6 +44,7 @@ And match response ==
   errors:[],
   failed:[
     {
+      "id": null,
       "kind": "failure",
       "obligationIdx": 1,
       "openGoals": "#[] openGoalSchema",
@@ -54,6 +56,7 @@ And match response ==
   stackTraces:[],
   succeeded:[
     {
+      "id": null,
       "kind": "success",
       "obligationIdx": 0,
       "openGoals": [],
@@ -83,8 +86,8 @@ And match response ==
 {
   succeeded: [],
   failed: [],
-  errors: "#[1] error",
-  stackTraces: "#[1] error",
+  errors: "#[1] ^error",
+  stackTraces: "#[1] ^error",
 }
 """
 
