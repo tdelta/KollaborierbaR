@@ -2,7 +2,7 @@
 	<img width="60%" src="logo.png"/>
 </p>
 
-*KollaborierbaR* is a web-based IDE for collaboratively editing Java source code and running automated proofs on [JML](https://en.wikipedia.org/wiki/Java_Modeling_Language) specifications. *KollaborierbaRs* automated proof system is based on the [KeY project](https://www.key-project.org/).
+*KollaborierbaR* is a web-based IDE for collaboratively editing Java source code and running automated proofs of [JML](https://en.wikipedia.org/wiki/Java_Modeling_Language) specifications. *KollaborierbaRs* automated proof system is based on the [KeY project](https://www.key-project.org/).
 
 # Quickstart 🚀
 
