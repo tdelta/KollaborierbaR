@@ -248,8 +248,8 @@ export default class Top extends React.Component<Props, State> {
           </Nav>
         </Navbar>
 
-        {/*Input form to start the file browsing dialog*/}  
         <input
+          /*Input form to start the file browsing dialog*/
           type="file"
           id="file"
           ref={this.fileSelector}
@@ -258,11 +258,11 @@ export default class Top extends React.Component<Props, State> {
         />
 
         <a
-          {/*Create ref element in order to download the editor content*/}
+          /*Create ref element in order to download the editor content*/
           href={`data:text/plain;charset=utf-8, ${encodeURIComponent(
             this.props.text
           )}`}
-          {/*The downloaded file should have the name of the currently opened file*/}
+          /*The downloaded file should have the name of the currently opened file*/
           download={
             this.props.getFilePath()[this.props.getFilePath().length - 1]
           }
