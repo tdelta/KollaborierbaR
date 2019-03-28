@@ -12,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import synchronization.data.File;
 import synchronization.data.LogootSAdd;
 import synchronization.data.LogootSDel;
@@ -36,8 +38,24 @@ public class SynchronizationController {
   @Autowired private UserList userList;
   @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
+  /**
+   * @return a list of all currently active crdt documents, mapped to their file path including the
+   *     project name, for example: /MyProject/src/main/Main.java
+   */
+  public ConcurrentHashMap<String, LogootSRopes> getDocuments() {
+    return documents;
+  }
+
+  /**
+   * Called when a client calls the insert route. An insert operation is applied to the crdt
+   * document and broadcasted to all subscribers on the document.
+   *
+   * @param file File attribute of the header, specifies what file to edit
+   * @param user The client that sent the insert
+   * @param message The insert operation
+   */
   @MessageMapping("/insert")
-  public void greeting(@Header("file") String file, Principal user, LogootSAdd message)
+  public void handleInsert(@Header("file") String file, Principal user, LogootSAdd message)
       throws Exception {
     // Apply crdt operation on the document saved on the server
     message.execute(documents.get(file));
@@ -49,8 +67,16 @@ public class SynchronizationController {
     }
   }
 
+  /**
+   * Called when a client calls the insert route. A remove operation is applied to the crdt document
+   * and broadcasted to all subscribers on the document.
+   *
+   * @param file File attribute of the header, specifies what file to edit
+   * @param user The client that sent the remove
+   * @param message The remove operation
+   */
   @MessageMapping("/remove")
-  public void greeting(@Header("file") String file, Principal user, LogootSDel message)
+  public void handleRemove(@Header("file") String file, Principal user, LogootSDel message)
       throws Exception {
     // Apply crdt operation on the document saved on the server
     message.execute(documents.get(file));
@@ -62,32 +88,47 @@ public class SynchronizationController {
     }
   }
 
-  @MessageMapping("/reset")
-  public void reset(@Header("file") String file, Principal user, File text) {
-    LogootSRopes document = fromText(text.content);
-    documents.put(file, document);
-    document = document.copy();
-    LinkedList<Principal> subscribed = users.get(file);
-    for (int i = 0; i < subscribed.size(); i++) {
-      document.setReplicaNumber(i);
-      messagingTemplate.convertAndSendToUser(subscribed.get(i).getName(), "/crdt-doc", document);
-    }
+  /**
+   * Called when a client disconnects from the socket. Removes the client from all crdt documents.
+   *
+   * @param event Information about the disconnect
+   */
+  @EventListener
+  public void handleDisconnect(final SessionDisconnectEvent event) {
+    final Principal user = event.getUser();
+    unsubscribe(user);
   }
 
+  /**
+   * Called when a client opens a file. Initialized a crdt document with a unique id and sends it to
+   * the client.
+   *
+   * @param file The file that the client opened
+   * @param user The client that called the route
+   * @param text The text to initialize the document with if it doesnt exist yet
+   */
   @MessageMapping("/file")
   public void handleSubscription(@Header("file") String file, Principal user, File text) {
+    System.out.println("Adding user to crdt doc " + file);
     unsubscribe(user);
+
+    if (file.equals("")) {
+      return;
+    }
+
     int replicaNumber;
     if (users.containsKey(file)) {
       // There are already people working on this document
       LogootSRopes document = documents.get(file).copy();
       // Send the document to the user with a unique id (replicaNumber)
-      replicaNumber = users.get(file).size();
+      List<Principal> connectedUsers = users.get(file);
+      replicaNumber = userList.get(connectedUsers.get(connectedUsers.size() - 1)).getCrdtId() + 1;
       document.setReplicaNumber(replicaNumber);
       users.get(file).add(user);
       // Send document to user
       messagingTemplate.convertAndSendToUser(user.getName(), "/crdt-doc", document);
     } else {
+      System.out.println("New crdt document, creating");
       // Noone is working on this document yet
       LinkedList<Principal> subscribed = new LinkedList<Principal>();
       subscribed.add(user);
@@ -100,36 +141,54 @@ public class SynchronizationController {
       // Send document to user
       messagingTemplate.convertAndSendToUser(user.getName(), "/crdt-doc", document);
     }
+
     // This event is handled by the ProjectSyncController instance
     userList.setId(user, replicaNumber);
     FileOpenedEvent event = new FileOpenedEvent(this, user, file);
     applicationEventPublisher.publishEvent(event);
   }
 
+  /**
+   * Creates a crdt document containing some text
+   *
+   * @param text The content of the document
+   */
   private LogootSRopes fromText(String text) {
     LogootSRopes document = new LogootSRopes();
 
-    // Insert content into the crdt document
-    List<Character> characterList =
-        text.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
-    // We have to construct the insert operation ourselfs because the java library doesnt generate
-    // the random part of the identifier,
-    // leading to inconsistencies in mute-structs
-    fr.loria.score.logootsplito.LogootSAdd<Character> insertOperation =
-        new fr.loria.score.logootsplito.LogootSAdd<Character>(
-            new fr.loria.score.logootsplito.Identifier(
-                Arrays.asList(new Integer[] {1000, 0, 0}), 0),
-            characterList);
-    insertOperation.execute(document);
+    if (text.length() > 0) {
+      // Insert content into the crdt document
+      List<Character> characterList =
+          text.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
+      // We have to construct the insert operation ourselfs because the java library doesnt generate
+      // the random part of the identifier,
+      // leading to inconsistencies in mute-structs
+      fr.loria.score.logootsplito.LogootSAdd<Character> insertOperation =
+          new fr.loria.score.logootsplito.LogootSAdd<Character>(
+              new fr.loria.score.logootsplito.Identifier(
+                  Arrays.asList(new Integer[] {1000, 0, 0}), -1),
+              characterList);
+      insertOperation.execute(document);
+    }
     return document;
   }
 
+  /**
+   * Removes a client from all crdt documents that it is connected to
+   *
+   * @param user The client
+   */
   private void unsubscribe(Principal user) {
     // Iterate over all names of files and lists of users working on them
     for (ConcurrentHashMap.Entry<String, LinkedList<Principal>> entry : users.entrySet()) {
       if (entry.getValue().contains(user)) {
+        System.out.println("Removed user " + user.getName() + " from crdt doc " + entry.getKey());
         if (entry.getValue().size() == 1) {
+          for (Principal otherUser : entry.getValue()) {
+            System.out.println(user.getName());
+          }
           // There are no other users working on the file, remove it entirely
+          System.out.println("Removed crdt doc " + entry.getKey());
           users.remove(entry.getKey());
           documents.remove(entry.getKey());
         } else {

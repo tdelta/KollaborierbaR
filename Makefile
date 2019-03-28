@@ -2,12 +2,16 @@ CLIENT_DIR = client
 SERVER_DIR = server
 
 # indicate, that submodules are not files
-.PHONY: setup check pedantic client linter test clean
+.PHONY: setup check format client linter test clean deploy
 
 all: server client
 
 # install dependencies etc.
+# (will download submodules, if we are not running within a Jenkins instance)
 setup:
+	if [[ -z "${RUNNING_IN_JENKINS}" ]]; then \
+		git submodule update --init --recursive; \
+	fi;
 	$(MAKE) -C $(CLIENT_DIR) setup
 	$(MAKE) -C $(SERVER_DIR) setup
 
@@ -16,10 +20,10 @@ check:
 	$(MAKE) -C $(CLIENT_DIR) check
 	$(MAKE) -C $(SERVER_DIR) check
 
-# run static analysis tools in aggressive mode
-pedantic:
-	$(MAKE) -C $(CLIENT_DIR) pedantic
-	$(MAKE) -C $(SERVER_DIR) pedantic
+# Run automatic source code formatters
+format:
+	$(MAKE) -C $(CLIENT_DIR) format
+	$(MAKE) -C $(SERVER_DIR) format
 
 # build
 client:
@@ -41,4 +45,8 @@ clean:
 	$(MAKE) -C $(CLIENT_DIR) clean
 	$(MAKE) -C $(SERVER_DIR) clean
 
+deploy:
+	$(MAKE) -C $(CLIENT_DIR) deploy
+	$(MAKE) -C $(SERVER_DIR) deploy
+	tools/createDeployable.sh
 

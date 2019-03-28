@@ -6,14 +6,18 @@ import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
 import Usernames from './components/user-names/user-names';
 
-import {
-  Network,
+import { Network } from './network';
+
+import ProjectController, {
   ProjectEvent,
   RenamedFileEvent,
   ProjectFileEvent,
   UsersUpdatedEvent,
   ProjectEventType,
-} from './network';
+} from './collaborative/ProjectController';
+
+import FileOrFolder, { FileFolderEnum } from './FileOrFolder';
+import Project from './Project';
 
 interface OpenFileData {
   fileName: string;
@@ -27,40 +31,23 @@ interface ProofResults {
   errors: string[];
 }
 
-enum FileFolderEnum {
-  file = 'file',
-  folder = 'folder',
-}
-
-interface FileOrFolder {
-  name: string;
-  type: FileFolderEnum;
-  contents?: FileOrFolder[];
-}
-
-interface Project {
-  name: string;
-  contents: FileOrFolder[];
-}
-
 export default class ProjectManagement {
   private showProject: (p: Project | {}) => void;
   private getCurrentProject: () => Project | {};
   private setText: (s: string) => void;
-  private getFileName: () => string | undefined;
   private setFileName: (name: string | undefined) => void;
   private getOpenedPath: () => string[];
   private setOpenedPath: (path: string[]) => void;
   private confirmationModal: React.RefObject<ConfirmationModal>;
   private notificationSystem: React.RefObject<NotificationSystem.System>;
   private openFile: (path: string[]) => void;
-  private network: Network;
+  private projectController: ProjectController;
 
   constructor(
+    network: Network,
     showProject: (p: Project | {}) => void,
     getCurrentProject: () => Project | {},
     setText: (s: string) => void,
-    getFileName: () => string | undefined,
     setFileName: (name: string | undefined) => void,
     getOpenedPath: () => string[],
     setOpenedPath: (path: string[]) => void,
@@ -71,7 +58,6 @@ export default class ProjectManagement {
     this.showProject = showProject;
     this.getCurrentProject = getCurrentProject;
     this.setText = setText;
-    this.getFileName = getFileName;
     this.setFileName = setFileName;
     this.getOpenedPath = getOpenedPath;
     this.setOpenedPath = setOpenedPath;
@@ -79,7 +65,7 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
-    this.network = new Network({
+    this.projectController = new ProjectController(network, {
       onProjectEvent: (
         event:
           | ProjectEvent
@@ -100,7 +86,7 @@ export default class ProjectManagement {
               )
             ) {
               this.setText('');
-              this.setFileName(undefined);
+              this.setOpenedPath([]);
             }
 
             if (this.notificationSystem.current) {
@@ -160,7 +146,7 @@ export default class ProjectManagement {
           case ProjectEventType.DeletedProject:
             this.showProject({});
             this.setText('');
-            this.setFileName(undefined);
+            this.setOpenedPath([]);
 
             if (this.notificationSystem.current) {
               this.notificationSystem.current.clearNotifications();
@@ -188,7 +174,7 @@ export default class ProjectManagement {
                 )
               ) {
                 this.setText('');
-                this.setFileName(undefined);
+                this.setOpenedPath([]);
               }
             }
 
@@ -205,17 +191,53 @@ export default class ProjectManagement {
             break;
           case ProjectEventType.UsersUpdated:
             console.log(event);
-                Usernames.updateAllUsers((<UsersUpdatedEvent>event).users);
+
+            Usernames.updateAllUsers((event as UsersUpdatedEvent).users);
             break;
         }
       },
-
-      onConnect: () => undefined,
     });
   }
 
-  public getNetwork(): Network {
-    return this.network;
+  /**
+   * Recursively searches the current project files for all files that end with ".script"
+   * And returns their absolute paths.
+   *
+   * @return - An array of filepaths
+   */
+  public getMacroFiles(): string[] {
+    const project: Project | {} = this.getCurrentProject();
+    if ('contents' in project) {
+      return (project as Project).contents
+        .map(item => this.getMacroFilesRec('', item))
+        .reduce((x: string[], y: string[]) => x.concat(y), []); // flatMap does not exist in IE
+    } else {
+      return [];
+    }
+  }
+
+  /**
+   * Recursive helper function. Given the path to the file or folder item, returns
+   * an array of absolute paths to all .script files contained in item
+   *
+   * @param parentName - path to item, e.g. /src if item is the file Main.java in /src/Main.java
+   * @param item - the file or folder to search in
+   * @return - an array of filepaths
+   */
+  private getMacroFilesRec(parentName: string, item: FileOrFolder): string[] {
+    if (item.type === FileFolderEnum.file && item.name.endsWith('.script')) {
+      // item is a macro file
+      return [`${parentName}/${item.name}`];
+    } else if (item.contents) {
+      // item is a directory
+      return item.contents
+        .map(child =>
+          this.getMacroFilesRec(`${parentName}/${item.name}`, child)
+        )
+        .reduce((x: string[], y: string[]) => x.concat(y), []); // flatMap does not exist in IE
+    } else {
+      return [];
+    }
   }
 
   private static projectContainsPath(
@@ -270,7 +292,15 @@ export default class ProjectManagement {
         Accept: 'application/json', // we want a json object back
         //'Content-Type': 'application/json', // we are sending a json object
       },
-    }).then(response => response.json()); // parse the response body as json
+    }).then(response => {
+      if (response.status === 200) {
+        console.log('Parsing open file response: ', response);
+
+        return response.json();
+      } else {
+        console.error('Opening file failed.', response);
+      }
+    }); // parse the response body as json
   }
 
   /*
@@ -291,15 +321,19 @@ export default class ProjectManagement {
    * load the related files for the project with name 'name' from the server
    * the handler displays the returned project in the editor
    */
-  public openProject(name: string, resetFile: boolean | undefined): void {
+  public openProject(name: string, resetFile: boolean = true): void {
     const escapedName = escape(name);
 
     const url = `${serverAddress}/projects/${escapedName}`;
 
     this.closeProject(() =>
-      this.network.openProject(
-        name,
-        () =>
+      this.projectController
+        .openProject(name)
+        .catch(e => {
+          console.error('Could not sync with server to open project');
+          console.error(e);
+        })
+        .then(() =>
           fetch(url, {
             method: 'GET',
             mode: 'cors',
@@ -307,16 +341,15 @@ export default class ProjectManagement {
             response.json().then((json: Project) => {
               this.showProject(json);
 
-              if (resetFile == null || resetFile) {
+              if (resetFile) {
                 this.setText('');
-                this.setFileName(undefined);
+                this.setOpenedPath([]);
               }
             });
             //return {'status': response.status,
             //  'statusText': response.statusText};
-          }),
-        () => console.log('Could not sync with server to open project')
-      )
+          })
+        )
     );
   }
 
@@ -326,12 +359,16 @@ export default class ProjectManagement {
     if ((project as Project).name == null) {
       cb();
     } else {
-      this.network.closeProject((project as Project).name, cb, () => {
-        console.log(
-          'Failed to unsubscribe, you may still receive messages for your closed project'
-        );
-        cb();
-      });
+      this.projectController
+        .closeProject((project as Project).name)
+        .catch(e => {
+          console.error(
+            'Failed to unsubscribe, you may still receive messages for your closed project'
+          );
+          console.error(e);
+          cb();
+        })
+        .then(cb);
     }
   }
 
@@ -358,7 +395,7 @@ export default class ProjectManagement {
    * Deletes a file from the loaded project on the server
    */
   public deleteFile(
-    currentlyOpenFile: string,
+    currentlyOpenFile: string[],
     projectName: string,
     path: string[]
   ): void {
@@ -379,11 +416,10 @@ export default class ProjectManagement {
             ).then(response => {
               // The response contains the new file structure, where the choosen file it deleted.
               this.showProject(response);
-
               // if the deleted file is the opened one, empty the editor
-              if (path[path.length - 1] === currentlyOpenFile) {
+              if (path.join('/') === currentlyOpenFile.join('/')) {
                 this.setText('');
-                this.setFileName(undefined);
+                this.setOpenedPath([]);
               }
             });
           }
@@ -409,7 +445,7 @@ export default class ProjectManagement {
           if (path === projectName) {
             this.showProject({});
             this.setText('');
-            this.setFileName(undefined);
+            this.setOpenedPath([]);
           }
         }
         // Nothing happens when the dialog was canceled
@@ -451,7 +487,10 @@ export default class ProjectManagement {
 
       ProjectManagement.createOverall(requestPath, type).then(response => {
         this.showProject(response);
-        this.openFile(path);
+
+        if (type !== 'folder') {
+          this.openFile(path);
+        }
       });
     } else if (file !== null && file.includes('/')) {
       alert('No appropriate filename. Filename includes: / ');
@@ -468,19 +507,20 @@ export default class ProjectManagement {
     if (file !== null && !file.includes('/')) {
       ProjectManagement.createOverall(file, FileFolderEnum.folder).then(
         response => {
-          this.network.openProject(
-            file,
-            () => {
-              this.showProject(response);
-              this.setText('');
-              this.setFileName(undefined);
-            },
-            () => {
-              console.log(
+          this.projectController
+            .openProject(file)
+            .catch(e => {
+              console.error(
                 'Creating the project failed, because we could not sync with the server'
               );
-            }
-          );
+
+              console.error(e);
+            })
+            .then(() => {
+              this.showProject(response);
+              this.setText('');
+              this.setOpenedPath([]);
+            });
         }
       );
     }
@@ -505,7 +545,9 @@ export default class ProjectManagement {
   }
 
   /*
-   * updates the filename of the given resource path
+   * This function updates the filename of the given resource path.
+   * The new filename is entered by the prompt, which is created
+   * inside the fuction.
    *
    */
   public updateFileName(path: string[]): void {
@@ -514,20 +556,16 @@ export default class ProjectManagement {
     if (name !== '..' && name !== '.' && name !== null && !name.includes('/')) {
       // Path to the ressource we want to rename
       // TODO: Handle if project not set
-      const url = `
-        ${serverAddress}
-        /projects
-        /${(this.getCurrentProject() as Project).name}
-        /${path.join('/')}`;
+      const url = `${serverAddress}/projects/${
+        (this.getCurrentProject() as Project).name
+      }/${path.join('/')}`;
 
       // Remove the current filename from the path array
       // and then create path for the renamed ressource:
       const oldfilename = path.pop();
-      const renamedRes = `
-        /projects
-        /${(this.getCurrentProject() as Project).name}
-        /${path.join('/')}
-        /${name}`;
+      const renamedRes = `/projects/${
+        (this.getCurrentProject() as Project).name
+      }/${path.join('/')}/${name}`;
 
       // Create a new array with the modify openPath
       const newOpenPath = path.concat([name]);
@@ -551,7 +589,7 @@ export default class ProjectManagement {
           // to the openedPath.
           this.setOpenedPath(newOpenPath);
 
-          if (this.getFileName() === oldfilename) {
+          if (path[path.length - 1] === oldfilename) {
             this.setFileName(name);
           }
         })
@@ -565,20 +603,26 @@ export default class ProjectManagement {
     }
   }
 
-  public updateFileContent(path: string[], content: string): void {
+  /**
+   * That function makes a call to the HTTP rest controller
+   * and updates the content of the file specified by the
+   * parameters.
+   *
+   * @param path to the file that will be updated
+   * @param content that will be set to the file
+   */
+  public updateFileContent(path: string[], content: string): Promise<void> {
     // Path to the ressource we want to save
     // TODO: Check if project exists
-    const url = `
-      ${serverAddress}
-      /projects
-      /${(this.getCurrentProject() as Project).name}
-      /${path.join('/')}`;
+    const url = `${serverAddress}/projects/${
+      (this.getCurrentProject() as Project).name
+    }/${path.join('/')}`;
 
     const requestbody = {
       fileContent: content,
     };
 
-    fetch(url, {
+    return fetch(url, {
       method: 'POST',
       mode: 'cors',
       headers: {
@@ -593,37 +637,5 @@ export default class ProjectManagement {
         );
       }
     });
-  }
-
-  public static getUsernames(): Promise<UserIndicatorData[]> {
-    const url = serverAddress + '/usernames';
-    const test = [
-      { firstName: 'Peter', lastName: 'lalala', crdtId: 0 },
-      { firstName: 'Lustig', lastName: 'lalala', crdtId: 1 },
-      { firstName: 'Mark', lastName: 'lalala', crdtId: 2 },
-      { firstName: 'BigJ', lastName: 'lalala', crdtId: 3 },
-      { firstName: 'Hallo', lastName: 'lalala', crdtId: 4 },
-      { firstName: 'lalalala', lastName: 'lalala', crdtId: 5 }
-    ];
-    /*return test; */
-
-    const promise1 = new Promise<UserIndicatorData[]>(function(
-      resolve,
-      reject
-    ) {
-      setTimeout(function() {
-        resolve(test);
-      }, 300);
-    });
-    return promise1;
-
-    /* return fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Accept': 'application/json',
-            },
-        })
-            .then((response) => response.json());*/
   }
 }
