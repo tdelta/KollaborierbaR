@@ -10,6 +10,7 @@ import ProofTabView from './ProofTabView';
 import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
 import classnames from 'classnames';
 
+import './sidebar.css'
 import Project from '../../Project';
 import ProofsState from '../../key/ProofsState';
 import ObligationResult from '../../key/netdata/ObligationResult';
@@ -46,6 +47,8 @@ export default class Sidebar extends React.Component<Props, State> {
     // ^ the project object must not be empty
 
     this.enableTab = this.enableTab.bind(this);
+	this.setUrgentTab = this.setUrgentTab.bind(this);
+	this.resetUrgentTab = this.resetUrgentTab.bind(this);
     this.toggle = this.toggle.bind(this);
     this.moveSplitBar = this.moveSplitBar.bind(this);
 
@@ -59,6 +62,8 @@ export default class Sidebar extends React.Component<Props, State> {
         : true,
       // currently open tab, see NavLink tags within the render method
       activeTab: '1',
+      // initially no tab should be marked as urgent
+      urgentTab: '-1',
     };
   }
 
@@ -82,6 +87,33 @@ export default class Sidebar extends React.Component<Props, State> {
     if (this.state.activeTab !== tab) {
       this.setState({
         activeTab: tab,
+      });
+    }
+  }
+
+  /**
+   * The sidebar is built from different tabs with different content.
+   * Using this function, one tab can be set as urgent with a color that indicates urgency.
+   *
+   * @param tab   id of the tab that should be set urgent. Use the same Id as in the NavLink definitions within the render method.
+   */
+  private setUrgentTab(tab: string): void {
+    if (this.state.urgentTab !== tab) {
+      this.setState({
+        urgentTab: tab,
+      });
+    }
+  }
+
+  /**
+   * The sidebar is built from different tabs with different content.
+   * Using this function, the urgent tab can be reset to a normal tab
+   * param tab - the id of the tab or undefined
+   */
+  private resetUrgentTab(tab: string | undefined = undefined): void {
+    if (!tab || this.state.urgentTab === tab) {
+      this.setState({
+        urgentTab: '-1',
       });
     }
   }
@@ -177,8 +209,13 @@ export default class Sidebar extends React.Component<Props, State> {
       prevProps.proofsState !== this.props.proofsState &&
       this.props.proofsState.numOfObligationsWithAvailableProofs() > 0
     ) {
-      this.enableTab('3');
+      this.setUrgentTab('3');
     }
+
+	if (prevProps.openedPath.length !== this.props.openedPath.length ||
+		prevProps.openedPath.some((value, index) => value !== this.props.openedPath[index])) {
+		this.resetUrgentTab();
+	}
 
     // This fixes the bug, where the height of the ace isn't correct until you resize the sidebar
     window.dispatchEvent(new Event('resize'));
@@ -254,8 +291,10 @@ export default class Sidebar extends React.Component<Props, State> {
                 <NavLink
                   className={classnames({
                     active: this.state.activeTab === '1',
+					urgent: this.state.urgentTab == '1',
                   })}
                   onClick={() => {
+					this.resetUrgentTab('1');
                     this.enableTab('1');
                   }}
                 >
@@ -266,8 +305,10 @@ export default class Sidebar extends React.Component<Props, State> {
                 <NavLink
                   className={classnames({
                     active: this.state.activeTab === '2',
+					urgent: this.state.urgentTab == '2',
                   })}
                   onClick={() => {
+					this.resetUrgentTab('2');
                     this.enableTab('2');
                   }}
                 >
@@ -278,8 +319,10 @@ export default class Sidebar extends React.Component<Props, State> {
                 <NavLink
                   className={classnames({
                     active: this.state.activeTab === '3',
+					urgent: this.state.urgentTab == '3',
                   })}
                   onClick={() => {
+					this.resetUrgentTab('3');
                     this.enableTab('3');
                   }}
                 >
@@ -373,4 +416,6 @@ interface State {
   collapsed: boolean;
   /** id of the currently opened tab, the the NavLink items generated within the {@link Sidebar.render} method */
   activeTab: string;
+  /** id of a tab where something urgent is going on */
+  urgentTab: string;
 }

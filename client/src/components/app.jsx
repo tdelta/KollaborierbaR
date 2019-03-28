@@ -185,7 +185,7 @@ export default class App extends React.Component {
         path.join('/'),
         this.state.text
       );
-      this.keyInterface.setCurrentFile(this.state.project.name, path);
+      this.keyInterface.setCurrentFile(this.state.project.name, path, false);
       this.consoleSyncController.openFile(this.state.project.name, path);
     }
     this.displayCloseButton = false;
