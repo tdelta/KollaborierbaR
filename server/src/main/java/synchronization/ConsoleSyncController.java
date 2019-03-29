@@ -15,12 +15,33 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 import org.springframework.web.util.UriUtils;
 
+/**
+ * Websocket controller that handles topics /console/projectname/** where ** is the path to a file
+ *
+ * <p>When a user subscribes for a file name they are connected to the file
+ *
+ * <p>Console events for the corresponding file, published by the Spring ApplicationEventPublisher,
+ * will be broadcasted to all connected users
+ */
 @Controller
 public class ConsoleSyncController extends SyncController<Void> {
+  /**
+   * Generates a filepath including the project name
+   *
+   * @param projectName project that the file is in
+   * @param filePath file path
+   * @return Concatenated project file path to use for message topics
+   */
   private static String genProjectFilePath(final String projectName, final String filePath) {
     return projectName + '/' + filePath;
   }
 
+  /**
+   * Generates a topic for websocket messages for a filepath
+   *
+   * @param projectFilePath file path including the project name
+   * @return the complete topic that users subscribe to when they connect to a file
+   */
   private static String genUserTopic(final String projectFilePath) {
     return "/console/" + projectFilePath;
   }
@@ -78,6 +99,12 @@ public class ConsoleSyncController extends SyncController<Void> {
     handleDisconnectHelper(event);
   }
 
+  /**
+   * Broadcasts the received message to all users that are connected to the file specified in the
+   * event
+   *
+   * @param event event that will be broadcasted to all connected users
+   */
   @EventListener
   public void handleNewMessage(final ConsoleEvent event) {
     final String projectFilePath = genProjectFilePath(event.getProjectName(), event.getFilePath());
