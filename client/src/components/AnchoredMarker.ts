@@ -135,6 +135,27 @@ export default class AnchoredMarker {
   }
 }
 
+export function split(
+  markers: AnchoredMarker[],
+  position: ace_types.Ace.Point,
+  session: ace_types.Ace.EditSession
+) {
+  let numMarkers: number = markers.length;
+  for(let i=0; i<numMarkers; i++){
+    let marker: AnchoredMarker = markers[i];
+    let range: ace_types.Ace.Range = marker.getRange(session);
+    if(range.contains(position.row,position.column)){
+      let end: ace_types.Ace.Point = range.end;
+      range.end = position;
+      marker.setRange(range,session);
+      let rangeAfter: ace_types.Ace.Range = Range.fromPoints(position,end);
+      let markerAfter: AnchoredMarker = new AnchoredMarker(rangeAfter,marker.message,marker.type,session);
+      markerAfter.opacity = marker.opacity;
+      markers.push(markerAfter);
+    }
+  }    
+}
+
 /**
  * Adds a new AnchoredMarker to an array of existing ones so that no overlaps occur.
  * Newer added markers will overwrite the old ones. That way you can sort the inputs by priority.
