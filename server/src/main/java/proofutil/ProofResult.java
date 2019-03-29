@@ -50,7 +50,6 @@ public class ProofResult {
             obligationIdx, methodName, msg, proofTree, openGoals, ObligationResult.Kind.failure));
   }
 
-
   /**
    * Basic getter for contents
    *

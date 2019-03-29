@@ -47,31 +47,31 @@ export default class ConsoleSyncController {
     let maybeUnsubscribe: Promise<void>;
     if (this.currentTopic != null) {
       maybeUnsubscribe = this.closeFile();
-    }
-
-    else {
+    } else {
       maybeUnsubscribe = Promise.resolve();
     }
 
     return maybeUnsubscribe
-      .then(() => this.stompService.safeSubscribe(
-        topic,
-        msg => {
-          console.log(msg);
-          const consoleEvent: ConsoleEvent = JSON.parse(msg.body);
-          switch (consoleEvent.eventType) {
-            case ConsoleEventType.Error:
-              this.errorObserver.onErrorEvent(consoleEvent as ErrorEvent);
-              break;
-            case ConsoleEventType.ConsoleMessage:
-              this.consoleObserver.onConsoleEvent(
-                consoleEvent as ConsoleMessageEvent
-              );
-              break;
-          }
-        },
-        {}
-      ))
+      .then(() =>
+        this.stompService.safeSubscribe(
+          topic,
+          msg => {
+            console.log(msg);
+            const consoleEvent: ConsoleEvent = JSON.parse(msg.body);
+            switch (consoleEvent.eventType) {
+              case ConsoleEventType.Error:
+                this.errorObserver.onErrorEvent(consoleEvent as ErrorEvent);
+                break;
+              case ConsoleEventType.ConsoleMessage:
+                this.consoleObserver.onConsoleEvent(
+                  consoleEvent as ConsoleMessageEvent
+                );
+                break;
+            }
+          },
+          {}
+        )
+      )
       .then(() => {
         this.currentProjectName = projectName;
         this.currentFilePath = path;
@@ -89,12 +89,11 @@ export default class ConsoleSyncController {
         'There is no topic set, we can not close the current proof context'
       );
     } else {
-      return this.stompService.safeUnsubscribe(this.currentTopic)
-        .then(() => {
-          this.currentTopic = undefined;
-          this.currentFilePath = undefined;
-          this.currentProjectName = undefined;
-        });
+      return this.stompService.safeUnsubscribe(this.currentTopic).then(() => {
+        this.currentTopic = undefined;
+        this.currentFilePath = undefined;
+        this.currentProjectName = undefined;
+      });
     }
   }
 }
