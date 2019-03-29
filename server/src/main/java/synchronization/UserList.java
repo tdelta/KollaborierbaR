@@ -1,6 +1,7 @@
 package synchronization;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,20 @@ public class UserList {
     int animalId = (int) Math.floor(Math.random() * animals.length);
     int adjectiveId = (int) Math.floor(Math.random() * adjectives.length);
 
-    map.put(user, new User(adjectives[adjectiveId], animals[animalId], -1));
+    map.put(user, new User(adjectives[adjectiveId], animals[animalId], -1, -1));
+  }
+
+  /**
+   * Sets the id of the user, unique in the project that they are workin in
+   *
+   * @param user The Stomp user
+   * @param usersInProject List of information about all users that are connected to a given project
+   */
+  public void setUniqueIdForProject(Principal user, List<User> usersInProject) {
+    User userName = map.get(user);
+    if (userName != null) {
+      userName.setUniqueIdForProject(usersInProject);
+    }
   }
 
   /**
@@ -42,7 +56,7 @@ public class UserList {
    * @param user The Stomp user
    * @param id The Crdt id
    */
-  public void setId(Principal user, int id) {
+  public void setCrdtId(Principal user, int id) {
     User userName = map.get(user);
     if (userName != null) {
       userName.setCrdtId(id);
