@@ -43,9 +43,7 @@ public class ConsoleSyncController extends SyncController<Void> {
       final String filePath =
           ((String) headers.get("simpDestination"))
               .substring(
-                  "/user/console/".length()
-                      + decodedProjectName.length()
-                      + 1 // +1 for trailing /
+                  "/user/console/".length() + decodedProjectName.length() + 1 // +1 for trailing /
                   );
 
       final String decodedFilePath = UriUtils.decode(filePath, "UTF-8");

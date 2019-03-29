@@ -1,19 +1,18 @@
 package server;
 
-import events.UpdatedProofEvent;
-import events.UpdatedProofHistoryEvent;
 import events.ConsoleMessageEvent;
 import events.ErrorEvent;
-import java.util.ArrayList;
+import events.UpdatedProofEvent;
+import events.UpdatedProofHistoryEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Observer;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -86,17 +85,20 @@ public class ProofController {
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
 
-    final Observer console = (observable, object) -> {
-      String message = (String) object;
-      ConsoleMessageEvent event = new ConsoleMessageEvent(this, pathData.projectName, pathData.filePath, message);
-      applicationEventPublisher.publishEvent(event);
-    };
+    final Observer console =
+        (observable, object) -> {
+          String message = (String) object;
+          ConsoleMessageEvent event =
+              new ConsoleMessageEvent(this, pathData.projectName, pathData.filePath, message);
+          applicationEventPublisher.publishEvent(event);
+        };
 
-    final Observer errorObserver = (observable, object) -> {
-      String message = (String) object;
-      ErrorEvent event = new ErrorEvent(this, pathData.projectName, pathData.filePath, message);
-      applicationEventPublisher.publishEvent(event);
-    };
+    final Observer errorObserver =
+        (observable, object) -> {
+          String message = (String) object;
+          ErrorEvent event = new ErrorEvent(this, pathData.projectName, pathData.filePath, message);
+          applicationEventPublisher.publishEvent(event);
+        };
 
     final KeYWrapper key = new KeYWrapper(projectFilePath, console, errorObserver);
 
@@ -107,7 +109,7 @@ public class ProofController {
       // Read the macro file
       String macroContents = fileService.getCurrent(pathData.projectName + macro.get());
       if (macroContents != "") {
-        System.out.println("ProofController: Using macro:\n"+macro.get());
+        System.out.println("ProofController: Using macro:\n" + macro.get());
         macroContentsOptional = Optional.of(macroContents);
       }
     }
