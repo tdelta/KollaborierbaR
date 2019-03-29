@@ -85,6 +85,9 @@ public class ProofController {
     final PathData pathData = decodePath(request);
     final String projectFilePath = pathData.projectFilePath;
 
+    // Listens for text that should be sent to the console.
+    // Emits an event that triggers the broadcast of the text to all users
+    // that are connected to the file being proven
     final Observer console =
         (observable, object) -> {
           String message = (String) object;
@@ -93,6 +96,9 @@ public class ProofController {
           applicationEventPublisher.publishEvent(event);
         };
 
+    // Listens for error texts that should be displayed in an error notification
+    // Emits an event that triggers the broadcast of the error to all users
+    // that are connected to the file being proven
     final Observer errorObserver =
         (observable, object) -> {
           String message = (String) object;
