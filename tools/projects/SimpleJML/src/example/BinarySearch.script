@@ -1,0 +1,9 @@
+set steps=8000;
+auto;
+
+rule "Loop (Scope) Invariant";
+select branch="Invariant Initially Valid";
+tryclose branch assertClosed="true";
+
+auto matches="\\<\{.*" breakpoint="x=false;";
+tryclose steps="600";

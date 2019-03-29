@@ -95,7 +95,7 @@ export default class Top extends React.Component<Props, State> {
    */
   private onFileLoaded(): void {
     if (this.fileReader != null && typeof this.fileReader.result === 'string') {
-      this.props.setText(this.fileReader.result);
+      this.props.simulateTextReplace(this.fileReader.result);
     }
   }
 
@@ -318,4 +318,5 @@ interface Props {
   onSelectMacro(macro: string): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
   isFileOpen: boolean;
+  simulateTextReplace: (text: string) => void;
 }

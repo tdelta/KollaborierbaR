@@ -20,7 +20,7 @@ public class UserList {
         "spider"
       };
 
-  private String[] adjectives = new String[] {"Wild", "Wise", "Drunk", "Fat"};
+  private String[] adjectives = new String[] {"Wild", "Wise", "Drunk", "Fat", "Damned", "Lousy", "Sinister", "Mischievous", "Jealous", "Grumpy", "Greedy"};
 
   // Maps Principal Object (Users managed by Stomp) to information about the users
   private ConcurrentHashMap<Principal, User> map = new ConcurrentHashMap<Principal, User>();
