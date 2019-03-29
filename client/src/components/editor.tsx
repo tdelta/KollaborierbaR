@@ -3,6 +3,8 @@ import * as ace_types from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-pastel_on_dark';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
+import {permanentEditHighlighting} from '../constants';
+
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -398,7 +400,7 @@ export default class Editor extends React.Component<Props, State> {
     const type: string = `n${uid} highlighting`;
     // The deleted field is set, when the range of a marker is empty
     this.popoverMarkers = this.popoverMarkers.filter(m => !m.deleted);
-    let deleteOld: boolean = false;
+    let deleteOld: boolean = !permanentEditHighlighting;
     if(deleteOld){
       // Make old markers less opaque
       this.popoverMarkers
