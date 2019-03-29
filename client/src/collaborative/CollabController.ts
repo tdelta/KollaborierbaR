@@ -39,6 +39,7 @@ export default class CollabController {
   private filepath!: string;
   private project!: string;
   private names: string[];
+  private colors: number[];
   private connected: boolean;
 
   constructor(
@@ -51,6 +52,7 @@ export default class CollabController {
     this.editor = editor.editor; // Ace editor
     this.setText = setText;
     this.names = [];
+    this.colors = [];
     this.connected = false;
 
     this.stompService.on('insert', {}, this.handleRemoteInsert.bind(this));
@@ -155,6 +157,7 @@ export default class CollabController {
         let lastName = user.lastName;
         lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
         this.names[user.crdtId] = `${user.firstName} ${lastName}`;
+        this.colors[user.crdtId] = user.idInProject;
       }
     }
   }
@@ -196,7 +199,7 @@ export default class CollabController {
         this.editorComponent.addBackMarker(
           start,
           end,
-          uid % 10,
+          this.colors[uid] % 10,
           this.names[uid]
         );
       }
