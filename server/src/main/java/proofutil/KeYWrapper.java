@@ -264,10 +264,6 @@ public class KeYWrapper {
     return results;
   }
 
-  public ProofResult proveContractByIdxs(final String className, final List<Integer> indices) {
-    return proveContractByIdxs(className, indices, Optional.empty());
-  }
-
   /**
    * Prove contracts by indices
    *
@@ -277,9 +273,15 @@ public class KeYWrapper {
    */
   public ProofResult proveContractByIdxs(
       final String className, final List<Integer> indices, Optional<String> macro) {
+    // we can only run proofs, if a KeY Environment is available
     if (env != null) {
       for (int index : indices) {
+        // internal KeY representation (sort) of the class on which we want to
+        // run a proof
         final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
+
+        // retrieve all possible proof targets (for example all behaviour
+        // specifications)
         final ImmutableSet<IObserverFunction> targets =
             env.getSpecificationRepository().getContractTargets(keyType);
 
@@ -296,6 +298,7 @@ public class KeYWrapper {
                     .sum()
                 - 1; // -1, since we start counting at 0
 
+        // iterate over the targets and proof those, that are listed in `indices`
         for (final IObserverFunction target : targets) {
           final ImmutableSet<Contract> contracts =
               env.getSpecificationRepository().getContracts(keyType, target);

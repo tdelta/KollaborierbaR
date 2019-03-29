@@ -126,24 +126,41 @@ export default class Editor extends React.Component<Props, State> {
       }
     });
 
+    // react on clicks in the editor gutter (where the line numbers are)
     this.editor.on('gutterclick', (e: any) => {
+      /* There are currently only two types of clickable items available in the
+       * gutter:
+       *
+       * 1. Not proven obligation (blue circle)
+       * 2. Proven obligation
+       *
+       * When those are clicked, the file should be immediately saved before any further actions:
+       */
       this.props.saveFile().then(() => {
         if (
+          // The icon represents a obligation, which has not been proven yet
           e.domEvent.target.className.includes('obligation_todo') &&
           e.domEvent.target.firstChild
         ) {
+          // extract line number from the gutter element
           const rowString = e.domEvent.target.firstChild.data;
           const row = parseInt(rowString, 10) - 1;
 
           if (row) {
+            // clicking on the gutter usually selects the text of the line.
+            // This undoes the selection:
             this.editor.session.getSelection().clearSelection();
+
+            // get a mapping from rows to obligation indices
             const obligations = this.props.getObligations(
               this.editor.session.getLines(0, this.editor.session.getLength())
             );
 
+            // start a proof on the obligation of this row
             this.props.onProveObligations(obligations[row]);
           }
         } else if (
+          // The icon represents a obligation, which has been proven yet
           e.domEvent.target.className.includes('obligation_done') &&
           e.domEvent.target.firstChild
         ) {
@@ -151,18 +168,27 @@ export default class Editor extends React.Component<Props, State> {
           const row = parseInt(rowString, 10) - 1;
 
           if (row) {
+            // clicking on the gutter usually selects the text of the line.
+            // This undoes the selection:
             this.editor.session.getSelection().clearSelection();
+
+            // get a mapping from rows to obligation indices
             const obligations = this.props.getObligations(
               this.editor.session.getLines(0, this.editor.session.getLength())
             );
 
+            // mark the obligation no longer as proven.
             this.props.resetObligation(obligations[row]);
+
+            // start a proof on the obligation of this row
             this.props.onProveObligations(obligations[row]);
           }
         }
       });
     });
 
+    // We need to modify the gutter renderer, such that we are able add customized
+    // gutter elements
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
   }
 
@@ -224,7 +250,7 @@ export default class Editor extends React.Component<Props, State> {
       this.editor.session.getLines(0, this.editor.session.getLength())
     );
     this.obligationAnnotations = [];
-    // Iterate over the indices of the result, which correspond to the line numbers
+    // Iterate over the indices of the result, which correspond to the line numbers of the obligations
     for (const index of Object.keys(obligations)) {
       const obligationIdx: number = obligations[index as any] as number;
 
