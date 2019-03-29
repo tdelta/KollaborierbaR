@@ -10,12 +10,14 @@ import java.util.Observer;
 
 public class ProofScriptExecutor {
 
-  private Proof proof;
+  private final Observer console;
 
-  private DefaultUserInterfaceControl userInterfaceControl = new DefaultUserInterfaceControl();
+  public ProofScriptExecutor(final Observer console) {
+    this.console = console;
+  }
 
-  // TODO: send outputs to the client
-  private Observer commandMonitor = (observable, object) -> {};
+  private final DefaultUserInterfaceControl userInterfaceControl =
+      new DefaultUserInterfaceControl();
 
   /**
    * Executes a proof using a given macro. The result is saved in proofInput
@@ -29,7 +31,7 @@ public class ProofScriptExecutor {
     Location fileLocation = new Location("Proof script", 0, 0);
 
     ProofScriptEngine engine = new ProofScriptEngine(script, fileLocation);
-    engine.setCommandMonitor(commandMonitor);
+    engine.setCommandMonitor(console);
     engine.execute(userInterfaceControl, proofInput);
   }
 }

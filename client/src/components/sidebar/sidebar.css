@@ -49,7 +49,11 @@
   width: 4px;
   height:100%;
 }
+.urgent {
 
+  background-color: #dc3545;
+  margin-bottom: 1px;
+}
 .sidebarToggleButton {
     /*circle shaped background*/
     /*(the button shall not be transparent, but rectangle backgrounds would

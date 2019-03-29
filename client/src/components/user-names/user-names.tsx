@@ -17,6 +17,7 @@ export default class Usernames extends React.Component<Props, State> {
     super(props);
     this.state = {
       userindicators: [],
+      ownId: -1,
     };
     Usernames.instance = this;
   }
@@ -27,9 +28,28 @@ export default class Usernames extends React.Component<Props, State> {
    * no direct pointer to the instance
    * @param users - the users that should be displayed in the top bar
    */
-  public static updateUsers(users: User[]) {
+  public static updateUsers(users: User[], ownId: number) {
     if (Usernames.instance) {
-      Usernames.instance.setState({ userindicators: users });
+      Usernames.instance.setState({ userindicators: users, ownId: ownId });
+    }
+  }
+
+  /**
+   * Get a user indicator icon for a given user
+   * @param key - the unique key of the element
+   * @returns the indicator icon html element
+   */
+  private getUserIndicator(user: User | undefined, key: number) {
+    if (user) {
+      return (
+        <UserIndicator
+          key={key}
+          uid={key}
+          firstName={user.firstName}
+          lastName={user.lastName}
+          crdtId={user.idInProject}
+        />
+      );
     }
   }
 
@@ -37,17 +57,21 @@ export default class Usernames extends React.Component<Props, State> {
    * React callback that creates the html elements
    */
   public render() {
+    const ownUser = this.state.userindicators.find(
+      user => user.idInProject === this.state.ownId
+    );
+    console.log(this.state.ownId);
+    const otherUsers = this.state.userindicators.filter(
+      user => user.idInProject !== this.state.ownId
+    );
+    const divider = otherUsers.length > 0 ? <span className="divider" /> : null;
     return (
       <>
-        {this.state.userindicators.map((iterator, index) => (
-          <UserIndicator
-            key={index}
-            uid={index}
-            firstName={iterator.firstName}
-            lastName={iterator.lastName}
-            crdtId={iterator.idInProject}
-          />
-        ))}
+        {this.getUserIndicator(ownUser, 0)}
+        {divider}
+        {otherUsers.map((iterator, index) =>
+          this.getUserIndicator(iterator, index + 1)
+        )}
       </>
     );
   }
@@ -57,4 +81,5 @@ interface Props {}
 
 interface State {
   userindicators: User[];
+  ownId: number;
 }
