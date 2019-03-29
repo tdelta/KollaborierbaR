@@ -280,7 +280,7 @@ public class KeYWrapper {
         // run a proof
         final KeYJavaType keyType = env.getJavaInfo().getKeYJavaType(className);
 
-        // retrieve all possible proof targets (for example all behaviour 
+        // retrieve all possible proof targets (for example all behaviour
         // specifications)
         final ImmutableSet<IObserverFunction> targets =
             env.getSpecificationRepository().getContractTargets(keyType);

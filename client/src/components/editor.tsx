@@ -130,7 +130,7 @@ export default class Editor extends React.Component<Props, State> {
     this.editor.on('gutterclick', (e: any) => {
       /* There are currently only two types of clickable items available in the
        * gutter:
-       * 
+       *
        * 1. Not proven obligation (blue circle)
        * 2. Proven obligation
        *
@@ -176,7 +176,7 @@ export default class Editor extends React.Component<Props, State> {
             const obligations = this.props.getObligations(
               this.editor.session.getLines(0, this.editor.session.getLength())
             );
-            
+
             // mark the obligation no longer as proven.
             this.props.resetObligation(obligations[row]);
 
