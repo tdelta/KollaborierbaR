@@ -100,30 +100,32 @@ export default class Top extends React.Component<Props, State> {
    * When a file gets uploaded that can be read it gets displayed
    */
   private onFileLoaded(): void {
-    if (this.fileReader != null && this.fileReader.result != null && typeof this.fileReader.result === 'string') {
+    if (
+      this.fileReader != null &&
+      this.fileReader.result != null &&
+      typeof this.fileReader.result === 'string'
+    ) {
       const filePath = this.props.getFilePath();
       const contents = this.fileReader.result;
 
-      if (filePath.length > 0 && this.fileNameForUpload != null && (this.props.project as any).name != null) {
+      if (
+        filePath.length > 0 &&
+        this.fileNameForUpload != null &&
+        (this.props.project as any).name != null
+      ) {
         const newFilePathBuilder = filePath.slice(0, filePath.length - 1);
-        newFilePathBuilder.push(this.fileNameForUpload)
+        newFilePathBuilder.push(this.fileNameForUpload);
         newFilePathBuilder.splice(0, 0, (this.props.project as Project).name);
-        
+
         const path = newFilePathBuilder.join('/');
 
-        ProjectApi
-          .createFile(path, FileFolderEnum.file)
-          .then(createdFile =>
-            ProjectApi.updateFileContents(path, contents)
-          );
+        ProjectApi.createFile(path, FileFolderEnum.file).then(createdFile =>
+          ProjectApi.updateFileContents(path, contents)
+        );
+      } else {
+        console.error('There is no open file path!');
       }
-
-      else {
-        console.error("There is no open file path!");
-      }
-    }
-
-    else {
+    } else {
       console.error('Uploader HTML element not available.');
     }
   }
@@ -171,7 +173,9 @@ export default class Top extends React.Component<Props, State> {
                 <DropdownMenu right>
                   <DropdownItem
                     onClick={() => {
-                      this.props.saveFile().then(() => this.props.onProveFile());
+                      this.props
+                        .saveFile()
+                        .then(() => this.props.onProveFile());
                     }}
                   >
                     <FontAwesomeIcon

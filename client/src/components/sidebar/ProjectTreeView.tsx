@@ -71,7 +71,7 @@ export default class ProjectTreeView extends React.Component<Props, {}> {
           <Context>
             {projectTitle}
             <ContextMenu>
-              {isProjectValid?
+              {isProjectValid ? (
                 <>
                   <ContextAction
                     icon={faFolderPlus}
@@ -95,8 +95,9 @@ export default class ProjectTreeView extends React.Component<Props, {}> {
                     Delete Project
                   </ContextAction>
                 </>
-                : <></>
-              }
+              ) : (
+                <></>
+              )}
             </ContextMenu>
           </Context>
         </div>

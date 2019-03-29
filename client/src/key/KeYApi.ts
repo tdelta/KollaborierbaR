@@ -16,7 +16,11 @@ export default class KeYApi {
    * @param macro - path to the proof script to use, empty string for no proof script
    * @returns a promise for the proof results
    */
-  public static proveFile(path: string, macro: string, signal: AbortSignal): Promise<ProofResults> {
+  public static proveFile(
+    path: string,
+    macro: string,
+    signal: AbortSignal
+  ): Promise<ProofResults> {
     const escapedPath = escape(path);
     // API URL of the server we will use for our request
     let url = `${serverAddress}/proof/${escapedPath}`;
@@ -31,7 +35,7 @@ export default class KeYApi {
         Accept: 'application/json', // we want a json object back
         //'Content-Type': 'application/json', // we are sending a json object
       },
-      signal: signal
+      signal: signal,
     }).then(response => response.json()); // parse the response body as json};
   }
 
@@ -62,7 +66,7 @@ export default class KeYApi {
         Accept: 'application/json', // we want a json object back
         //'Content-Type': 'application/json', // we are sending a json object
       },
-      signal: signal
+      signal: signal,
     }).then(response => response.json()); // parse the response body as json};
   }
 
@@ -88,7 +92,7 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
-        signal: signal
+        signal: signal,
       }
     ).then(response => response.json());
   }
@@ -150,7 +154,7 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
-        signal: signal
+        signal: signal,
       }
     ).then(response => response.json());
   }
@@ -169,7 +173,7 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
-        signal: signal
+        signal: signal,
       }
     ).then(response => response.json());
   }
@@ -201,7 +205,7 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
-        signal: signal
+        signal: signal,
       }
     ).then(response => response.json());
   }
@@ -287,22 +291,25 @@ export default class KeYApi {
     obligationIdx: number,
     signal: AbortSignal
   ) {
-    return KeYApi.downloadHistoryIds(projectName, filePath, obligationIdx,signal).then(
-      (historyIdxs: number[]) => {
-        console.log('Retrieved history idxs: ', historyIdxs);
+    return KeYApi.downloadHistoryIds(
+      projectName,
+      filePath,
+      obligationIdx,
+      signal
+    ).then((historyIdxs: number[]) => {
+      console.log('Retrieved history idxs: ', historyIdxs);
 
-        return Promise.all(
-          historyIdxs.map(historyIdx =>
-            KeYApi.downloadHistoricProof(
-              projectName,
-              filePath,
-              obligationIdx,
-              historyIdx,
-              signal
-            )
+      return Promise.all(
+        historyIdxs.map(historyIdx =>
+          KeYApi.downloadHistoricProof(
+            projectName,
+            filePath,
+            obligationIdx,
+            historyIdx,
+            signal
           )
-        );
-      }
-    );
+        )
+      );
+    });
   }
 }

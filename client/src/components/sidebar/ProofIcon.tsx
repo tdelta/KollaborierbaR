@@ -39,7 +39,7 @@ export default class ProofIcon extends React.Component<Props, {}> {
       case Kind.OpenProofTree:
         icon = faVectorSquare;
         if (this.props.node.collapsed) {
-          icon = faSquareSolid
+          icon = faSquareSolid;
         }
         color = red;
         break;
@@ -47,7 +47,7 @@ export default class ProofIcon extends React.Component<Props, {}> {
       case Kind.ClosedProofTree:
         icon = faVectorSquare;
         if (this.props.node.collapsed) {
-          icon = faSquareSolid
+          icon = faSquareSolid;
         }
         color = green;
         break;

@@ -404,8 +404,7 @@ export default class App extends React.Component {
           getMacroFiles={this.getMacroFiles}
           //TODO: onDeleteProject={this.deleteProject}
           isFileOpen={
-            this.state.project.name != null &&
-            this.state.openedPath.length > 0
+            this.state.project.name != null && this.state.openedPath.length > 0
           }
           project={this.state.project}
         />
