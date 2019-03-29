@@ -51,6 +51,19 @@ public class UserList {
   }
 
   /**
+   * Gets the id of the user, unique in the project that they are workin in
+   *
+   * @param user The Stomp user
+   * @return return the user that belongs to the parameter
+   */
+  public int getUniqueIdForProject(Principal user) {
+    User userName = map.get(user);
+    if (userName != null)
+      return userName.getIdInProject();
+    return -1;
+  }
+
+  /**
    * Sets the Crdt id of an existing user
    *
    * @param user The Stomp user
