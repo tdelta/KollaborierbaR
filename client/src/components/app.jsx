@@ -407,6 +407,7 @@ export default class App extends React.Component {
             this.state.project.name != null &&
             this.state.openedPath.length > 0
           }
+          project={this.state.project}
         />
         <div id="mainContainer">
           {/* Render the sidebar component */}
