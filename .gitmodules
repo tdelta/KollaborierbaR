@@ -1,3 +1,4 @@
 [submodule "key"]
 	path = key
-	url = https://git.key-project.org/key/key
+	url = git@git.key-project.org:key/key.git
+	branch = master

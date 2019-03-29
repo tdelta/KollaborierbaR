@@ -20,7 +20,20 @@ public class UserList {
         "spider"
       };
 
-  private String[] adjectives = new String[] {"Wild", "Wise", "Drunk", "Fat"};
+  private String[] adjectives =
+      new String[] {
+        "Wild",
+        "Wise",
+        "Drunk",
+        "Fat",
+        "Damned",
+        "Lousy",
+        "Sinister",
+        "Mischievous",
+        "Jealous",
+        "Grumpy",
+        "Greedy"
+      };
 
   // Maps Principal Object (Users managed by Stomp) to information about the users
   private ConcurrentHashMap<Principal, User> map = new ConcurrentHashMap<Principal, User>();
@@ -48,6 +61,18 @@ public class UserList {
     if (userName != null) {
       userName.setUniqueIdForProject(usersInProject);
     }
+  }
+
+  /**
+   * Gets the id of the user, unique in the project that they are workin in
+   *
+   * @param user The Stomp user
+   * @return return the user that belongs to the parameter
+   */
+  public int getUniqueIdForProject(Principal user) {
+    User userName = map.get(user);
+    if (userName != null) return userName.getIdInProject();
+    return -1;
   }
 
   /**
