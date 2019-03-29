@@ -24,5 +24,4 @@ export default interface ObligationResult {
 export enum ObligationResultKind {
   success = 'success',
   failure = 'failure',
-  error = 'error',
 }

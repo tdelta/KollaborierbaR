@@ -42,7 +42,8 @@ export default class KeYInterface {
   private getProofsState: () => ProofsState;
   private setProofsState: (proofsState: ProofsState) => void;
   private setObligationIdOfLastUpdatedProof: (obligationId: number) => void;
-  private addNewConsoleMessage: (message: string) => void;
+
+  private cancelDownloads: AbortController;
 
   /** currently selected macro */
   private macro: string = '';
@@ -66,7 +67,6 @@ export default class KeYInterface {
    * @param setProofsState - change the state of available proof results displayed in the UI
    * @param setObligationIdOfLastUpdatedProof - inform the UI about an proof obligation whose proof results recently changed
    * @param getFilePath - allows to retrieve the currently opened file
-   * @param addNewConsoleMessage - display a message in the console at the bottom of the UI
    */
   constructor(
     stompService: StompService,
@@ -75,8 +75,7 @@ export default class KeYInterface {
     getProofsState: () => ProofsState,
     setProofsState: (proofsState: ProofsState) => void,
     setObligationIdOfLastUpdatedProof: (obligationId: number) => void,
-    getFilePath: () => string,
-    addNewConsoleMessage: (message: string) => void
+    getFilePath: () => string
   ) {
     this.notificationSystem = notificationSystem;
     this.setProvenObligations = setProvenObligations;
@@ -96,10 +95,10 @@ export default class KeYInterface {
     this.getObligations = this.getObligations.bind(this);
     this.getContractsForMethod = this.getContractsForMethod.bind(this);
     this.handleResults = this.handleResults.bind(this);
-    this.addNewConsoleMessage = addNewConsoleMessage;
     this.refreshLastProof = this.refreshLastProof.bind(this);
     this.saveObligationResult = this.saveObligationResult.bind(this);
     this.setMacro = this.setMacro.bind(this);
+    this.cancelDownloads = new AbortController();
 
     // Initialize the proof synchronization service.
     // It must be supplied callbacks, which are invoked, if the proof state
@@ -149,26 +148,32 @@ export default class KeYInterface {
   private refreshLastProof(
     projectName: string,
     filePath: string,
-    obligationIdx: number
+    obligationIdx: number,
+    notification: boolean = true
   ): void {
-    KeYApi.downloadLatestProof(projectName, filePath, obligationIdx).then(
-      obligationResult => {
-        console.log('Key: Obligation result: ', obligationResult);
+    KeYApi.downloadLatestProof(
+      projectName,
+      filePath,
+      obligationIdx,
+      this.cancelDownloads.signal
+    ).then(obligationResult => {
+      console.log('Key: Obligation result: ', obligationResult);
 
-        this.setProofsState(
-          this.getProofsState().updateLastResultByObligationIdx(
-            obligationResult.obligationIdx,
-            obligationResult
-          )
-        );
+      this.setProofsState(
+        this.getProofsState().updateLastResultByObligationIdx(
+          obligationResult.obligationIdx,
+          obligationResult
+        )
+      );
 
-        this.setProvenObligations(
-          this.getProofsState().getProvenObligationIdxs()
-        );
+      this.setProvenObligations(
+        this.getProofsState().getProvenObligationIdxs()
+      );
+      if (notification) {
         this.sendLastProofNotifications(obligationResult);
-        this.setObligationIdOfLastUpdatedProof(obligationResult.obligationIdx);
       }
-    );
+      this.setObligationIdOfLastUpdatedProof(obligationResult.obligationIdx);
+    });
   }
 
   /**
@@ -186,20 +191,23 @@ export default class KeYInterface {
     filePath: string,
     obligationIdx: number
   ): void {
-    KeYApi.downloadAllHistoricProofs(projectName, filePath, obligationIdx).then(
-      (savedResults: ObligationResult[]) => {
-        console.log('Key: Saved obligations: ', savedResults);
+    KeYApi.downloadAllHistoricProofs(
+      projectName,
+      filePath,
+      obligationIdx,
+      this.cancelDownloads.signal
+    ).then((savedResults: ObligationResult[]) => {
+      console.log('Key: Saved obligations: ', savedResults);
 
-        this.setProofsState(
-          this.getProofsState().updateSavedResultsByObligationIdx(
-            obligationIdx,
-            savedResults
-          )
-        );
+      this.setProofsState(
+        this.getProofsState().updateSavedResultsByObligationIdx(
+          obligationIdx,
+          savedResults
+        )
+      );
 
-        this.sendHistoryUpdateNotification();
-      }
-    );
+      this.sendHistoryUpdateNotification();
+    });
   }
 
   /**
@@ -255,21 +263,36 @@ export default class KeYInterface {
    * This method should be called by the application for everytime a file is
    * opened.
    */
-  public setCurrentFile(projectName: string, filePath: string[]) {
+  public setCurrentFile(
+    projectName: string,
+    filePath: string[],
+    notification: boolean = true
+  ) {
+    // Stop all downloads since they concern a different file
+    this.cancelDownloads.abort();
+    this.cancelDownloads = new AbortController();
+
     this.proofController.openFile(projectName, filePath);
 
     const filePathJoined = filePath.join('/');
 
-    KeYApi.downloadObligationIds(projectName, filePathJoined).then(
-      (obligationIdxs: number[]) => {
-        console.log('Retrieved obligation idxs: ', obligationIdxs);
+    KeYApi.downloadObligationIds(
+      projectName,
+      filePathJoined,
+      this.cancelDownloads.signal
+    ).then((obligationIdxs: number[]) => {
+      console.log('Retrieved obligation idxs: ', obligationIdxs);
 
-        for (const obligationIdx of obligationIdxs) {
-          this.refreshLastProof(projectName, filePathJoined, obligationIdx);
-          this.refreshProofHistory(projectName, filePathJoined, obligationIdx);
-        }
+      for (const obligationIdx of obligationIdxs) {
+        this.refreshLastProof(
+          projectName,
+          filePathJoined,
+          obligationIdx,
+          notification
+        );
+        this.refreshProofHistory(projectName, filePathJoined, obligationIdx);
       }
-    );
+    });
   }
 
   /**
@@ -288,7 +311,11 @@ export default class KeYInterface {
       });
     }
 
-    KeYApi.proveFile(this.getFilePath(), this.macro).then(this.handleResults);
+    KeYApi.proveFile(
+      this.getFilePath(),
+      this.macro,
+      this.cancelDownloads.signal
+    ).then(this.handleResults);
   }
 
   /**
@@ -309,16 +336,6 @@ export default class KeYInterface {
           });
           break;
 
-        case ObligationResultKind.error:
-          this.notificationSystem.current.addNotification({
-            title: 'Error!',
-            message: obligationResult.resultMsg,
-            level: 'error',
-            position: 'bc',
-            autoDismiss: 15,
-          });
-          break;
-
         case ObligationResultKind.failure:
           this.notificationSystem.current.addNotification({
             title: 'Failure!',
@@ -329,10 +346,6 @@ export default class KeYInterface {
           });
           break;
       }
-
-      //for(const stackTrace of results.stackTraces){
-      //  this.addNewConsoleMessage(stackTrace.resultMsg);
-      //}
     }
   }
 
@@ -376,9 +389,12 @@ export default class KeYInterface {
       });
     }
 
-    return KeYApi.proveObligations(this.getFilePath(), nr, this.macro).then(
-      this.handleResults
-    );
+    return KeYApi.proveObligations(
+      this.getFilePath(),
+      nr,
+      this.macro,
+      this.cancelDownloads.signal
+    ).then(this.handleResults);
   }
 
   /**
@@ -389,7 +405,6 @@ export default class KeYInterface {
    */
   private handleResults(results: ProofResults): void {
     results.succeeded
-      .concat(results.errors)
       .concat(results.failed)
       .forEach(this.proofController.setObligationResult);
   }

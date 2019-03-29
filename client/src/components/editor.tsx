@@ -3,6 +3,8 @@ import * as ace_types from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-pastel_on_dark';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
+import {permanentEditHighlighting} from '../constants';
+
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -17,7 +19,7 @@ import {
   diagnosticPriority,
 } from '../diagnostics';
 
-import AnchoredMarker, { addToArray } from './AnchoredMarker';
+import AnchoredMarker, { addToArray, split } from './AnchoredMarker';
 import PopoverMarker from './PopoverMarker';
 
 import '../highlighting/jml.js';
@@ -89,6 +91,10 @@ export default class Editor extends React.Component<Props, State> {
     });
 
     this.editor.on('change', (delta: ace_types.Ace.Delta) => {
+      if(delta.action === 'insert' && !this.editor.ignoreChanges){
+        if(split(this.popoverMarkers,delta.start,this.editor.session))
+        this.setPopoverMarkers();
+      }
       this.popoverMarkers.forEach(h => h.onChange(delta));
       this.errorMarkers.forEach(m => m.onChange(delta));
       // Update the position of the existing error markers in the editor
@@ -392,15 +398,22 @@ export default class Editor extends React.Component<Props, State> {
   public addBackMarker(start: any, end: any, uid: number, name: string) {
     const range = Range.fromPoints(start, end);
     const type: string = `n${uid} highlighting`;
-    this.popoverMarkerIds.forEach(m => this.editor.session.removeMarker(m));
     // The deleted field is set, when the range of a marker is empty
     this.popoverMarkers = this.popoverMarkers.filter(m => !m.deleted);
-    // Make old markers less opaque
-    this.popoverMarkers
-      .filter(m => m.type === type)
-      .filter(m => m.opacity > 0.1)
-      .forEach(m => (m.opacity -= 0.01));
-
+    let deleteOld: boolean = !permanentEditHighlighting;
+    if(deleteOld){
+      // Make old markers less opaque
+      this.popoverMarkers
+        .filter(m => m.type === type)
+        .filter(m => m.opacity > 0.1)
+        .forEach(m => (m.opacity -= 0.01));
+    }
+    let maxLength: number;
+    if(deleteOld){
+      maxLength = 10;
+    } else {
+      maxLength = Infinity;
+    }
     this.popoverMarkers = addToArray(
       this.popoverMarkers,
       range,
@@ -413,11 +426,17 @@ export default class Editor extends React.Component<Props, State> {
     // Set the opacity of the newly added anchored marker
     this.popoverMarkers[this.popoverMarkers.length - 1].opacity = 0.5;
 
-    // Remove old markers
-    if (this.popoverMarkers.length > 5) {
-      this.popoverMarkers.splice(0, this.popoverMarkers.length - 5);
+    if(deleteOld){
+      // Remove old markers
+      if (this.popoverMarkers.length > 5) {
+        this.popoverMarkers.splice(0, this.popoverMarkers.length - 5);
+      }
     }
+    this.setPopoverMarkers();
+  }
 
+  private setPopoverMarkers(): void {
+    this.popoverMarkerIds.forEach(m => this.editor.session.removeMarker(m));
     for (const anchoredRange of this.popoverMarkers) {
       const popoverMarker: PopoverMarker = new PopoverMarker(
         anchoredRange,

@@ -115,10 +115,12 @@ export interface User {
   lastName: string;
   /** unique id relative to the currently opened file */
   crdtId: number;
+  idInProject: number;
 }
 
 export interface UsersUpdatedEvent extends ProjectEvent {
   users: User[];
+  ownId: number;
 }
 
 /**

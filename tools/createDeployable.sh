@@ -3,7 +3,7 @@
 set -e
 
 mkdir -p deliverables/KollaborierbaR
-mkdir deliverables/KollaborierbaR/projects
+cp -R tools/projects deliverables/KollaborierbaR/projects
 
 cp -R client/build/* deliverables/KollaborierbaR/
 cp server/build/libs/KollaborierbaR-*.jar deliverables/KollaborierbaR/
