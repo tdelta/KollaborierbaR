@@ -53,6 +53,7 @@ export default class App extends React.Component {
 
     // all methods should always refer to this instance of App, when
     // using the `this` variable.
+    this.simulateTextReplace = this.simulateTextReplace.bind(this);
     this.saveFile = this.saveFile.bind(this);
     this.setText = this.setText.bind(this);
     this.setDiagnostics = this.setDiagnostics.bind(this);
@@ -157,6 +158,12 @@ export default class App extends React.Component {
     this.setState({
       text: text,
     });
+  }
+
+  simulateTextReplace(text) {
+    if (this.editor.current != null) {
+      this.editor.current.simulateTextReplace(text);
+    }
   }
 
   setFileName(filename) {
@@ -387,6 +394,7 @@ export default class App extends React.Component {
          */}
         {/* Render the top component */}
         <Top
+          simulateTextReplace={this.simulateTextReplace}
           getFilePath={this.projectManagement.getOpenedPath}
           setText={this.setText}
           text={this.state.text}
