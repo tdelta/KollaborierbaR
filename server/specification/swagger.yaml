@@ -790,21 +790,11 @@ definitions:
   ProofResult:
     type: object
     properties:
-      errors:
-        type: array
-        items:
-          $ref: '#/definitions/ObligationResult'
-        description: Proofs, which failed to execute correctly.
       failed:
         type: array
         items:
           $ref: '#/definitions/ObligationResult'
         description: Proofs, which could not be closed.
-      stackTraces:
-        type: array
-        items:
-          $ref: '#/definitions/ObligationResult'
-        description: Same as `errors`, but with stack traces as message.
       succeeded:
         type: array
         items:
