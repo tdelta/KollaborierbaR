@@ -18,6 +18,7 @@ export default class AnchoredMarker {
   public message: string; // displayed message at the marker
   public deleted: boolean = false;
   public opacity: number = 1;
+  public range!: ace_types.Ace.Range;
 
   constructor(
     range: ace_types.Ace.Range,
@@ -40,20 +41,26 @@ export default class AnchoredMarker {
       .length;
     if (this.end.getPosition().column === lastLine) {
       // The end of the range is at the end of a line
-      return new Range(
+      this.range.setStart(
         this.start.getPosition().row,
-        this.start.getPosition().column,
+        this.start.getPosition().column
+      );
+      this.range.setEnd(
         this.end.getPosition().row + 1,
         0
       );
+      return this.range;
     } else {
       // The end of the range is not at the end of a line
-      return new Range(
+      this.range.setStart(
         this.start.getPosition().row,
-        this.start.getPosition().column,
+        this.start.getPosition().column
+      );
+      this.range.setEnd(
         this.end.getPosition().row,
         this.end.getPosition().column + 1
       );
+      return this.range;
     }
   }
 
@@ -79,6 +86,7 @@ export default class AnchoredMarker {
       .getDocument()
       .createAnchor(range.start.row, range.start.column);
     this.end = editSession.getDocument().createAnchor(row, column);
+    this.range = Range.fromPoints(this.start,this.end);
     this.start.detach();
     this.end.detach();
   }
@@ -139,7 +147,7 @@ export function split(
   markers: AnchoredMarker[],
   position: ace_types.Ace.Point,
   session: ace_types.Ace.EditSession
-) {
+): boolean {
   let numMarkers: number = markers.length;
   for(let i=0; i<numMarkers; i++){
     let marker: AnchoredMarker = markers[i];
@@ -152,8 +160,10 @@ export function split(
       let markerAfter: AnchoredMarker = new AnchoredMarker(rangeAfter,marker.message,marker.type,session);
       markerAfter.opacity = marker.opacity;
       markers.push(markerAfter);
+      return true;
     }
-  }    
+  }
+  return false;
 }
 
 /**
