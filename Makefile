@@ -9,7 +9,7 @@ all: server client
 # install dependencies etc.
 # (will download submodules, if we are not running within a Jenkins instance)
 setup:
-	if [[ -z "${RUNNING_IN_JENKINS}" ]]; then \
+	if [ -z "${RUNNING_IN_JENKINS}" ]; then \
 		git submodule update --init --recursive; \
 	fi;
 	$(MAKE) -C $(CLIENT_DIR) setup
