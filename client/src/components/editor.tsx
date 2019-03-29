@@ -92,8 +92,9 @@ export default class Editor extends React.Component<Props, State> {
 
     this.editor.on('change', (delta: ace_types.Ace.Delta) => {
       if (delta.action === 'insert' && !this.editor.ignoreChanges) {
-        if (split(this.popoverMarkers, delta.start, this.editor.session))
+        if (split(this.popoverMarkers, delta.start, this.editor.session)) {
           this.setPopoverMarkers();
+        }
       }
       this.popoverMarkers.forEach(h => h.onChange(delta));
       this.errorMarkers.forEach(m => m.onChange(delta));
@@ -400,7 +401,7 @@ export default class Editor extends React.Component<Props, State> {
     const type: string = `n${uid} highlighting`;
     // The deleted field is set, when the range of a marker is empty
     this.popoverMarkers = this.popoverMarkers.filter(m => !m.deleted);
-    let deleteOld: boolean = !permanentEditHighlighting;
+    const deleteOld: boolean = !permanentEditHighlighting;
     if (deleteOld) {
       // Make old markers less opaque
       this.popoverMarkers
