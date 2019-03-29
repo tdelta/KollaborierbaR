@@ -92,7 +92,7 @@ export default class Editor extends React.Component<Props, State> {
 
     this.editor.on('change', (delta: ace_types.Ace.Delta) => {
       if(delta.action === 'insert' && !this.editor.ignoreChanges){
-        split(this.popoverMarkers,delta.start,this.editor.session);
+        if(split(this.popoverMarkers,delta.start,this.editor.session))
         this.setPopoverMarkers();
       }
       this.popoverMarkers.forEach(h => h.onChange(delta));
@@ -411,6 +411,12 @@ export default class Editor extends React.Component<Props, State> {
         .filter(m => m.type === type)
         .filter(m => m.opacity > 0.1)
         .forEach(m => (m.opacity -= 0.01));
+    }
+    let maxLength: number;
+    if(deleteOld){
+      maxLength = 10;
+    } else {
+      maxLength = Infinity;
     }
     this.popoverMarkers = addToArray(
       this.popoverMarkers,
