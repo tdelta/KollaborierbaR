@@ -2,4 +2,3 @@
 	path = key
 	url = git@git.key-project.org:key/key.git
 	branch = master
-	shallow = true
