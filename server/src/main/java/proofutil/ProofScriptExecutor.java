@@ -12,11 +12,12 @@ public class ProofScriptExecutor {
 
   private final Observer console;
 
-  public ProofScriptExecutor(final Observer console){
+  public ProofScriptExecutor(final Observer console) {
     this.console = console;
   }
 
-  private final DefaultUserInterfaceControl userInterfaceControl = new DefaultUserInterfaceControl();
+  private final DefaultUserInterfaceControl userInterfaceControl =
+      new DefaultUserInterfaceControl();
 
   /**
    * Executes a proof using a given macro. The result is saved in proofInput

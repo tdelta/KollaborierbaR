@@ -17,9 +17,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observer;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.Observer;
 import org.key_project.util.collection.ImmutableSet;
 
 /**
@@ -68,10 +68,10 @@ public class KeYWrapper {
       // performed proof if a *.proof
       // file is loaded
     } catch (ProblemLoaderException e) {
-      errorObserver.update(null,
-          "Couldn't process all relevant information for verification with KeY.");
+      errorObserver.update(
+          null, "Couldn't process all relevant information for verification with KeY.");
 
-      console.update(null,"Exception at '" + location + "':\n"+stackToString(e));
+      console.update(null, "Exception at '" + location + "':\n" + stackToString(e));
 
       System.out.println("Exception at '" + location + "':");
       e.printStackTrace();
@@ -177,14 +177,16 @@ public class KeYWrapper {
                   .collect(Collectors.toList()));
         }
       } catch (Exception e) {
-        errorObserver.update(null,
+        errorObserver.update(
+            null,
             "Something went wrong at '"
                 + contract.getDisplayName()
                 + "' of "
                 + contract.getTarget()
                 + ".");
 
-        console.update(null,
+        console.update(
+            null,
             "Exception at '"
                 + contract.getDisplayName()
                 + "' of "
