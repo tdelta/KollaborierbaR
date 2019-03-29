@@ -3,7 +3,7 @@ import * as ace_types from 'ace-builds';
 import 'ace-builds/src-noconflict/theme-pastel_on_dark';
 import 'ace-builds/src-noconflict/ext-language_tools';
 
-import {permanentEditHighlighting} from '../constants';
+import { permanentEditHighlighting } from '../constants';
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -91,9 +91,9 @@ export default class Editor extends React.Component<Props, State> {
     });
 
     this.editor.on('change', (delta: ace_types.Ace.Delta) => {
-      if(delta.action === 'insert' && !this.editor.ignoreChanges){
-        if(split(this.popoverMarkers,delta.start,this.editor.session))
-        this.setPopoverMarkers();
+      if (delta.action === 'insert' && !this.editor.ignoreChanges) {
+        if (split(this.popoverMarkers, delta.start, this.editor.session))
+          this.setPopoverMarkers();
       }
       this.popoverMarkers.forEach(h => h.onChange(delta));
       this.errorMarkers.forEach(m => m.onChange(delta));
@@ -401,7 +401,7 @@ export default class Editor extends React.Component<Props, State> {
     // The deleted field is set, when the range of a marker is empty
     this.popoverMarkers = this.popoverMarkers.filter(m => !m.deleted);
     let deleteOld: boolean = !permanentEditHighlighting;
-    if(deleteOld){
+    if (deleteOld) {
       // Make old markers less opaque
       this.popoverMarkers
         .filter(m => m.type === type)
@@ -409,7 +409,7 @@ export default class Editor extends React.Component<Props, State> {
         .forEach(m => (m.opacity -= 0.01));
     }
     let maxLength: number;
-    if(deleteOld){
+    if (deleteOld) {
       maxLength = 10;
     } else {
       maxLength = Infinity;
@@ -426,7 +426,7 @@ export default class Editor extends React.Component<Props, State> {
     // Set the opacity of the newly added anchored marker
     this.popoverMarkers[this.popoverMarkers.length - 1].opacity = 0.5;
 
-    if(deleteOld){
+    if (deleteOld) {
       // Remove old markers
       if (this.popoverMarkers.length > 5) {
         this.popoverMarkers.splice(0, this.popoverMarkers.length - 5);

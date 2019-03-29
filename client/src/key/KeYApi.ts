@@ -14,6 +14,7 @@ export default class KeYApi {
    * Tells the server that it should prove all obligations in a file
    * @param string - the path to the file relative to the server projects folder
    * @param macro - path to the proof script to use, empty string for no proof script
+   * @param signal - used to cancel the request if needed
    * @returns a promise for the proof results
    */
   public static proveFile(
@@ -45,6 +46,7 @@ export default class KeYApi {
    * @param string - the path to the file relative to the server projects folder
    * @param nr - the index or indices of the obligations to prove
    * @param macro - path to the proof script to use, empty string for no proof script
+   * @param signal - used to cancel the request if needed
    * @returns a promise for the proof results
    */
   public static proveObligations(
@@ -76,6 +78,7 @@ export default class KeYApi {
    * @param obligationIdx - index of the obligation (counted from top to bottom
    *                        in the source file), for which the latest proof
    *                        shall be retrieved.
+   * @param signal - used to cancel the request if needed
    */
   public static downloadLatestProof(
     projectName: string,
@@ -138,6 +141,7 @@ export default class KeYApi {
    * @param obligationIdx - index of the obligation (counted from top to bottom
    *                        in the source file), for which the ids of available
    *                        history items shall be retrieved
+   * @param signal - used to cancel the request if needed
    */
   public static downloadHistoryIds(
     projectName: string,
@@ -188,6 +192,7 @@ export default class KeYApi {
    * @param historyIdx - which result shall be retrieved from the history?
    *                     {@link #downloadHistoryIds) can be used to retrieve a
    *                     list of ids available on the server.
+   * @param signal - used to cancel the request if needed
    */
   public static downloadHistoricProof(
     projectName: string,
@@ -284,6 +289,7 @@ export default class KeYApi {
    * @param obligationIdx - index of the obligation (counted from top to bottom
    *                        in the source file), for which the available
    *                        history items shall be retrieved
+   * @param signal - used to cancel the request if needed
    */
   public static downloadAllHistoricProofs(
     projectName: string,

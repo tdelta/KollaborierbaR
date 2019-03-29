@@ -192,7 +192,7 @@ test {
 
 // API documentation generation
 convertSwagger2markup {
-    swaggerInput "specification/swagger.yaml"
+    swaggerInput "${projectDir}/specification/swagger.yaml"
     outputDir file("${buildDir}/asciidoc/generated")
     outputFile file("${buildDir}/asciidoc/generated/apidoc")
     config = [
