@@ -52,6 +52,8 @@ export default class Editor extends React.Component<Props, State> {
       disableContext: true,
       contracts: [],
     };
+
+    this.simulateTextReplace = this.simulateTextReplace.bind(this);
   }
 
   /**
@@ -157,6 +159,10 @@ export default class Editor extends React.Component<Props, State> {
     });
 
     this.addKeyAnnotationType(this.editor.renderer.$gutterLayer);
+  }
+
+  public simulateTextReplace(text: string) {
+    this.editor.setValue(text);
   }
 
   /**

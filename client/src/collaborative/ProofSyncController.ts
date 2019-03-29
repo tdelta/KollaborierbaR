@@ -59,36 +59,48 @@ export default class ProofSyncController {
   public openFile(projectName: string, path: string[]): Promise<void> {
     const topic = this.genTopic(projectName, path);
 
-    return this.stompService
-      .safeSubscribe(
-        topic,
-        msg => {
-          try {
-            const event: ProofEvent = JSON.parse(msg.body);
+    let maybeUnsubscribe: Promise<void>;
+    if (this.currentTopic != null) {
+      maybeUnsubscribe = this.closeFile();
+    }
 
-            console.log(`incoming proof event`, event);
+    else {
+      maybeUnsubscribe = Promise.resolve();
+    }
 
-            switch (event.eventType) {
-              case ProofEventType.UpdatedProof:
-                this.observer.onUpdatedProof(event);
-                break;
+    return maybeUnsubscribe
+      .then(() => 
+        this.stompService
+          .safeSubscribe(
+            topic,
+            msg => {
+              try {
+                const event: ProofEvent = JSON.parse(msg.body);
 
-              case ProofEventType.UpdatedProofHistory:
-                this.observer.onUpdatedHistory(event);
-                break;
-            }
-          } catch (e) {
-            console.error('Failed to parse server event');
-            console.error(e);
-          }
-        },
-        {}
-      )
-      .then(() => {
-        this.currentProjectName = projectName;
-        this.currentFilePath = path;
-        this.currentTopic = topic;
-      });
+                console.log(`incoming proof event`, event);
+
+                switch (event.eventType) {
+                  case ProofEventType.UpdatedProof:
+                    this.observer.onUpdatedProof(event);
+                    break;
+
+                  case ProofEventType.UpdatedProofHistory:
+                    this.observer.onUpdatedHistory(event);
+                    break;
+                }
+              } catch (e) {
+                console.error('Failed to parse server event');
+                console.error(e);
+              }
+            },
+            {}
+          )
+          .then(() => {
+            this.currentProjectName = projectName;
+            this.currentFilePath = path;
+            this.currentTopic = topic;
+          })
+        );
   }
 
   /**
@@ -101,7 +113,13 @@ export default class ProofSyncController {
         'There is no topic set, we can not close the current proof context'
       );
     } else {
-      return this.stompService.safeUnsubscribe(this.currentTopic);
+      return this.stompService
+        .safeUnsubscribe(this.currentTopic)
+        .then(() => {
+          this.currentTopic = undefined;
+          this.currentFilePath = undefined;
+          this.currentProjectName = undefined;
+        });
     }
   }
 
