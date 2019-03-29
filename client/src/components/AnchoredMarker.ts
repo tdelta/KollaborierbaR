@@ -145,17 +145,17 @@ export function split(
   position: ace_types.Ace.Point,
   session: ace_types.Ace.EditSession
 ): boolean {
-  let numMarkers: number = markers.length;
+  const numMarkers: number = markers.length;
   for (let i = 0; i < numMarkers; i++) {
-    let marker: AnchoredMarker = markers[i];
-    let range: ace_types.Ace.Range = marker.getRange(session);
+    const marker: AnchoredMarker = markers[i];
+    const range: ace_types.Ace.Range = marker.getRange(session);
 
     if (range.contains(position.row, position.column)) {
-      let end: ace_types.Ace.Point = range.end;
+      const end: ace_types.Ace.Point = range.end;
       range.end = position;
       marker.setRange(range, session);
-      let rangeAfter: ace_types.Ace.Range = Range.fromPoints(position, end);
-      let markerAfter: AnchoredMarker = new AnchoredMarker(
+      const rangeAfter: ace_types.Ace.Range = Range.fromPoints(position, end);
+      const markerAfter: AnchoredMarker = new AnchoredMarker(
         rangeAfter,
         marker.message,
         marker.type,
