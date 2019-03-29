@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import NotificationSystem from 'react-notification-system';
 import '../index.css';
 import Usernames from './user-names/user-names';
+import Toggleable from './Toggleable';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -30,11 +31,16 @@ import {
 } from 'reactstrap';
 
 import { OpenModal, DeleteModal, MacroModal } from './selection-modals.jsx';
+import ProjectApi from '../ProjectApi';
+import { FileFolderEnum } from '../FileOrFolder';
+import Project from '../Project';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
   private downloadSelector: RefObject<HTMLInputElement>;
   private fileReader?: FileReader;
+
+  private fileNameForUpload?: string;
 
   constructor(props: Props) {
     super(props);
@@ -86,6 +92,7 @@ export default class Top extends React.Component<Props, State> {
 
     if (event.target != null && event.target.files != null) {
       this.fileReader.readAsText(event.target.files[0]);
+      this.fileNameForUpload = event.target.files[0].name;
     }
   }
 
@@ -93,8 +100,33 @@ export default class Top extends React.Component<Props, State> {
    * When a file gets uploaded that can be read it gets displayed
    */
   private onFileLoaded(): void {
-    if (this.fileReader != null && typeof this.fileReader.result === 'string') {
-      this.props.setText(this.fileReader.result);
+    if (
+      this.fileReader != null &&
+      this.fileReader.result != null &&
+      typeof this.fileReader.result === 'string'
+    ) {
+      const filePath = this.props.getFilePath();
+      const contents = this.fileReader.result;
+
+      if (
+        filePath.length > 0 &&
+        this.fileNameForUpload != null &&
+        (this.props.project as any).name != null
+      ) {
+        const newFilePathBuilder = filePath.slice(0, filePath.length - 1);
+        newFilePathBuilder.push(this.fileNameForUpload);
+        newFilePathBuilder.splice(0, 0, (this.props.project as Project).name);
+
+        const path = newFilePathBuilder.join('/');
+
+        ProjectApi.createFile(path, FileFolderEnum.file).then(createdFile =>
+          ProjectApi.updateFileContents(path, contents)
+        );
+      } else {
+        console.error('There is no open file path!');
+      }
+    } else {
+      console.error('Uploader HTML element not available.');
     }
   }
 
@@ -133,31 +165,35 @@ export default class Top extends React.Component<Props, State> {
           <Nav className="ml-auto" navbar>
             <Usernames />
 
-            <UncontrolledDropdown>
-              <DropdownToggle nav caret>
-                KeY
-              </DropdownToggle>
-              <DropdownMenu right>
-                <DropdownItem
-                  onClick={() => {
-                    this.props.saveFile().then(() => this.props.onProveFile());
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faForward}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Prove all contracts
-                </DropdownItem>
-                <DropdownItem onClick={this.toggleMacroModal}>
-                  <FontAwesomeIcon
-                    icon={faDirections}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Select Macro
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
+            <Toggleable isVisible={this.props.isFileOpen}>
+              <UncontrolledDropdown>
+                <DropdownToggle nav caret>
+                  KeY
+                </DropdownToggle>
+                <DropdownMenu right>
+                  <DropdownItem
+                    onClick={() => {
+                      this.props
+                        .saveFile()
+                        .then(() => this.props.onProveFile());
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faForward}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Prove all contracts
+                  </DropdownItem>
+                  <DropdownItem onClick={this.toggleMacroModal}>
+                    <FontAwesomeIcon
+                      icon={faDirections}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Select Macro
+                  </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
+            </Toggleable>
 
             <UncontrolledDropdown>
               <DropdownToggle nav caret>
@@ -203,48 +239,50 @@ export default class Top extends React.Component<Props, State> {
               loadFunction={this.props.getMacroFiles}
               selectOperation={this.props.onSelectMacro}
             />
-            <UncontrolledDropdown>
-              <DropdownToggle nav caret>
-                File
-              </DropdownToggle>
-              <DropdownMenu right>
-                <DropdownItem onClick={this.downloadFileOnClick}>
-                  <FontAwesomeIcon
-                    icon={faDownload}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Download
-                </DropdownItem>
-                <DropdownItem onClick={this.openFileOnClick}>
-                  <FontAwesomeIcon
-                    icon={faCloudUploadAlt}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Upload
-                </DropdownItem>
-                <DropdownItem onClick={this.props.onDeleteFile}>
-                  <FontAwesomeIcon
-                    icon={faTrashAlt}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Delete
-                </DropdownItem>
-                <DropdownItem onClick={this.props.onUpdateFileName}>
-                  <FontAwesomeIcon
-                    icon={faTag}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Rename
-                </DropdownItem>
-                <DropdownItem onClick={this.props.saveFile}>
-                  <FontAwesomeIcon
-                    icon={faSave}
-                    style={{ marginRight: '0.5em' }}
-                  />
-                  Save
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
+            <Toggleable isVisible={this.props.isFileOpen}>
+              <UncontrolledDropdown>
+                <DropdownToggle nav caret>
+                  File
+                </DropdownToggle>
+                <DropdownMenu right>
+                  <DropdownItem onClick={this.downloadFileOnClick}>
+                    <FontAwesomeIcon
+                      icon={faDownload}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Download
+                  </DropdownItem>
+                  <DropdownItem onClick={this.openFileOnClick}>
+                    <FontAwesomeIcon
+                      icon={faCloudUploadAlt}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Upload
+                  </DropdownItem>
+                  <DropdownItem onClick={this.props.onDeleteFile}>
+                    <FontAwesomeIcon
+                      icon={faTrashAlt}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Delete
+                  </DropdownItem>
+                  <DropdownItem onClick={this.props.onUpdateFileName}>
+                    <FontAwesomeIcon
+                      icon={faTag}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Rename
+                  </DropdownItem>
+                  <DropdownItem onClick={this.props.saveFile}>
+                    <FontAwesomeIcon
+                      icon={faSave}
+                      style={{ marginRight: '0.5em' }}
+                    />
+                    Save
+                  </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
+            </Toggleable>
           </Nav>
         </Navbar>
 
@@ -312,4 +350,6 @@ interface Props {
   onProveFile(): void;
   onSelectMacro(macro: string): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
+  isFileOpen: boolean;
+  project: Project | {};
 }

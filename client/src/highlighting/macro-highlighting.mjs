@@ -21,7 +21,7 @@ ace.define( // create a new ace module
             start: [
               {
                 token: 'keyword',
-                regex: 'matches|auto|tryclose|select|branch|formula|number|rule|set|steps|breakpoint'
+                regex: 'matches|auto|tryclose|select|branch|formula|number|rule|set|steps|breakpointscript|foreach|cases|case|matchLabel|matchSeq|closes|matchRule|repeat|theonly'
                 // The regular expression matches all keywords. These shall be highlighted as 'keyword'
               }
             ]
