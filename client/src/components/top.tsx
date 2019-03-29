@@ -31,11 +31,16 @@ import {
 } from 'reactstrap';
 
 import { OpenModal, DeleteModal, MacroModal } from './selection-modals.jsx';
+import ProjectApi from '../ProjectApi';
+import { FileFolderEnum } from '../FileOrFolder';
+import Project from '../Project';
 
 export default class Top extends React.Component<Props, State> {
   private fileSelector: RefObject<HTMLInputElement>;
   private downloadSelector: RefObject<HTMLInputElement>;
   private fileReader?: FileReader;
+
+  private fileNameForUpload?: string;
 
   constructor(props: Props) {
     super(props);
@@ -87,6 +92,7 @@ export default class Top extends React.Component<Props, State> {
 
     if (event.target != null && event.target.files != null) {
       this.fileReader.readAsText(event.target.files[0]);
+      this.fileNameForUpload = event.target.files[0].name;
     }
   }
 
@@ -94,8 +100,31 @@ export default class Top extends React.Component<Props, State> {
    * When a file gets uploaded that can be read it gets displayed
    */
   private onFileLoaded(): void {
-    if (this.fileReader != null && typeof this.fileReader.result === 'string') {
-      this.props.setText(this.fileReader.result);
+    if (this.fileReader != null && this.fileReader.result != null && typeof this.fileReader.result === 'string') {
+      const filePath = this.props.getFilePath();
+      const contents = this.fileReader.result;
+
+      if (filePath.length > 0 && this.fileNameForUpload != null && (this.props.project as any).name != null) {
+        const newFilePathBuilder = filePath.slice(0, filePath.length - 1);
+        newFilePathBuilder.push(this.fileNameForUpload)
+        newFilePathBuilder.splice(0, 0, (this.props.project as Project).name);
+        
+        const path = newFilePathBuilder.join('/');
+
+        ProjectApi
+          .createFile(path, FileFolderEnum.file)
+          .then(createdFile =>
+            ProjectApi.updateFileContents(path, contents)
+          );
+      }
+
+      else {
+        console.error("There is no open file path!");
+      }
+    }
+
+    else {
+      console.error('Uploader HTML element not available.');
     }
   }
 
@@ -318,4 +347,5 @@ interface Props {
   onSelectMacro(macro: string): void;
   notificationSystem: React.RefObject<NotificationSystem.System>;
   isFileOpen: boolean;
+  project: Project | {};
 }
