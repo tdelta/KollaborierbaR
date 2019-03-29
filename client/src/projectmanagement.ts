@@ -86,7 +86,6 @@ export default class ProjectManagement {
 
         if (currentProjectName != null) {
           switch (event.eventType) {
-
             // A file got deleted on the server
             case ProjectEventType.DeletedFile:
               this.openProject(currentProjectName, false).then(

@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Indicates, that a project had been deleted.
  *
- * See base class {@link ProofEvent} for more information.
+ * <p>See base class {@link ProofEvent} for more information.
  */
 public class DeletedProjectEvent extends ProjectEvent {
   private final List<String> deleted;
