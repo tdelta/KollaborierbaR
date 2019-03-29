@@ -32,6 +32,8 @@ class ModalSelect extends React.Component {
 
   /*
    * update the state with the selected option
+   * @param name - the selected element of the modal
+   * @param id - an enumeration for the options and used to check with option is active
    */
   select(name, id) {
     this.setState({
@@ -45,6 +47,7 @@ class ModalSelect extends React.Component {
   /*
    * performs the desired operation for the selected option when the select button is pressed
    * through the setStructure props method the structure starts its long journey to the sidebar
+   * @param name - the selected element of the modal
    */
   selectAction(name) {
     if (!name) {
@@ -137,16 +140,16 @@ class ModalSelect extends React.Component {
 /*
  * loads the project list, called whenever a project modal is opened
  */
-const loadProjectNames = function() {
+function loadProjectNames() {
   ProjectManagement.getProjects().then(projects => {
     this.setState({ options: projects });
   });
-};
+}
 
 /*
  * loads the available macro files from the project, called when MacroModal is opened
  */
-const loadMacroFiles = function() {
+function loadMacroFiles() {
   let options = this.props.loadFunction();
   if (options.length > 0) {
     options.push('');
@@ -154,9 +157,10 @@ const loadMacroFiles = function() {
   this.setState({
     options: options,
   });
-};
+}
 
 /*
+ * Wrapper around generic modal for opening projects
  * No inheritance from ModalSelect because it is considered bad practice in React.
  * See https://reactjs.org/docs/composition-vs-inheritance.html
  */
@@ -171,6 +175,11 @@ function OpenModal(props) {
   );
 }
 
+/*
+ * Wrapper around generic modal for deleting projects
+ * No inheritance from ModalSelect because it is considered bad practice in React.
+ * See https://reactjs.org/docs/composition-vs-inheritance.html
+ */
 function DeleteModal(props) {
   return (
     <ModalSelect
@@ -182,6 +191,11 @@ function DeleteModal(props) {
   );
 }
 
+/*
+ * Wrapper around generic modal for selecting macros
+ * No inheritance from ModalSelect because it is considered bad practice in React.
+ * See https://reactjs.org/docs/composition-vs-inheritance.html
+ */
 function MacroModal(props) {
   return (
     <ModalSelect
