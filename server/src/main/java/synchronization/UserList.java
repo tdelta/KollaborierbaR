@@ -69,9 +69,13 @@ public class UserList {
    * @param user The Stomp user
    * @return return the user that belongs to the parameter
    */
-  public int getUniqueIdForProject(Principal user) {
-    User userName = map.get(user);
-    if (userName != null) return userName.getIdInProject();
+  public int getUniqueIdForProject(final Principal user) {
+    final User userName = map.get(user);
+
+    if (userName != null) {
+      return userName.getIdInProject();
+    }
+
     return -1;
   }
 
