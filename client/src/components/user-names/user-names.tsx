@@ -42,33 +42,36 @@ export default class Usernames extends React.Component<Props, State> {
   private getUserIndicator(user: User | undefined, key: number) {
     if (user) {
       return (
-          <UserIndicator
-            key={key}
-            uid={key}
-            firstName={user.firstName}
-            lastName={user.lastName}
-            crdtId={user.idInProject}
-          /> 
-      )
+        <UserIndicator
+          key={key}
+          uid={key}
+          firstName={user.firstName}
+          lastName={user.lastName}
+          crdtId={user.idInProject}
+        />
+      );
     }
-
   }
 
   /**
    * React callback that creates the html elements
    */
   public render() {
-    const ownUser = this.state.userindicators.find(user => user.idInProject === this.state.ownId);
-    console.log(this.state.ownId)
-    const otherUsers = this.state.userindicators.filter(user => user.idInProject !== this.state.ownId);
+    const ownUser = this.state.userindicators.find(
+      user => user.idInProject === this.state.ownId
+    );
+    console.log(this.state.ownId);
+    const otherUsers = this.state.userindicators.filter(
+      user => user.idInProject !== this.state.ownId
+    );
     const divider = otherUsers.length > 0 ? <span className="divider" /> : null;
     return (
       <>
         {this.getUserIndicator(ownUser, 0)}
         {divider}
-        {otherUsers.map((iterator, index) => (
+        {otherUsers.map((iterator, index) =>
           this.getUserIndicator(iterator, index + 1)
-        ))}
+        )}
       </>
     );
   }

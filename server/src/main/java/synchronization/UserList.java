@@ -20,7 +20,20 @@ public class UserList {
         "spider"
       };
 
-  private String[] adjectives = new String[] {"Wild", "Wise", "Drunk", "Fat", "Damned", "Lousy", "Sinister", "Mischievous", "Jealous", "Grumpy", "Greedy"};
+  private String[] adjectives =
+      new String[] {
+        "Wild",
+        "Wise",
+        "Drunk",
+        "Fat",
+        "Damned",
+        "Lousy",
+        "Sinister",
+        "Mischievous",
+        "Jealous",
+        "Grumpy",
+        "Greedy"
+      };
 
   // Maps Principal Object (Users managed by Stomp) to information about the users
   private ConcurrentHashMap<Principal, User> map = new ConcurrentHashMap<Principal, User>();
@@ -58,8 +71,7 @@ public class UserList {
    */
   public int getUniqueIdForProject(Principal user) {
     User userName = map.get(user);
-    if (userName != null)
-      return userName.getIdInProject();
+    if (userName != null) return userName.getIdInProject();
     return -1;
   }
 

@@ -45,10 +45,7 @@ export default class AnchoredMarker {
         this.start.getPosition().row,
         this.start.getPosition().column
       );
-      this.range.setEnd(
-        this.end.getPosition().row + 1,
-        0
-      );
+      this.range.setEnd(this.end.getPosition().row + 1, 0);
       return this.range;
     } else {
       // The end of the range is not at the end of a line
@@ -86,7 +83,7 @@ export default class AnchoredMarker {
       .getDocument()
       .createAnchor(range.start.row, range.start.column);
     this.end = editSession.getDocument().createAnchor(row, column);
-    this.range = Range.fromPoints(this.start,this.end);
+    this.range = Range.fromPoints(this.start, this.end);
     this.start.detach();
     this.end.detach();
   }
@@ -149,19 +146,24 @@ export function split(
   session: ace_types.Ace.EditSession
 ): boolean {
   let numMarkers: number = markers.length;
-  for(let i=0; i<numMarkers; i++){
+  for (let i = 0; i < numMarkers; i++) {
     let marker: AnchoredMarker = markers[i];
     let range: ace_types.Ace.Range = marker.getRange(session);
 
-    if(range.contains(position.row,position.column)){
+    if (range.contains(position.row, position.column)) {
       let end: ace_types.Ace.Point = range.end;
       range.end = position;
-      marker.setRange(range,session);
-      let rangeAfter: ace_types.Ace.Range = Range.fromPoints(position,end);
-      let markerAfter: AnchoredMarker = new AnchoredMarker(rangeAfter,marker.message,marker.type,session);
+      marker.setRange(range, session);
+      let rangeAfter: ace_types.Ace.Range = Range.fromPoints(position, end);
+      let markerAfter: AnchoredMarker = new AnchoredMarker(
+        rangeAfter,
+        marker.message,
+        marker.type,
+        session
+      );
       markerAfter.opacity = marker.opacity;
 
-      markers.splice(i+1, 0, markerAfter);
+      markers.splice(i + 1, 0, markerAfter);
       return true;
     }
   }

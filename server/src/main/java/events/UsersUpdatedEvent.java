@@ -23,16 +23,16 @@ public class UsersUpdatedEvent extends ProjectEvent {
   }
 
   /**
-   * Should be set to the id of the user that receives this event so that he can identify his own name
+   * Should be set to the id of the user that receives this event so that he can identify his own
+   * name
+   *
    * @param the unique project ID of the user
    */
   public void setOwnId(int id) {
     ownId = id;
   }
 
-  /**
-   * @return unique project ID of the user
-   */
+  /** @return unique project ID of the user */
   public int getOwnId() {
     return ownId;
   }
