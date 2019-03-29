@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observer;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.key_project.util.collection.ImmutableSet;
@@ -29,12 +30,18 @@ import org.key_project.util.collection.ImmutableSet;
 public class KeYWrapper {
   private KeYEnvironment<?> env;
   private ProofResult results;
-  private ProofScriptExecutor proofScriptExecutor = new ProofScriptExecutor();
+  private ProofScriptExecutor proofScriptExecutor;
+  private Observer console;
+  private Observer errorObserver;
 
-  public KeYWrapper(String path) {
+  public KeYWrapper(String path, Observer console, Observer errorObserver) {
     final File location =
         new File("projects/" + path); // Path to the source code folder/file or to a *.proof file
     results = new ProofResult();
+
+    this.console = console;
+    this.errorObserver = errorObserver;
+    proofScriptExecutor = new ProofScriptExecutor(console);
 
     try {
       List<File> classPaths = null; // Optionally: Additional specifications for API classes
@@ -61,13 +68,10 @@ public class KeYWrapper {
       // performed proof if a *.proof
       // file is loaded
     } catch (ProblemLoaderException e) {
-      results.addError(
-          -1,
-          "unknown",
-          "Couldn't process all relevant information for verification with KeY.",
-          null);
+      errorObserver.update(
+          null, "Couldn't process all relevant information for verification with KeY.");
 
-      results.addStackTrace(-1, "unknown", "Exception at '" + location + "':\n" + stackToString(e));
+      console.update(null, "Exception at '" + location + "':\n" + stackToString(e));
 
       System.out.println("Exception at '" + location + "':");
       e.printStackTrace();
@@ -173,19 +177,16 @@ public class KeYWrapper {
                   .collect(Collectors.toList()));
         }
       } catch (Exception e) {
-        results.addError(
-            obligationIdx,
-            "unknown",
+        errorObserver.update(
+            null,
             "Something went wrong at '"
                 + contract.getDisplayName()
                 + "' of "
                 + contract.getTarget()
-                + ".",
-            null);
+                + ".");
 
-        results.addStackTrace(
-            obligationIdx,
-            contract.getTarget().toString(),
+        console.update(
+            null,
             "Exception at '"
                 + contract.getDisplayName()
                 + "' of "

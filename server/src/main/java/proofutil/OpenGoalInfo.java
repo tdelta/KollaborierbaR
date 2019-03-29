@@ -22,7 +22,7 @@ public class OpenGoalInfo {
 
   private long id;
   @Lob private String sequent;
-  private String formula;
+  @Lob private String formula;
 
   public OpenGoalInfo() {}
 

@@ -19,3 +19,13 @@ span.login-text {
   margin-top: auto ;
   margin-bottom: auto ;
 }
+
+.divider {
+  width: 2px;
+  height: 25px;
+  margin-top: auto ;
+  margin-bottom: auto ;
+  background-color: #9a9da0;
+  margin-left: 0.4em;
+  margin-right: 0.2em;
+}

@@ -16,7 +16,11 @@ export default class KeYApi {
    * @param macro - path to the proof script to use, empty string for no proof script
    * @returns a promise for the proof results
    */
-  public static proveFile(path: string, macro: string): Promise<ProofResults> {
+  public static proveFile(
+    path: string,
+    macro: string,
+    signal: AbortSignal
+  ): Promise<ProofResults> {
     const escapedPath = escape(path);
     // API URL of the server we will use for our request
     let url = `${serverAddress}/proof/${escapedPath}`;
@@ -31,6 +35,7 @@ export default class KeYApi {
         Accept: 'application/json', // we want a json object back
         //'Content-Type': 'application/json', // we are sending a json object
       },
+      signal: signal,
     }).then(response => response.json()); // parse the response body as json};
   }
 
@@ -45,7 +50,8 @@ export default class KeYApi {
   public static proveObligations(
     path: string,
     nr: number | number[],
-    macro: string
+    macro: string,
+    signal: AbortSignal
   ): Promise<ProofResults> {
     const escapedPath = escape(path);
     let url = `${serverAddress}/proof/${escapedPath}?obligationIdxs=${nr}`;
@@ -60,6 +66,7 @@ export default class KeYApi {
         Accept: 'application/json', // we want a json object back
         //'Content-Type': 'application/json', // we are sending a json object
       },
+      signal: signal,
     }).then(response => response.json()); // parse the response body as json};
   }
 
@@ -73,7 +80,8 @@ export default class KeYApi {
   public static downloadLatestProof(
     projectName: string,
     filePath: string,
-    obligationIdx: number
+    obligationIdx: number,
+    signal: AbortSignal
   ): Promise<ObligationResult> {
     return fetch(
       `${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/last`,
@@ -84,6 +92,7 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
+        signal: signal,
       }
     ).then(response => response.json());
   }
@@ -133,7 +142,8 @@ export default class KeYApi {
   public static downloadHistoryIds(
     projectName: string,
     filePath: string,
-    obligationIdx: number
+    obligationIdx: number,
+    signal: AbortSignal
   ): Promise<number[]> {
     return fetch(
       `${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history`,
@@ -144,13 +154,15 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
+        signal: signal,
       }
     ).then(response => response.json());
   }
 
   public static downloadObligationIds(
     projectName: string,
-    filePath: string
+    filePath: string,
+    signal: AbortSignal
   ): Promise<number[]> {
     return fetch(
       `${serverAddress}/proof/${projectName}/${filePath}/obligation`,
@@ -161,6 +173,7 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
+        signal: signal,
       }
     ).then(response => response.json());
   }
@@ -180,7 +193,8 @@ export default class KeYApi {
     projectName: string,
     filePath: string,
     obligationIdx: number,
-    historyIdx: number
+    historyIdx: number,
+    signal: AbortSignal
   ): Promise<ObligationResult> {
     return fetch(
       `${serverAddress}/proof/${projectName}/${filePath}/obligation/${obligationIdx}/history/${historyIdx}`,
@@ -191,6 +205,7 @@ export default class KeYApi {
           Accept: 'application/json', // we want a json object back
           //'Content-Type': 'application/json', // we are sending a json object
         },
+        signal: signal,
       }
     ).then(response => response.json());
   }
@@ -273,23 +288,28 @@ export default class KeYApi {
   public static downloadAllHistoricProofs(
     projectName: string,
     filePath: string,
-    obligationIdx: number
+    obligationIdx: number,
+    signal: AbortSignal
   ) {
-    return KeYApi.downloadHistoryIds(projectName, filePath, obligationIdx).then(
-      (historyIdxs: number[]) => {
-        console.log('Retrieved history idxs: ', historyIdxs);
+    return KeYApi.downloadHistoryIds(
+      projectName,
+      filePath,
+      obligationIdx,
+      signal
+    ).then((historyIdxs: number[]) => {
+      console.log('Retrieved history idxs: ', historyIdxs);
 
-        return Promise.all(
-          historyIdxs.map(historyIdx =>
-            KeYApi.downloadHistoricProof(
-              projectName,
-              filePath,
-              obligationIdx,
-              historyIdx
-            )
+      return Promise.all(
+        historyIdxs.map(historyIdx =>
+          KeYApi.downloadHistoricProof(
+            projectName,
+            filePath,
+            obligationIdx,
+            historyIdx,
+            signal
           )
-        );
-      }
-    );
+        )
+      );
+    });
   }
 }
