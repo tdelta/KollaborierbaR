@@ -2,6 +2,11 @@ package events;
 
 import java.util.List;
 
+/**
+ * Indicates, that a file had been deleted.
+ *
+ * See base class {@link ProofEvent} for more information.
+ */
 public class DeletedFileEvent extends ProjectEvent {
   private final String filePath;
   private final List<String> deleted;
