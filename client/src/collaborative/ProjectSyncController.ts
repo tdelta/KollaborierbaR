@@ -120,6 +120,7 @@ export interface User {
 
 export interface UsersUpdatedEvent extends ProjectEvent {
   users: User[];
+  ownId: number;
 }
 
 /**

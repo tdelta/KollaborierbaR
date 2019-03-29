@@ -201,6 +201,8 @@ public class ProjectSyncController {
         UsersUpdatedEvent userEvent =
             new UsersUpdatedEvent(this, projectEntry.getKey(), subscriberNames);
         for (Principal otherUser : projectEntry.getValue()) {
+          int idInProject = userList.getUniqueIdForProject(otherUser);
+          userEvent.setOwnId(idInProject);
           messagingTemplate.convertAndSendToUser(
               otherUser.getName(), "/projects/" + projectEntry.getKey(), userEvent, headers);
         }
@@ -219,6 +221,8 @@ public class ProjectSyncController {
     List<User> subscriberNames = getSubscriberNames(users);
     UsersUpdatedEvent userEvent = new UsersUpdatedEvent(this, projectName, subscriberNames);
     for (Principal otherUser : users) {
+      int idInProject = userList.getUniqueIdForProject(otherUser);
+      userEvent.setOwnId(idInProject);
       messagingTemplate.convertAndSendToUser(
           otherUser.getName(), "/projects/" + projectName, userEvent);
     }
