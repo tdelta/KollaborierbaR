@@ -19,16 +19,16 @@ export default class UserIndicator extends React.Component<Props, {}> {
    */
   public getColor(crdtId: number): string {
     const colors = [
-      '#4CAF50',
-      '#009688',
-      '#9E9E9E',
-      '#00BCD4',
-      '#448AFF',
-      '#D32F2F',
-      '#FF4081',
-      '#FF5722',
-      '#FFEB3B',
-      '#7C4DFF',
+      '#7A71f6',
+      '#EECC16',
+      '#FCA7E4',
+      '#AA71FF',
+      '#A4C61A',
+      '#E37CFF',
+      '#62BB35',
+      '#EA4E9D',
+      '#37A862',
+      '#FDAE33',
     ];
     return colors[crdtId % 10] || '#C70039';
   }

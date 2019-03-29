@@ -64,7 +64,7 @@ export default class Usernames extends React.Component<Props, State> {
     const divider = otherUsers.length > 0 ? <span className="divider" /> : null;
     return (
       <>
-        {this.getUserIndicator(ownUser, 1)}
+        {this.getUserIndicator(ownUser, 0)}
         {divider}
         {otherUsers.map((iterator, index) => (
           this.getUserIndicator(iterator, index + 1)
