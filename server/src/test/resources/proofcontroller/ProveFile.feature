@@ -13,9 +13,7 @@ And status 200
 And match response ==
 """
 {
-  errors:[],
   failed:[],
-  stackTraces:[],
   succeeded:[
     {
       "id": null,
@@ -41,7 +39,6 @@ And status 200
 And match response ==
 """
 {
-  errors:[],
   failed:[
     {
       "id": null,
@@ -53,7 +50,6 @@ And match response ==
       "targetName": "#string"
     }
   ],
-  stackTraces:[],
   succeeded:[
     {
       "id": null,
@@ -86,8 +82,6 @@ And match response ==
 {
   succeeded: [],
   failed: [],
-  errors: "#[1] ^error",
-  stackTraces: "#[1] ^error",
 }
 """
 

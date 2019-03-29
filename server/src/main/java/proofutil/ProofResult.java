@@ -14,16 +14,6 @@ public class ProofResult {
   private List<ObligationResult> errors = new ArrayList<>();
   private List<ObligationResult> stackTraces = new ArrayList<>();
 
-  public List<ObligationResult> getStackTraces() {
-    return stackTraces;
-  }
-
-  public void addStackTrace(final int obligationIdx, final String methodName, final String msg) {
-    stackTraces.add(
-        new ObligationResult(
-            obligationIdx, methodName, msg, null, new ArrayList<>(0), ObligationResult.Kind.error));
-  }
-
   /**
    * Add a succeeded proof to the list
    *
@@ -61,26 +51,6 @@ public class ProofResult {
   }
 
   /**
-   * Add an error message to the list, used whenever an exception occures
-   *
-   * @param msg the result message to be displayed
-   */
-  public void addError(
-      final int obligationIdx,
-      final String methodName,
-      final String msg,
-      final ProofNode proofTree) {
-    errors.add(
-        new ObligationResult(
-            obligationIdx,
-            methodName,
-            msg,
-            proofTree,
-            new ArrayList<>(0),
-            ObligationResult.Kind.error));
-  }
-
-  /**
    * Basic getter for contents
    *
    * @return succeeded proofs
@@ -96,14 +66,5 @@ public class ProofResult {
    */
   public List<ObligationResult> getFailed() {
     return failed;
-  }
-
-  /**
-   * Basic getter for contents
-   *
-   * @return exception messages
-   */
-  public List<ObligationResult> getErrors() {
-    return errors;
   }
 }
