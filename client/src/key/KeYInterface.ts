@@ -396,6 +396,7 @@ export default class KeYInterface {
 
   /**
    * Finds all lines that contain proof obligations and gives each obligation an index.
+   *
    * @param lines - Lines of a text that contains JML specifications
    * @returns An array where the index of a line that contains proof obligations
    * is set to the index of the last obligations in the line. For the other lines it is undefined
@@ -403,16 +404,20 @@ export default class KeYInterface {
   public getObligations(lines: string[]): number[] {
     let numObligations = 0;
     const result: number[] = [];
+
+    // iterate over all lines
     for (let i = 0; i < lines.length; i += 1) {
       // Find the start of all proof obligations in the current line
       const obligations: RegExpMatchArray | null = lines[i].match(
         this.contractRegex
       );
+
       if (obligations) {
         numObligations += obligations.length;
         result[i] = numObligations - 1;
       }
     }
+
     return result;
   }
 
