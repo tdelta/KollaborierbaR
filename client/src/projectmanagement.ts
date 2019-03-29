@@ -73,8 +73,10 @@ export default class ProjectManagement {
           | ProjectFileEvent
           | UsersUpdatedEvent
       ) => {
-        const currentProjectName: string | null = (this.getCurrentProject() as any).name != null ?
-          (this.getCurrentProject() as Project).name : null;
+        const currentProjectName: string | null =
+          (this.getCurrentProject() as any).name != null
+            ? (this.getCurrentProject() as Project).name
+            : null;
 
         console.log(event.eventType);
 
@@ -83,9 +85,8 @@ export default class ProjectManagement {
             // Delete File event
 
             case ProjectEventType.DeletedFile:
-              this
-                .openProject(currentProjectName, false)
-                .then(updatedProject => {
+              this.openProject(currentProjectName, false).then(
+                updatedProject => {
                   if (
                     !ProjectManagement.projectContainsPath(
                       updatedProject,
@@ -105,20 +106,24 @@ export default class ProjectManagement {
                       position: 'bc',
                     });
                   }
-                });
+                }
+              );
               break;
 
             // Rename File event
 
             case ProjectEventType.RenamedFile:
-              this
-                .openProject(currentProjectName, false)
-                .then(updatedProject => {
+              this.openProject(currentProjectName, false).then(
+                updatedProject => {
                   const renameEvent: RenamedFileEvent = event as RenamedFileEvent;
 
-                  if (renameEvent.originalPath === this.getOpenedPath().join('/')) {
+                  if (
+                    renameEvent.originalPath === this.getOpenedPath().join('/')
+                  ) {
                     // TODO: Evtl abstimmen mit Collab controller
-                    const newPathArray: string[] = renameEvent.newPath.split('/');
+                    const newPathArray: string[] = renameEvent.newPath.split(
+                      '/'
+                    );
 
                     if (newPathArray.length < 1) {
                       console.log('Error: Updated file path is invalied.');
@@ -132,14 +137,15 @@ export default class ProjectManagement {
                   if (this.notificationSystem.current) {
                     this.notificationSystem.current.clearNotifications();
                     this.notificationSystem.current.addNotification({
-                      message: `File ${renameEvent.originalPath} got renamed to ${
-                        renameEvent.newPath
-                      }.`,
+                      message: `File ${
+                        renameEvent.originalPath
+                      } got renamed to ${renameEvent.newPath}.`,
                       level: 'info',
                       position: 'bc',
                     });
                   }
-                });
+                }
+              );
               break;
 
             // Update File event
@@ -183,8 +189,8 @@ export default class ProjectManagement {
             // Update Project event
 
             case ProjectEventType.UpdatedProject:
-              this.openProject(currentProjectName, false)
-                .then(updatedProject => {
+              this.openProject(currentProjectName, false).then(
+                updatedProject => {
                   if (
                     !ProjectManagement.projectContainsPath(
                       updatedProject,
@@ -205,7 +211,8 @@ export default class ProjectManagement {
                       position: 'bc',
                     });
                   }
-                });
+                }
+              );
               break;
 
             // User Updated event
@@ -343,48 +350,49 @@ export default class ProjectManagement {
    * load the related files for the project with name 'name' from the server
    * the handler displays the returned project in the editor
    */
-  public openProject(name: string, resetFile: boolean = true): Promise<Project> {
+  public openProject(
+    name: string,
+    resetFile: boolean = true
+  ): Promise<Project> {
     const escapedName = escape(name);
 
     const url = `${serverAddress}/projects/${escapedName}`;
-    const shouldClose = (this.getCurrentProject() as any).name != null
-      && name !== (this.getCurrentProject() as Project).name;
+    const shouldClose =
+      (this.getCurrentProject() as any).name != null &&
+      name !== (this.getCurrentProject() as Project).name;
 
     let maybeClosePromise: Promise<void>;
     if (shouldClose) {
       maybeClosePromise = this.closeProject();
-    }
-
-    else {
+    } else {
       maybeClosePromise = Promise.resolve();
     }
 
-    return maybeClosePromise
-      .then(() =>
-        this.projectController
-          .openProject(name)
-          .catch(e => {
-            console.error('Could not sync with server to open project');
-            console.error(e);
-          })
-          .then(() =>
-            fetch(url, {
-              method: 'GET',
-              mode: 'cors',
-            }).then(response => 
-              response.json().then((json: Project) => {
-                this.showProject(json);
+    return maybeClosePromise.then(() =>
+      this.projectController
+        .openProject(name)
+        .catch(e => {
+          console.error('Could not sync with server to open project');
+          console.error(e);
+        })
+        .then(() =>
+          fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+          }).then(response =>
+            response.json().then((json: Project) => {
+              this.showProject(json);
 
-                if (resetFile) {
-                  this.setText('');
-                  this.setOpenedPath([]);
-                }
+              if (resetFile) {
+                this.setText('');
+                this.setOpenedPath([]);
+              }
 
-                return json;
-              })
-            )
+              return json;
+            })
           )
-      );
+        )
+    );
   }
 
   public closeProject(): Promise<void> {
@@ -404,7 +412,7 @@ export default class ProjectManagement {
             'Failed to unsubscribe, you may still receive messages for your closed project'
           );
           console.error(e);
-        })
+        });
     }
   }
 
