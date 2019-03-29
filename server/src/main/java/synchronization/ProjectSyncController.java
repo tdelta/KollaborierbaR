@@ -63,8 +63,8 @@ public class ProjectSyncController {
 
     if (!users.contains(user)) {
       System.out.println("Someone registered for " + decodedProjectName);
+      userList.setUniqueIdForProject(user, getSubscriberNames(users));
       users.add(user);
-
       sessions.put(decodedProjectName, users);
     }
 
