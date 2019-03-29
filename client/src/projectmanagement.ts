@@ -65,6 +65,10 @@ export default class ProjectManagement {
     this.notificationSystem = notificationSystem;
     this.openFile = openFile;
 
+    // The following controller reports to us changes made to the project on
+    // the server, possibly by other clients.
+    // Depending on the change, we act accordingly and maybe display a
+    // Notification
     this.projectController = new ProjectSyncController(stompService, {
       onProjectEvent: (
         event:
@@ -82,17 +86,19 @@ export default class ProjectManagement {
 
         if (currentProjectName != null) {
           switch (event.eventType) {
-            // Delete File event
 
+            // A file got deleted on the server
             case ProjectEventType.DeletedFile:
               this.openProject(currentProjectName, false).then(
                 updatedProject => {
+                  // did the file we are currently viewing get deleted?
                   if (
                     !ProjectManagement.projectContainsPath(
                       updatedProject,
                       this.getOpenedPath()
                     )
                   ) {
+                    // close the file
                     this.setText('');
                     this.setOpenedPath([]);
                   }
@@ -110,17 +116,16 @@ export default class ProjectManagement {
               );
               break;
 
-            // Rename File event
-
+            // A file got renamed on the server
             case ProjectEventType.RenamedFile:
               this.openProject(currentProjectName, false).then(
                 updatedProject => {
                   const renameEvent: RenamedFileEvent = event as RenamedFileEvent;
 
+                  // has the file been renamed which we are currently viewing?
                   if (
                     renameEvent.originalPath === this.getOpenedPath().join('/')
                   ) {
-                    // TODO: Evtl abstimmen mit Collab controller
                     const newPathArray: string[] = renameEvent.newPath.split(
                       '/'
                     );
@@ -128,6 +133,7 @@ export default class ProjectManagement {
                     if (newPathArray.length < 1) {
                       console.log('Error: Updated file path is invalied.');
                     } else {
+                      // change the currently opened file to the new name
                       this.setFileName(newPathArray[newPathArray.length - 1]);
                       this.setOpenedPath(newPathArray);
                     }
@@ -148,11 +154,15 @@ export default class ProjectManagement {
               );
               break;
 
-            // Update File event
-
+            // File content got updated on the server ( a file has been saved )
             case ProjectEventType.UpdatedFile:
               const fileEvent: ProjectFileEvent = event as ProjectFileEvent;
 
+              // we dont need to do anything, since the {@link CollabController} keeps
+              // the currently opened file in sync with the others
+
+              // if the currently opened file got its contents updated, just
+              // display a notification
               if (fileEvent.filePath === this.getOpenedPath().join('/')) {
                 // Send notification for file save
                 if (this.notificationSystem.current) {
@@ -167,9 +177,9 @@ export default class ProjectManagement {
 
               break;
 
-            // Delete Project event
-
+            // The currently opened project got deleted
             case ProjectEventType.DeletedProject:
+              // close everything
               this.showProject({});
               this.setText('');
               this.setOpenedPath([]);
@@ -186,11 +196,13 @@ export default class ProjectManagement {
 
               break;
 
-            // Update Project event
-
+            // Something in the project structure changed,
+            // Usually this means, a file got created.
             case ProjectEventType.UpdatedProject:
               this.openProject(currentProjectName, false).then(
                 updatedProject => {
+                  // any change could have happened, if the currently opened
+                  // file is no longer part of the project structure, close it
                   if (
                     !ProjectManagement.projectContainsPath(
                       updatedProject,
@@ -215,8 +227,7 @@ export default class ProjectManagement {
               );
               break;
 
-            // User Updated event
-
+            // The list of clients working on the file changed
             case ProjectEventType.UsersUpdated:
               console.log(event);
               Usernames.updateUsers(
