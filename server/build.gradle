@@ -201,6 +201,7 @@ convertSwagger2markup {
 }
 
 asciidoctorPdf {
+    version = 'Alpha 1.0'
     dependsOn convertSwagger2markup
     options doctype: 'report'
     sourceDir file("${buildDir}/asciidoc/generated")

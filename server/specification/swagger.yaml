@@ -4,7 +4,7 @@ info:
     This is the central server of the KollaborierbaR collaborative Java
     specification and verification web app.
   version: '0.1'
-  title: KollaborierbaR Server
+  title: KollaborierbaR Server HTTP API
   contact:
     email: "kollaborierbar-team@googlegroups.com"
 host: 'localhost:9000'
@@ -24,7 +24,12 @@ paths:
       tags:
         - linter-controller
       summary: Run static analysis on a java source file
-      description: Will return an empty list, if static analysis fails, or no source code was submitted.
+      description: >-
+        Runs a static analysis on a java source file.
+        This includes the static analysis framework of the Eclipse JDT and tests for the use of Java
+        features, which are not yet supported by the automatic prover of the KeY Project.
+        
+        Will return an empty list, if static analysis fails, or if no source code was submitted.
       operationId: lintUsingPOST
       consumes:
         - application/json
@@ -642,6 +647,13 @@ definitions:
         format: int64
         example: 24
     title: Diagnostic
+    example:
+      endCol: 42
+      endRow: 24
+      kind: ERROR
+      message: Syntax error
+      startCol: 0
+      startRow: 24
   FileUpdateData:
     type: object
     properties:
@@ -737,10 +749,10 @@ definitions:
   OpenedFileResponse:
     type: object
     properties:
-      filename:
+      fileName:
         type: string
         example: 'IntegerUtil.java'
-      filetext:
+      fileText:
         type: string
         example: "public class IntegerUtil {\n/*@ normal_behavior\n     @ ensures \\result == x + y;\n     @*/\n   public static int add(int x, int y) {\n      return x + y;\n   }\n   \n   /*@ normal_behavior\n     @ requires (x != y);\n     @ ensures \\result == x - y;\n     @\n     @ exceptional_behaviour\n     @ requires (x == y);\n     @ signals (RuntimeException) true;\n     @*/\n   public static int sub(int x, int y) {\n       if (x == y) {throw new RuntimeException();}\n      return x + y;\n   }\n}"
   ProofNode:
