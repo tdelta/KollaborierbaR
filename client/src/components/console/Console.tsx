@@ -113,10 +113,20 @@ export default class Console extends React.Component<Props, State>
     this.props.setVisibility(true);
   }
 
+  /**
+   * Hides the console if it is visible, displays it if it is invisible
+   */
   private invertVisibility(): void {
     this.props.setVisibility(!this.props.visible);
   }
 
+  /**
+   * React callback for when the props of the component changed,
+   * called after render was executed
+   * {@link https://reactjs.org/docs/react-component.html#componentdidupdate}
+   * Scrolls the console to the top of the last added message.
+   * For that purpose messages are rendered as individual <div>
+   */
   public componentDidUpdate(): void {
     if (this.lastMsg.current) {
       const msgDiv: HTMLElement = this.lastMsg.current;
@@ -128,11 +138,13 @@ export default class Console extends React.Component<Props, State>
   }
 }
 
+// Structure of the properties passed to the component
 interface Props {
   setVisibility: (visible: boolean) => void;
   visible: boolean;
 }
 
+// Structure of the state of the component
 interface State {
   consolelog: string[];
   visible: boolean;
