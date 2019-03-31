@@ -10,7 +10,7 @@ import {
   ModalBody,
   ModalFooter,
 } from 'reactstrap';
-import ProjectManagement from '../projectmanagement.ts';
+import ProjectApi from '../ProjectApi.ts';
 
 /*
  * open a dialog window, that shows a list with available options
@@ -141,7 +141,7 @@ class ModalSelect extends React.Component {
  * loads the project list, called whenever a project modal is opened
  */
 function loadProjectNames() {
-  ProjectManagement.getProjects().then(projects => {
+  ProjectApi.getProjects().then(projects => {
     this.setState({ options: projects });
   });
 }
