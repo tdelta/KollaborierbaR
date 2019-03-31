@@ -91,36 +91,21 @@ public class KeYWrapper {
 
     if (env != null) {
       try {
+
         // Create proof
         proof = env.createProof(contract.createProofObl(env.getInitConfig(), contract));
-
         // Set proof strategy options
         StrategyProperties sp =
             proof.getSettings().getStrategySettings().getActiveStrategyProperties();
-        sp.setProperty(StrategyProperties.QUERYAXIOM_OPTIONS_KEY, StrategyProperties.QUERYAXIOM_ON);
-        sp.setProperty(
-            StrategyProperties.QUANTIFIERS_OPTIONS_KEY,
-            StrategyProperties.QUANTIFIERS_NON_SPLITTING_WITH_PROGS);
-        sp.setProperty(StrategyProperties.LOOP_OPTIONS_KEY, StrategyProperties.LOOP_NONE);
-        sp.setProperty(
-            StrategyProperties.INF_FLOW_CHECK_PROPERTY, StrategyProperties.INF_FLOW_CHECK_FALSE);
+        sp.setProperty(StrategyProperties.LOOP_OPTIONS_KEY, StrategyProperties.LOOP_INVARIANT);
+        sp.setProperty(StrategyProperties.METHOD_OPTIONS_KEY, StrategyProperties.METHOD_CONTRACT);
+        sp.setProperty(StrategyProperties.DEP_OPTIONS_KEY, StrategyProperties.DEP_ON);
+        sp.setProperty(StrategyProperties.QUERY_OPTIONS_KEY, StrategyProperties.QUERY_ON);
         sp.setProperty(
             StrategyProperties.NON_LIN_ARITH_OPTIONS_KEY, StrategyProperties.NON_LIN_ARITH_DEF_OPS);
         sp.setProperty(
-            StrategyProperties.AUTO_INDUCTION_OPTIONS_KEY, StrategyProperties.AUTO_INDUCTION_OFF);
-        sp.setProperty(
-            StrategyProperties.STOPMODE_OPTIONS_KEY, StrategyProperties.STOPMODE_DEFAULT);
-        sp.setProperty(
-            StrategyProperties.CLASS_AXIOM_OPTIONS_KEY, StrategyProperties.CLASS_AXIOM_DELAYED);
-        sp.setProperty(StrategyProperties.MPS_OPTIONS_KEY, StrategyProperties.MPS_MERGE);
-        sp.setProperty(StrategyProperties.BLOCK_OPTIONS_KEY, StrategyProperties.BLOCK_EXPAND);
-        sp.setProperty(StrategyProperties.METHOD_OPTIONS_KEY, StrategyProperties.METHOD_CONTRACT);
-        sp.setProperty(StrategyProperties.OSS_OPTIONS_KEY, StrategyProperties.OSS_OFF);
-        sp.setProperty(
-            StrategyProperties.SPLITTING_OPTIONS_KEY, StrategyProperties.SPLITTING_DELAYED);
-        sp.setProperty(StrategyProperties.VBT_PHASE, StrategyProperties.VBT_SYM_EX);
+            StrategyProperties.STOPMODE_OPTIONS_KEY, StrategyProperties.STOPMODE_NONCLOSE);
         proof.getSettings().getStrategySettings().setActiveStrategyProperties(sp);
-
         // Make sure that the new options are used
         int maxSteps = 10000;
         ProofSettings.DEFAULT_SETTINGS.getStrategySettings().setMaxSteps(maxSteps);
