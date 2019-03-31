@@ -5,6 +5,7 @@ import UserIndicator from './components/user-names/user-indicator';
 import { serverAddress } from './constants';
 import ConfirmationModal from './components/confirmation-modal';
 import Usernames from './components/user-names/user-names';
+import ProjectApi from './ProjectApi';
 
 import { StompService } from './StompService';
 
@@ -259,7 +260,7 @@ export default class ProjectManagement {
 
   /**
    * Recursive helper function. Given the path to the file or folder item, returns
-   * an array of absolute paths to all .script files contained in item
+   * an array of absolute paths to all .script files contained in item.
    *
    * @param parentName - path to item, e.g. /src if item is the file Main.java in /src/Main.java
    * @param item - the file or folder to search in
@@ -281,6 +282,12 @@ export default class ProjectManagement {
     }
   }
 
+  /**
+   * Checks if a path exists in a project.
+   * @param project - the name of the affected project
+   * @param path - the path whose existence should be tested
+   * @return {boolean} which indicates if the project exists or not
+   */
   private static projectContainsPath(
     project: Project,
     path: string[]
@@ -307,61 +314,10 @@ export default class ProjectManagement {
   }
 
   /**
-   * Fetches contents and metadata of a file asynchronously from the server via
-   * HTTP request.
-   *
-   * @param {string} path: path to file that shall be opened.
-   *     It shall contain a leading '/' and the first folder shall be the
-   *     project name.
-   *
-   * @returns {Promise} promise which will resolve to said contents and metadata.
-   *
-   * @example
-   * openFile('/My Project/README.md').then((response) =>
-   *   console.log(response.fileName); // yields "README.md"
-   *   console.log(response.fileText); // yields contents of the README.md file
-   * });
-   */
-  public static openFile(path: string): Promise<OpenFileData> {
-    const escapedPath = escape(path);
-    // API URL of the server we will use for our request
-    const url = `${serverAddress}/projects/${escapedPath}`;
-
-    return fetch(url, {
-      method: 'GET',
-      mode: 'cors', // enable cross origin requests. Server must also allow this!
-      headers: {
-        Accept: 'application/json', // we want a json object back
-        //'Content-Type': 'application/json', // we are sending a json object
-      },
-    }).then(response => {
-      if (response.status === 200) {
-        console.log('Parsing open file response: ', response);
-
-        return response.json();
-      } else {
-        console.error('Opening file failed.', response);
-      }
-    }); // parse the response body as json
-  }
-
-  /*
-   * load the list of available projects from the server
-   */
-  public static getProjects(): Promise<string[]> {
-    const url = `${serverAddress}/projects`;
-    return fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        Accept: 'application/json',
-      },
-    }).then(response => response.json());
-  }
-
-  /*
-   * load the related files for the project with name 'name' from the server
-   * the handler displays the returned project in the editor
+   * Load a project from the server and display it in the app.
+   * @param name - the name of the project
+   * @param resetFile - boolean which controls if the file displayed in the editor should be reset
+   * @returns {Promise} which resolves to the project
    */
   public openProject(
     name: string,
@@ -389,25 +345,24 @@ export default class ProjectManagement {
           console.error(e);
         })
         .then(() =>
-          fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-          }).then(response =>
-            response.json().then((json: Project) => {
-              this.showProject(json);
+          ProjectApi.openProject(name).then((json: Project) => {
+            this.showProject(json);
 
-              if (resetFile) {
-                this.setText('');
-                this.setOpenedPath([]);
-              }
+            if (resetFile) {
+              this.setText('');
+              this.setOpenedPath([]);
+            }
 
-              return json;
-            })
-          )
+            return json;
+          })
         )
     );
   }
 
+  /**
+   * Close the currently loaded project.
+   * @returns {Promise} which resolves to nothing
+   */
   public closeProject(): Promise<void> {
     const project = this.getCurrentProject();
 
@@ -429,27 +384,11 @@ export default class ProjectManagement {
     }
   }
 
-  /*
-   * Calls the REST delete method. only used internally
-   * TODO: Better explanation, what this method does
-   */
-  private static deleteOverall(path: string): Promise<Project | {}> {
-    const escapedPath = escape(path);
-    const url = `${serverAddress}/projects/${escapedPath}`;
-
-    return fetch(url, {
-      method: 'DELETE',
-      mode: 'cors', // enable cross origin requests. Server must also allow this!
-      headers: {
-        Accept: 'application/json', // we want a json object back
-      },
-    })
-      .then(response => response.json()) // parse the response body as json
-      .catch(() => undefined); // if the json body is empty (e.g. after project delete) return an empty json object
-  }
-
-  /*
-   * Deletes a file from the loaded project on the server
+  /**
+   * Deletes a file from the loaded project on the server.
+   * @param currentlyOpenFile - path to the currently opened file, relative to project
+   * @param projectName - name of the project
+   * @param path - path to the file that should be deleted, relative to project
    */
   public deleteFile(
     currentlyOpenFile: string[],
@@ -468,26 +407,28 @@ export default class ProjectManagement {
           `Do you really want to delete ${filename}`,
           () => {
             // This string composition is necessary because path contains only the path within a project.
-            ProjectManagement.deleteOverall(
-              `${projectName}/${path.join('/')}`
-            ).then(response => {
-              // The response contains the new file structure, where the choosen file it deleted.
-              this.showProject(response);
-              // if the deleted file is the opened one, empty the editor
-              if (path.join('/') === currentlyOpenFile.join('/')) {
-                this.setText('');
-                this.setOpenedPath([]);
+            ProjectApi.deleteOverall(`${projectName}/${path.join('/')}`).then(
+              response => {
+                // The response contains the new file structure, where the choosen file it deleted.
+                this.showProject(response);
+                // if the deleted file is the opened one, empty the editor
+                if (path.join('/') === currentlyOpenFile.join('/')) {
+                  this.setText('');
+                  this.setOpenedPath([]);
+                }
               }
-            });
+            );
           }
         );
       }
     }
   }
 
-  /*
-   * delete projects from server
+  /**
+   * Delete projects from server.
    * the main difference from deleteFile is that the path to delete is composed differently
+   * @param projectName - name of the project
+   * @param path - path to the file that should be deleted, relative to projects folder on the server
    */
   public deleteProject(projectName: string, path: string): void {
     // Show a dialog to confirm the deletion of the project
@@ -498,7 +439,7 @@ export default class ProjectManagement {
         `Really delete project ${path}?`,
         // Called when the dialog was confirmed
         () => {
-          ProjectManagement.deleteOverall(path); // Project to delete, in this case always the project that was opened
+          ProjectApi.deleteOverall(path); // Project to delete, in this case always the project that was opened
           if (path === projectName) {
             this.showProject({});
             this.setText('');
@@ -510,26 +451,10 @@ export default class ProjectManagement {
     }
   }
 
-  /*
-   * create file/folder/project on the server. Files have type == file.
-   * Projects/folders have type == folder
-   * only used internally
-   */
-  private static createOverall(
-    path: string,
-    type: FileFolderEnum
-  ): Promise<Project> {
-    const escapedPath = escape(path);
-
-    const url = `${serverAddress}/projects/${escapedPath}?type=${type}`;
-    return fetch(url, {
-      method: 'PUT',
-      mode: 'cors',
-    }).then(response => response.json());
-  }
-
-  /*
-   * create a file in the active project
+  /**
+   * Create a file in the active project.
+   * @param projectName - name of the project
+   * @param path - path to the file that should be deleted, relative to project
    */
   public createFile(
     projectName: string,
@@ -542,7 +467,7 @@ export default class ProjectManagement {
       path.push(file);
       const requestPath = `${projectName}/${path.join('/')}`;
 
-      ProjectManagement.createOverall(requestPath, type).then(response => {
+      ProjectApi.createOverall(requestPath, type).then(response => {
         this.showProject(response);
 
         if (type !== 'folder') {
@@ -554,103 +479,64 @@ export default class ProjectManagement {
     }
   }
 
-  /*
-   * create a new project
-   * the main difference from createFile is that the path is composed differently
+  /**
+   * Create a new project.
    */
-
   public createProject(): void {
     const file = prompt('Enter Name', '');
     if (file !== null && !file.includes('/')) {
-      ProjectManagement.createOverall(file, FileFolderEnum.folder).then(
-        response => {
-          this.projectController
-            .openProject(file)
-            .catch(e => {
-              console.error(
-                'Creating the project failed, because we could not sync with the server'
-              );
+      ProjectApi.createOverall(file, FileFolderEnum.folder).then(response => {
+        this.projectController
+          .openProject(file)
+          .catch(e => {
+            console.error(
+              'Creating the project failed, because we could not sync with the server'
+            );
 
-              console.error(e);
-            })
-            .then(() => {
-              this.showProject(response);
-              this.setText('');
-              this.setOpenedPath([]);
-            });
-        }
-      );
+            console.error(e);
+          })
+          .then(() => {
+            this.showProject(response);
+            this.setText('');
+            this.setOpenedPath([]);
+          });
+      });
     }
     if (file !== null && file.includes('/')) {
       alert('No appropriate filename. Filename includes: / ');
     }
   }
 
-  public runProof(path: string): Promise<ProofResults> {
-    const escapedPath = escape(path);
-    // API URL of the server we will use for our request
-    const url = `${serverAddress}/proof/${escapedPath}`;
-
-    return fetch(url, {
-      method: 'GET',
-      mode: 'cors', // enable cross origin requests. Server must also allow this!
-      headers: {
-        Accept: 'application/json', // we want a json object back
-        // 'Content-Type': 'application/json', // we are sending a json object
-      },
-    }).then(response => response.json()); // parse the response body as json};
-  }
-
-  /*
+  /**
    * This function updates the filename of the given resource path.
    * The new filename is entered by the prompt, which is created
    * inside the fuction.
-   *
+   * @param path - path to the file that should be deleted, relative to the loaded project
    */
   public updateFileName(path: string[]): void {
     const name = prompt('Enter Name', '');
 
     if (name !== '..' && name !== '.' && name !== null && !name.includes('/')) {
-      // Path to the ressource we want to rename
-      // TODO: Handle if project not set
-      const url = `${serverAddress}/projects/${
-        (this.getCurrentProject() as Project).name
-      }/${path.join('/')}`;
-
       // Remove the current filename from the path array
       // and then create path for the renamed ressource:
-      const oldfilename = path.pop();
+      const oldfilename = path[path.length - 1];
       const renamedRes = `/projects/${
         (this.getCurrentProject() as Project).name
-      }/${path.join('/')}/${name}`;
+      }/${path.slice(0, -1).join('/')}/${name}`;
 
       // Create a new array with the modify openPath
-      const newOpenPath = path.concat([name]);
+      const newOpenPath = path.slice(0, -1).concat([name]);
 
-      const requestbody = {
-        fileName: renamedRes,
-      };
-
-      fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestbody), // necessary if you want to send a JSON object in a fetch request
-      }).then(response =>
-        response.json().then(res => {
-          this.showProject(res);
-          // If set openedPath isn't set after renaming, the currently openedFile would not math
-          // to the openedPath.
-          this.setOpenedPath(newOpenPath);
-
-          if (path[path.length - 1] === oldfilename) {
-            this.setFileName(name);
-          }
-        })
-      );
+      ProjectApi.updateFileName(
+        (this.getCurrentProject() as Project).name,
+        path,
+        renamedRes
+      ).then(res => {
+        this.showProject(res);
+        // If set openedPath isn't set after renaming, the currently openedFile would not match
+        // to the openedPath.
+        this.setOpenedPath(newOpenPath);
+      });
     }
     if (name !== null && name.includes('/')) {
       alert('No appropriate filename. Filename includes: /');
@@ -669,25 +555,11 @@ export default class ProjectManagement {
    * @param content that will be set to the file
    */
   public updateFileContent(path: string[], content: string): Promise<void> {
-    // Path to the ressource we want to save
-    // TODO: Check if project exists
-    const url = `${serverAddress}/projects/${
-      (this.getCurrentProject() as Project).name
-    }/${path.join('/')}`;
-
-    const requestbody = {
-      fileContent: content,
-    };
-
-    return fetch(url, {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestbody), // necessary if you want to send a JSON object in a fetch request
-    }).then(response => {
+    return ProjectApi.updateFileContent(
+      (this.getCurrentProject() as Project).name,
+      path,
+      content
+    ).then(response => {
       if (response.status !== 200) {
         alert(
           'Uups! Something went wrong while saving your filecontent to the server'
