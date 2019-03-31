@@ -141,7 +141,7 @@ public class ProjectSyncController {
 
   /**
    * If a client unsubscribes from a project, the controller is sent a {@link
-   * org.springframework.web.socket.messaging.SessionUnsubscribeEvent)} containing information about
+   * org.springframework.web.socket.messaging.SessionUnsubscribeEvent} containing information about
    * the affected user and subscription.
    *
    * <p>The association of the user to the project will be deleted.
@@ -181,7 +181,7 @@ public class ProjectSyncController {
 
   /**
    * If a client disconnects his websocket from the server, the controller is sent a {@link
-   * org.springframework.web.socket.messaging.SessionDisconnectEvent)} containing information about
+   * org.springframework.web.socket.messaging.SessionDisconnectEvent} containing information about
    * the affected user and subscription.
    *
    * <p>This method essentially acts in the same way as {@link #handleUnsubscribe}, however, instead
