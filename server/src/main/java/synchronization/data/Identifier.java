@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public class Identifier extends fr.loria.score.logootsplito.Identifier {
 
   /**
-   * Constructor used by Jackson to parse the object from the corresponding mute-structs object
+   * Constructor used by Jackson to parse the object from the corresponding mute-structs object.
    *
    * @param tuples A structure used in mute-structs
    */

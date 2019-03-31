@@ -24,10 +24,10 @@ import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
  * additional data per destination/topic (see {@link #setDestinationData})
  *
  * @author Anton Haubner {@literal <anton.haubner@outlook.de>}
- * @param <DestinationData> Type of additional data associated with each STOMP destination. Set it
- *     to {@code Void}, if you dont want to store addional data.
+ * @param <T> Type of additional data associated with each STOMP destination. Set it to {@code
+ *     Void}, if you dont want to store addional data.
  */
-public class SyncController<DestinationData> {
+public class SyncController<T> {
   /**
    * Associates a STOMP destination/topic with users subscribed to it. Mapping: DestinationId ->
    * Users
@@ -37,9 +37,9 @@ public class SyncController<DestinationData> {
 
   /**
    * Associates a STOMP destination/topic with some additional data, see class description. Mapping:
-   * DestinationId -> DestinationData
+   * DestinationId -> T
    */
-  private ConcurrentHashMap<String, DestinationData> contents = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<String, T> contents = new ConcurrentHashMap<>();
 
   /**
    * Associates an subscription id pared with a client with a destination/topic. Mapping:
@@ -101,7 +101,7 @@ public class SyncController<DestinationData> {
       final Principal user,
       @Header final String simpSubscriptionId,
       final String destinationId,
-      final DestinationData defaultDestinationData) {
+      final T defaultDestinationData) {
     System.out.println("User " + user.getName() + " subscribed for destination " + destinationId);
 
     final List<Principal> users =
@@ -123,7 +123,7 @@ public class SyncController<DestinationData> {
 
   /**
    * If a client unsubscribes from a destination, the controller is sent a {@link
-   * org.springframework.web.socket.messaging.SessionUnsubscribeEvent)} containing information about
+   * org.springframework.web.socket.messaging.SessionUnsubscribeEvent} containing information about
    * the affected user and subscription.
    *
    * <p>The controller can simply call this function with the event and it will be handled.
@@ -166,7 +166,7 @@ public class SyncController<DestinationData> {
 
   /**
    * If a client disconnects his websocket from the server, the controller is sent a {@link
-   * org.springframework.web.socket.messaging.SessionDisconnectEvent)} containing information about
+   * org.springframework.web.socket.messaging.SessionDisconnectEvent} containing information about
    * the affected user and subscription.
    *
    * <p>The controller can simply call this function with the event and it will be handled.
@@ -208,7 +208,7 @@ public class SyncController<DestinationData> {
    * @param destinationId id of the destination/topic, for which new additional shall be stored.
    * @param content New content to be stored for a destination/topic.
    */
-  protected void setDestinationData(final String destinationId, final DestinationData content) {
+  protected void setDestinationData(final String destinationId, final T content) {
     contents.put(destinationId, content);
   }
 
