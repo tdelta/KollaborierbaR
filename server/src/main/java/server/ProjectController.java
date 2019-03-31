@@ -314,8 +314,8 @@ public class ProjectController {
         final DeletedProjectEvent event = new DeletedProjectEvent(this, projectname, deletedFiles);
         applicationEventPublisher.publishEvent(event);
 
-        // WICHTIG: Der Grund für die Existenz dieser Funktion separat von deleteFile ist, dass wenn
-        // wir ein Project löschen, wir kein neues Json Object davon zurücken können
+        // IMPORTANT: This function exists sepereated from the default deleteFile function, because
+        // if we delete a project, we don't have a Json Object to return
         return new ResponseEntity<>(HttpStatus.OK);
       } catch (IOException e) {
         e.printStackTrace();

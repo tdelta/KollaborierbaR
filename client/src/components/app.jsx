@@ -16,6 +16,7 @@ import { StompService } from '../StompService';
 import ProofsState from '../key/ProofsState';
 
 import ProjectManagement from '../projectmanagement.ts';
+import ProjectApi from '../ProjectApi.ts';
 
 import CollabController from '../collaborative/CollabController.ts';
 import ConsoleSyncController from '../collaborative/ConsoleSyncController.ts';
@@ -306,17 +307,17 @@ export default class App extends React.Component {
    */
   openFile(path) {
     // This string composition is necessary because path contains only the path within a project.
-    ProjectManagement.openFile(
-      this.state.project.name + '/' + path.join('/')
-    ).then(response => {
-      this.setState({
-        text: response.fileText,
-        provenObligations: [],
-        proofsState: ProofsState.create(),
-      });
-      // TODO: Handle rename with collab controller
-      this.setOpenedPath(path);
-    });
+    ProjectApi.openFile(this.state.project.name + '/' + path.join('/')).then(
+      response => {
+        this.setState({
+          text: response.fileText,
+          provenObligations: [],
+          proofsState: ProofsState.create(),
+        });
+        // TODO: Handle rename with collab controller
+        this.setOpenedPath(path);
+      }
+    );
   }
 
   /**
