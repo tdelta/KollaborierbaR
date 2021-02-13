@@ -10,7 +10,7 @@
 
 (requires python3 for running a local webserver and Java 8 for running the backend)
 
-1. Download the latest `KollaborierbaR.tar.gz` from releases
+1. [Download](https://github.com/tdelta/KollaborierbaR/releases/download/release-1.0/KollaborierbaR.tar.gz) `KollaborierbaR.tar.gz` from the `deliverables` folder
 2. **OR** build an up to date version yourself:
 
 ```sh
@@ -49,3 +49,24 @@ A set of makefiles abstracts from the different tooling used in those projects. 
 **Remember to always run `make setup` first, after downloading the repository**
 
 You can use all of the above commands (except for `deploy`) also within the `client` or `server` folders, so that the described effects only apply to the client or server respectively.
+
+## Credits
+This Project was developed as part of the <em>Bachelor Praktikum</em> in Computer Science at Technische Universität Darmstadt.
+
+* Marc Arnold - [@m-arnold](https://github.com/m-arnold)
+* Jonas Belouadi - [@potamides](https://github.com/potamides)
+* Anton Haubner - [@ahbnr](https://github.com/ahbnr)
+* David Heck - [@heckstrahler](https://github.com/heckstrahler)
+* Martin Kerscher - [@maruker](https://github.com/maruker)
+
+### Used Libraries
+
+TODO:
+* [Sprint Boot](https://spring.io/projects/spring-boot)
+* [Karate](https://github.com/intuit/karate)
+* ...
+
+## License
+
+TODO:
+AGPL?
