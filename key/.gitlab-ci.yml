@@ -1,0 +1,58 @@
+#
+# This files describes the workflow of the continous integration
+# checker for KeY run within gitlab.
+#
+# Jenkins runs are triggered from somewhere else.
+#
+
+stages:
+    - primary
+    - secondary
+
+compile:oraclejdk8:
+  stage: primary
+  image: key-dev-jdk8
+  script:
+    - javac -version
+    - ant -f key/scripts/build.xml compileAll
+    
+compile:openjdk8:
+  stage: primary
+  image: key-dev-openjdk8
+  script:
+    - javac -version
+    - ant -f key/scripts/build.xml compileAll
+
+compile:openjdk11:
+  stage: primary
+  image: key-dev-openjdk11
+  allow_failure: true
+  script:
+    - javac -version
+    - ant -f key/scripts/build.xml compileAll
+
+fatJar:oraclejdk8:
+  stage: secondary
+  image: key-dev-jdk8
+  script:
+    - javac -version
+    - ant -f key/scripts/build.xml fatJar
+  artifacts:
+    paths:
+      - key/deployment/*.jar
+    expire_in: 1 week
+
+checkstyle:
+  stage: primary
+  image: key-dev-openjdk8
+  allow_failure: true
+  script:
+    - echo "**** Check the commit's gitlab page for a readable checkstyle report ****"
+    - (key/scripts/tools/checkstyle/runIncrementalCheckstyle.sh | tee report.txt) || true
+    - key/scripts/tools/checkstyle/publishAudit.py report.txt
+  artifacts:
+    name: "checkstyle-report-$CI_JOB_ID"
+    expire_in: 1 year
+    when: always
+    paths:
+    - report.txt
