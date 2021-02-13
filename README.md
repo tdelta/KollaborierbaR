@@ -10,7 +10,7 @@
 
 (requires python3 for running a local webserver and Java 8 for running the backend)
 
-1. [Download](https://git.key-project.org/dsteinhoefel/kollaborierbar/raw/syncedConsole/deliverables/KollaborierbaR.tar.gz?inline=false) `KollaborierbaR.tar.gz` from the `deliverables` folder
+1. Download the latest `KollaborierbaR.tar.gz` from releases
 2. **OR** build an up to date version yourself:
 
 ```sh
