@@ -10,7 +10,7 @@
 
 (requires python3 for running a local webserver and Java 8 for running the backend. Versions other than Java 8 **will lead to errors**.)
 
-1. Download the latest `KollaborierbaR.tar.gz` from releases
+1. Download the latest `KollaborierbaR.tar.gz` from [releases](https://github.com/tdelta/KollaborierbaR/releases/)
 2. **OR** build an up to date version yourself:
 
 ```sh
