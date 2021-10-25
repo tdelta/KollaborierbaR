@@ -8,7 +8,7 @@
 
 # Quickstart 🚀
 
-(requires python3 for running a local webserver and Java 8 for running the backend)
+(requires python3 for running a local webserver and Java 8 for running the backend. Versions other than Java 8 **will lead to errors**.)
 
 1. Download the latest `KollaborierbaR.tar.gz` from releases
 2. **OR** build an up to date version yourself:
@@ -27,6 +27,14 @@ cd KollaborierbaR
 ```
 
 4. If you want others to join you in KollaborierbaR, stop the server, configure your public IP address in `config.js`, and restart it.
+
+# Documentation :closed_book:
+
+A description of the project, QA methods, two user studies and a documentation of the backend API can be found in this document:
+[documentation.pdf](./documentation.pdf).
+It is written for the most part in German, though. The backend API specification is written in English.
+
+Other than that, the source code itself is annotated with comments and documentation in English.
 
 # KollaborierbaRs build system 🛠️
 
