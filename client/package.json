@@ -34,8 +34,8 @@
     "stompjs-websocket": "^4.1.7"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "vite",
+    "build": "vite build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -r build/*",
@@ -45,7 +45,8 @@
     "tslint-fix": "tslint -c .tslint.json --project tsconfig.json --fix 'src/**/*.ts*'",
     "format": "prettier --write 'src/**/*.{ts,js}*'",
     "tslint-config-check": "tslint-config-prettier-check ./.tslint.json",
-    "eslint-config-check": "eslint --print-config . | eslint-config-prettier-check"
+    "eslint-config-check": "eslint --print-config . | eslint-config-prettier-check",
+    "dev": "vite"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -60,7 +61,7 @@
     "@fortawesome/fontawesome-free": "^5.5.0",
     "@types/classnames": "^2.2.7",
     "@types/jest": "^24.0.1",
-    "@types/node": "^10.12.10",
+    "@types/node": "^22.10.0",
     "@types/react": "^16.7.7",
     "@types/react-dom": "^16.0.10",
     "eslint": "^5.6.0",
@@ -78,6 +79,11 @@
     "tslint-eslint-rules": "^5.4.0",
     "tslint-plugin-prettier": "^2.0.1",
     "tslint-react": "^3.6.0",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.3.3333",
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.0",
+    "vite-tsconfig-paths": "^4.3.2"
   }
 }
