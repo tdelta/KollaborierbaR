@@ -10,7 +10,9 @@ export default defineConfig(({ mode }) => {
   setEnv(mode);
   return {
     plugins: [
-      react(),
+      react({
+        jsxRuntime: 'classic'
+      }),
       tsconfigPaths(),
       envPlugin(),
       devServerPlugin(),
