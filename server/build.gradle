@@ -1,17 +1,16 @@
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
         maven {
           url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath "org.asciidoctor:asciidoctor-gradle-jvm:2.0.0-rc.1"
+        classpath "org.asciidoctor:asciidoctor-gradle-jvm:2.4.0"
         classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE"
         classpath "com.diffplug.spotless:spotless-plugin-gradle:3.21.1"
         classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.9"
-        classpath 'io.github.swagger2markup:swagger2markup-gradle-plugin:1.3.3'
+        //classpath 'io.github.swagger2markup:swagger2markup-gradle-plugin:1.3.3'
     }
 }
 
@@ -33,7 +32,7 @@ apply plugin: "com.github.spotbugs"
 // api doc generation
 apply plugin: 'org.asciidoctor.jvm.convert'
 apply plugin: "org.asciidoctor.jvm.pdf"
-apply plugin: 'io.github.swagger2markup'
+//apply plugin: 'io.github.swagger2markup'
 
 // import KeY ant project
 def keyFolder = "../key/key"
@@ -66,6 +65,14 @@ dependencies {
     testCompile 'com.intuit.karate:karate-apache:0.9.1'
 	//testCompile 'io.rest-assured:rest-assured:3.3.0'
     implementation "org.eclipse.jdt:org.eclipse.jdt.core:3.15.0"
+    // Explicitly specify versions for the following dependencies to prevent Gradle from using newer, incompatible versions.
+    implementation "org.eclipse.platform:org.eclipse.core.runtime:3.16.0" // Dependency of eclipse.jdt.core
+    implementation "org.eclipse.platform:org.eclipse.equinox.common:3.10.600" // Dependency of eclipse.jdt.core
+    implementation "org.eclipse.platform:org.eclipse.core.resources:3.13.900" // Dependency of eclipse.jdt.core
+    implementation "org.eclipse.platform:org.eclipse.osgi:3.14.0" // Dependency of eclipse.jdt.core
+    implementation "org.eclipse.platform:org.eclipse.core.jobs:3.10.1100" // Dependency of eclipse.jdt.core
+    implementation "org.eclipse.platform:org.eclipse.core.contenttype:3.7.500" // Dependency of eclipse.jdt.core
+    implementation "org.eclipse.platform:org.eclipse.equinox.preferences:3.7.700" // Dependency of eclipse.jdt.core
     compile("org.springframework.boot:spring-boot-starter-web")
     testCompile('org.springframework.boot:spring-boot-starter-test')
     compile("org.springframework.boot:spring-boot-starter-websocket")
@@ -191,18 +198,18 @@ test {
 }
 
 // API documentation generation
-convertSwagger2markup {
-    swaggerInput "${projectDir}/specification/swagger.yaml"
-    outputDir file("${buildDir}/asciidoc/generated")
-    outputFile file("${buildDir}/asciidoc/generated/apidoc")
-    config = [
-            'swagger2markup.pathsGroupedBy' : 'TAGS',
-    ]
-}
+//convertSwagger2markup {
+//    swaggerInput "${projectDir}/specification/swagger.yaml"
+//    outputDir file("${buildDir}/asciidoc/generated")
+//    outputFile file("${buildDir}/asciidoc/generated/apidoc")
+//    config = [
+//            'swagger2markup.pathsGroupedBy' : 'TAGS',
+//    ]
+//}
 
 asciidoctorPdf {
     version = 'Alpha 1.0'
-    dependsOn convertSwagger2markup
+    //dependsOn convertSwagger2markup
     options doctype: 'report'
     sourceDir file("${buildDir}/asciidoc/generated")
 
